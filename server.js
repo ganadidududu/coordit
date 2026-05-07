@@ -136,6 +136,14 @@ async function initDB() {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  await dbRun(`CREATE TABLE IF NOT EXISTS style_preferences (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER UNIQUE,
+    styles TEXT DEFAULT '[]',
+    occasions TEXT DEFAULT '[]',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
   console.log('✓ Database initialized');
 }
 
@@ -659,22 +667,69 @@ app.post('/api/styling/:id/save', authMiddleware, async (req, res) => {
 });
 
 // ══════════════════════════════════════════════
+// STYLE PREFERENCES
+// ══════════════════════════════════════════════
+
+app.get('/api/style-preferences', authMiddleware, async (req, res) => {
+  try {
+    const pref = await dbGet('SELECT * FROM style_preferences WHERE user_id = ?', [req.user.id]);
+    if (!pref) return res.json({ styles: [], occasions: [] });
+    res.json({
+      styles: JSON.parse(pref.styles || '[]'),
+      occasions: JSON.parse(pref.occasions || '[]'),
+      updated_at: pref.updated_at,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+  }
+});
+
+app.put('/api/style-preferences', authMiddleware, async (req, res) => {
+  try {
+    const { styles = [], occasions = [] } = req.body;
+    await dbRun(
+      `INSERT INTO style_preferences (user_id, styles, occasions, updated_at)
+       VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+       ON CONFLICT(user_id) DO UPDATE SET
+         styles = excluded.styles,
+         occasions = excluded.occasions,
+         updated_at = CURRENT_TIMESTAMP`,
+      [req.user.id, JSON.stringify(styles), JSON.stringify(occasions)]
+    );
+    const updated = await dbGet('SELECT * FROM style_preferences WHERE user_id = ?', [req.user.id]);
+    res.json({
+      styles: JSON.parse(updated.styles || '[]'),
+      occasions: JSON.parse(updated.occasions || '[]'),
+      updated_at: updated.updated_at,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+  }
+});
+
+// ══════════════════════════════════════════════
 // STATS / DASHBOARD
 // ══════════════════════════════════════════════
 
 app.get('/api/stats', authMiddleware, async (req, res) => {
   const totalItems = await dbGet('SELECT COUNT(*) as count FROM closet_items WHERE user_id = ?', [req.user.id]);
   const totalLooks = await dbGet('SELECT COUNT(*) as count FROM styling_looks WHERE user_id = ?', [req.user.id]);
-  const mostWorn = await dbGet(
-    'SELECT name_ko, name, worn_count FROM closet_items WHERE user_id = ? ORDER BY worn_count DESC LIMIT 1',
+  const mostWornTop3 = await dbAll(
+    'SELECT id, name_ko, name, worn_count, category FROM closet_items WHERE user_id = ? ORDER BY worn_count DESC LIMIT 3',
     [req.user.id]
   );
+  const unwornCount = await dbGet('SELECT COUNT(*) as count FROM closet_items WHERE user_id = ? AND worn_count = 0', [req.user.id]);
+  const favoriteCount = await dbGet('SELECT COUNT(*) as count FROM closet_items WHERE user_id = ? AND is_favorite = 1', [req.user.id]);
   const measurements = await dbGet('SELECT predicted_size, body_type FROM measurements WHERE user_id = ?', [req.user.id]);
 
   res.json({
     totalItems: totalItems?.count || 0,
     totalLooks: totalLooks?.count || 0,
-    mostWorn: mostWorn || null,
+    mostWorn: mostWornTop3 || [],
+    unworn_count: unwornCount?.count || 0,
+    favorite_count: favoriteCount?.count || 0,
     predictedSize: measurements?.predicted_size || 'M',
     bodyType: measurements?.body_type || 'regular',
   });

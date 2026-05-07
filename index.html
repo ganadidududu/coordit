@@ -110,6 +110,12 @@ html, body {
 }
 .btn-camel:hover { background: var(--camel-deep); }
 
+/* Spinner */
+@keyframes coordit-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 /* Cards */
 .card {
   background: var(--bg-raised);
@@ -214,6 +220,19 @@ window.API = {
 
   // Stats
   getStats: () => apiFetch('/api/stats'),
+
+  // Image upload
+  uploadImage: async (file) => {
+    const fd = new FormData();
+    fd.append('image', file);
+    const res = await fetch('/api/closet/upload-image', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + window.Auth.getToken() },
+      body: fd,
+    });
+    if (!res.ok) throw new Error((await res.json()).error || '업로드 실패');
+    return res.json(); // { image_url }
+  },
 };
 
 // ── Toast notifications ──
@@ -1327,10 +1346,33 @@ function Closet({ onNav, brand, user, onLogout }) {
 }
 
 function AddItemModal({ onClose, onSaved }) {
-  const [form, setForm] = useState({ name: '', name_ko: '', category: '상의', color: '#8F6F45', fabric: '', size: 'M', brand: '', garment_shoulder: '', garment_chest: '', garment_waist: '', garment_length: '' });
+  const [form, setForm] = useState({ name: '', name_ko: '', category: '상의', color: '#8F6F45', fabric: '', size: 'M', brand: '', image_url: '', garment_shoulder: '', garment_chest: '', garment_waist: '', garment_length: '' });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleImageClick = () => {
+    if (uploading) return;
+    fileInputRef.current && fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const result = await window.API.uploadImage(file);
+      set('image_url', result.image_url);
+      window.Toast.show('이미지가 업로드되었습니다.', 'success');
+    } catch (err) {
+      window.Toast.show(err.message || '이미지 업로드 실패', 'error');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
 
   const save = async () => {
     if (!form.name_ko && !form.name) { window.Toast.show('이름을 입력해주세요.', 'error'); return; }
@@ -1339,6 +1381,7 @@ function AddItemModal({ onClose, onSaved }) {
       const body = { ...form };
       ['garment_shoulder','garment_chest','garment_waist','garment_length'].forEach(k => { if (body[k]) body[k] = parseFloat(body[k]); else delete body[k]; });
       if (!body.name) body.name = body.name_ko;
+      if (body.image_url) body.image_url = body.image_url;
       await window.API.addItem(body);
       window.Toast.show('아이템이 추가되었습니다!', 'success');
       onSaved();
@@ -1361,6 +1404,76 @@ function AddItemModal({ onClose, onSaved }) {
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* 이미지 업로드 */}
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em' }}>의류 이미지 (선택)</div>
+            <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
+            <div
+              onClick={handleImageClick}
+              style={{
+                width: '100%',
+                aspectRatio: '4/3',
+                maxHeight: 240,
+                border: '1px dashed var(--line-strong)',
+                borderRadius: 4,
+                background: uploading ? 'rgba(28,27,26,0.04)' : form.image_url ? 'transparent' : 'rgba(28,27,26,0.02)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: uploading ? 'wait' : 'pointer',
+                overflow: 'hidden',
+                position: 'relative',
+                transition: 'border-color 0.2s, background 0.2s',
+              }}
+              onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = 'var(--camel)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line-strong)'; }}
+            >
+              {form.image_url && !uploading ? (
+                <>
+                  <img
+                    src={form.image_url}
+                    alt="미리보기"
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(0.05) contrast(1.02)' }}
+                  />
+                  <div style={{
+                    position: 'absolute', inset: 0, background: 'rgba(28,27,26,0)', transition: 'background 0.2s',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(28,27,26,0.45)'; e.currentTarget.querySelector('span').style.opacity = '1'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(28,27,26,0)'; e.currentTarget.querySelector('span').style.opacity = '0'; }}
+                  >
+                    <span style={{ opacity: 0, color: 'var(--ivory)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.06em', transition: 'opacity 0.2s' }}>
+                      클릭하여 변경
+                    </span>
+                  </div>
+                </>
+              ) : uploading ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                  <div style={{
+                    width: 28, height: 28, border: '2px solid var(--line-strong)', borderTopColor: 'var(--camel)',
+                    borderRadius: '50%', animation: 'coordit-spin 0.8s linear infinite',
+                  }} />
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.06em' }}>업로드 중...</span>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: 24 }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--camel-soft)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.06em', textAlign: 'center' }}>
+                    클릭하여 이미지 업로드
+                  </span>
+                  <span style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'JetBrains Mono, monospace' }}>
+                    JPG, PNG, WEBP
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
           {inp('name_ko', '의류명 (한국어)', 'text', '예: 헤리티지 카멜 코트')}
           {inp('name', '의류명 (English)', 'text', 'e.g. Heritage Camel Coat')}
           <div>
@@ -3163,7 +3276,33 @@ function OnboardingStyle({ onNext, onPrev }) {
   const occasions = ['출근', '데이트', '여행', '운동', '파티', '일상'];
   const [selected, setSelected] = React.useState([]);
   const [selOccasion, setSelOccasion] = React.useState([]);
+  const [saving, setSaving] = React.useState(false);
   const toggle = (arr, setArr, v) => setArr(arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]);
+
+  React.useEffect(() => {
+    fetch('/api/style-preferences', { headers: { 'Authorization': 'Bearer ' + window.Auth.getToken() } })
+      .then(r => r.json()).then(d => {
+        if (d.styles) setSelected(d.styles);
+        if (d.occasions) setSelOccasion(d.occasions);
+      }).catch(() => {});
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await fetch('/api/style-preferences', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.Auth.getToken() },
+        body: JSON.stringify({ styles: selected, occasions: selOccasion }),
+      });
+      window.Toast.show('취향이 저장되었습니다!', 'success');
+      onNext();
+    } catch (e) {
+      window.Toast.show('저장 실패', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, padding: 48 }}>
@@ -3204,7 +3343,7 @@ function OnboardingStyle({ onNext, onPrev }) {
 
       <div style={{ display: 'flex', gap: 10 }}>
         <button className="btn btn-secondary" onClick={onPrev}>이전</button>
-        <button className="btn btn-primary" style={{ flex: 1 }} onClick={onNext}>저장 & 다음 →</button>
+        <button className="btn btn-primary" style={{ flex: 1, opacity: saving ? 0.7 : 1 }} disabled={saving} onClick={handleSave}>{saving ? '저장중...' : '저장 & 다음 →'}</button>
       </div>
     </div>
   );
