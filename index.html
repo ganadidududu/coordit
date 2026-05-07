@@ -1,0 +1,3581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Coordit — The Curated Wardrobe</title>
+<meta name="viewport" content="width=1440" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+KR:wght@300;400;500;600;700&family=Pretendard:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Fraunces:ital,wght@0,400;0,500;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
+
+<style id="coordit-styles">
+/* Coordit — Premium Vintage Wardrobe */
+:root {
+  /* Brand palette */
+  --obsidian: #1C1B1A;
+  --obsidian-soft: #2D2A27;
+  --camel: #B08A5B;
+  --camel-deep: #8F6F45;
+  --camel-soft: #D4B896;
+  --ivory: #F5F0E6;
+  --ivory-warm: #EFE8D8;
+  --linen: #E8DFC9;
+  --linen-deep: #DDD0B3;
+  --slate: #5A6B7E;
+  --slate-deep: #3F4E5E;
+  --slate-soft: #8A9AAC;
+  --walnut: #4A3826;
+  --walnut-light: #6B523A;
+
+  /* Semantic */
+  --bg: var(--ivory);
+  --bg-raised: #FBF7EE;
+  --text: var(--obsidian);
+  --text-muted: #6B6357;
+  --text-dim: #9A9287;
+  --line: rgba(28, 27, 26, 0.08);
+  --line-strong: rgba(28, 27, 26, 0.16);
+
+  /* Semantic for fit analysis */
+  --fit-tight: #A8423A;
+  --fit-perfect: #5B7355;
+  --fit-loose: #7A6FA0;
+
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body, 'Inter', system-ui, sans-serif);
+  font-feature-settings: 'ss01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+
+.serif { font-family: var(--font-display, 'Cormorant Garamond', 'Playfair Display', serif); }
+.sans  { font-family: var(--font-body, 'Inter', system-ui, sans-serif); }
+.mono  { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.korean-serif { font-family: var(--font-korean-display, 'Noto Serif KR', serif); }
+.korean-sans { font-family: var(--font-korean, 'Pretendard', 'Noto Sans KR', sans-serif); }
+
+/* Typographic utilities */
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-family: var(--font-korean, 'Pretendard', sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--obsidian);
+  color: var(--ivory);
+}
+.btn-primary:hover { background: var(--walnut); }
+.btn-secondary {
+  background: transparent;
+  color: var(--obsidian);
+  border-color: var(--line-strong);
+}
+.btn-secondary:hover { background: rgba(28,27,26,0.04); }
+.btn-camel {
+  background: var(--camel);
+  color: var(--ivory);
+}
+.btn-camel:hover { background: var(--camel-deep); }
+
+/* Cards */
+.card {
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+
+/* Placeholder (no real imagery) */
+.ph {
+  background:
+    repeating-linear-gradient(135deg, rgba(74,56,38,0.06) 0 1px, transparent 1px 8px),
+    var(--linen);
+  color: var(--walnut);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+}
+.ph-dark {
+  background:
+    repeating-linear-gradient(135deg, rgba(245,240,230,0.06) 0 1px, transparent 1px 8px),
+    var(--obsidian-soft);
+  color: var(--linen);
+}
+
+/* Scroll */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 4px; }
+
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+<style>
+  :root {
+    --font-display: 'Cormorant Garamond', 'EB Garamond', serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-korean-display: 'Noto Serif KR', serif;
+    --font-korean: 'Pretendard', 'Noto Sans KR', sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel" data-name="api">
+// ── API Layer ──
+const BASE = 'http://localhost:3000';
+
+window.Auth = {
+  getToken: () => { try { return localStorage.getItem('coordit_token'); } catch { return null; } },
+  setToken: (t) => { try { localStorage.setItem('coordit_token', t); } catch {} },
+  getUser:  () => { try { return JSON.parse(localStorage.getItem('coordit_user') || 'null'); } catch { return null; } },
+  setUser:  (u) => { try { localStorage.setItem('coordit_user', JSON.stringify(u)); } catch {} },
+  logout:   () => { try { localStorage.removeItem('coordit_token'); localStorage.removeItem('coordit_user'); } catch {} },
+};
+
+async function apiFetch(path, opts = {}) {
+  const token = window.Auth.getToken();
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${BASE}${path}`, { ...opts, headers });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+window.API = {
+  // Auth
+  register: (body) => apiFetch('/api/auth/register', { method: 'POST', body: JSON.stringify(body) }),
+  login:    (body) => apiFetch('/api/auth/login',    { method: 'POST', body: JSON.stringify(body) }),
+
+  // Measurements
+  getMeasurements: ()   => apiFetch('/api/measurements'),
+  saveMeasurements:(m)  => apiFetch('/api/measurements', { method: 'PUT', body: JSON.stringify(m) }),
+
+  // Closet
+  getCloset:   (q = {}) => apiFetch('/api/closet?' + new URLSearchParams(q)),
+  getItem:     (id)     => apiFetch(`/api/closet/${id}`),
+  addItem:     (body)   => apiFetch('/api/closet', { method: 'POST', body: JSON.stringify(body) }),
+  updateItem:  (id, b)  => apiFetch(`/api/closet/${id}`, { method: 'PUT', body: JSON.stringify(b) }),
+  deleteItem:  (id)     => apiFetch(`/api/closet/${id}`, { method: 'DELETE' }),
+  wearItem:    (id)     => apiFetch(`/api/closet/${id}/wear`, { method: 'POST' }),
+
+  // Fit Analysis
+  getFitAnalysis: (itemId) => apiFetch(`/api/fit-analysis${itemId ? '?item_id=' + itemId : ''}`),
+
+  // Styling
+  generateStyling: (body) => apiFetch('/api/styling/generate', { method: 'POST', body: JSON.stringify(body) }),
+  getSavedLooks:   ()     => apiFetch('/api/styling/saved'),
+  saveLook:        (id)   => apiFetch(`/api/styling/${id}/save`, { method: 'POST' }),
+
+  // Stats
+  getStats: () => apiFetch('/api/stats'),
+};
+
+// ── Toast notifications ──
+window.Toast = {
+  show(msg, type = 'info') {
+    const el = document.createElement('div');
+    const colors = { info: '#1C1B1A', error: '#A8423A', success: '#5B7355' };
+    el.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+      background:${colors[type]};color:#F5F0E6;padding:12px 24px;border-radius:4px;z-index:99999;
+      font-family:Pretendard,sans-serif;font-size:14px;transition:transform 0.3s ease;
+      box-shadow:0 8px 24px rgba(0,0,0,0.3);white-space:nowrap;`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => { el.style.transform = 'translateX(-50%) translateY(0)'; });
+    setTimeout(() => {
+      el.style.transform = 'translateX(-50%) translateY(80px)';
+      setTimeout(() => el.remove(), 350);
+    }, 3000);
+  }
+};
+</script>
+
+<script type="text/babel" data-name="images">
+// Coordit — Image assets (Unsplash, direct CDN URLs)
+// Curated fashion/editorial imagery. Auto-cropped via Unsplash params.
+
+window.IMG = {
+  // Hero + editorial moods
+  heroCamel:    'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=900&h=1200&fit=crop&q=80',
+  heroPortrait: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=700&h=900&fit=crop&q=80',
+  heroStill:    'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=500&h=600&fit=crop&q=80',
+
+  // Closet items (muted, editorial)
+  coat:         'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=500&h=625&fit=crop&q=80',
+  knit:         'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=625&fit=crop&q=80',
+  trouser:      'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=500&h=625&fit=crop&q=80',
+  denim:        'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&h=625&fit=crop&q=80',
+  shirt:        'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500&h=625&fit=crop&q=80',
+  moto:         'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&h=625&fit=crop&q=80',
+  sneaker:      'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&h=625&fit=crop&q=80',
+  dress:        'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&h=625&fit=crop&q=80',
+
+  // Looks (full-body editorial)
+  look1:        'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=1000&fit=crop&q=80',
+  look2:        'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=1000&fit=crop&q=80',
+  look3:        'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&h=1000&fit=crop&q=80',
+  look4:        'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&h=1000&fit=crop&q=80',
+  look5:        'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?w=800&h=1000&fit=crop&q=80',
+  look6:        'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&h=1000&fit=crop&q=80',
+
+  // Body / fit lab — back/side silhouettes, clean editorial
+  bodyFront:    'https://images.unsplash.com/photo-1617551307578-7f5160d6615e?w=700&h=1000&fit=crop&q=85',
+  bodySide:     'https://images.unsplash.com/photo-1551803091-e20673f15770?w=600&h=900&fit=crop&q=85',
+  bodyFit:      'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&h=1200&fit=crop&q=85&crop=faces,center',
+  garmentFlat:  'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=700&h=900&fit=crop&q=85',
+
+  // Product detail
+  productFront: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=900&h=1125&fit=crop&q=85',
+  productBack:  'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=400&h=400&fit=crop&q=80',
+  productDetail:'https://images.unsplash.com/photo-1517941823-815bea90d291?w=400&h=400&fit=crop&q=80',
+  productStyled:'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=400&fit=crop&q=80',
+
+  // TPO / styling cards
+  tpoMorning:   'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=600&h=800&fit=crop&q=80',
+  tpoCafe:      'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&h=800&fit=crop&q=80',
+  tpoDinner:    'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?w=600&h=800&fit=crop&q=80',
+  tpoWeekend:   'https://images.unsplash.com/photo-1483721310020-03333e577078?w=600&h=800&fit=crop&q=80',
+};
+
+</script>
+<script type="text/babel" data-name="shell">
+// Coordit — Shared components and design system
+// Export to window for cross-file access
+
+const { useState, useEffect, useRef, useMemo } = React;
+
+// ═══════════════════════════════════════════════════
+// Logo / wordmark
+// ═══════════════════════════════════════════════════
+function Logo({ size = 24, color, brand = "Coordit" }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'baseline', gap: 2,
+      fontFamily: "var(--font-display, 'Cormorant Garamond', serif)",
+      fontSize: size, fontWeight: 500,
+      letterSpacing: '-0.02em',
+      color: color || 'var(--obsidian)',
+    }}>
+      <span style={{ fontStyle: 'italic', fontWeight: 600 }}>C</span>
+      <span>oordit</span>
+      <span style={{
+        width: 5, height: 5, borderRadius: '50%',
+        background: 'var(--camel)', marginLeft: 2,
+        alignSelf: 'center', transform: 'translateY(-1px)',
+      }} />
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// TopBar (nav)
+// ═══════════════════════════════════════════════════
+function TopBar({ active, onNav, brand, user, onLogout }) {
+  const [showUserMenu, setShowUserMenu] = React.useState(false);
+  const items = [
+    { id: 'closet', label: 'Closet', ko: '옷장' },
+    { id: 'styling', label: 'Styling', ko: '스타일링' },
+    { id: 'fit', label: 'Fit Lab', ko: '핏 분석' },
+    { id: 'atelier', label: 'Atelier', ko: '아뜰리에' },
+  ];
+  return (
+    <header style={{
+      position: 'sticky', top: 0, zIndex: 50,
+      background: 'rgba(245,240,230,0.85)',
+      backdropFilter: 'blur(20px)',
+      borderBottom: '1px solid var(--line)',
+      padding: '18px 48px',
+      display: 'flex', alignItems: 'center', gap: 40,
+    }}>
+      <div onClick={() => onNav('landing')} style={{ cursor: 'pointer' }}>
+        <Logo size={22} brand={brand} />
+      </div>
+      <nav style={{ display: 'flex', gap: 32, marginLeft: 24 }}>
+        {items.map(it => (
+          <button
+            key={it.id}
+            onClick={() => onNav(it.id)}
+            style={{
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              padding: '6px 2px',
+              fontFamily: "var(--font-korean, 'Pretendard', sans-serif)",
+              fontSize: 13, letterSpacing: '0.02em',
+              color: active === it.id ? 'var(--obsidian)' : 'var(--text-muted)',
+              borderBottom: active === it.id ? '1px solid var(--camel)' : '1px solid transparent',
+              transition: 'all 0.2s',
+            }}
+          >
+            <span style={{ fontFamily: "var(--font-display, serif)", fontStyle: 'italic', fontWeight: 500, marginRight: 6 }}>
+              {it.label}
+            </span>
+            <span style={{ fontSize: 11, opacity: 0.7 }}>{it.ko}</span>
+          </button>
+        ))}
+      </nav>
+      <div style={{ marginLeft: 'auto', display: 'flex', gap: 16, alignItems: 'center' }}>
+        <div style={{
+          padding: '8px 14px',
+          border: '1px solid var(--line-strong)',
+          borderRadius: 20,
+          fontSize: 11, color: 'var(--text-muted)',
+          fontFamily: 'JetBrains Mono, monospace',
+          letterSpacing: '0.1em',
+          display: 'flex', gap: 8, alignItems: 'center',
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--fit-perfect)' }} />
+          AI ACTIVE
+        </div>
+        <div style={{
+          width: 32, height: 32, borderRadius: '50%',
+          background: 'var(--walnut)', color: 'var(--ivory)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 12, fontWeight: 600,
+          fontFamily: 'var(--font-display, serif)', fontStyle: 'italic',
+        }}>
+          {user ? (user.name || user.email || '인').charAt(0).toUpperCase() : '인'}
+        </div>
+        {user && (
+          <div style={{ position: 'relative' }}>
+            <button onClick={() => setShowUserMenu(v => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-muted)', letterSpacing: '0.08em' }}>
+              {user.name || user.email.split('@')[0]} ▾
+            </button>
+            {showUserMenu && (
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 8, background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, padding: 8, minWidth: 160, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 100 }}>
+                <button onClick={() => { onNav('onboarding'); setShowUserMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'none', border: 'none', fontSize: 13, cursor: 'pointer', color: 'var(--obsidian)', fontFamily: "var(--font-korean, sans-serif)" }}>
+                  체형 설정
+                </button>
+                <button onClick={() => { if (onLogout) onLogout(); setShowUserMenu(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'none', border: 'none', fontSize: 13, cursor: 'pointer', color: 'var(--fit-tight)', fontFamily: "var(--font-korean, sans-serif)" }}>
+                  로그아웃
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        {!user && (
+          <button onClick={() => onNav('__auth')} style={{ padding: '8px 16px', background: 'var(--obsidian)', color: 'var(--ivory)', border: 'none', borderRadius: 4, fontSize: 12, cursor: 'pointer', fontFamily: "var(--font-korean, sans-serif)" }}>
+            로그인
+          </button>
+        )}
+      </div>
+    </header>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// Footer
+// ═══════════════════════════════════════════════════
+function Footer({ brand }) {
+  return (
+    <footer style={{
+      padding: '48px 48px 32px',
+      borderTop: '1px solid var(--line)',
+      background: 'var(--bg-raised)',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+      gap: 32, marginTop: 64,
+    }}>
+      <div>
+        <Logo size={20} brand={brand} />
+        <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 8, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em' }}>
+          THE CURATED WARDROBE · EST. 2026
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 32, fontSize: 12, color: 'var(--text-muted)' }}>
+        <a style={linkStyle}>이용약관</a>
+        <a style={linkStyle}>개인정보 처리방침</a>
+        <a style={linkStyle}>지속가능성 리포트</a>
+        <a style={linkStyle}>Fit Guide</a>
+        <a style={linkStyle}>고객지원</a>
+      </div>
+    </footer>
+  );
+}
+const linkStyle = { color: 'inherit', textDecoration: 'none', cursor: 'pointer' };
+
+// ═══════════════════════════════════════════════════
+// Chip / Tag
+// ═══════════════════════════════════════════════════
+function Chip({ children, active, onClick, variant = 'default' }) {
+  const bg = variant === 'dark'
+    ? (active ? 'var(--obsidian)' : 'transparent')
+    : (active ? 'var(--obsidian)' : 'transparent');
+  const color = active ? 'var(--ivory)' : 'var(--obsidian)';
+  return (
+    <button onClick={onClick} style={{
+      padding: '8px 18px',
+      borderRadius: 999,
+      border: active ? '1px solid var(--obsidian)' : '1px solid var(--line-strong)',
+      background: bg, color,
+      fontSize: 12, letterSpacing: '0.02em',
+      fontFamily: "var(--font-korean, 'Pretendard', sans-serif)",
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+    }}>{children}</button>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// Stat number (editorial display)
+// ═══════════════════════════════════════════════════
+function Stat({ value, label, unit, trend }) {
+  return (
+    <div>
+      <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 40, fontWeight: 500, letterSpacing: '-0.02em', color: 'var(--obsidian)', lineHeight: 1 }}>
+        {value}{unit && <span style={{ fontSize: 16, color: 'var(--text-muted)', marginLeft: 4 }}>{unit}</span>}
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }}>
+        {label}
+      </div>
+      {trend && <div style={{ fontSize: 10, color: 'var(--fit-perfect)', marginTop: 4 }}>↑ {trend}</div>}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// Garment card (used in closet + recs)
+// ═══════════════════════════════════════════════════
+function GarmentCard({ title, subtitle, tag, accuracy, swatches, placeholder = 'garment', size = 'md', onClick }) {
+  const heights = { sm: 180, md: 280, lg: 360 };
+  return (
+    <div onClick={onClick} style={{
+      background: 'var(--bg-raised)',
+      border: '1px solid var(--line)',
+      borderRadius: 12,
+      overflow: 'hidden',
+      cursor: onClick ? 'pointer' : 'default',
+      transition: 'all 0.25s ease',
+      display: 'flex', flexDirection: 'column',
+    }}
+    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 28px rgba(74,56,38,0.08)'; }}
+    onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
+    >
+      <div className="ph" style={{ height: heights[size], position: 'relative' }}>
+        {tag && (
+          <div style={{
+            position: 'absolute', top: 12, left: 12,
+            padding: '4px 10px',
+            background: 'rgba(245,240,230,0.9)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: 4,
+            fontSize: 10, letterSpacing: '0.08em',
+            color: 'var(--walnut)',
+            fontFamily: 'JetBrains Mono, monospace',
+            textTransform: 'uppercase',
+          }}>{tag}</div>
+        )}
+        <span style={{ opacity: 0.5 }}>{placeholder}</span>
+        {swatches && (
+          <div style={{ position: 'absolute', bottom: 12, left: 12, display: 'flex', gap: 4 }}>
+            {swatches.map((c, i) => (
+              <span key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: c, border: '1px solid rgba(255,255,255,0.4)' }} />
+            ))}
+          </div>
+        )}
+      </div>
+      <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--obsidian)', fontFamily: "var(--font-korean, 'Pretendard', sans-serif)" }}>
+          {title}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: "var(--font-korean, 'Pretendard', sans-serif)" }}>
+          {subtitle}
+        </div>
+        {accuracy && (
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ flex: 1, height: 2, background: 'var(--line)', borderRadius: 1, overflow: 'hidden' }}>
+              <div style={{ width: `${accuracy}%`, height: '100%', background: 'var(--camel)' }} />
+            </div>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{accuracy}%</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// Section header
+// ═══════════════════════════════════════════════════
+function SectionHeader({ eyebrow, title, subtitle, align = 'left' }) {
+  return (
+    <div style={{ textAlign: align, display: 'flex', flexDirection: 'column', gap: 12, alignItems: align === 'center' ? 'center' : 'flex-start' }}>
+      {eyebrow && <div className="eyebrow">{eyebrow}</div>}
+      <h2 className="korean-serif" style={{
+        margin: 0,
+        fontFamily: "var(--font-korean-display, 'Noto Serif KR', serif)",
+        fontWeight: 500,
+        fontSize: 56,
+        lineHeight: 1.15,
+        letterSpacing: '-0.02em',
+        color: 'var(--obsidian)',
+        maxWidth: 900,
+      }}>
+        {title}
+      </h2>
+      {subtitle && <p style={{
+        margin: 0,
+        fontSize: 16, color: 'var(--text-muted)',
+        lineHeight: 1.6, maxWidth: 640,
+        fontFamily: "var(--font-korean, 'Pretendard', sans-serif)",
+      }}>{subtitle}</p>}
+    </div>
+  );
+}
+
+Object.assign(window, {
+  Logo, TopBar, Footer, Chip, Stat, GarmentCard, SectionHeader,
+});
+
+</script>
+<script type="text/babel" data-name="landing">
+// Coordit — Landing Page (editorial vintage wardrobe)
+
+function Landing({ onNav, brand, user, onLogout }) {
+  return (
+    <main>
+      <TopBar active="landing" onNav={onNav} brand={brand} user={user} onLogout={onLogout} />
+
+      {/* ═══ HERO ═══ */}
+      <section style={{
+        padding: '80px 64px 120px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1.2fr 1fr',
+          gap: 64,
+          maxWidth: 1440,
+          margin: '0 auto',
+          alignItems: 'center',
+          minHeight: 640,
+        }}>
+          {/* Left: editorial copy */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+            <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ width: 32, height: 1, background: 'var(--camel)' }} />
+              THE CURATED LENS · N°001
+            </div>
+
+            <h1 className="korean-serif" style={{
+              margin: 0,
+              fontSize: 100,
+              lineHeight: 0.95,
+              fontWeight: 400,
+              letterSpacing: '-0.035em',
+              color: 'var(--obsidian)',
+            }}>
+              입을 옷이,<br/>
+              <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontWeight: 500, color: 'var(--walnut)' }}>
+                늘 거기에.
+              </span>
+            </h1>
+
+            <p className="korean-sans" style={{
+              margin: 0, maxWidth: 480,
+              fontSize: 17, lineHeight: 1.7,
+              color: 'var(--text-muted)',
+            }}>
+              Coordit는 당신의 옷장을 AI로 디지털화하고,<br/>
+              체형·일정·날씨에 맞춘 코디를 매일 아침 큐레이션합니다.
+            </p>
+
+            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+              <button className="btn btn-primary" onClick={() => onNav('onboarding')}>
+                무료로 시작하기 →
+              </button>
+              <button className="btn btn-secondary" onClick={() => onNav('atelier')}>
+                아뜰리에 둘러보기
+              </button>
+            </div>
+
+            {/* press strip */}
+            <div style={{
+              display: 'flex', gap: 40, marginTop: 32,
+              paddingTop: 32, borderTop: '1px solid var(--line)',
+              alignItems: 'center',
+            }}>
+              <div style={{ fontSize: 10, color: 'var(--text-dim)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em' }}>AS SEEN IN</div>
+              <div style={{ display: 'flex', gap: 28, fontFamily: 'var(--font-display, serif)', fontSize: 16, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                <span>Vogue Korea</span>
+                <span style={{ opacity: 0.4 }}>·</span>
+                <span>W Magazine</span>
+                <span style={{ opacity: 0.4 }}>·</span>
+                <span>Noblesse</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: editorial still-life composition */}
+          <HeroComposition />
+        </div>
+      </section>
+
+      {/* ═══ QUIETLY ANIMATED RULE ═══ */}
+      <div style={{
+        padding: '16px 64px',
+        borderTop: '1px solid var(--line)',
+        borderBottom: '1px solid var(--line)',
+        background: 'var(--bg-raised)',
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          display: 'flex', gap: 48,
+          fontFamily: 'var(--font-display, serif)', fontStyle: 'italic',
+          fontSize: 20, color: 'var(--walnut)',
+          animation: 'coordit-marquee 40s linear infinite',
+          whiteSpace: 'nowrap',
+        }}>
+          {Array.from({ length: 2 }).map((_, k) => (
+            <React.Fragment key={k}>
+              <span>체형 기반 핏 분석</span>
+              <span style={{ color: 'var(--camel)' }}>✦</span>
+              <span>TPO 스타일링</span>
+              <span style={{ color: 'var(--camel)' }}>✦</span>
+              <span>Digital Twin Wardrobe</span>
+              <span style={{ color: 'var(--camel)' }}>✦</span>
+              <span>AI 큐레이션</span>
+              <span style={{ color: 'var(--camel)' }}>✦</span>
+              <span>매일 아침 7시, 오늘의 코디</span>
+              <span style={{ color: 'var(--camel)' }}>✦</span>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+      <style>{`@keyframes coordit-marquee { to { transform: translateX(-50%); } }`}</style>
+
+      {/* ═══ 4 CORE MODULES ═══ */}
+      <section style={{ padding: '120px 64px 80px', maxWidth: 1440, margin: '0 auto' }}>
+        <SectionHeader
+          eyebrow="CAPABILITY — 04"
+          title={<>네 가지 정밀함,<br/>하나의 옷장.</>}
+          subtitle="사진 한 장에서 시작해, 오늘 입을 옷까지. Coordit의 엔진이 네 단계로 작동합니다."
+        />
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(12, 1fr)',
+          gap: 24,
+          marginTop: 72,
+        }}>
+          <ModuleCard
+            n="01" label="DIGITAL CLOSET"
+            title="옷장을 통째로 디지털화"
+            body="사진 업로드 또는 URL. GPT-4o Vision이 소재·실루엣·컬러를 자동 태깅합니다."
+            span={7} tall
+            accent="var(--walnut)"
+            visual={<ClosetMiniVisual />}
+          />
+          <ModuleCard
+            n="02" label="FIT FORENSICS"
+            title={<>체형 기반<br/>사이즈 예측</>}
+            body="경쟁사가 하지 못하는 것. 실제 신체 수치 × 브랜드 사이즈 표 파싱."
+            span={5} tall
+            accent="var(--fit-tight)"
+            visual={<FitMiniVisual />}
+          />
+          <ModuleCard
+            n="03" label="TPO STYLING"
+            title="상황이 옷을 결정합니다"
+            body="‘내일 소개팅’, ‘파리 출장’. Claude가 옷장 안에서 답을 찾습니다."
+            span={5}
+            accent="var(--slate-deep)"
+            visual={<TPOMiniVisual />}
+          />
+          <ModuleCard
+            n="04" label="VISUALIZER"
+            title="입어보지 않고 보는 코디"
+            body="추천 아이템을 한 화면에서 조합·대체·저장. 에디토리얼 레이아웃."
+            span={7}
+            accent="var(--camel-deep)"
+            visual={<VisMiniVisual />}
+          />
+        </div>
+      </section>
+
+      {/* ═══ METRICS ═══ */}
+      <section style={{
+        background: 'var(--obsidian)', color: 'var(--ivory)',
+        padding: '100px 64px', margin: '80px 0 0',
+      }}>
+        <div style={{ maxWidth: 1440, margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 56 }}>
+            <h3 className="korean-serif" style={{
+              margin: 0, fontSize: 42, fontWeight: 400,
+              fontFamily: "var(--font-korean-display, serif)",
+              letterSpacing: '-0.02em',
+              maxWidth: 560,
+            }}>
+              데이터로 이야기하는,<br/>
+              <span style={{ fontStyle: 'italic', color: 'var(--camel-soft)', fontFamily: 'var(--font-display, serif)' }}>
+                가장 정밀한 옷장.
+              </span>
+            </h3>
+            <div style={{ fontSize: 11, color: 'var(--linen)', opacity: 0.6, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em' }}>
+              CLOSED BETA · Q2 2026
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 48, paddingTop: 48, borderTop: '1px solid rgba(245,240,230,0.12)' }}>
+            {[
+              { v: '98.4', u: '%', l: 'AI 태깅 정확도', sub: 'GPT-4o Vision 기반' },
+              { v: '840', u: '+', l: '연동 브랜드 DB', sub: '국내외 쇼핑몰' },
+              { v: '±1.5', u: 'cm', l: '핏 예측 오차', sub: '내부 벤치마크' },
+              { v: '3.2', u: 'min', l: '평균 큐레이션 시간', sub: '아침 알림 기준' },
+            ].map((s, i) => (
+              <div key={i}>
+                <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 72, fontWeight: 400, letterSpacing: '-0.03em', lineHeight: 1 }}>
+                  {s.v}<span style={{ fontSize: 28, color: 'var(--camel-soft)' }}>{s.u}</span>
+                </div>
+                <div style={{ fontSize: 12, marginTop: 12, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--linen)' }}>
+                  {s.l}
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(245,240,230,0.5)', marginTop: 6, fontFamily: "var(--font-korean, 'Pretendard', sans-serif)" }}>
+                  {s.sub}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ TESTIMONIAL / EDITORIAL ═══ */}
+      <section style={{ padding: '120px 64px', maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="eyebrow" style={{ marginBottom: 40 }}>FROM OUR READERS</div>
+          <blockquote style={{
+            margin: 0,
+            fontFamily: "var(--font-korean-display, 'Noto Serif KR', serif)",
+            fontSize: 48, lineHeight: 1.4, fontWeight: 400,
+            color: 'var(--obsidian)',
+            letterSpacing: '-0.02em',
+          }}>
+            "옷장을 열기 전에 옷이 먼저 도착했다.<br/>
+            <span style={{ fontStyle: 'italic', color: 'var(--walnut)', fontFamily: 'var(--font-display, serif)' }}>
+              — 이게 큐레이션이라는 것.
+            </span>"
+          </blockquote>
+          <div style={{ marginTop: 40, fontSize: 12, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em' }}>
+            SUYEON K. · 베타 테스터 · 서울
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ CTA ═══ */}
+      <section style={{
+        background: 'var(--linen)',
+        padding: '100px 64px',
+        position: 'relative',
+      }}>
+        <div style={{ maxWidth: 960, margin: '0 auto', textAlign: 'center' }}>
+          <h2 className="korean-serif" style={{
+            margin: 0, fontSize: 72, fontWeight: 400,
+            lineHeight: 1.1, letterSpacing: '-0.02em',
+            color: 'var(--obsidian)',
+          }}>
+            오늘 아침, <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', color: 'var(--walnut)' }}>무얼</span> 입으셨나요?
+          </h2>
+          <p style={{ fontSize: 18, color: 'var(--text-muted)', margin: '24px 0 40px', fontFamily: "var(--font-korean, 'Pretendard', sans-serif)" }}>
+            베타 테스터 500명 모집 중 · 3분이면 가입이 끝납니다.
+          </p>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <button className="btn btn-primary" onClick={() => onNav('onboarding')}>지금 시작 →</button>
+            <button className="btn btn-secondary" onClick={() => onNav('fit')}>핏 분석 데모</button>
+          </div>
+        </div>
+      </section>
+
+      <Footer brand={brand} />
+    </main>
+  );
+}
+
+// ═════════════════════════════════════
+// Visuals
+// ═════════════════════════════════════
+function HeroComposition() {
+  return (
+    <div style={{
+      position: 'relative',
+      height: 640,
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gridTemplateRows: '1fr 1fr',
+      gap: 12,
+    }}>
+      <div style={{ gridRow: '1 / 3', borderRadius: 4, overflow: 'hidden', background: '#2a2623' }}>
+        <img src={IMG.heroCamel} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(0.1) contrast(1.02)' }}/>
+      </div>
+      <div style={{ borderRadius: 4, overflow: 'hidden', background: '#2a2623' }}>
+        <img src={IMG.heroPortrait} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+      </div>
+      <div style={{
+        borderRadius: 4, background: 'var(--obsidian)', color: 'var(--linen)',
+        padding: 20, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+        fontFamily: 'JetBrains Mono, monospace', fontSize: 10, letterSpacing: '0.1em',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', opacity: 0.6 }}>
+          <span>// TODAY</span>
+          <span>18°C</span>
+        </div>
+        <div>
+          <div style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 28, letterSpacing: '-0.02em', marginBottom: 8, fontWeight: 500 }}>
+            Parisian<br/>Weekday
+          </div>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {['#B08A5B','#1C1B1A','#F5F0E6'].map(c => (
+              <span key={c} style={{ width: 18, height: 18, background: c, borderRadius: '50%' }} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* floating accent card */}
+      <div style={{
+        position: 'absolute', right: -32, top: 40,
+        width: 220, padding: 16,
+        background: 'var(--bg-raised)',
+        border: '1px solid var(--line)',
+        borderRadius: 4,
+        boxShadow: '0 12px 32px rgba(74,56,38,0.12)',
+      }}>
+        <div style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', color: 'var(--text-muted)' }}>
+          LiDAR ACCURACY
+        </div>
+        <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 36, fontWeight: 500, letterSpacing: '-0.02em', marginTop: 4 }}>
+          98.4<span style={{ fontSize: 14, color: 'var(--camel)' }}>%</span>
+        </div>
+        <div style={{ height: 2, background: 'var(--line)', marginTop: 12, borderRadius: 1 }}>
+          <div style={{ width: '98.4%', height: '100%', background: 'var(--camel)', borderRadius: 1 }} />
+        </div>
+      </div>
+
+      {/* floating fit badge */}
+      <div style={{
+        position: 'absolute', left: -28, bottom: 40,
+        width: 160, padding: 14,
+        background: 'var(--walnut)', color: 'var(--ivory)',
+        borderRadius: 4,
+        boxShadow: '0 12px 32px rgba(28,27,26,0.18)',
+      }}>
+        <div style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', opacity: 0.7 }}>
+          FIT PREDICTION
+        </div>
+        <div style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 22, marginTop: 4 }}>
+          Perfect · M
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ModuleCard({ n, label, title, body, span, tall, accent, visual }) {
+  return (
+    <div style={{
+      gridColumn: `span ${span}`,
+      minHeight: tall ? 480 : 360,
+      padding: 36,
+      background: 'var(--bg-raised)',
+      border: '1px solid var(--line)',
+      borderRadius: 4,
+      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+      gap: 24,
+      position: 'relative', overflow: 'hidden',
+    }}>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 24 }}>
+          <div style={{
+            fontFamily: 'var(--font-display, serif)',
+            fontSize: 40, fontWeight: 500, fontStyle: 'italic',
+            color: accent, letterSpacing: '-0.02em', lineHeight: 1,
+          }}>{n}</div>
+          <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>
+            {label}
+          </div>
+        </div>
+        <h3 className="korean-serif" style={{
+          margin: 0, fontSize: 32, fontWeight: 500,
+          letterSpacing: '-0.02em', color: 'var(--obsidian)', lineHeight: 1.2,
+          fontFamily: "var(--font-korean-display, serif)",
+        }}>{title}</h3>
+        <p className="korean-sans" style={{ margin: '14px 0 0', fontSize: 14, lineHeight: 1.6, color: 'var(--text-muted)' }}>
+          {body}
+        </p>
+      </div>
+      <div style={{ marginTop: 'auto' }}>{visual}</div>
+    </div>
+  );
+}
+
+function ClosetMiniVisual() {
+  const items = [
+    { tag: 'COAT', c: '#8F6F45' },
+    { tag: 'KNIT', c: '#E8DFC9' },
+    { tag: 'DENIM', c: '#3F4E5E' },
+    { tag: 'SILK', c: '#D4B896' },
+    { tag: 'WOOL', c: '#4A3826' },
+  ];
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
+      {items.map((it, i) => (
+        <div key={i} style={{
+          aspectRatio: '3/4',
+          background: it.c,
+          borderRadius: 2,
+          display: 'flex', flexDirection: 'column',
+          justifyContent: 'flex-end', padding: 8,
+          color: i === 1 || i === 3 ? 'var(--walnut)' : 'var(--ivory)',
+          fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{ position: 'absolute', top: 8, right: 8, fontSize: 8, opacity: 0.7 }}>0{i+1}</div>
+          {it.tag}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FitMiniVisual() {
+  const rows = [
+    { part: '어깨', v: '-1.5', state: 'Tight', color: 'var(--fit-tight)', pct: 85 },
+    { part: '가슴', v: '+4.0', state: 'Perfect', color: 'var(--fit-perfect)', pct: 65 },
+    { part: '허리', v: '+6.0', state: 'Loose', color: 'var(--fit-loose)', pct: 45 },
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {rows.map((r, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11 }}>
+          <span className="korean-sans" style={{ width: 34, color: 'var(--text-muted)' }}>{r.part}</span>
+          <div style={{ flex: 1, height: 4, background: 'var(--line)', borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{ width: `${r.pct}%`, height: '100%', background: r.color }} />
+          </div>
+          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: r.color, minWidth: 40, textAlign: 'right' }}>
+            {r.v}cm
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TPOMiniVisual() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {[
+        { t: '내일 · 소개팅', s: 'Camel + Ivory' },
+        { t: '금요일 · 파티', s: 'Obsidian + Silk' },
+      ].map((x, i) => (
+        <div key={i} style={{
+          padding: '10px 14px',
+          background: i === 0 ? 'var(--obsidian)' : 'transparent',
+          color: i === 0 ? 'var(--ivory)' : 'var(--text-muted)',
+          border: i === 0 ? 'none' : '1px solid var(--line-strong)',
+          borderRadius: 2,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          fontSize: 12,
+        }}>
+          <span className="korean-sans">{x.t}</span>
+          <span style={{ fontSize: 10, fontStyle: 'italic', fontFamily: 'var(--font-display, serif)', opacity: 0.8 }}>{x.s}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function VisMiniVisual() {
+  const items = ['COAT','KNIT','TROUSER','LOAFER'];
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+      {items.map((i, idx) => (
+        <div key={idx} className="ph" style={{ aspectRatio: '3/4', fontSize: 8, borderRadius: 2 }}>
+          {i}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+window.Landing = Landing;
+
+</script>
+
+<script type="text/babel" data-name="auth">
+// Coordit — Auth screens (Login / Register)
+
+function AuthScreen({ onAuth }) {
+  const [mode, setMode] = React.useState('login');
+  const [form, setForm] = React.useState({ email: '', password: '', name: '' });
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const submit = async () => {
+    if (!form.email || !form.password) { setError('이메일과 비밀번호를 입력해주세요.'); return; }
+    setLoading(true); setError('');
+    try {
+      const res = mode === 'login'
+        ? await window.API.login({ email: form.email, password: form.password })
+        : await window.API.register({ email: form.email, password: form.password, name: form.name });
+      window.Auth.setToken(res.token);
+      window.Auth.setUser(res.user);
+      onAuth(res.user);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inp = (k, placeholder, type = 'text') => (
+    <input
+      type={type} placeholder={placeholder} value={form[k]}
+      onChange={e => set(k, e.target.value)}
+      onKeyDown={e => e.key === 'Enter' && submit()}
+      style={{
+        width: '100%', padding: '14px 16px',
+        border: '1px solid var(--line-strong)', borderRadius: 4,
+        background: 'transparent', outline: 'none',
+        fontSize: 14, fontFamily: "var(--font-korean, 'Pretendard', sans-serif)",
+        color: 'var(--obsidian)',
+      }}
+    />
+  );
+
+  return (
+    <main style={{
+      minHeight: '100vh', background: 'var(--bg)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 24,
+    }}>
+      <div style={{ width: '100%', maxWidth: 440 }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <div style={{
+            fontFamily: "var(--font-display, 'Cormorant Garamond', serif)",
+            fontSize: 38, fontWeight: 500, letterSpacing: '-0.02em',
+            color: 'var(--obsidian)',
+          }}>
+            <span style={{ fontStyle: 'italic', fontWeight: 600 }}>C</span>oordit
+            <span style={{
+              display: 'inline-block', width: 7, height: 7, borderRadius: '50%',
+              background: 'var(--camel)', marginLeft: 3, verticalAlign: 'middle',
+              transform: 'translateY(-3px)',
+            }}/>
+          </div>
+          <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.2em', color: 'var(--text-muted)', marginTop: 4 }}>
+            THE CURATED WARDROBE
+          </div>
+        </div>
+
+        <div style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, padding: 40 }}>
+          <div style={{ marginBottom: 28 }}>
+            <h2 className="korean-serif" style={{
+              margin: 0, fontSize: 28, fontWeight: 500,
+              fontFamily: "var(--font-korean-display, serif)",
+              letterSpacing: '-0.02em',
+            }}>
+              {mode === 'login' ? '다시 만나요' : '큐레이션을 시작합니다'}
+            </h2>
+            <p style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--text-muted)', fontFamily: "var(--font-korean, sans-serif)" }}>
+              {mode === 'login' ? '옷장과 스타일 분석이 기다리고 있습니다.' : '당신의 옷장을 AI가 큐레이션합니다.'}
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {mode === 'register' && inp('name', '이름 (선택)')}
+            {inp('email', '이메일', 'email')}
+            {inp('password', '비밀번호', 'password')}
+          </div>
+
+          {error && (
+            <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(168,66,58,0.08)', border: '1px solid rgba(168,66,58,0.2)', borderRadius: 4, fontSize: 13, color: 'var(--fit-tight)', fontFamily: "var(--font-korean, sans-serif)" }}>
+              {error}
+            </div>
+          )}
+
+          <button className="btn btn-primary" onClick={submit} disabled={loading}
+            style={{ width: '100%', marginTop: 20, opacity: loading ? 0.7 : 1 }}>
+            {loading ? '처리중...' : mode === 'login' ? '로그인' : '계정 만들기'}
+          </button>
+
+          <div style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: 'var(--text-muted)', fontFamily: "var(--font-korean, sans-serif)" }}>
+            {mode === 'login' ? '계정이 없으신가요?' : '이미 계정이 있으신가요?'}
+            {' '}
+            <button onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); }}
+              style={{ background: 'none', border: 'none', color: 'var(--walnut)', cursor: 'pointer', fontSize: 13, fontFamily: "var(--font-korean, sans-serif)", textDecoration: 'underline', padding: 0 }}>
+              {mode === 'login' ? '회원가입' : '로그인'}
+            </button>
+          </div>
+        </div>
+
+        {/* Quick demo login */}
+        <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <button onClick={async () => {
+            setForm({ email: 'demo@coordit.com', password: 'demo1234', name: '' });
+            setLoading(true); setError('');
+            try {
+              // Try login first, register if not exists
+              let res;
+              try {
+                res = await window.API.login({ email: 'demo@coordit.com', password: 'demo1234' });
+              } catch {
+                res = await window.API.register({ email: 'demo@coordit.com', password: 'demo1234', name: '데모 사용자' });
+              }
+              window.Auth.setToken(res.token);
+              window.Auth.setUser(res.user);
+              onAuth(res.user);
+            } catch (e) { setError(e.message); } finally { setLoading(false); }
+          }} style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+            DEMO LOGIN
+          </button>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+window.AuthScreen = AuthScreen;
+</script>
+
+<script type="text/babel" data-name="closet">
+// Coordit — Closet (나의 옷장)
+
+function Closet({ onNav, brand, user, onLogout }) {
+  const [filter, setFilter] = useState('전체');
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [stats, setStats] = useState({ totalItems: 0, predictedSize: 'M' });
+  const filters = ['전체', '상의', '하의', '아우터', '원피스', '액세서리'];
+
+  const loadItems = async (cat) => {
+    try {
+      setLoading(true);
+      const data = await window.API.getCloset(cat && cat !== '전체' ? { category: cat } : {});
+      setItems(data);
+    } catch (e) {
+      window.Toast.show('옷장을 불러올 수 없습니다: ' + e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadItems(filter);
+    window.API.getStats().then(s => setStats(s)).catch(() => {});
+  }, [filter]);
+
+  const handleFavorite = async (item) => {
+    try {
+      await window.API.updateItem(item.id, { is_favorite: item.is_favorite ? 0 : 1 });
+      loadItems(filter);
+    } catch (e) { window.Toast.show(e.message, 'error'); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('이 아이템을 삭제하시겠습니까?')) return;
+    try {
+      await window.API.deleteItem(id);
+      window.Toast.show('삭제되었습니다.', 'success');
+      loadItems(filter);
+    } catch (e) { window.Toast.show(e.message, 'error'); }
+  };
+
+  return (
+    <main>
+      <TopBar active="closet" onNav={onNav} brand={brand} user={user} onLogout={onLogout} />
+      {showAddModal && <AddItemModal onClose={() => setShowAddModal(false)} onSaved={() => { setShowAddModal(false); loadItems(filter); }} />}
+
+      <section style={{ padding: '56px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div className="eyebrow" style={{ marginBottom: 24 }}>HOME / CLOSET / ALL</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40 }}>
+          <div>
+            <h1 className="korean-serif" style={{ margin: 0, fontSize: 72, fontWeight: 400, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: "var(--font-korean-display, serif)" }}>
+              나의 <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', color: 'var(--walnut)' }}>옷장</span>
+            </h1>
+            <div style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 12, fontFamily: "var(--font-korean, 'Pretendard', sans-serif)" }}>
+              총 <span style={{ color: 'var(--walnut)', fontWeight: 500 }}>{stats.totalItems}</span>개의 아이템 · 예측 사이즈: <span style={{ color: 'var(--walnut)', fontWeight: 500 }}>{stats.predictedSize}</span>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn btn-secondary" onClick={() => onNav('onboarding')}>핏 프로필</button>
+            <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>+ 새 의류 등록</button>
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {filters.map(f => <Chip key={f} active={filter === f} onClick={() => setFilter(f)}>{f}</Chip>)}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em' }}>
+            {items.length}개 표시중
+          </div>
+        </div>
+      </section>
+
+      <section style={{ padding: '40px 48px 0', maxWidth: 1600, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 340px', gap: 40 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+          {loading ? (
+            Array(6).fill(0).map((_, i) => (
+              <div key={i} style={{ aspectRatio: '4/5', background: 'var(--linen)', borderRadius: 4, animation: 'pulse 1.5s infinite' }} />
+            ))
+          ) : items.map((item) => (
+            <ClosetCard
+              key={item.id}
+              item={item}
+              onFit={() => onNav('fit')}
+              onFavorite={() => handleFavorite(item)}
+              onDelete={() => handleDelete(item.id)}
+            />
+          ))}
+          <div style={{ border: '1px dashed var(--line-strong)', borderRadius: 4, minHeight: 440, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, cursor: 'pointer', color: 'var(--text-muted)', transition: 'all 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--walnut)'; e.currentTarget.style.color = 'var(--walnut)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line-strong)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+            onClick={() => setShowAddModal(true)}
+          >
+            <div style={{ fontSize: 28, fontFamily: 'var(--font-display, serif)', fontStyle: 'italic' }}>+</div>
+            <div className="korean-sans" style={{ fontSize: 13 }}>새 의류 등록</div>
+            <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', opacity: 0.6 }}>PHOTO · URL · SCAN</div>
+          </div>
+        </div>
+
+        <aside style={{ display: 'flex', flexDirection: 'column', gap: 20, position: 'sticky', top: 100, alignSelf: 'flex-start' }}>
+          <div style={{ background: 'var(--obsidian)', color: 'var(--ivory)', padding: 24, borderRadius: 4 }}>
+            <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', opacity: 0.6 }}>COORDIT AI</div>
+            <div style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 28, marginTop: 8, fontWeight: 500 }}>Today's Edit</div>
+            <p className="korean-sans" style={{ margin: '16px 0 20px', fontSize: 13, lineHeight: 1.6, opacity: 0.85 }}>
+              옷장의 아이템들로 오늘의 코디를 AI가 자동 큐레이션합니다.
+            </p>
+            <button className="btn btn-camel" style={{ width: '100%' }} onClick={() => onNav('styling')}>
+              오늘의 코디 추천 →
+            </button>
+          </div>
+
+          <div style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', padding: 24, borderRadius: 4 }}>
+            <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>WARDROBE DOSSIER</div>
+            <div className="korean-serif" style={{ fontSize: 20, marginTop: 8, fontWeight: 500, fontFamily: "var(--font-korean-display, serif)" }}>스타일 데이터</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 20 }}>
+              <MiniStat label="총 아이템" value={stats.totalItems} />
+              <MiniStat label="예측 사이즈" value={stats.predictedSize} />
+              <MiniStat label="핏 분석" value="AI" unit=" ✓" accent="var(--fit-perfect)" />
+              <MiniStat label="저장된 코디" value={stats.totalLooks || 0} />
+            </div>
+          </div>
+
+          <div style={{ background: 'var(--linen)', border: '1px solid var(--line)', padding: 20, borderRadius: 4 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{ fontSize: 14 }}>✦</span>
+              <div className="korean-serif" style={{ fontSize: 16, fontWeight: 500, fontFamily: "var(--font-korean-display, serif)" }}>핏 분석</div>
+            </div>
+            <p className="korean-sans" style={{ margin: '10px 0', fontSize: 12, lineHeight: 1.6, color: 'var(--text-muted)' }}>
+              실측 체형 기반 AI 핏 분석으로 어떤 옷이 얼마나 잘 맞는지 확인하세요.
+            </p>
+            <button className="btn btn-secondary" style={{ width: '100%', fontSize: 12, padding: '10px' }} onClick={() => onNav('fit')}>
+              핏 분석 시작 →
+            </button>
+          </div>
+        </aside>
+      </section>
+      <Footer brand={brand} />
+    </main>
+  );
+}
+
+function AddItemModal({ onClose, onSaved }) {
+  const [form, setForm] = useState({ name: '', name_ko: '', category: '상의', color: '#8F6F45', fabric: '', size: 'M', brand: '', garment_shoulder: '', garment_chest: '', garment_waist: '', garment_length: '' });
+  const [loading, setLoading] = useState(false);
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const save = async () => {
+    if (!form.name_ko && !form.name) { window.Toast.show('이름을 입력해주세요.', 'error'); return; }
+    setLoading(true);
+    try {
+      const body = { ...form };
+      ['garment_shoulder','garment_chest','garment_waist','garment_length'].forEach(k => { if (body[k]) body[k] = parseFloat(body[k]); else delete body[k]; });
+      if (!body.name) body.name = body.name_ko;
+      await window.API.addItem(body);
+      window.Toast.show('아이템이 추가되었습니다!', 'success');
+      onSaved();
+    } catch (e) { window.Toast.show(e.message, 'error'); } finally { setLoading(false); }
+  };
+
+  const inp = (k, label, type='text', placeholder='') => (
+    <div key={k}>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em' }}>{label}</div>
+      <input type={type} value={form[k]} onChange={e => set(k, e.target.value)} placeholder={placeholder}
+        style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--line-strong)', borderRadius: 4, background: 'transparent', outline: 'none', fontSize: 14, fontFamily: "var(--font-korean, sans-serif)", color: 'var(--obsidian)' }} />
+    </div>
+  );
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(28,27,26,0.7)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={onClose}>
+      <div style={{ background: 'var(--bg)', borderRadius: 4, width: '100%', maxWidth: 640, padding: 40, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+          <h2 className="korean-serif" style={{ margin: 0, fontSize: 28, fontWeight: 500, fontFamily: "var(--font-korean-display, serif)" }}>새 의류 등록</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {inp('name_ko', '의류명 (한국어)', 'text', '예: 헤리티지 카멜 코트')}
+          {inp('name', '의류명 (English)', 'text', 'e.g. Heritage Camel Coat')}
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em' }}>카테고리</div>
+            <select value={form.category} onChange={e => set('category', e.target.value)} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--line-strong)', borderRadius: 4, background: 'var(--bg)', fontSize: 14 }}>
+              {['상의','하의','아우터','원피스','액세서리'].map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {inp('fabric', '소재', 'text', 'Wool, Cotton, Cashmere...')}
+            {inp('size', '사이즈', 'text', 'XS / S / M / L / XL')}
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em' }}>대표 색상</div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input type="color" value={form.color} onChange={e => set('color', e.target.value)} style={{ width: 44, height: 44, border: '1px solid var(--line-strong)', borderRadius: 4, cursor: 'pointer', padding: 2 }} />
+              <span style={{ fontSize: 12, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-muted)' }}>{form.color}</span>
+            </div>
+          </div>
+          <div style={{ borderTop: '1px solid var(--line)', paddingTop: 16 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em' }}>실측 사이즈 (선택 — 핏 분석에 활용)</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {inp('garment_shoulder', '어깨 (cm)', 'number', '43.0')}
+              {inp('garment_chest', '가슴 둘레 (cm)', 'number', '102')}
+              {inp('garment_waist', '허리 둘레 (cm)', 'number', '96')}
+              {inp('garment_length', '총장 (cm)', 'number', '70')}
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 28 }}>
+          <button className="btn btn-secondary" onClick={onClose} style={{ flex: 1 }}>취소</button>
+          <button className="btn btn-primary" onClick={save} disabled={loading} style={{ flex: 2, opacity: loading ? 0.7 : 1 }}>
+            {loading ? '저장중...' : '등록하기'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClosetCard({ item, onFit, onFavorite, onDelete }) {
+  const [hover, setHover] = useState(false);
+  const title = item.name_ko || item.name;
+  const sub = `${item.category}${item.fabric ? ' · ' + item.fabric : ''}`;
+  const c = item.color || '#8F6F45';
+
+  return (
+    <div style={{ background: 'var(--bg-raised)', border: item.is_favorite ? '1px solid var(--camel)' : '1px solid var(--line)', borderRadius: 4, overflow: 'hidden', transition: 'all 0.25s', transform: hover ? 'translateY(-2px)' : 'none', boxShadow: hover ? '0 12px 28px rgba(74,56,38,0.10)' : 'none' }}
+      onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+      <div style={{ aspectRatio: '4/5', background: c, position: 'relative', overflow: 'hidden' }}>
+        {item.image_url && <img src={item.image_url} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(0.1) contrast(1.02)' }}/>}
+        {!item.image_url && (
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 10px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.4)' }}>{item.category.toUpperCase()}</span>
+          </div>
+        )}
+        {item.fabric && (
+          <div style={{ position: 'absolute', top: 14, left: 14, padding: '4px 10px', background: 'rgba(245,240,230,0.92)', color: 'var(--walnut)', fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', borderRadius: 2 }}>
+            {item.fabric.toUpperCase()}
+          </div>
+        )}
+        <div style={{ position: 'absolute', top: 14, right: 14, display: 'flex', gap: 6 }}>
+          <button onClick={(e) => { e.stopPropagation(); onFavorite(); }} style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(13,12,11,0.55)', border: 'none', cursor: 'pointer', color: item.is_favorite ? '#D4B896' : 'rgba(245,240,230,0.6)', fontSize: 12 }}>
+            {item.is_favorite ? '♥' : '♡'}
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); onDelete(); }} style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(13,12,11,0.55)', border: 'none', cursor: 'pointer', color: 'rgba(245,240,230,0.6)', fontSize: 10 }}>
+            ✕
+          </button>
+        </div>
+        <div style={{ position: 'absolute', bottom: 12, left: 14, padding: '4px 8px', background: 'rgba(13,12,11,0.55)', backdropFilter: 'blur(8px)', color: 'var(--ivory)', fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', borderRadius: 2 }}>
+          {item.size || 'M'} · #{String(item.id).padStart(3, '0')}
+        </div>
+      </div>
+      <div style={{ padding: '14px 16px' }}>
+        <div className="korean-sans" style={{ fontSize: 14, fontWeight: 500 }}>{title}</div>
+        <div className="korean-sans" style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{sub}</div>
+        <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
+          <button onClick={onFit} style={{ flex: 1, padding: '7px 0', background: 'var(--linen)', border: 'none', borderRadius: 2, fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em', color: 'var(--walnut)', cursor: 'pointer' }}>
+            핏 분석
+          </button>
+          {item.worn_count > 0 && (
+            <div style={{ padding: '7px 10px', background: 'var(--line)', borderRadius: 2, fontSize: 10, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-muted)' }}>
+              {item.worn_count}회
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MiniStat({ label, value, unit, accent }) {
+  return (
+    <div>
+      <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 24, fontWeight: 500, letterSpacing: '-0.02em', color: accent || 'var(--obsidian)', lineHeight: 1 }}>
+        {value}{unit && <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 2 }}>{unit}</span>}
+      </div>
+      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 6, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        {label}
+      </div>
+    </div>
+  );
+}
+
+window.Closet = Closet;
+
+</script>
+<script type="text/babel" data-name="body3d">
+// Coordit Fit Lab — Three.js 3D mannequin component
+// Matte atelier torso, drag-to-rotate, with fit-state measurement rings + HTML overlay labels.
+
+const Body3DComponent = (() => {
+  // fitData: { shoulder:{state,delta}, chest:{state,delta}, waist:{state,delta}, hip:{state,delta} }
+  // measurements: { shoulder, chest, waist, hip, height } — used to scale figure
+  function Body3D({ width = 500, height = 720, fitData = null, measurements = null }) {
+    const mountRef = React.useRef(null);
+    const rafRef = React.useRef(null);
+    const stateRef = React.useRef({ rotY: 0.35, targetY: 0.35, dragging: false, lastX: 0 });
+    const ringsRef = React.useRef({});
+    const [labels, setLabels] = React.useState({});
+
+    React.useEffect(() => {
+      const mount = mountRef.current;
+      if (!mount || !window.THREE) return;
+
+      const THREE = window.THREE;
+      const scene = new THREE.Scene();
+      scene.background = null;
+
+      // Wider FOV + framed to see head to toe
+      const camera = new THREE.PerspectiveCamera(30, width / height, 0.1, 100);
+      camera.position.set(0, 0, 9);
+      camera.lookAt(0, 0, 0);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      renderer.setSize(width, height);
+      renderer.outputColorSpace = THREE.SRGBColorSpace || THREE.sRGBEncoding;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.1;
+      mount.appendChild(renderer.domElement);
+
+      // ── LIGHTS ── editorial studio lighting
+      const key = new THREE.DirectionalLight(0xf5e9cf, 1.5);
+      key.position.set(-3, 4, 4);
+      scene.add(key);
+
+      const rim = new THREE.DirectionalLight(0xb08a5b, 1.0);
+      rim.position.set(4, 2, -3);
+      scene.add(rim);
+
+      const fill = new THREE.DirectionalLight(0x8a7a6a, 0.4);
+      fill.position.set(0, -2, 4);
+      scene.add(fill);
+
+      const ambient = new THREE.AmbientLight(0x2a2420, 0.4);
+      scene.add(ambient);
+
+      // ── MANNEQUIN MATERIAL ── matte porcelain/plaster
+      const skinMat = new THREE.MeshStandardMaterial({
+        color: 0xd4b896,
+        roughness: 0.85,
+        metalness: 0.05,
+      });
+
+      // ── MANNEQUIN ── group holding all body parts
+      const figure = new THREE.Group();
+
+      // Head (oval)
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(0.22, 32, 24),
+        skinMat
+      );
+      head.scale.set(0.85, 1.05, 0.9);
+      head.position.y = 3.05;
+      figure.add(head);
+
+      // Neck
+      const neck = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.09, 0.11, 0.22, 24),
+        skinMat
+      );
+      neck.position.y = 2.75;
+      figure.add(neck);
+
+      // Torso — more human proportions via curved LatheGeometry
+      const torsoProfile = [
+        new THREE.Vector2(0.32, 0.0),
+        new THREE.Vector2(0.30, 0.15),
+        new THREE.Vector2(0.27, 0.35),
+        new THREE.Vector2(0.28, 0.55),
+        new THREE.Vector2(0.34, 0.85),
+        new THREE.Vector2(0.36, 1.00),
+        new THREE.Vector2(0.40, 1.15),
+        new THREE.Vector2(0.38, 1.25),
+        new THREE.Vector2(0.22, 1.35),
+        new THREE.Vector2(0.14, 1.40),
+      ];
+      const torsoGeom = new THREE.LatheGeometry(torsoProfile, 48);
+      torsoGeom.scale(1.08, 1.0, 0.72);
+      const torso = new THREE.Mesh(torsoGeom, skinMat);
+      torso.position.y = 1.25;
+      figure.add(torso);
+
+      // Hips
+      const hipProfile = [
+        new THREE.Vector2(0.32, 0.0),
+        new THREE.Vector2(0.36, 0.10),
+        new THREE.Vector2(0.38, 0.22),
+        new THREE.Vector2(0.36, 0.35),
+        new THREE.Vector2(0.30, 0.45),
+      ];
+      const hipGeom = new THREE.LatheGeometry(hipProfile, 48);
+      hipGeom.scale(1.1, 1.0, 0.78);
+      const hips = new THREE.Mesh(hipGeom, skinMat);
+      hips.position.y = 0.85;
+      figure.add(hips);
+
+      // Arms
+      function makeArm(sideX) {
+        const arm = new THREE.Group();
+        const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.075, 0.72, 20), skinMat);
+        upper.position.set(0, -0.36, 0);
+        arm.add(upper);
+        const fore = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.06, 0.6, 20), skinMat);
+        fore.position.set(0, -1.02, 0);
+        arm.add(fore);
+        const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.08, 20, 16), skinMat);
+        elbow.position.set(0, -0.72, 0);
+        arm.add(elbow);
+        const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.12, 20, 16), skinMat);
+        arm.add(shoulder);
+        const hand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.22, 0.08), skinMat);
+        hand.position.set(0, -1.42, 0);
+        arm.add(hand);
+        arm.position.set(sideX * 0.44, 2.5, 0);
+        arm.rotation.z = sideX * 0.08;
+        return arm;
+      }
+      figure.add(makeArm(-1), makeArm(1));
+
+      // Legs
+      function makeLeg(sideX) {
+        const leg = new THREE.Group();
+        const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.11, 0.88, 20), skinMat);
+        thigh.position.set(0, -0.44, 0);
+        leg.add(thigh);
+        const knee = new THREE.Mesh(new THREE.SphereGeometry(0.12, 20, 16), skinMat);
+        knee.position.set(0, -0.88, 0);
+        leg.add(knee);
+        const calf = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.08, 0.82, 20), skinMat);
+        calf.position.set(0, -1.32, 0);
+        leg.add(calf);
+        const foot = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.1, 0.32), skinMat);
+        foot.position.set(0, -1.78, 0.06);
+        leg.add(foot);
+        leg.position.set(sideX * 0.16, 0.85, 0);
+        return leg;
+      }
+      figure.add(makeLeg(-1), makeLeg(1));
+
+      // Scale figure based on user measurements for personalised body shape
+      const mH = measurements && measurements.height ? measurements.height / 172 : 1;
+      const mW = measurements && measurements.chest ? Math.sqrt(measurements.chest / 98) : 1;
+      figure.position.y = -1.4 * mH;
+      figure.scale.set(0.72 * mW, 0.72 * mH, 0.72 * mW);
+      scene.add(figure);
+
+      // ── FIT-STATE MEASUREMENT RINGS ──
+      const FIT_COLORS = {
+        tight:   { ring: 0xc85a4e, glow: 0xff7a68, css: '#D66A5D' },
+        perfect: { ring: 0x6b8a60, glow: 0x9acc80, css: '#7FA870' },
+        loose:   { ring: 0x8d7fb5, glow: 0xb5a8e0, css: '#9D90C7' },
+      };
+
+      function makeFitRing(fitKey, radius, yOffset, squeezeZ = 0.72) {
+        const col = FIT_COLORS[fitKey] || FIT_COLORS.perfect;
+        const group = new THREE.Group();
+
+        const innerGeom = new THREE.TorusGeometry(radius, 0.028, 14, 120);
+        const inner = new THREE.Mesh(innerGeom, new THREE.MeshBasicMaterial({
+          color: col.ring, transparent: true, opacity: 1.0, side: THREE.DoubleSide,
+        }));
+        inner.rotation.x = Math.PI / 2;
+        group.add(inner);
+
+        const outerGeom = new THREE.TorusGeometry(radius, 0.055, 14, 120);
+        const outer = new THREE.Mesh(outerGeom, new THREE.MeshBasicMaterial({
+          color: col.glow, transparent: true, opacity: 0.28, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false,
+        }));
+        outer.rotation.x = Math.PI / 2;
+        group.add(outer);
+
+        const markerGeom = new THREE.TorusGeometry(radius, 0.006, 8, 120);
+        const marker = new THREE.Mesh(markerGeom, new THREE.MeshBasicMaterial({
+          color: 0x1a1612, transparent: true, opacity: 0.6,
+        }));
+        marker.rotation.x = Math.PI / 2;
+        group.add(marker);
+
+        group.scale.set(1.08, squeezeZ, 1.0);
+        group.position.y = yOffset;
+        group.userData = { ...group.userData, radius, fitKey };
+        return group;
+      }
+
+      // Use fitData from API if available, otherwise use defaults
+      const fd = fitData || {};
+      const shoulderState = fd.shoulder ? fd.shoulder.state : 'tight';
+      const chestState    = fd.chest    ? fd.chest.state    : 'perfect';
+      const waistState    = fd.waist    ? fd.waist.state    : 'loose';
+      const hipState      = fd.hip      ? fd.hip.state      : 'perfect';
+
+      const shoulderRing = makeFitRing(shoulderState, 0.44, 2.40);
+      figure.add(shoulderRing);
+
+      const chestRing = makeFitRing(chestState, 0.38, 2.10);
+      figure.add(chestRing);
+
+      const waistRing = makeFitRing(waistState, 0.31, 1.60);
+      figure.add(waistRing);
+
+      const hipRing = makeFitRing(hipState, 0.38, 0.95);
+      hipRing.children[0].material.opacity = 0.55;
+      hipRing.children[1].material.opacity = 0.14;
+      figure.add(hipRing);
+
+      // Store refs for dynamic updates
+      ringsRef.current = { shoulderRing, chestRing, waistRing, hipRing };
+
+      // ── CALIPER BRACKETS ── white/camel L-brackets on each side of fit rings (cheat: small arcs outside figure)
+      function makeCaliper(fitKey, radius, yOffset, squeezeZ = 0.72) {
+        const col = FIT_COLORS[fitKey];
+        const group = new THREE.Group();
+        const calR = radius * 1.15; // slightly larger than ring
+        // Short arcs on left and right side (±20 degrees around ±X axis)
+        for (const sign of [-1, 1]) {
+          const arcGeom = new THREE.TorusGeometry(calR, 0.008, 8, 32, Math.PI / 7);
+          const arc = new THREE.Mesh(arcGeom, new THREE.MeshBasicMaterial({
+            color: 0xf5e9cf, transparent: true, opacity: 0.85,
+          }));
+          arc.rotation.x = Math.PI / 2;
+          arc.rotation.y = sign > 0 ? -Math.PI / 14 : Math.PI - Math.PI / 14;
+          group.add(arc);
+        }
+        group.scale.set(1.08, squeezeZ, 1.0);
+        group.position.y = yOffset;
+        return group;
+      }
+      figure.add(makeCaliper('tight', 0.44, 2.40));
+      figure.add(makeCaliper('perfect', 0.38, 2.10));
+      figure.add(makeCaliper('loose', 0.31, 1.60));
+      figure.add(makeCaliper('perfect', 0.38, 0.95));
+
+      // ── FLOOR — circular platform ──
+      const platform = new THREE.Mesh(
+        new THREE.CircleGeometry(1.6, 64),
+        new THREE.MeshStandardMaterial({ color: 0x1a1612, roughness: 0.95, metalness: 0 })
+      );
+      platform.rotation.x = -Math.PI / 2;
+      platform.position.y = -1.62;
+      scene.add(platform);
+
+      // Platform rim glow
+      const rimRing = new THREE.Mesh(
+        new THREE.TorusGeometry(1.6, 0.008, 8, 128),
+        new THREE.MeshBasicMaterial({ color: 0xd4b896, transparent: true, opacity: 0.4 })
+      );
+      rimRing.rotation.x = Math.PI / 2;
+      rimRing.position.y = -1.615;
+      scene.add(rimRing);
+
+      // ── LABEL ANCHORS ── dynamic from fitData or defaults
+      const makeDelta = (d) => d ? `${parseFloat(d) > 0 ? '+' : ''}${d}cm` : '—';
+      const anchors = [
+        { id: 'shoulder', part: '어깨', en: 'SHOULDER',
+          state: (fd.shoulder ? fd.shoulder.label : 'Tight').toUpperCase(),
+          fit: shoulderState,
+          delta: fd.shoulder ? makeDelta(fd.shoulder.delta) : '-1.5cm',
+          y: 2.40, r: 0.44 },
+        { id: 'chest', part: '가슴', en: 'CHEST',
+          state: (fd.chest ? fd.chest.label : 'Perfect').toUpperCase(),
+          fit: chestState,
+          delta: fd.chest ? makeDelta(fd.chest.delta) : '+4.0cm',
+          y: 2.10, r: 0.38 },
+        { id: 'waist', part: '허리', en: 'WAIST',
+          state: (fd.waist ? fd.waist.label : 'Loose').toUpperCase(),
+          fit: waistState,
+          delta: fd.waist ? makeDelta(fd.waist.delta) : '+6.0cm',
+          y: 1.60, r: 0.31 },
+        { id: 'hip', part: '힙', en: 'HIP',
+          state: (fd.hip ? fd.hip.label : 'Perfect').toUpperCase(),
+          fit: hipState,
+          delta: fd.hip ? makeDelta(fd.hip.delta) : '+1.5cm',
+          y: 0.95, r: 0.38 },
+      ];
+      const anchorVec = new THREE.Vector3();
+
+      function projectAnchors() {
+        const next = {};
+        for (const a of anchors) {
+          // local point at +x edge of the ring in figure coords (ring squeezeX = 1.08)
+          anchorVec.set(a.r * 1.08, a.y, 0);
+          // apply figure's transform (position + scale + rotation)
+          const v = anchorVec.clone();
+          figure.localToWorld(v);
+          v.project(camera);
+          // convert NDC to pixels
+          const x = (v.x * 0.5 + 0.5) * width;
+          const y = (-v.y * 0.5 + 0.5) * height;
+          // if behind camera or off-screen laterally, hide label
+          const visible = v.z < 1 && x > 0 && x < width;
+          next[a.id] = { ...a, x, y, visible, css: FIT_COLORS[a.fit].css };
+        }
+        setLabels(next);
+      }
+
+      // ── DRAG ROTATION ──
+      const canvas = renderer.domElement;
+      canvas.style.cursor = 'grab';
+      canvas.style.display = 'block';
+      canvas.style.width = width + 'px';
+      canvas.style.height = height + 'px';
+
+      const onDown = (e) => {
+        stateRef.current.dragging = true;
+        stateRef.current.lastX = e.clientX ?? (e.touches && e.touches[0].clientX);
+        canvas.style.cursor = 'grabbing';
+      };
+      const onUp = () => {
+        stateRef.current.dragging = false;
+        canvas.style.cursor = 'grab';
+      };
+      const onMove = (e) => {
+        if (!stateRef.current.dragging) return;
+        const x = e.clientX ?? (e.touches && e.touches[0].clientX);
+        const dx = x - stateRef.current.lastX;
+        stateRef.current.lastX = x;
+        stateRef.current.targetY += dx * 0.008;
+      };
+
+      canvas.addEventListener('mousedown', onDown);
+      window.addEventListener('mouseup', onUp);
+      window.addEventListener('mousemove', onMove);
+      canvas.addEventListener('touchstart', onDown, { passive: true });
+      window.addEventListener('touchend', onUp);
+      window.addEventListener('touchmove', onMove, { passive: true });
+
+      // ── ANIMATION LOOP ──
+      let frameCount = 0;
+      const tick = () => {
+        stateRef.current.rotY += (stateRef.current.targetY - stateRef.current.rotY) * 0.08;
+        if (!stateRef.current.dragging) {
+          stateRef.current.targetY += 0.0015;
+        }
+        figure.rotation.y = stateRef.current.rotY;
+        renderer.render(scene, camera);
+        // Project labels every 2 frames (~30Hz enough)
+        if (frameCount++ % 2 === 0) projectAnchors();
+        rafRef.current = requestAnimationFrame(tick);
+      };
+      tick();
+
+      return () => {
+        cancelAnimationFrame(rafRef.current);
+        canvas.removeEventListener('mousedown', onDown);
+        window.removeEventListener('mouseup', onUp);
+        window.removeEventListener('mousemove', onMove);
+        canvas.removeEventListener('touchstart', onDown);
+        window.removeEventListener('touchend', onUp);
+        window.removeEventListener('touchmove', onMove);
+        renderer.dispose();
+        if (mount.contains(renderer.domElement)) {
+          mount.removeChild(renderer.domElement);
+        }
+      };
+    }, [width, height]);
+
+    // HTML overlay labels positioned via projected anchor coords
+    return (
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        pointerEvents: 'none',
+      }}>
+        <div ref={mountRef} style={{
+          position: 'relative', width, height,
+          pointerEvents: 'auto',
+        }}>
+          {/* HTML overlay labels */}
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+            {Object.values(labels).map((L) => (
+              <div key={L.id} style={{
+                position: 'absolute',
+                left: L.x, top: L.y,
+                transform: 'translate(8px, -50%)',
+                opacity: L.visible ? 1 : 0.2,
+                transition: 'opacity 0.3s',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10,
+                letterSpacing: '0.08em',
+                color: '#F5F0E6',
+                whiteSpace: 'nowrap',
+              }}>
+                {/* Leader dot + line */}
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  background: 'rgba(10, 9, 8, 0.88)',
+                  border: `1px solid ${L.css}`,
+                  borderLeft: `3px solid ${L.css}`,
+                  padding: '6px 10px',
+                  backdropFilter: 'blur(6px)',
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                      <span style={{ color: '#F5F0E6', fontWeight: 500 }}>{L.en}</span>
+                      <span style={{ color: 'rgba(245,240,230,0.5)', fontSize: 9 }}>{L.part}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 3 }}>
+                      <span style={{ color: L.css, fontWeight: 600, fontSize: 11 }}>{L.state}</span>
+                      <span style={{ color: 'rgba(245,240,230,0.7)', fontFamily: "'Cormorant Garamond', serif", fontSize: 13, fontStyle: 'italic' }}>{L.delta}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return Body3D;
+})();
+
+window.Body3D = Body3DComponent;
+
+</script>
+
+<script type="text/babel" data-name="fit-lab">
+// Coordit — Fit Lab (핏 분석) — redesigned hero + editorial layout
+
+function FitLab({ onNav, brand, user, onLogout }) {
+  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [closetItems, setClosetItems] = useState([]);
+  const [fitData, setFitData] = useState(null);
+  const [measurements, setMeasurements] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      window.API.getCloset(),
+      window.API.getMeasurements(),
+    ]).then(([items, m]) => {
+      setClosetItems(items);
+      setMeasurements(m);
+      if (items.length > 0) setSelectedItemId(items[0].id);
+    }).catch(e => window.Toast.show(e.message, 'error'))
+    .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (!selectedItemId) return;
+    setAnalyzing(true);
+    window.API.getFitAnalysis(selectedItemId)
+      .then(data => setFitData(data))
+      .catch(e => window.Toast.show(e.message, 'error'))
+      .finally(() => setAnalyzing(false));
+  }, [selectedItemId]);
+
+  const sizes = ['XS', 'S', 'M', 'L', 'XL'];
+  const [selectedSize, setSelectedSize] = useState('M');
+  const FIT_COLOR_MAP = { tight: 'var(--fit-tight)', perfect: 'var(--fit-perfect)', loose: 'var(--fit-loose)' };
+  const selectedItem = closetItems.find(i => i.id === selectedItemId);
+  const analysis = fitData && fitData.analysis;
+
+  const regions = analysis ? [
+    analysis.shoulder && { part: '어깨', en: 'SHOULDER', state: analysis.shoulder.label, color: FIT_COLOR_MAP[analysis.shoulder.state], v: analysis.shoulder.delta, pct: analysis.shoulder.state === 'perfect' ? 65 : analysis.shoulder.state === 'tight' ? 85 : 40, top: '14%' },
+    analysis.chest    && { part: '가슴', en: 'CHEST',    state: analysis.chest.label,    color: FIT_COLOR_MAP[analysis.chest.state],    v: analysis.chest.delta,    pct: analysis.chest.state    === 'perfect' ? 65 : 80, top: '28%' },
+    analysis.waist    && { part: '허리', en: 'WAIST',    state: analysis.waist.label,    color: FIT_COLOR_MAP[analysis.waist.state],    v: analysis.waist.delta,    pct: analysis.waist.state    === 'perfect' ? 65 : 45, top: '46%' },
+    analysis.length   && { part: '총장', en: 'LENGTH',   state: analysis.length.label,   color: FIT_COLOR_MAP[analysis.length.state],   v: analysis.length.delta,   pct: 55, top: '68%' },
+  ].filter(Boolean) : [
+    { part: '어깨', en: 'SHOULDER', state: 'Tight',   color: 'var(--fit-tight)',   v: '-1.5', pct: 85, top: '14%' },
+    { part: '가슴', en: 'CHEST',    state: 'Perfect', color: 'var(--fit-perfect)', v: '+4.0', pct: 65, top: '28%' },
+    { part: '허리', en: 'WAIST',    state: 'Loose',   color: 'var(--fit-loose)',   v: '+6.0', pct: 45, top: '46%' },
+    { part: '총장', en: 'LENGTH',   state: 'Perfect', color: 'var(--fit-perfect)', v: '+1.5', pct: 55, top: '68%' },
+  ];
+
+  return (
+    <main>
+      <TopBar active="fit" onNav={onNav} brand={brand} user={user} onLogout={onLogout} />
+
+      {/* ═══ HERO — Big Editorial Headline ═══ */}
+      <section style={{ padding: '56px 48px 32px', maxWidth: 1600, margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
+          <div className="eyebrow">
+            COORDIT FIT FORENSICS · {selectedItem ? (selectedItem.name_ko || selectedItem.name).toUpperCase() : 'SELECT ITEM'}
+          </div>
+          <div className="eyebrow" style={{ color: 'var(--walnut)' }}>
+            {new Date().toLocaleDateString('ko-KR')} · LIVE SCAN
+          </div>
+        </div>
+
+        <h1 className="korean-serif" style={{
+          margin: 0, fontSize: 128, fontWeight: 400,
+          letterSpacing: '-0.045em', lineHeight: 0.9,
+          fontFamily: "var(--font-korean-display, serif)",
+        }}>
+          핏을, <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', color: 'var(--walnut)', fontWeight: 500 }}>해부</span>합니다.
+        </h1>
+        <p className="korean-sans" style={{ margin: '28px 0 0', fontSize: 18, lineHeight: 1.6, color: 'var(--text-muted)', maxWidth: 760 }}>
+          당신의 실측 체형 데이터와 브랜드 사이즈 표를 AI가 교차 분석합니다. <span style={{ color: 'var(--walnut)', fontStyle: 'italic', fontFamily: 'var(--font-display, serif)' }}>±0.3cm</span>의 정밀도로.
+        </p>
+      </section>
+
+      {/* ═══ FORENSIC SCAN — full-bleed editorial ═══ */}
+      <section style={{ padding: '40px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div style={{
+          background: 'var(--obsidian)', color: 'var(--ivory)',
+          borderRadius: 4, overflow: 'hidden',
+          display: 'grid', gridTemplateColumns: '1.3fr 1fr',
+          minHeight: 780,
+        }}>
+          {/* LEFT: Technical body-map dossier */}
+          <div style={{ position: 'relative', background: '#0a0908', overflow: 'hidden' }}>
+            {/* Blueprint background */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `
+                linear-gradient(rgba(180,138,91,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(180,138,91,0.04) 1px, transparent 1px),
+                linear-gradient(rgba(180,138,91,0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(180,138,91,0.08) 1px, transparent 1px)
+              `,
+              backgroundSize: '20px 20px, 20px 20px, 100px 100px, 100px 100px',
+            }}/>
+            {/* Radial glow */}
+            <div style={{ position: 'absolute', inset: 0,
+              background: 'radial-gradient(ellipse at 50% 42%, rgba(212,184,150,0.08) 0%, transparent 60%)' }}/>
+
+            {/* Central body-map — 3D mannequin (Three.js) with SVG fallback */}
+            {window.THREE && window.Body3D ? (
+              <Body3D width={540} height={760} fitData={analysis} measurements={measurements} />
+            ) : (
+              <svg viewBox="0 0 400 720" preserveAspectRatio="xMidYMid meet"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+                <defs>
+                  <linearGradient id="bodyFillFallback" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%"  stopColor="#2a2420"/>
+                    <stop offset="100%" stopColor="#0f0c0a"/>
+                  </linearGradient>
+                </defs>
+                {/* Simple silhouette fallback */}
+                <ellipse cx="200" cy="75" rx="22" ry="27" fill="url(#bodyFillFallback)" stroke="rgba(212,184,150,0.3)" strokeWidth="0.7"/>
+                <path d="M 188 118 L 130 152 Q 112 162 108 182 L 104 260 Q 102 360 108 450 L 130 450 L 135 280 L 140 260 Q 148 254 152 265 L 150 450 L 250 450 L 248 265 Q 252 254 260 260 L 265 280 L 270 450 L 292 450 Q 298 360 296 260 L 292 182 Q 288 162 270 152 L 212 118 Z"
+                  fill="url(#bodyFillFallback)" stroke="rgba(212,184,150,0.35)" strokeWidth="0.8"/>
+                <text x="200" y="680" textAnchor="middle" fill="rgba(212,184,150,0.5)" fontSize="10" fontFamily="JetBrains Mono, monospace" letterSpacing="2">LOADING 3D MANNEQUIN…</text>
+              </svg>
+            )}
+
+            {/* Pulsing scan line */}
+            <div style={{
+              position: 'absolute', left: '10%', right: '10%', top: '50%',
+              height: 1, background: 'linear-gradient(90deg, transparent, #D4B896, transparent)',
+              opacity: 0.6, boxShadow: '0 0 12px #D4B896',
+              animation: 'coordit-scan 4s ease-in-out infinite',
+            }}/>
+            <style>{`
+              @keyframes coordit-scan {
+                0%, 100% { top: 18%; opacity: 0.3; }
+                50% { top: 78%; opacity: 0.7; }
+              }
+            `}</style>
+            {/* Measurement lines — horizontal rulers across body */}
+            {false && regions.map((r, i) => (
+              <div key={r.en} style={{
+                position: 'absolute', left: 0, right: 0, top: r.top,
+                pointerEvents: 'none',
+              }}>
+                {/* Full-width dashed line */}
+                <div style={{
+                  position: 'absolute', left: 0, right: 0, top: '50%',
+                  height: 1,
+                  backgroundImage: `repeating-linear-gradient(90deg, ${r.color} 0 6px, transparent 6px 14px)`,
+                  opacity: 0.7,
+                }}/>
+                {/* Small ticks */}
+                <div style={{
+                  position: 'absolute', left: '28%', top: '50%', transform: 'translateY(-50%)',
+                  width: 8, height: 8, borderRadius: '50%', background: r.color,
+                  boxShadow: `0 0 0 2px rgba(13,12,11,0.8), 0 0 20px ${r.color}88`,
+                }}/>
+                <div style={{
+                  position: 'absolute', right: '28%', top: '50%', transform: 'translateY(-50%)',
+                  width: 8, height: 8, borderRadius: '50%', background: r.color,
+                  boxShadow: `0 0 0 2px rgba(13,12,11,0.8), 0 0 20px ${r.color}88`,
+                }}/>
+
+                {/* Label pill */}
+                <div style={{
+                  position: 'absolute',
+                  left: i % 2 === 0 ? 24 : 'auto',
+                  right: i % 2 === 0 ? 'auto' : 24,
+                  top: '50%', transform: 'translateY(-50%)',
+                  background: 'rgba(13,12,11,0.75)',
+                  backdropFilter: 'blur(12px)',
+                  border: `1px solid ${r.color}`,
+                  padding: '8px 14px', borderRadius: 2,
+                  minWidth: 140,
+                }}>
+                  <div style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.14em', color: 'rgba(245,240,230,0.55)' }}>
+                    {r.en}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 2 }}>
+                    <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 18, fontWeight: 600, color: r.color }}>
+                      {r.state}
+                    </span>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--ivory)' }}>
+                      {r.v}cm
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* TOP-LEFT: garment meta */}
+            <div style={{ position: 'absolute', top: 32, left: 32, zIndex: 5 }}>
+              <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.18em', opacity: 0.65 }}>
+                GARMENT
+              </div>
+              <div className="korean-sans" style={{ fontSize: 15, marginTop: 6, fontWeight: 500 }}>
+                옵시디언 모토 재킷 II
+              </div>
+              <div style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', marginTop: 4, opacity: 0.6, letterSpacing: '0.1em' }}>
+                SIZE M · SKU 0142
+              </div>
+            </div>
+
+            {/* TOP-RIGHT: live indicator */}
+            <div style={{ position: 'absolute', top: 32, right: 32, zIndex: 5,
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '6px 12px',
+              background: 'rgba(13,12,11,0.6)', backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(245,240,230,0.15)',
+              borderRadius: 2,
+              fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em',
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--fit-perfect)', boxShadow: '0 0 8px var(--fit-perfect)' }}/>
+              LIVE · ±0.3cm
+            </div>
+
+            {/* BOTTOM: Editorial caption */}
+            <div style={{ position: 'absolute', bottom: 32, left: 32, right: 32, zIndex: 5 }}>
+              <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.2em', opacity: 0.55, marginBottom: 6 }}>
+                FORENSIC FIT SCAN
+              </div>
+              <div style={{
+                fontFamily: 'var(--font-display, serif)', fontStyle: 'italic',
+                fontSize: 52, fontWeight: 500, letterSpacing: '-0.02em', lineHeight: 1,
+              }}>
+                A body, <span style={{ color: 'var(--camel-soft)' }}>mapped</span>.
+              </div>
+            </div>
+
+            {/* Corner registration marks */}
+            {['top-left','top-right','bottom-left','bottom-right'].map(c => {
+              const pos = {
+                'top-left':     { top: 16, left: 16, borderTop: '1px solid', borderLeft: '1px solid' },
+                'top-right':    { top: 16, right: 16, borderTop: '1px solid', borderRight: '1px solid' },
+                'bottom-left':  { bottom: 16, left: 16, borderBottom: '1px solid', borderLeft: '1px solid' },
+                'bottom-right': { bottom: 16, right: 16, borderBottom: '1px solid', borderRight: '1px solid' },
+              }[c];
+              return <div key={c} style={{ position: 'absolute', width: 18, height: 18, borderColor: 'var(--camel-soft)', zIndex: 4, ...pos }}/>;
+            })}
+          </div>
+
+          {/* RIGHT: AI Verdict + size */}
+          <div style={{ padding: 48, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 32 }}>
+            {/* Verdict */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.18em', color: 'var(--camel-soft)' }}>
+                  ✦ COORDIT AI · VERDICT
+                </div>
+                <div style={{
+                  padding: '4px 12px', borderRadius: 2,
+                  background: 'var(--fit-perfect)', color: 'var(--ivory)',
+                  fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.14em', fontWeight: 500,
+                }}>PERFECT · 92/100</div>
+              </div>
+
+              <h2 className="korean-serif" style={{
+                margin: 0, fontSize: 44, fontWeight: 400, lineHeight: 1.15,
+                letterSpacing: '-0.025em',
+                fontFamily: "var(--font-korean-display, serif)",
+              }}>
+                이 옷은 당신에게<br/>
+                <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', color: 'var(--camel-soft)', fontWeight: 500 }}>
+                  Size M
+                </span>으로 완성됩니다.
+              </h2>
+
+              <p className="korean-sans" style={{ margin: '20px 0 0', fontSize: 14, lineHeight: 1.7, color: 'rgba(245,240,230,0.75)' }}>
+                어깨 라인이 프레임을 잡아주고, 허리에 4cm 여유가 생겨 레이어링이 가능합니다.
+                구조적 테일러링을 의도한 브랜드 설계로 추정됩니다.
+              </p>
+
+              <div style={{ marginTop: 28, padding: '16px 20px', background: 'rgba(245,240,230,0.04)', borderRadius: 2, border: '1px solid rgba(245,240,230,0.08)' }}>
+                <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.14em', opacity: 0.55, marginBottom: 10 }}>
+                  PREDICTION CONFIDENCE
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ flex: 1, height: 4, background: 'rgba(245,240,230,0.1)', borderRadius: 2, overflow: 'hidden' }}>
+                    <div style={{ width: '94%', height: '100%', background: 'linear-gradient(90deg, var(--camel) 0%, var(--camel-soft) 100%)' }}/>
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-display, serif)', fontSize: 32, fontWeight: 500, color: 'var(--camel-soft)', lineHeight: 1 }}>
+                    94<span style={{ fontSize: 16, opacity: 0.5 }}>%</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Item picker from closet */}
+            {closetItems.length > 0 && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.14em', opacity: 0.6, marginBottom: 10 }}>
+                  ITEM SELECTION
+                </div>
+                <select value={selectedItemId || ''} onChange={e => setSelectedItemId(Number(e.target.value))}
+                  style={{ width: '100%', padding: '12px 14px', background: 'rgba(245,240,230,0.05)', border: '1px solid rgba(245,240,230,0.15)', borderRadius: 2, color: 'var(--ivory)', fontSize: 13, fontFamily: "var(--font-korean, sans-serif)", outline: 'none', cursor: 'pointer' }}>
+                  {closetItems.map(item => (
+                    <option key={item.id} value={item.id} style={{ background: '#1C1B1A' }}>
+                      {item.name_ko || item.name} ({item.size || 'M'})
+                    </option>
+                  ))}
+                </select>
+                {analyzing && <div style={{ fontSize: 10, color: 'var(--camel-soft)', marginTop: 6, fontFamily: 'JetBrains Mono, monospace' }}>ANALYZING...</div>}
+              </div>
+            )}
+
+            {/* Size picker */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
+                <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.14em', opacity: 0.6 }}>
+                  SIZE · AI PICK IS {measurements ? measurements.predicted_size || 'M' : 'M'}
+                </div>
+                <div className="korean-sans" style={{ fontSize: 11, color: 'var(--camel-soft)' }}>
+                  실측 기반 분석
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 20 }}>
+                {sizes.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setSelectedSize(s)}
+                    style={{
+                      flex: 1, padding: '16px 0', position: 'relative',
+                      border: selectedSize === s ? '1px solid var(--camel-soft)' : '1px solid rgba(245,240,230,0.15)',
+                      background: selectedSize === s ? 'var(--camel)' : 'transparent',
+                      color: selectedSize === s ? 'var(--obsidian)' : 'var(--ivory)',
+                      fontFamily: 'var(--font-display, serif)', fontSize: 20, fontWeight: 500,
+                      cursor: 'pointer', borderRadius: 2, transition: 'all 0.15s',
+                    }}
+                  >
+                    {s}
+                    {s === 'M' && (
+                      <div style={{ position: 'absolute', top: -8, right: -4, padding: '2px 6px', background: 'var(--camel-soft)', color: 'var(--obsidian)', fontSize: 8, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', borderRadius: 2 }}>
+                        AI
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button className="btn btn-camel" style={{ flex: 1 }}>장바구니에 담기</button>
+                <button style={{
+                  padding: '14px 18px',
+                  border: '1px solid rgba(245,240,230,0.2)',
+                  background: 'transparent', color: 'var(--ivory)',
+                  borderRadius: 8, cursor: 'pointer', fontSize: 14,
+                }}>♡</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ VITALS — 4-card quick read ═══ */}
+      <section style={{ padding: '40px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+          {[
+            { label: 'OVERALL FIT', value: '92', unit: '/100', sub: 'Fit Forensics Score', accent: 'var(--fit-perfect)' },
+            { label: 'BRAND MATCH', value: 'A+',             sub: '체형 유형 일치도',      accent: 'var(--walnut)' },
+            { label: 'SILHOUETTE',  value: 'Structured',     italic: true, sub: '구조적 실루엣',        accent: 'var(--camel)' },
+            { label: 'AUTHORITY',   value: '94', unit: '%', sub: '예측 신뢰도',           accent: 'var(--obsidian)' },
+          ].map((v, i) => (
+            <div key={i} style={{
+              background: i === 3 ? 'var(--obsidian)' : 'var(--bg-raised)',
+              color: i === 3 ? 'var(--ivory)' : 'var(--obsidian)',
+              border: '1px solid var(--line)',
+              borderRadius: 4, padding: 24, minHeight: 130,
+              display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+            }}>
+              <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', color: i === 3 ? 'rgba(245,240,230,0.55)' : 'var(--text-muted)' }}>
+                {v.label}
+              </div>
+              <div>
+                <div style={{
+                  fontFamily: 'var(--font-display, serif)',
+                  fontSize: v.italic ? 36 : 52, fontWeight: 500,
+                  fontStyle: v.italic ? 'italic' : 'normal',
+                  letterSpacing: '-0.03em', lineHeight: 1,
+                  color: v.accent,
+                }}>
+                  {v.value}{v.unit && <span style={{ fontSize: 18, opacity: 0.6, marginLeft: 2 }}>{v.unit}</span>}
+                </div>
+                <div className="korean-sans" style={{ fontSize: 12, marginTop: 6, color: i === 3 ? 'rgba(245,240,230,0.65)' : 'var(--text-muted)' }}>
+                  {v.sub}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ DETAILED TABLE ═══ */}
+      <section style={{ padding: '48px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, padding: '40px 40px 24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
+            <div>
+              <div className="eyebrow">DOSSIER · N°002 · DETAILED MEASUREMENTS</div>
+              <div className="korean-serif" style={{ fontSize: 40, marginTop: 12, fontWeight: 500, letterSpacing: '-0.02em', fontFamily: "var(--font-korean-display, serif)", lineHeight: 1.1 }}>
+                내 체형 × <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', color: 'var(--walnut)' }}>가먼트</span> 교차 분석
+              </div>
+              <div className="korean-sans" style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>
+                단위 cm · 브랜드 공식 사이즈 표 기준 (Ref. Brand SS26 #014)
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="btn btn-secondary" style={{ fontSize: 12, padding: '10px 18px' }}>PDF 리포트</button>
+              <button className="btn btn-secondary" style={{ fontSize: 12, padding: '10px 18px' }}>사이즈 표 원문 ↗</button>
+            </div>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '2fr 1.2fr 1.2fr 1.2fr 1.5fr 1fr',
+            fontSize: 13,
+          }}>
+            {['측정 부위', '내 사이즈', '가먼트 (M)', 'Δ', '상태', '신뢰도'].map(h => (
+              <div key={h} style={{
+                padding: '14px 16px', borderBottom: '1px solid var(--line-strong)',
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-muted)',
+              }}>{h}</div>
+            ))}
+            {[
+              { part: '어깨 너비', mine: 44.5, g: 43.0, v: '-1.5', state: 'Tight',   color: 'var(--fit-tight)',   conf: 97 },
+              { part: '가슴 둘레', mine: 98.0, g: 102.0, v: '+4.0', state: 'Perfect', color: 'var(--fit-perfect)', conf: 94 },
+              { part: '허리 둘레', mine: 82.0, g: 88.0, v: '+6.0', state: 'Loose',   color: 'var(--fit-loose)',   conf: 96 },
+              { part: '총장',      mine: 72.0, g: 73.5, v: '+1.5', state: 'Perfect', color: 'var(--fit-perfect)', conf: 98 },
+              { part: '소매 길이', mine: 62.5, g: 63.0, v: '+0.5', state: 'Perfect', color: 'var(--fit-perfect)', conf: 93 },
+              { part: '밑단 너비', mine: 52.0, g: 55.0, v: '+3.0', state: 'Perfect', color: 'var(--fit-perfect)', conf: 91 },
+            ].map((r, i) => (
+              <React.Fragment key={i}>
+                <div style={flCell(i, true)} className="korean-sans">{r.part}</div>
+                <div style={{ ...flCell(i), fontFamily: 'var(--font-display, serif)', fontSize: 20, fontWeight: 500 }}>{r.mine}</div>
+                <div style={{ ...flCell(i), fontFamily: 'var(--font-display, serif)', fontSize: 20, fontWeight: 500, color: 'var(--text-muted)' }}>{r.g}</div>
+                <div style={{ ...flCell(i), fontFamily: 'JetBrains Mono, monospace', fontSize: 14, color: r.color, fontWeight: 500 }}>{r.v}</div>
+                <div style={flCell(i)}>
+                  <span style={{
+                    padding: '5px 12px', borderRadius: 999,
+                    background: `${r.color}1a`, color: r.color,
+                    fontSize: 12, fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontWeight: 600,
+                  }}>{r.state}</span>
+                </div>
+                <div style={{ ...flCell(i), display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ flex: 1, height: 2, background: 'var(--line)', borderRadius: 1 }}>
+                    <div style={{ width: `${r.conf}%`, height: '100%', background: 'var(--camel)' }}/>
+                  </div>
+                  <span style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-muted)' }}>{r.conf}</span>
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
+
+          <div style={{
+            marginTop: 28, padding: '18px 22px', borderRadius: 2,
+            background: 'var(--obsidian)', color: 'var(--linen)',
+            display: 'flex', gap: 20, alignItems: 'center',
+            fontSize: 13,
+          }}>
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.14em', color: 'var(--camel-soft)', whiteSpace: 'nowrap' }}>
+              ✦ AI NOTE
+            </span>
+            <span className="korean-sans" style={{ lineHeight: 1.55, opacity: 0.9 }}>
+              어깨 <span style={{ color: 'var(--camel-soft)', fontWeight: 500 }}>-1.5cm 타이트함</span>은 구조적 테일러링을 의도한 브랜드 설계. 캐주얼 무드를 원한다면 <span style={{ fontStyle: 'italic', fontFamily: 'var(--font-display, serif)' }}>Size L</span>을 고려하세요.
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ RELATED TRY-ONS ═══ */}
+      <section style={{ padding: '64px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div className="eyebrow" style={{ marginBottom: 12 }}>COMPARE · 유사 핏 가먼트</div>
+        <h3 className="korean-serif" style={{ margin: '0 0 28px', fontSize: 40, fontWeight: 500, letterSpacing: '-0.02em', fontFamily: "var(--font-korean-display, serif)" }}>
+          같은 체형 · 다른 실루엣
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+          {[
+            { src: IMG.coat, name: '헤리티지 카멜 코트', fit: 'Perfect', size: 'M', score: 95 },
+            { src: IMG.knit, name: '클라우드 캐시미어 니트', fit: 'Loose', size: 'S', score: 88 },
+            { src: IMG.trouser, name: '프리시전 플리츠 트라우저', fit: 'Perfect', size: 'M', score: 96 },
+            { src: IMG.shirt, name: '아키텍처럴 포플린 셔츠', fit: 'Tight', size: 'L', score: 82 },
+          ].map((x, i) => (
+            <div key={i} style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, overflow: 'hidden', cursor: 'pointer' }}>
+              <div style={{ aspectRatio: '4/5', background: '#2a2623', position: 'relative' }}>
+                <img src={x.src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(0.15)' }}/>
+                <div style={{ position: 'absolute', top: 12, left: 12, padding: '4px 10px', background: 'rgba(245,240,230,0.92)', fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', borderRadius: 2, color: 'var(--walnut)' }}>
+                  FIT · {x.fit.toUpperCase()}
+                </div>
+                <div style={{ position: 'absolute', bottom: 12, right: 12, fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 32, color: 'var(--ivory)', fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
+                  {x.size}
+                </div>
+              </div>
+              <div style={{ padding: '14px 16px' }}>
+                <div className="korean-sans" style={{ fontSize: 13, fontWeight: 500 }}>{x.name}</div>
+                <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ flex: 1, height: 2, background: 'var(--line)', borderRadius: 1 }}>
+                    <div style={{ width: `${x.score}%`, height: '100%', background: 'var(--camel)' }}/>
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-display, serif)', fontSize: 14, fontWeight: 500, color: 'var(--walnut)' }}>{x.score}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <Footer brand={brand} />
+    </main>
+  );
+}
+
+const flCell = (i, first) => ({
+  padding: '18px 16px',
+  borderBottom: '1px solid var(--line)',
+  display: 'flex', alignItems: 'center',
+  fontWeight: first ? 500 : 400,
+});
+
+window.FitLab = FitLab;
+
+</script>
+<script type="text/babel" data-name="styling">
+// Coordit — AI Styling (TPO 추천)
+
+function Styling({ onNav, brand, user, onLogout }) {
+  const [prompt, setPrompt] = useState('내일 오후 2시 파트너사 미팅. 비 예보 있음.');
+  const [activeCoord, setActiveCoord] = useState(0);
+  const [coords, setCoords] = useState([]);
+  const [closetItems, setClosetItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [generated, setGenerated] = useState(false);
+
+  useEffect(() => {
+    window.API.getSavedLooks().then(looks => {
+      if (looks.length > 0) {
+        const parsed = looks.map(l => ({
+          ...l,
+          item_ids: typeof l.item_ids === 'string' ? JSON.parse(l.item_ids) : l.item_ids,
+          palette: typeof l.palette === 'string' ? JSON.parse(l.palette) : l.palette,
+        }));
+        setCoords(parsed);
+        setGenerated(true);
+      }
+    }).catch(() => {});
+    window.API.getCloset().then(setClosetItems).catch(() => {});
+  }, []);
+
+  const generate = async () => {
+    setLoading(true);
+    try {
+      const res = await window.API.generateStyling({ prompt });
+      const parsed = res.looks.map(l => ({
+        ...l,
+        item_ids: typeof l.item_ids === 'string' ? JSON.parse(l.item_ids) : (l.item_ids || []),
+        palette: typeof l.palette === 'string' ? JSON.parse(l.palette) : (l.palette || ['#8F6F45','#F5F0E6','#2D2A27']),
+      }));
+      setCoords(parsed);
+      setClosetItems(res.closetItems || closetItems);
+      setGenerated(true);
+      setActiveCoord(0);
+      window.Toast.show('코디가 생성되었습니다!', 'success');
+    } catch (e) {
+      window.Toast.show('생성 실패: ' + e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveLook = async (id) => {
+    try {
+      await window.API.saveLook(id);
+      window.Toast.show('코디가 저장되었습니다.', 'success');
+    } catch (e) { window.Toast.show(e.message, 'error'); }
+  };
+
+  const FALLBACK_COORDS = [
+    {
+      name: 'Parisian Weekday',
+      name_ko: '파리지엔 워크데이',
+      mood: '비즈니스 · 비 예보',
+      palette: ['#8F6F45', '#F5F0E6', '#2D2A27'],
+      ai_reasoning: '옷장 아이템으로 비즈니스 코디를 추천합니다. AI 코디 생성 버튼을 눌러보세요.',
+      fit_score: 88,
+      item_ids: [],
+    },
+    {
+      name: 'Obsidian Evening',
+      name_ko: '옵시디언 이브닝',
+      mood: '디너 · 실내',
+      palette: ['#1C1B1A', '#4A3826', '#D4B896'],
+      ai_reasoning: '저녁 행사에 맞는 포멀한 코디입니다.',
+      fit_score: 85,
+      item_ids: [],
+    },
+    {
+      name: 'Weekend Essai',
+      name_ko: '주말의 에세이',
+      mood: '캐주얼 · 주말',
+      palette: ['#E8DFC9', '#B08A5B', '#5A6B7E'],
+      ai_reasoning: '주말에 어울리는 편안한 코디입니다.',
+      fit_score: 82,
+      item_ids: [],
+    },
+  ];
+
+  const displayCoords = coords.length > 0 ? coords : FALLBACK_COORDS;
+  const c = displayCoords[activeCoord] || displayCoords[0];
+
+  // Get actual closet items for this look
+  const lookItems = c && c.item_ids && c.item_ids.length > 0
+    ? c.item_ids.map(id => closetItems.find(i => i.id === id)).filter(Boolean)
+    : [];
+
+  const placeholderItems = [
+    { name_ko: '헤리티지 카멜 코트', category: '아우터', color: '#8F6F45' },
+    { name_ko: '에센셜 피마 티셔츠', category: '이너', color: '#F5F0E6' },
+    { name_ko: '프리시전 플리츠 트라우저', category: '하의', color: '#2D2A27' },
+    { name_ko: '에센셜 화이트 스니커즈', category: '슈즈', color: '#D4B896' },
+  ];
+
+  const displayItems = lookItems.length > 0 ? lookItems : placeholderItems;
+  const roles = ['HERO', 'BASE', 'STRUCTURE', 'ACCENT'];
+
+
+  return (
+    <main>
+      <TopBar active="styling" onNav={onNav} brand={brand} user={user} onLogout={onLogout} />
+
+      <section style={{ padding: '48px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div className="eyebrow">AI STYLIST · TPO ENGINE</div>
+        <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 48, alignItems: 'flex-end' }}>
+          <h1 className="korean-serif" style={{
+            margin: 0, fontSize: 88, fontWeight: 400,
+            letterSpacing: '-0.035em', lineHeight: 1,
+            fontFamily: "var(--font-korean-display, serif)",
+          }}>
+            당신의 순간을<br/>
+            <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', color: 'var(--walnut)' }}>큐레이팅</span>합니다.
+          </h1>
+          <div>
+            <div style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>
+              POWERED BY CLAUDE · OPUS
+            </div>
+            <p className="korean-sans" style={{ marginTop: 10, fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              일정·날씨·컨텍스트를 읽어 옷장 안에서 답을 구성합니다. 새로 사지 않습니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Prompt bar */}
+      <section style={{ padding: '40px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div style={{
+          background: 'var(--bg-raised)', border: '1px solid var(--line-strong)',
+          borderRadius: 4, padding: '12px 12px 12px 20px',
+          display: 'flex', gap: 12, alignItems: 'center',
+        }}>
+          <span style={{ fontSize: 14, color: 'var(--walnut)' }}>✦</span>
+          <input
+            value={prompt} onChange={e => setPrompt(e.target.value)}
+            style={{
+              flex: 1, border: 'none', background: 'transparent', outline: 'none',
+              fontSize: 15, fontFamily: "var(--font-korean, 'Pretendard', sans-serif)",
+              color: 'var(--obsidian)',
+            }}
+          />
+          <button className="btn btn-primary" style={{ padding: '12px 20px', opacity: loading ? 0.7 : 1 }} onClick={generate} disabled={loading}>
+            {loading ? '✦ AI 분석중...' : 'AI 코디 생성'}
+          </button>
+        </div>
+        <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+          {['내일 미팅', '주말 브런치', '파리 출장 3일', '첫 소개팅', '결혼식 하객', '갤러리 오프닝'].map(q => (
+            <Chip key={q} onClick={() => setPrompt(q)}>{q}</Chip>
+          ))}
+        </div>
+      </section>
+
+      {/* Weather / Style DNA strip */}
+      <section style={{ padding: '32px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+          <InfoCard
+            label="TODAY"
+            title="18°C"
+            sub="구름 조금 · 선선함"
+            note="린넨·울 레이어링 추천"
+            accent="var(--slate)"
+          />
+          <InfoCard
+            label="STYLE DNA"
+            title="88"
+            unit="/100"
+            sub="시너지 스코어"
+            note="미니멀 실루엣 × 어스 톤"
+            accent="var(--walnut)"
+            bar={88}
+          />
+          <InfoCard
+            label="WARDROBE UTILIZATION"
+            title="94"
+            unit="%"
+            sub="이번 주 활용도"
+            note="추천 반영률 상위 구간"
+            accent="var(--fit-perfect)"
+            bar={94}
+          />
+        </div>
+      </section>
+
+      {/* Coordinate explorer */}
+      <section style={{ padding: '56px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
+          <div>
+            <div className="eyebrow">CURATED FOR YOU · 03</div>
+            <div className="korean-serif" style={{ fontSize: 44, marginTop: 12, fontWeight: 500, letterSpacing: '-0.02em', fontFamily: "var(--font-korean-display, serif)" }}>
+              추천 코디
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {coords.map((_, i) => (
+              <button key={i} onClick={() => setActiveCoord(i)} style={{
+                width: 40, height: 40, borderRadius: '50%',
+                border: activeCoord === i ? '1px solid var(--obsidian)' : '1px solid var(--line-strong)',
+                background: activeCoord === i ? 'var(--obsidian)' : 'transparent',
+                color: activeCoord === i ? 'var(--ivory)' : 'var(--obsidian)',
+                fontFamily: 'var(--font-display, serif)', fontSize: 14, fontStyle: 'italic',
+                cursor: 'pointer',
+              }}>
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Featured coordinate — editorial layout */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 24,
+          background: activeCoord === 1 ? 'var(--obsidian)' : 'var(--bg-raised)',
+          color: activeCoord === 1 ? 'var(--ivory)' : 'var(--obsidian)',
+          borderRadius: 4, padding: 40,
+          border: '1px solid var(--line)',
+          transition: 'background 0.4s',
+        }}>
+          {/* Left: Editorial copy */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, paddingRight: 24 }}>
+            <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', opacity: 0.6 }}>
+              LOOK N°{String(activeCoord + 1).padStart(2, '0')} · {c.mood}
+            </div>
+            <h2 className="korean-serif" style={{
+              margin: 0, fontFamily: 'var(--font-display, serif)',
+              fontSize: 64, fontWeight: 500, fontStyle: 'italic',
+              letterSpacing: '-0.03em', lineHeight: 1,
+            }}>
+              {c.name}
+            </h2>
+            <p className="korean-sans" style={{ margin: 0, fontSize: 14, lineHeight: 1.7, opacity: 0.85 }}>
+              {c.ai_reasoning || '정제된 실루엣과 따뜻한 캐멀 톤. 미팅의 밀도 있는 무드를 위한 레이어 구성입니다.'}
+            </p>
+
+            <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+              {c.palette.map(col => (
+                <div key={col} style={{
+                  width: 44, height: 44, borderRadius: 2, background: col,
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }} />
+              ))}
+            </div>
+
+            <div style={{
+              marginTop: 'auto', paddingTop: 32,
+              borderTop: `1px solid ${activeCoord === 1 ? 'rgba(245,240,230,0.15)' : 'var(--line)'}`,
+              display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20,
+            }}>
+              <div>
+                <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', opacity: 0.6 }}>TEMP</div>
+                <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 24, fontWeight: 500, marginTop: 4 }}>—</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', opacity: 0.6 }}>FIT SCORE</div>
+                <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 24, fontWeight: 500, marginTop: 4, color: activeCoord === 1 ? 'var(--camel-soft)' : 'var(--walnut)' }}>
+                  {c.fit_score ? `${c.fit_score}%` : '—'}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className={activeCoord === 1 ? 'btn btn-camel' : 'btn btn-primary'} style={{ flex: 1 }} onClick={() => c.id && saveLook(c.id)}>
+                저장하기
+              </button>
+              <button style={{
+                padding: '14px 18px',
+                border: `1px solid ${activeCoord === 1 ? 'rgba(245,240,230,0.3)' : 'var(--line-strong)'}`,
+                background: 'transparent', color: 'inherit',
+                borderRadius: 8, cursor: 'pointer', fontSize: 14,
+              }}>
+                ♡
+              </button>
+            </div>
+          </div>
+
+          {/* Right: 4-item grid — real closet items or placeholders */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: 8 }}>
+            {displayItems.slice(0, 4).map((item, i) => (
+              <CoordItem key={i} item={{
+                t: item.name_ko || item.name,
+                role: roles[i] || 'ITEM',
+                tag: item.category,
+              }} idx={i} dark={activeCoord === 1} color={(c.palette || [])[i % 3] || item.color || '#8F6F45'} />
+            ))}
+          </div>
+        </div>
+
+        {/* Alt carousel — mini looks */}
+        <div style={{ marginTop: 40, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+          {[
+            { name: 'Morning Meeting', tag: 'BIZ CASUAL', t: '08:30 - 12:00', color: '#8F6F45' },
+            { name: 'Cafe Lunch', tag: 'SMART CASUAL', t: '12:30 - 14:00', color: '#D4B896' },
+            { name: 'Client Dinner', tag: 'ELEVATED', t: '19:00 - 22:00', color: '#1C1B1A' },
+            { name: 'Weekend Walk', tag: 'EFFORTLESS', t: 'SAT - SUN', color: '#5A6B7E' },
+          ].map((l, i) => (
+            <MiniLook key={i} {...l} />
+          ))}
+        </div>
+      </section>
+
+      {/* AI Reasoning */}
+      <section style={{ padding: '80px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div style={{
+          background: 'var(--linen)', borderRadius: 4, padding: 48,
+          display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 48,
+          border: '1px solid var(--line)',
+        }}>
+          <div>
+            <div className="eyebrow">AI REASONING</div>
+            <h3 className="korean-serif" style={{
+              margin: '16px 0 0', fontSize: 36, fontWeight: 500,
+              letterSpacing: '-0.02em', lineHeight: 1.2,
+              fontFamily: "var(--font-korean-display, serif)",
+            }}>
+              왜 이 조합일까요?
+            </h3>
+            <p className="korean-sans" style={{ marginTop: 16, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7 }}>
+              Coordit는 결정을 내리고, 그 결정의 이유를 투명하게 보여줍니다.
+            </p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {(c && c.ai_reasoning ? [
+              { label: 'AI 큐레이션', detail: c.ai_reasoning, tag: 'AI' },
+              { label: 'TPO 문맥', detail: `"${prompt}" 컨텍스트에 최적화된 스타일링입니다.`, tag: 'CONTEXT' },
+              { label: '아이템 구성', detail: `${displayItems.length}개의 옷장 아이템으로 구성된 코디입니다.`, tag: 'ITEMS' },
+              { label: '핏 스코어', detail: `체형 기반 핏 점수: ${c.fit_score || 85}점 (100점 만점)`, tag: 'FIT' },
+            ] : [
+              { label: '날씨 매칭', detail: '오늘 날씨에 맞는 레이어링을 추천합니다.', tag: 'WEATHER' },
+              { label: 'TPO 문맥', detail: 'AI 코디 생성 버튼을 눌러 실제 분석을 시작하세요.', tag: 'CONTEXT' },
+              { label: '체형 궁합', detail: '체형 데이터를 입력하면 맞춤 분석이 가능합니다.', tag: 'BODY' },
+              { label: '옷장 활용', detail: '등록된 옷장 아이템 기반으로 코디를 구성합니다.', tag: 'WARDROBE' },
+            ]).map((r, i) => (
+              <div key={i} style={{
+                padding: '16px 20px',
+                background: 'rgba(255,255,255,0.6)',
+                borderRadius: 2,
+                display: 'grid', gridTemplateColumns: '120px 1fr 60px', gap: 16, alignItems: 'center',
+              }}>
+                <div className="korean-sans" style={{ fontSize: 13, fontWeight: 500 }}>{r.label}</div>
+                <div className="korean-sans" style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>{r.detail}</div>
+                <div style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', color: 'var(--walnut)', textAlign: 'right' }}>{r.tag}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <Footer brand={brand} />
+    </main>
+  );
+}
+
+function InfoCard({ label, title, unit, sub, note, accent, bar }) {
+  return (
+    <div style={{
+      background: 'var(--bg-raised)', border: '1px solid var(--line)',
+      borderRadius: 4, padding: 24,
+      display: 'flex', flexDirection: 'column', gap: 12,
+    }}>
+      <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>
+        {label}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+        <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 52, fontWeight: 500, letterSpacing: '-0.03em', color: accent, lineHeight: 1 }}>
+          {title}
+        </div>
+        {unit && <div style={{ fontSize: 18, color: 'var(--text-muted)' }}>{unit}</div>}
+      </div>
+      <div className="korean-sans" style={{ fontSize: 12, color: 'var(--text-muted)' }}>{sub}</div>
+      {bar !== undefined && (
+        <div style={{ height: 2, background: 'var(--line)', borderRadius: 1 }}>
+          <div style={{ width: `${bar}%`, height: '100%', background: accent }} />
+        </div>
+      )}
+      <div className="korean-sans" style={{ fontSize: 11, color: 'var(--walnut)', marginTop: 'auto' }}>
+        → {note}
+      </div>
+    </div>
+  );
+}
+
+function CoordItem({ item, idx, dark, color }) {
+  return (
+    <div style={{
+      background: color,
+      borderRadius: 2, padding: 16,
+      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+      minHeight: 180,
+      color: ['#F5F0E6','#E8DFC9','#D4B896'].includes(color) ? 'var(--walnut)' : 'var(--ivory)',
+      backgroundImage: `repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 8px)`,
+      position: 'relative',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', opacity: 0.7 }}>
+          {item.role}
+        </span>
+        <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', opacity: 0.5 }}>
+          0{idx + 1}
+        </span>
+      </div>
+      <div>
+        <div className="korean-sans" style={{ fontSize: 15, fontWeight: 500, lineHeight: 1.3 }}>
+          {item.t}
+        </div>
+        <div style={{ fontSize: 10, opacity: 0.7, marginTop: 4, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em' }}>
+          · {item.tag}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MiniLook({ name, tag, t, color }) {
+  return (
+    <div style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s' }}
+    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+    onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+    >
+      <div style={{ aspectRatio: '3/4', background: color, position: 'relative', padding: 14, backgroundImage: `repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 8px)` }}>
+        <div style={{ fontSize: 9, color: 'var(--ivory)', opacity: 0.7, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em' }}>
+          {tag}
+        </div>
+      </div>
+      <div style={{ padding: '14px 16px' }}>
+        <div className="korean-sans" style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 18, fontWeight: 500 }}>{name}</div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, fontFamily: 'JetBrains Mono, monospace' }}>{t}</div>
+      </div>
+    </div>
+  );
+}
+
+window.Styling = Styling;
+
+</script>
+<script type="text/babel" data-name="misc">
+// Coordit — Product detail, Onboarding, Atelier (misc screens, compact)
+
+// ═══ PRODUCT DETAIL ═══
+function Product({ onNav, brand, user, onLogout }) {
+  return (
+    <main>
+      <TopBar active="atelier" onNav={onNav} brand={brand} user={user} onLogout={onLogout} />
+      <section style={{ padding: '48px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div className="eyebrow">SHOP / OUTERWEAR / OBSIDIAN MOTO II</div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 48, marginTop: 32 }}>
+          {/* Images */}
+          <div>
+            <div className="ph" style={{
+              aspectRatio: '4/5', background: '#1C1B1A',
+              backgroundImage: 'repeating-linear-gradient(135deg, rgba(245,240,230,0.04) 0 1px, transparent 1px 10px)',
+              borderRadius: 4, position: 'relative', color: 'var(--linen)',
+            }}>
+              <div style={{ position: 'absolute', top: 20, left: 20, padding: '6px 12px', background: 'rgba(245,240,230,0.9)', color: 'var(--walnut)', fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', borderRadius: 2 }}>
+                ✦ AI 분석 완료
+              </div>
+              <span style={{ opacity: 0.5, fontSize: 11 }}>FRONT · HERO</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 8 }}>
+              {['BACK','DETAIL','STYLED'].map(l => (
+                <div key={l} className="ph" style={{ aspectRatio: '1/1', background: '#2D2A27', color: 'var(--linen)', borderRadius: 4, fontSize: 10 }}>{l}</div>
+              ))}
+            </div>
+          </div>
+
+          {/* Info */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <div>
+              <div style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', color: 'var(--walnut)' }}>ATELIER EXCLUSIVE</div>
+              <h1 className="korean-serif" style={{
+                margin: '12px 0 0', fontSize: 56, fontWeight: 400,
+                letterSpacing: '-0.03em', lineHeight: 1.1,
+                fontFamily: "var(--font-korean-display, serif)",
+              }}>옵시디언 모토 <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', color: 'var(--walnut)' }}>II</span></h1>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginTop: 12 }}>
+                <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 36, fontWeight: 500, letterSpacing: '-0.02em' }}>₩845,000</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', textDecoration: 'line-through' }}>₩960,000</div>
+              </div>
+            </div>
+
+            <p className="korean-sans" style={{ margin: 0, fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.7 }}>
+              재활용 가죽으로 제작된 독보적인 실루엣. 두 번째 에디션은 강화된 솔기와 시그니처 '큐레이터 렌즈' 안감이 특징입니다.
+            </p>
+
+            {/* AI Fit Guide card */}
+            <div style={{ background: 'var(--linen)', border: '1px solid var(--line)', padding: 20, borderRadius: 4 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', color: 'var(--walnut)' }}>
+                  ✦ AI 핏 가이드 · 당신의 체형 기반
+                </div>
+                <div style={{ padding: '3px 8px', background: 'var(--fit-perfect)', color: 'var(--ivory)', fontSize: 9, letterSpacing: '0.1em', fontFamily: 'JetBrains Mono, monospace', borderRadius: 2 }}>
+                  PERFECT · M
+                </div>
+              </div>
+              <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 12 }}>
+                {[
+                  { p: '어깨', s: '좁음 ●', c: 'var(--fit-tight)' },
+                  { p: '가슴', s: '완벽함 ●', c: 'var(--fit-perfect)' },
+                  { p: '허리', s: '여유있음 ●', c: 'var(--fit-loose)' },
+                  { p: '총장', s: '완벽함 ●', c: 'var(--fit-perfect)' },
+                ].map(r => (
+                  <div key={r.p} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(28,27,26,0.08)' }}>
+                    <span className="korean-sans" style={{ color: 'var(--text-muted)' }}>{r.p}</span>
+                    <span style={{ color: r.c, fontFamily: 'var(--font-display, serif)', fontStyle: 'italic' }}>{r.s}</span>
+                  </div>
+                ))}
+              </div>
+              <button className="btn btn-secondary" style={{ width: '100%', marginTop: 14, fontSize: 12, padding: '10px' }} onClick={() => onNav('fit')}>
+                상세 핏 분석 보기 →
+              </button>
+            </div>
+
+            {/* Size */}
+            <div>
+              <div style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', color: 'var(--text-muted)', marginBottom: 10 }}>사이즈</div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {['XS','S','M','L','XL'].map(s => (
+                  <button key={s} style={{
+                    flex: 1, padding: '14px 0',
+                    border: s === 'M' ? '1px solid var(--obsidian)' : '1px solid var(--line-strong)',
+                    background: s === 'M' ? 'var(--obsidian)' : 'transparent',
+                    color: s === 'M' ? 'var(--ivory)' : 'var(--obsidian)',
+                    fontFamily: 'var(--font-display, serif)', fontSize: 16, fontWeight: 500,
+                    borderRadius: 2, cursor: 'pointer',
+                  }}>{s}</button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button className="btn btn-primary" style={{ flex: 1 }}>구매하기</button>
+              <button className="btn btn-secondary" style={{ padding: '14px 18px' }}>♡</button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, paddingTop: 20, borderTop: '1px solid var(--line)', fontSize: 12 }}>
+              <div><div style={{ color: 'var(--text-muted)' }}>원산지</div><div className="korean-sans" style={{ marginTop: 4, fontWeight: 500 }}>이탈리아 토스카나</div></div>
+              <div><div style={{ color: 'var(--text-muted)' }}>소재</div><div className="korean-sans" style={{ marginTop: 4, fontWeight: 500 }}>100% 리사이클 가죽</div></div>
+              <div><div style={{ color: 'var(--text-muted)' }}>하드웨어</div><div className="korean-sans" style={{ marginTop: 4, fontWeight: 500 }}>브러시드 팔라듐</div></div>
+              <div><div style={{ color: 'var(--text-muted)' }}>무게</div><div className="korean-sans" style={{ marginTop: 4, fontWeight: 500 }}>1.2kg (미디엄)</div></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Match with closet */}
+        <div style={{ marginTop: 72 }}>
+          <div className="eyebrow">MATCH WITH YOUR CLOSET</div>
+          <div className="korean-serif" style={{ fontSize: 40, marginTop: 12, fontWeight: 500, letterSpacing: '-0.02em', fontFamily: "var(--font-korean-display, serif)" }}>
+            옷장 안에서 매칭하기
+          </div>
+          <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            {[
+              { name: '그레이 울 트라우저', note: '완벽한 균형', body: '울의 매트한 질감이 가죽의 광택을 중화시켜 세련된 이브닝 룩.', tag: '보노크롬', c: '#5A6B7E' },
+              { name: '에센셜 피마 티셔츠', note: '캐주얼 코어', body: '자켓의 하드웨어를 돋보이게 하는 대비감. 일상적인 데일리 룩.', tag: '엣지 미니멀', c: '#F5F0E6' },
+              { name: '생지 데님 팬츠', note: '위크엔드 톤', body: '구조적 가죽 × 워싱 데님의 믹스 매치. 거리감 있는 실루엣.', tag: '캐주얼 컨트라스트', c: '#3F4E5E' },
+            ].map((m, i) => (
+              <div key={i} style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, overflow: 'hidden' }}>
+                <div style={{ aspectRatio: '4/3', background: m.c, padding: 14, backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 10px)', display: 'flex', alignItems: 'flex-end', color: ['#F5F0E6'].includes(m.c) ? 'var(--walnut)' : 'var(--ivory)' }}>
+                  <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em' }}>MATCH · 0{i + 1}</span>
+                </div>
+                <div style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                    <div>
+                      <div className="korean-sans" style={{ fontSize: 15, fontWeight: 500 }}>{m.name}</div>
+                      <div style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', color: 'var(--walnut)', fontSize: 13, marginTop: 2 }}>— {m.note}</div>
+                    </div>
+                    <div style={{ padding: '3px 8px', background: 'var(--linen)', fontSize: 9, color: 'var(--walnut)', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', borderRadius: 2, whiteSpace: 'nowrap' }}>
+                      {m.tag}
+                    </div>
+                  </div>
+                  <p className="korean-sans" style={{ margin: '12px 0 0', fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>{m.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <Footer brand={brand} />
+    </main>
+  );
+}
+
+// ═══ ONBOARDING ═══
+function Onboarding({ onNav, brand, user, onLogout }) {
+  const [step, setStep] = useState(2);
+  const [values, setValues] = useState({ height: 172, weight: 62, shoulder: 44.5, chest: 98, waist: 82, hip: 96, inseam: 80 });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    window.API.getMeasurements().then(m => {
+      if (m && m.height) setValues({ height: m.height, weight: m.weight || 62, shoulder: m.shoulder || 44.5, chest: m.chest || 98, waist: m.waist || 82, hip: m.hip || 96, inseam: m.inseam || 80 });
+    }).catch(() => {});
+  }, []);
+
+  const saveMeasurements = async () => {
+    setSaving(true);
+    try {
+      await window.API.saveMeasurements(values);
+      window.Toast.show('체형 정보가 저장되었습니다!', 'success');
+      setStep(Math.min(4, step + 1));
+    } catch (e) {
+      window.Toast.show(e.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+  const steps = [
+    { n: '01', t: '계정', ko: '시작하기' },
+    { n: '02', t: '체형', ko: '신체 측정' },
+    { n: '03', t: '스타일', ko: '취향 설정' },
+    { n: '04', t: '옷장', ko: '첫 등록' },
+  ];
+  return (
+    <main>
+      <TopBar active="" onNav={onNav} brand={brand} user={user} onLogout={onLogout} />
+      <section style={{ padding: '48px 48px 0', maxWidth: 1200, margin: '0 auto' }}>
+        <div className="eyebrow">ONBOARDING · 04 STEPS</div>
+        <h1 className="korean-serif" style={{
+          margin: '16px 0 40px', fontSize: 72, fontWeight: 400,
+          letterSpacing: '-0.03em', lineHeight: 1,
+          fontFamily: "var(--font-korean-display, serif)",
+        }}>
+          당신을 <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', color: 'var(--walnut)' }}>측정</span>합니다.
+        </h1>
+
+        {/* Step rail */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 40 }}>
+          {steps.map((s, i) => (
+            <div key={i} style={{
+              padding: 20, borderRadius: 4,
+              background: i === step - 1 ? 'var(--obsidian)' : 'var(--bg-raised)',
+              color: i === step - 1 ? 'var(--ivory)' : 'var(--obsidian)',
+              border: '1px solid var(--line)',
+              opacity: i > step - 1 ? 0.5 : 1,
+              cursor: 'pointer',
+            }} onClick={() => setStep(i + 1)}>
+              <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 28, fontStyle: 'italic', fontWeight: 500, color: i === step - 1 ? 'var(--camel-soft)' : 'var(--walnut)' }}>{s.n}</div>
+              <div className="korean-sans" style={{ fontSize: 14, fontWeight: 500, marginTop: 8 }}>{s.ko}</div>
+              <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', opacity: 0.6, marginTop: 2 }}>{s.t.toUpperCase()}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Step 2 content — measurements */}
+        {step === 2 && <div style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, padding: 48, display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 48 }}>
+          <div>
+            <div className="korean-serif" style={{ fontSize: 32, fontWeight: 500, letterSpacing: '-0.02em', fontFamily: "var(--font-korean-display, serif)" }}>
+              신체를 수치로 담습니다
+            </div>
+            <p className="korean-sans" style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 12, lineHeight: 1.7 }}>
+              측정이 정밀할수록 핏 예측이 정밀해집니다. 줄자가 없다면 사진 기반 자동 측정도 가능합니다.
+            </p>
+
+            <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {[
+                { k: 'height', label: '키', unit: 'cm', min: 140, max: 200 },
+                { k: 'weight', label: '몸무게', unit: 'kg', min: 40, max: 120 },
+                { k: 'shoulder', label: '어깨 너비', unit: 'cm', min: 30, max: 60, step: 0.5 },
+                { k: 'chest', label: '가슴 둘레', unit: 'cm', min: 70, max: 130 },
+                { k: 'waist', label: '허리 둘레', unit: 'cm', min: 60, max: 110 },
+              ].map(f => (
+                <div key={f.k}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                    <span className="korean-sans" style={{ fontSize: 13 }}>{f.label}</span>
+                    <span style={{ fontFamily: 'var(--font-display, serif)', fontSize: 22, fontWeight: 500, letterSpacing: '-0.02em' }}>
+                      {values[f.k]}<span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 4 }}>{f.unit}</span>
+                    </span>
+                  </div>
+                  <input type="range" min={f.min} max={f.max} step={f.step || 1} value={values[f.k]}
+                    onChange={e => setValues({ ...values, [f.k]: +e.target.value })}
+                    style={{ width: '100%', accentColor: '#B08A5B' }} />
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 32 }}>
+              <button className="btn btn-secondary" onClick={() => setStep(Math.max(1, step - 1))}>이전</button>
+              <button className="btn btn-primary" style={{ flex: 1, opacity: saving ? 0.7 : 1 }} onClick={saveMeasurements} disabled={saving}>
+                {saving ? '저장중...' : '저장 & 다음 →'}
+              </button>
+            </div>
+          </div>
+
+          {/* Right — preview body */}
+          <div style={{ background: 'var(--obsidian)', color: 'var(--ivory)', borderRadius: 4, padding: 32, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', opacity: 0.6 }}>
+              LIVE BODY MODEL
+            </div>
+            <div style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 26, marginTop: 8, fontWeight: 500 }}>
+              Your Twin
+            </div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 360, position: 'relative' }}>
+              <svg viewBox="0 0 200 340" style={{ width: 200, height: 340 }}>
+                <g stroke="rgba(245,240,230,0.3)" fill="none" strokeWidth="1.2">
+                  <ellipse cx="100" cy="30" rx="20" ry="22"/>
+                  <path d={`M 50 70 Q 100 60 150 70`}/>
+                  <path d="M 50 70 Q 48 140 60 220"/>
+                  <path d="M 150 70 Q 152 140 140 220"/>
+                  <path d="M 60 220 L 62 330"/>
+                  <path d="M 140 220 L 138 330"/>
+                  <path d="M 50 75 L 30 180"/>
+                  <path d="M 150 75 L 170 180"/>
+                </g>
+                <line x1={100 - values.shoulder} y1="70" x2={100 + values.shoulder} y2="70" stroke="var(--camel)" strokeWidth="1.5"/>
+                <line x1={100 - values.chest / 2.5} y1="120" x2={100 + values.chest / 2.5} y2="120" stroke="var(--camel)" strokeWidth="1.5" strokeDasharray="2 2"/>
+                <line x1={100 - values.waist / 2.5} y1="180" x2={100 + values.waist / 2.5} y2="180" stroke="var(--camel)" strokeWidth="1.5" strokeDasharray="2 2"/>
+              </svg>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, paddingTop: 16, borderTop: '1px solid rgba(245,240,230,0.12)' }}>
+              <div><div style={{ fontSize: 9, opacity: 0.5, fontFamily: 'JetBrains Mono, monospace' }}>PREDICTED SIZE</div><div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 24, fontWeight: 500 }}>M</div></div>
+              <div><div style={{ fontSize: 9, opacity: 0.5, fontFamily: 'JetBrains Mono, monospace' }}>BODY TYPE</div><div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 20, fontStyle: 'italic' }}>Regular</div></div>
+            </div>
+          </div>
+        </div>}
+
+        {step === 2 && (
+          <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <AltMethod icon="📷" title="사진으로 측정" body="전신 사진 한 장. AI가 18개 포인트를 자동 측정합니다." tag="추천" />
+            <AltMethod icon="📐" title="줄자로 직접" body="동영상 가이드를 따라 5분. 가장 정확한 방법입니다." />
+          </div>
+        )}
+
+        {/* Step 3 — 취향 설정 */}
+        {step === 3 && <OnboardingStyle onNext={() => setStep(4)} onPrev={() => setStep(2)} />}
+
+        {/* Step 4 — 첫 등록 */}
+        {step === 4 && <OnboardingFirstItem onFinish={() => onNav('closet')} onPrev={() => setStep(3)} />}
+      </section>
+      <Footer brand={brand} />
+    </main>
+  );
+}
+
+function OnboardingStyle({ onNext, onPrev }) {
+  const styles = [
+    { id: 'minimal',  label: '미니멀', en: 'Minimal',  desc: '군더더기 없는 깔끔한 라인' },
+    { id: 'classic',  label: '클래식', en: 'Classic',  desc: '시간을 초월한 정통 스타일' },
+    { id: 'casual',   label: '캐주얼', en: 'Casual',   desc: '편안하고 자연스러운 일상복' },
+    { id: 'street',   label: '스트릿', en: 'Street',   desc: '도시적이고 개성 있는 무드' },
+    { id: 'formal',   label: '포멀',   en: 'Formal',   desc: '격식 있는 비즈니스 룩' },
+    { id: 'vintage',  label: '빈티지', en: 'Vintage',  desc: '레트로 감성의 독특한 감각' },
+  ];
+  const occasions = ['출근', '데이트', '여행', '운동', '파티', '일상'];
+  const [selected, setSelected] = React.useState([]);
+  const [selOccasion, setSelOccasion] = React.useState([]);
+  const toggle = (arr, setArr, v) => setArr(arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]);
+
+  return (
+    <div style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, padding: 48 }}>
+      <div className="korean-serif" style={{ fontSize: 32, fontWeight: 500, letterSpacing: '-0.02em', fontFamily: 'var(--font-korean-display, serif)', marginBottom: 8 }}>
+        스타일 취향을 알려주세요
+      </div>
+      <p className="korean-sans" style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 32, lineHeight: 1.7 }}>
+        선택한 취향을 바탕으로 AI가 코디를 추천해드립니다. 복수 선택 가능합니다.
+      </p>
+
+      <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.14em', opacity: 0.6, marginBottom: 14 }}>STYLE TYPE</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 36 }}>
+        {styles.map(s => (
+          <div key={s.id} onClick={() => toggle(selected, setSelected, s.id)} style={{
+            padding: '20px 24px', borderRadius: 4, cursor: 'pointer', transition: 'all 0.15s',
+            border: selected.includes(s.id) ? '1px solid var(--camel-soft)' : '1px solid var(--line)',
+            background: selected.includes(s.id) ? 'var(--camel)' : 'var(--bg-raised)',
+            color: selected.includes(s.id) ? 'var(--obsidian)' : 'var(--ivory)',
+          }}>
+            <div style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 22, fontWeight: 500 }}>{s.en}</div>
+            <div className="korean-sans" style={{ fontSize: 15, fontWeight: 600, marginTop: 4 }}>{s.label}</div>
+            <div className="korean-sans" style={{ fontSize: 11, opacity: 0.7, marginTop: 6, lineHeight: 1.5 }}>{s.desc}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.14em', opacity: 0.6, marginBottom: 14 }}>OCCASION</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 36 }}>
+        {occasions.map(o => (
+          <button key={o} onClick={() => toggle(selOccasion, setSelOccasion, o)} className="korean-sans" style={{
+            padding: '10px 20px', borderRadius: 2, cursor: 'pointer', fontSize: 13, transition: 'all 0.15s',
+            border: selOccasion.includes(o) ? '1px solid var(--camel-soft)' : '1px solid rgba(245,240,230,0.2)',
+            background: selOccasion.includes(o) ? 'var(--walnut)' : 'transparent',
+            color: 'var(--ivory)',
+          }}>{o}</button>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button className="btn btn-secondary" onClick={onPrev}>이전</button>
+        <button className="btn btn-primary" style={{ flex: 1 }} onClick={onNext}>저장 & 다음 →</button>
+      </div>
+    </div>
+  );
+}
+
+function OnboardingFirstItem({ onFinish, onPrev }) {
+  const cats = ['상의', '하의', '아우터', '원피스', '신발', '액세서리'];
+  const [form, setForm] = React.useState({ name: '', category: '상의', color: '#B08A5B', size: 'M', fabric: '', garment_shoulder: '', garment_chest: '', garment_waist: '', garment_length: '' });
+  const [saving, setSaving] = React.useState(false);
+
+  const handleSave = async () => {
+    if (!form.name.trim()) { window.Toast.show('아이템 이름을 입력해주세요', 'error'); return; }
+    setSaving(true);
+    try {
+      await window.API.addItem({
+        ...form,
+        garment_shoulder: form.garment_shoulder ? +form.garment_shoulder : null,
+        garment_chest:    form.garment_chest    ? +form.garment_chest    : null,
+        garment_waist:    form.garment_waist    ? +form.garment_waist    : null,
+        garment_length:   form.garment_length   ? +form.garment_length   : null,
+      });
+      window.Toast.show('첫 아이템이 등록되었습니다!', 'success');
+      onFinish();
+    } catch (e) {
+      window.Toast.show(e.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inp = (field, placeholder, type='text') => (
+    <input type={type} placeholder={placeholder} value={form[field]}
+      onChange={e => setForm({ ...form, [field]: e.target.value })}
+      style={{ width: '100%', padding: '12px 16px', background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 2, color: 'var(--ivory)', fontFamily: 'var(--font-korean, sans-serif)', fontSize: 14, boxSizing: 'border-box' }} />
+  );
+
+  return (
+    <div style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, padding: 48, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
+      <div>
+        <div className="korean-serif" style={{ fontSize: 32, fontWeight: 500, letterSpacing: '-0.02em', fontFamily: 'var(--font-korean-display, serif)', marginBottom: 8 }}>
+          첫 아이템을 등록하세요
+        </div>
+        <p className="korean-sans" style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 32, lineHeight: 1.7 }}>
+          옷장에 아이템을 추가하면 핏 분석과 AI 코디 추천을 받을 수 있습니다.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <div className="korean-sans" style={{ fontSize: 11, opacity: 0.6, marginBottom: 6 }}>아이템 이름 *</div>
+            {inp('name', '예: 화이트 오버핏 셔츠')}
+          </div>
+          <div>
+            <div className="korean-sans" style={{ fontSize: 11, opacity: 0.6, marginBottom: 6 }}>카테고리</div>
+            <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
+              style={{ width: '100%', padding: '12px 16px', background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 2, color: 'var(--ivory)', fontFamily: 'var(--font-korean, sans-serif)', fontSize: 14 }}>
+              {cats.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <div className="korean-sans" style={{ fontSize: 11, opacity: 0.6, marginBottom: 6 }}>사이즈</div>
+              <select value={form.size} onChange={e => setForm({ ...form, size: e.target.value })}
+                style={{ width: '100%', padding: '12px 16px', background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 2, color: 'var(--ivory)', fontFamily: 'var(--font-korean, sans-serif)', fontSize: 14 }}>
+                {['XS','S','M','L','XL','XXL'].map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <div className="korean-sans" style={{ fontSize: 11, opacity: 0.6, marginBottom: 6 }}>소재</div>
+              {inp('fabric', '예: 코튼, 울')}
+            </div>
+          </div>
+          <div style={{ borderTop: '1px solid var(--line)', paddingTop: 16 }}>
+            <div className="korean-sans" style={{ fontSize: 11, opacity: 0.6, marginBottom: 12 }}>의류 치수 (핏 분석용, 선택)</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {[['garment_shoulder','어깨'],['garment_chest','가슴'],['garment_waist','허리'],['garment_length','총장']].map(([k,l]) => (
+                <div key={k}>
+                  <div className="korean-sans" style={{ fontSize: 10, opacity: 0.5, marginBottom: 4 }}>{l} (cm)</div>
+                  {inp(k, '—', 'number')}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10, marginTop: 32 }}>
+          <button className="btn btn-secondary" onClick={onPrev}>이전</button>
+          <button className="btn btn-primary" style={{ flex: 1, opacity: saving ? 0.7 : 1 }} disabled={saving} onClick={handleSave}>
+            {saving ? '등록 중...' : '등록하고 시작하기 →'}
+          </button>
+        </div>
+        <button className="korean-sans" style={{ marginTop: 12, width: '100%', background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', padding: '8px 0' }}
+          onClick={onFinish}>나중에 등록할게요 →</button>
+      </div>
+
+      <div style={{ background: 'var(--obsidian)', color: 'var(--ivory)', borderRadius: 4, padding: 32 }}>
+        <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', opacity: 0.6, marginBottom: 24 }}>WARDROBE PREVIEW</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ padding: '20px 24px', border: '1px solid var(--camel-soft)', borderRadius: 4, background: 'rgba(176,138,91,0.1)' }}>
+            <div style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em', opacity: 0.6, marginBottom: 8 }}>NEW · {form.category.toUpperCase()}</div>
+            <div className="korean-sans" style={{ fontSize: 16, fontWeight: 600 }}>{form.name || '아이템 이름'}</div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
+              <div style={{ width: 20, height: 20, borderRadius: '50%', background: form.color, border: '1px solid rgba(255,255,255,0.2)' }}/>
+              <span style={{ fontSize: 11, opacity: 0.7, fontFamily: 'JetBrains Mono, monospace' }}>{form.size} · {form.fabric || '—'}</span>
+            </div>
+          </div>
+          <div style={{ fontSize: 12, opacity: 0.5, textAlign: 'center', fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', paddingTop: 8 }}>
+            Your wardrobe begins here.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AltMethod({ icon, title, body, tag }) {
+  return (
+    <div style={{ background: 'var(--linen)', border: '1px solid var(--line)', borderRadius: 4, padding: 24, display: 'flex', gap: 20, alignItems: 'flex-start', cursor: 'pointer' }}>
+      <div style={{ fontSize: 32 }}>{icon}</div>
+      <div style={{ flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="korean-serif" style={{ fontSize: 18, fontWeight: 500, fontFamily: "var(--font-korean-display, serif)" }}>{title}</div>
+          {tag && <span style={{ padding: '2px 8px', background: 'var(--walnut)', color: 'var(--ivory)', fontSize: 9, letterSpacing: '0.12em', fontFamily: 'JetBrains Mono, monospace', borderRadius: 2 }}>{tag}</span>}
+        </div>
+        <div className="korean-sans" style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.6 }}>{body}</div>
+      </div>
+      <div style={{ fontSize: 20 }}>→</div>
+    </div>
+  );
+}
+
+// ═══ ATELIER — simple showcase ═══
+function Atelier({ onNav, brand, user, onLogout }) {
+  const looks = [
+    { name: 'Morning Ritual', kr: '기록된 아침', img: IMG.look1, vol: 'VOL.01', mood: 'Quiet Morning' },
+    { name: 'Galerie Hours',  kr: '갤러리 시간',  img: IMG.look2, vol: 'VOL.02', mood: 'Curator Mode' },
+    { name: 'Soft Machine',   kr: '부드러운 기계', img: IMG.look3, vol: 'VOL.03', mood: 'Urban Tech' },
+    { name: 'Weekend Essai',  kr: '주말의 에세이', img: IMG.look4, vol: 'VOL.04', mood: 'Loose Tailor' },
+    { name: 'Tokyo Drift',    kr: '도쿄의 드리프트', img: IMG.look5, vol: 'VOL.05', mood: 'Night Edit' },
+    { name: 'Quiet Luxury',   kr: '조용한 럭셔리', img: IMG.look6, vol: 'VOL.06', mood: 'Cashmere Hour' },
+  ];
+  return (
+    <main>
+      <TopBar active="atelier" onNav={onNav} brand={brand} user={user} onLogout={onLogout} />
+      <section style={{ padding: '48px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+        <div className="eyebrow">THE ATELIER · EDITORIAL ARCHIVE</div>
+        <h1 className="korean-serif" style={{
+          margin: '16px 0 40px', fontSize: 88, fontWeight: 400,
+          letterSpacing: '-0.035em', lineHeight: 0.95,
+          fontFamily: "var(--font-korean-display, serif)",
+        }}>
+          <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', color: 'var(--walnut)' }}>Atelier</span>,<br/>
+          큐레이터가 모은 옷들.
+        </h1>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+          {looks.map((l, idx) => (
+            <div key={idx} style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, overflow: 'hidden', cursor: 'pointer' }}>
+              <div style={{ aspectRatio: '4/5', background: '#2a2623', position: 'relative', overflow: 'hidden' }}>
+                <img src={l.img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(0.1) contrast(1.02)' }}/>
+                <div style={{ position: 'absolute', top: 14, left: 14, padding: '3px 8px', background: 'rgba(13,12,11,0.55)', backdropFilter: 'blur(6px)', color: 'var(--ivory)', fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.14em', borderRadius: 2 }}>
+                  {l.vol} · 2026
+                </div>
+                <div style={{ position: 'absolute', bottom: 18, left: 18, right: 18 }}>
+                  <div style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 14, color: 'var(--camel-soft)', fontWeight: 500, letterSpacing: '0.02em', textShadow: '0 1px 6px rgba(0,0,0,0.6)' }}>
+                    — {l.mood}
+                  </div>
+                </div>
+              </div>
+              <div style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 26, fontWeight: 500, letterSpacing: '-0.01em' }}>{l.name}</div>
+                  <div className="korean-sans" style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{l.kr}</div>
+                </div>
+                <div style={{ fontSize: 20 }}>→</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+      <Footer brand={brand} />
+    </main>
+  );
+}
+
+Object.assign(window, { Product, Onboarding, Atelier });
+
+</script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// Tweakable defaults
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "brandName": "DDrobe",
+  "fontDisplay": "Fraunces",
+  "fontKoreanDisplay": "Noto Serif KR",
+  "fontBody": "Inter",
+  "fontKorean": "Pretendard"
+}/*EDITMODE-END*/;
+
+function App() {
+  const [user, setUser] = useState(() => window.Auth.getUser());
+  const [screen, setScreen] = useState(() => {
+    try { return localStorage.getItem('coordit-screen') || 'landing'; }
+    catch { return 'landing'; }
+  });
+  const [tweaks, setTweaks] = useState(TWEAKS);
+  const [tweaksOpen, setTweaksOpen] = useState(false);
+
+  // Check if server is reachable on first load
+  useEffect(() => {
+    if (!window.Auth.getToken()) return;
+    window.API.getStats().catch(() => {
+      // Token might be invalid if server restarted — keep user in auth'd state for now
+    });
+  }, []);
+
+  const handleAuth = (u) => {
+    setUser(u);
+    setScreen('landing');
+  };
+
+  const handleLogout = () => {
+    window.Auth.logout();
+    setUser(null);
+    setScreen('landing');
+    try { localStorage.removeItem('coordit-screen'); } catch {}
+  };
+
+  useEffect(() => {
+    try { localStorage.setItem('coordit-screen', screen); } catch {}
+    window.scrollTo(0, 0);
+  }, [screen]);
+
+  useEffect(() => {
+    const r = document.documentElement.style;
+    r.setProperty('--font-display', `'${tweaks.fontDisplay}', serif`);
+    r.setProperty('--font-korean-display', `'${tweaks.fontKoreanDisplay}', serif`);
+    r.setProperty('--font-body', `'${tweaks.fontBody}', system-ui, sans-serif`);
+    r.setProperty('--font-korean', `'${tweaks.fontKorean}', sans-serif`);
+  }, [tweaks]);
+
+  // Edit mode / tweaks protocol
+  useEffect(() => {
+    const handler = (e) => {
+      if (!e.data || typeof e.data !== 'object') return;
+      if (e.data.type === '__activate_edit_mode') setTweaksOpen(true);
+      else if (e.data.type === '__deactivate_edit_mode') setTweaksOpen(false);
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const updateTweak = (k, v) => {
+    const next = { ...tweaks, [k]: v };
+    setTweaks(next);
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [k]: v } }, '*');
+  };
+
+  // Routes that require auth
+  const protectedScreens = ['closet', 'fit', 'styling', 'onboarding'];
+
+  const handleNav = (s) => {
+    if (protectedScreens.includes(s) && !user) {
+      // Show auth screen
+      setScreen('__auth');
+      return;
+    }
+    setScreen(s);
+  };
+
+  const screens = {
+    landing: Landing,
+    closet: Closet,
+    fit: FitLab,
+    styling: Styling,
+    product: Product,
+    onboarding: Onboarding,
+    atelier: Atelier,
+  };
+
+  if (screen === '__auth' || (protectedScreens.includes(screen) && !user)) {
+    return <AuthScreen onAuth={handleAuth} />;
+  }
+
+  const Current = screens[screen] || Landing;
+
+  return (
+    <div data-screen-label={screen}>
+      <Current onNav={handleNav} brand={tweaks.brandName} user={user} onLogout={handleLogout} />
+      {tweaksOpen && <TweaksPanel tweaks={tweaks} update={updateTweak} />}
+    </div>
+  );
+}
+
+function TweaksPanel({ tweaks, update }) {
+  const displayFonts = ['Cormorant Garamond', 'EB Garamond', 'Playfair Display', 'Fraunces'];
+  const koreanDisplay = ['Noto Serif KR'];
+  const bodyFonts = ['Inter'];
+  const koreanBody = ['Pretendard', 'Noto Sans KR'];
+
+  return (
+    <div style={{
+      position: 'fixed', bottom: 24, right: 24, width: 320,
+      background: 'var(--obsidian)', color: 'var(--ivory)',
+      border: '1px solid var(--walnut)',
+      borderRadius: 4, padding: 20, zIndex: 9999,
+      fontFamily: 'Inter, sans-serif',
+      boxShadow: '0 24px 60px rgba(0,0,0,0.4)',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 22, fontWeight: 500 }}>Tweaks</div>
+        <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', color: 'var(--camel-soft)' }}>LIVE</span>
+      </div>
+
+      <TweakGroup label="BRAND">
+        <div style={{ display: 'flex', gap: 4 }}>
+          {['Coordit', 'DDrobe'].map(b => (
+            <button key={b} onClick={() => update('brandName', b)} style={tweakBtn(tweaks.brandName === b)}>{b}</button>
+          ))}
+        </div>
+      </TweakGroup>
+
+      <TweakGroup label="DISPLAY (EN)">
+        {displayFonts.map(f => (
+          <button key={f} onClick={() => update('fontDisplay', f)} style={tweakBtn(tweaks.fontDisplay === f, true)}>
+            <span style={{ fontFamily: `'${f}', serif`, fontStyle: 'italic' }}>{f}</span>
+          </button>
+        ))}
+      </TweakGroup>
+
+      <TweakGroup label="DISPLAY (KR)">
+        {koreanDisplay.map(f => (
+          <button key={f} onClick={() => update('fontKoreanDisplay', f)} style={tweakBtn(tweaks.fontKoreanDisplay === f, true)}>
+            <span style={{ fontFamily: `'${f}', serif` }}>{f}</span>
+          </button>
+        ))}
+      </TweakGroup>
+
+      <TweakGroup label="BODY (KR)">
+        {koreanBody.map(f => (
+          <button key={f} onClick={() => update('fontKorean', f)} style={tweakBtn(tweaks.fontKorean === f, true)}>
+            <span style={{ fontFamily: `'${f}', sans-serif` }}>{f}</span>
+          </button>
+        ))}
+      </TweakGroup>
+    </div>
+  );
+}
+
+function TweakGroup({ label, children }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', opacity: 0.6, marginBottom: 6 }}>{label}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>{children}</div>
+    </div>
+  );
+}
+
+const tweakBtn = (active, full) => ({
+  padding: '8px 12px', fontSize: 12, cursor: 'pointer',
+  background: active ? 'var(--camel)' : 'transparent',
+  color: active ? 'var(--obsidian)' : 'var(--ivory)',
+  border: `1px solid ${active ? 'var(--camel)' : 'rgba(245,240,230,0.2)'}`,
+  borderRadius: 2, textAlign: 'left', width: full ? '100%' : 'auto',
+  transition: 'all 0.15s',
+});
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+</body>
+</html>

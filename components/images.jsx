@@ -1,0 +1,45 @@
+// Coordit — Image assets (Unsplash, direct CDN URLs)
+// Curated fashion/editorial imagery. Auto-cropped via Unsplash params.
+
+window.IMG = {
+  // Hero + editorial moods
+  heroCamel:    'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=900&h=1200&fit=crop&q=80',
+  heroPortrait: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=700&h=900&fit=crop&q=80',
+  heroStill:    'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=500&h=600&fit=crop&q=80',
+
+  // Closet items (muted, editorial)
+  coat:         'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=500&h=625&fit=crop&q=80',
+  knit:         'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=625&fit=crop&q=80',
+  trouser:      'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=500&h=625&fit=crop&q=80',
+  denim:        'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&h=625&fit=crop&q=80',
+  shirt:        'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500&h=625&fit=crop&q=80',
+  moto:         'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&h=625&fit=crop&q=80',
+  sneaker:      'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&h=625&fit=crop&q=80',
+  dress:        'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&h=625&fit=crop&q=80',
+
+  // Looks (full-body editorial)
+  look1:        'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=1000&fit=crop&q=80',
+  look2:        'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=1000&fit=crop&q=80',
+  look3:        'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&h=1000&fit=crop&q=80',
+  look4:        'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&h=1000&fit=crop&q=80',
+  look5:        'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?w=800&h=1000&fit=crop&q=80',
+  look6:        'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&h=1000&fit=crop&q=80',
+
+  // Body / fit lab — back/side silhouettes, clean editorial
+  bodyFront:    'https://images.unsplash.com/photo-1617551307578-7f5160d6615e?w=700&h=1000&fit=crop&q=85',
+  bodySide:     'https://images.unsplash.com/photo-1551803091-e20673f15770?w=600&h=900&fit=crop&q=85',
+  bodyFit:      'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&h=1200&fit=crop&q=85&crop=faces,center',
+  garmentFlat:  'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=700&h=900&fit=crop&q=85',
+
+  // Product detail
+  productFront: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=900&h=1125&fit=crop&q=85',
+  productBack:  'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=400&h=400&fit=crop&q=80',
+  productDetail:'https://images.unsplash.com/photo-1517941823-815bea90d291?w=400&h=400&fit=crop&q=80',
+  productStyled:'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=400&fit=crop&q=80',
+
+  // TPO / styling cards
+  tpoMorning:   'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=600&h=800&fit=crop&q=80',
+  tpoCafe:      'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&h=800&fit=crop&q=80',
+  tpoDinner:    'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?w=600&h=800&fit=crop&q=80',
+  tpoWeekend:   'https://images.unsplash.com/photo-1483721310020-03333e577078?w=600&h=800&fit=crop&q=80',
+};

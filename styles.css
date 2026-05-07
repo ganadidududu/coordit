@@ -1,0 +1,134 @@
+/* Coordit — Premium Vintage Wardrobe */
+:root {
+  /* Brand palette */
+  --obsidian: #1C1B1A;
+  --obsidian-soft: #2D2A27;
+  --camel: #B08A5B;
+  --camel-deep: #8F6F45;
+  --camel-soft: #D4B896;
+  --ivory: #F5F0E6;
+  --ivory-warm: #EFE8D8;
+  --linen: #E8DFC9;
+  --linen-deep: #DDD0B3;
+  --slate: #5A6B7E;
+  --slate-deep: #3F4E5E;
+  --slate-soft: #8A9AAC;
+  --walnut: #4A3826;
+  --walnut-light: #6B523A;
+
+  /* Semantic */
+  --bg: var(--ivory);
+  --bg-raised: #FBF7EE;
+  --text: var(--obsidian);
+  --text-muted: #6B6357;
+  --text-dim: #9A9287;
+  --line: rgba(28, 27, 26, 0.08);
+  --line-strong: rgba(28, 27, 26, 0.16);
+
+  /* Semantic for fit analysis */
+  --fit-tight: #A8423A;
+  --fit-perfect: #5B7355;
+  --fit-loose: #7A6FA0;
+
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body, 'Inter', system-ui, sans-serif);
+  font-feature-settings: 'ss01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+
+.serif { font-family: var(--font-display, 'Cormorant Garamond', 'Playfair Display', serif); }
+.sans  { font-family: var(--font-body, 'Inter', system-ui, sans-serif); }
+.mono  { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+.korean-serif { font-family: var(--font-korean-display, 'Noto Serif KR', serif); }
+.korean-sans { font-family: var(--font-korean, 'Pretendard', 'Noto Sans KR', sans-serif); }
+
+/* Typographic utilities */
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-family: var(--font-korean, 'Pretendard', sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--obsidian);
+  color: var(--ivory);
+}
+.btn-primary:hover { background: var(--walnut); }
+.btn-secondary {
+  background: transparent;
+  color: var(--obsidian);
+  border-color: var(--line-strong);
+}
+.btn-secondary:hover { background: rgba(28,27,26,0.04); }
+.btn-camel {
+  background: var(--camel);
+  color: var(--ivory);
+}
+.btn-camel:hover { background: var(--camel-deep); }
+
+/* Cards */
+.card {
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+
+/* Placeholder (no real imagery) */
+.ph {
+  background:
+    repeating-linear-gradient(135deg, rgba(74,56,38,0.06) 0 1px, transparent 1px 8px),
+    var(--linen);
+  color: var(--walnut);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+}
+.ph-dark {
+  background:
+    repeating-linear-gradient(135deg, rgba(245,240,230,0.06) 0 1px, transparent 1px 8px),
+    var(--obsidian-soft);
+  color: var(--linen);
+}
+
+/* Scroll */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 4px; }
