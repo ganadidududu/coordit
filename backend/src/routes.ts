@@ -1,0 +1,102 @@
+import { Router } from "express";
+import { signup, login } from "./modules/auth/auth.controller";
+import { createBodyMeasurement, listBodyMeasurements } from "./modules/body-measurements/body-measurements.controller";
+import {
+  createClothingItem,
+  deleteClothingItem,
+  getClothingItem,
+  listClothingItems,
+  updateClothingItem
+} from "./modules/clothing-items/clothing-items.controller";
+import {
+  createClothingSize,
+  deleteClothingSize,
+  listClothingSizes,
+  updateClothingSize
+} from "./modules/clothing-sizes/clothing-sizes.controller";
+import {
+  createExternalProduct,
+  createExternalProductFromUrl,
+  getExternalProduct,
+  listExternalProducts,
+  updateExternalProduct
+} from "./modules/external-products/external-products.controller";
+import {
+  createExternalProductSize,
+  deleteExternalProductSize,
+  listExternalProductSizes,
+  updateExternalProductSize
+} from "./modules/external-product-sizes/external-product-sizes.controller";
+import { createFeedback, listFeedback } from "./modules/feedback/feedback.controller";
+import {
+  getFitAnalysisResultController,
+  recentFitAnalysisResultsController,
+  recommendFitBatchController,
+  recommendFitController
+} from "./modules/fit/fit.controller";
+import {
+  createReferenceClothing,
+  deactivateReferenceClothing,
+  getReferenceClothing,
+  getReferenceClothingByCategory,
+  listReferenceClothing,
+  updateReferenceClothing
+} from "./modules/reference-clothing/reference-clothing.controller";
+import {
+  listRecommendationLogs,
+  markRecommendationClicked,
+  markRecommendationPurchased
+} from "./modules/recommendation-logs/recommendation-logs.controller";
+import { getMe, updateMe } from "./modules/users/users.controller";
+import { authMiddleware } from "./middleware/auth.middleware";
+
+export const routes = Router();
+
+routes.post("/auth/signup", signup);
+routes.post("/auth/login", login);
+
+routes.use(authMiddleware);
+
+routes.get("/users/me", getMe);
+routes.patch("/users/me", updateMe);
+routes.post("/body-measurements", createBodyMeasurement);
+routes.get("/body-measurements", listBodyMeasurements);
+
+routes.post("/clothing-items", createClothingItem);
+routes.get("/clothing-items", listClothingItems);
+routes.get("/clothing-items/:id", getClothingItem);
+routes.patch("/clothing-items/:id", updateClothingItem);
+routes.delete("/clothing-items/:id", deleteClothingItem);
+routes.post("/clothing-items/:id/sizes", createClothingSize);
+routes.get("/clothing-items/:id/sizes", listClothingSizes);
+routes.patch("/clothing-sizes/:id", updateClothingSize);
+routes.delete("/clothing-sizes/:id", deleteClothingSize);
+
+routes.post("/reference-clothing", createReferenceClothing);
+routes.get("/reference-clothing", listReferenceClothing);
+routes.get("/reference-clothing/by-category/:category", getReferenceClothingByCategory);
+routes.get("/reference-clothing/:id", getReferenceClothing);
+routes.patch("/reference-clothing/:id", updateReferenceClothing);
+routes.patch("/reference-clothing/:id/deactivate", deactivateReferenceClothing);
+
+routes.post("/external-products", createExternalProduct);
+routes.post("/external-products/from-url", createExternalProductFromUrl);
+routes.get("/external-products", listExternalProducts);
+routes.get("/external-products/:id", getExternalProduct);
+routes.patch("/external-products/:id", updateExternalProduct);
+routes.post("/external-products/:id/sizes", createExternalProductSize);
+routes.get("/external-products/:id/sizes", listExternalProductSizes);
+routes.patch("/external-product-sizes/:id", updateExternalProductSize);
+routes.delete("/external-product-sizes/:id", deleteExternalProductSize);
+
+routes.post("/fit/recommend", recommendFitController);
+routes.post("/fit/recommend/batch", recommendFitBatchController);
+routes.get("/fit-analysis-results/recent", recentFitAnalysisResultsController);
+routes.get("/fit-analysis-results", recentFitAnalysisResultsController);
+routes.get("/fit-analysis-results/:id", getFitAnalysisResultController);
+
+routes.post("/fit-analysis-results/:id/feedback", createFeedback);
+routes.get("/user-feedback", listFeedback);
+routes.get("/recommendation-logs", listRecommendationLogs);
+routes.patch("/recommendation-logs/:id/click", markRecommendationClicked);
+routes.patch("/recommendation-logs/:id/purchase", markRecommendationPurchased);
