@@ -4,12 +4,44 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        ink: "#111111",
-        line: "#e7e7e7",
-        muted: "#6f6f6f"
-      }
-    }
+        obsidian:      "#1C1B1A",
+        "obsidian-soft": "#2D2A27",
+        camel:         "#B08A5B",
+        "camel-deep":  "#8F6F45",
+        "camel-soft":  "#D4B896",
+        ivory:         "#F5F0E6",
+        "ivory-warm":  "#EFE8D8",
+        linen:         "#E8DFC9",
+        "linen-deep":  "#DDD0B3",
+        walnut:        "#4A3826",
+        "walnut-light":"#6B523A",
+        slate:         "#5A6B7E",
+        "slate-deep":  "#3F4E5E",
+        "slate-soft":  "#8A9AAC",
+        "fit-tight":   "#A8423A",
+        "fit-perfect": "#5B7355",
+        "fit-loose":   "#7A6FA0",
+        bg:            "var(--bg)",
+        "bg-raised":   "var(--bg-raised)",
+        line:          "rgba(28,27,26,0.08)",
+        "line-strong": "rgba(28,27,26,0.16)",
+        "text-muted":  "#6B6357",
+        "text-dim":    "#9A9287",
+      },
+      fontFamily: {
+        display:        ["'Cormorant Garamond'", "'EB Garamond'", "serif"],
+        body:           ["'Inter'", "system-ui", "sans-serif"],
+        "korean-display": ["'Noto Serif KR'", "serif"],
+        korean:         ["'Pretendard'", "'Noto Sans KR'", "sans-serif"],
+        mono:           ["'JetBrains Mono'", "ui-monospace", "monospace"],
+      },
+      borderRadius: {
+        sm:  "4px",
+        DEFAULT: "8px",
+        lg:  "16px",
+        xl:  "24px",
+      },
+    },
   },
-  plugins: []
+  plugins: [],
 };
-
