@@ -8,6 +8,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
+const { analyzeFit: scoreEngine } = require('./fitScoreEngine');
 const bcrypt = require('bcryptjs');
 const sqlite3 = require('sqlite3').verbose();
 const multer = require('multer');
@@ -430,89 +431,57 @@ app.get('/api/fit-analysis', authMiddleware, async (req, res) => {
 });
 
 function analyzeFit(measurements, item) {
-  const results = {};
+  // 카테고리 정규화
+  const catMap = {
+    '아우터': 'coat', '코트': 'coat', '자켓': 'jacket', '블레이저': 'blazer',
+    '셔츠': 'shirt', '상의': 'tshirt', '티셔츠': 'tshirt', '니트': 'knit',
+    '바지': 'pants', '슬랙스': 'slacks', '청바지': 'jeans', '하의': 'pants',
+    '스커트': 'skirt', '원피스': 'dress',
+  };
+  const category = catMap[item.category] || 'tshirt';
 
-  // Shoulder
-  if (item.garment_shoulder && measurements.shoulder) {
-    const delta = item.garment_shoulder - measurements.shoulder;
-    results.shoulder = {
-      delta: delta.toFixed(1),
-      state: delta < -1 ? 'tight' : delta > 3 ? 'loose' : 'perfect',
-      label: delta < -1 ? 'Tight' : delta > 3 ? 'Loose' : 'Perfect',
-      value_cm: Math.abs(delta).toFixed(1),
-      sign: delta > 0 ? '+' : '',
+  const reference = {
+    shoulder: measurements.shoulder || undefined,
+    chest:    measurements.chest    || undefined,
+    waist:    measurements.waist    || undefined,
+    hip:      measurements.hip      || undefined,
+    sleeve:   measurements.sleeve   || undefined,
+    length:   measurements.inseam   || undefined,
+  };
+
+  const target = {
+    shoulder: item.garment_shoulder || undefined,
+    chest:    item.garment_chest    || undefined,
+    waist:    item.garment_waist    || undefined,
+    length:   item.garment_length   || undefined,
+    sleeve:   item.garment_sleeve   || undefined,
+  };
+
+  const engine = scoreEngine({ category, reference, target });
+
+  // 기존 API 응답 형식 유지를 위한 변환
+  const legacyDetails = {};
+  for (const [part, d] of Object.entries(engine.details || {})) {
+    legacyDetails[part] = {
+      delta: d.diff.toFixed(1),
+      score: d.score,
+      comment: d.comment,
+      state: d.score >= 85 ? 'perfect' : d.score >= 65 ? 'acceptable' : 'issue',
     };
   }
 
-  // Chest
-  if (item.garment_chest && measurements.chest) {
-    const delta = item.garment_chest - measurements.chest;
-    results.chest = {
-      delta: delta.toFixed(1),
-      state: delta < 2 ? 'tight' : delta > 10 ? 'loose' : 'perfect',
-      label: delta < 2 ? 'Tight' : delta > 10 ? 'Loose' : 'Perfect',
-      value_cm: Math.abs(delta).toFixed(1),
-      sign: delta > 0 ? '+' : '',
-    };
-  }
-
-  // Waist
-  if (item.garment_waist && measurements.waist) {
-    const delta = item.garment_waist - measurements.waist;
-    results.waist = {
-      delta: delta.toFixed(1),
-      state: delta < 1 ? 'tight' : delta > 8 ? 'loose' : 'perfect',
-      label: delta < 1 ? 'Tight' : delta > 8 ? 'Loose' : 'Perfect',
-      value_cm: Math.abs(delta).toFixed(1),
-      sign: delta > 0 ? '+' : '',
-    };
-  }
-
-  // Length (vs inseam for bottoms, or just garment_length)
-  if (item.garment_length) {
-    const ref = measurements.inseam || measurements.height * 0.48;
-    const delta = item.garment_length - ref;
-    results.length = {
-      delta: delta.toFixed(1),
-      state: delta < -3 ? 'tight' : delta > 5 ? 'loose' : 'perfect',
-      label: delta < -3 ? 'Short' : delta > 5 ? 'Long' : 'Perfect',
-      value_cm: Math.abs(delta).toFixed(1),
-      sign: delta > 0 ? '+' : '',
-    };
-  }
-
-  // Overall score
-  const states = Object.values(results).map(r => r.state);
-  const perfectCount = states.filter(s => s === 'perfect').length;
-  const overallScore = states.length > 0
-    ? Math.round((perfectCount / states.length) * 100 * 0.6 + 40)
-    : 85;
-
-  const recommendation = generateFitRecommendation(results, item);
-
-  return { ...results, overall_score: overallScore, recommendation };
-}
-
-function generateFitRecommendation(results, item) {
-  const tight = Object.entries(results).filter(([k, v]) => v && v.state === 'tight').map(([k]) => k);
-  const loose = Object.entries(results).filter(([k, v]) => v && v.state === 'loose').map(([k]) => k);
-
-  const partNames = { shoulder: '어깨', chest: '가슴', waist: '허리', length: '기장' };
-
-  if (tight.length === 0 && loose.length === 0) {
-    return '전체적으로 완벽한 핏입니다. 이 아이템은 당신의 체형에 이상적으로 맞습니다.';
-  }
-
-  let rec = '';
-  if (tight.length > 0) {
-    rec += `${tight.map(k => partNames[k]).join(', ')} 부분이 다소 타이트합니다. `;
-    if (tight.includes('shoulder')) rec += '한 치수 큰 사이즈를 권장합니다. ';
-  }
-  if (loose.length > 0) {
-    rec += `${loose.map(k => partNames[k]).join(', ')} 부분에 여유가 있습니다. `;
-    if (loose.includes('waist')) rec += '수선을 고려해보세요.';
-  }
-  return rec.trim();
+  return {
+    ...legacyDetails,
+    overall_score: engine.totalScore ?? 75,
+    verdict: engine.verdict,
+    confidence: engine.confidence,
+    recommendation: engine.verdict === '잘 맞음'
+      ? '전체적으로 완벽한 핏입니다.'
+      : Object.entries(engine.details || {})
+          .filter(([, d]) => d.score < 70)
+          .map(([, d]) => d.comment)
+          .join(' ') || engine.verdict,
+  };
 }
 
 // ══════════════════════════════════════════════
