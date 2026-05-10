@@ -81,6 +81,11 @@ async function initDB() {
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  // Add new measurement columns if they don't exist yet (migration)
+  for (const col of ['sleeve REAL', 'top_length REAL', 'thigh REAL', 'rise REAL', 'hem REAL', 'bot_length REAL']) {
+    await dbRun(`ALTER TABLE measurements ADD COLUMN ${col}`).catch(() => {});
+  }
+
   await dbRun(`CREATE TABLE IF NOT EXISTS closet_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -253,6 +258,30 @@ app.put('/api/measurements', authMiddleware, async (req, res) => {
     [req.user.id, height, weight, shoulder, chest, waist, hip, inseam, neck, bodyType, predictedSize]
   );
 
+  const updated = await dbGet('SELECT * FROM measurements WHERE user_id = ?', [req.user.id]);
+  res.json(updated);
+});
+
+app.patch('/api/measurements', authMiddleware, async (req, res) => {
+  const allowed = ['height', 'weight', 'shoulder', 'chest', 'waist', 'hip', 'inseam', 'neck', 'sleeve', 'top_length', 'thigh', 'rise', 'hem', 'bot_length'];
+  const fieldUpdates = {};
+  for (const f of allowed) {
+    if (req.body[f] !== undefined) fieldUpdates[f] = req.body[f];
+  }
+  if (Object.keys(fieldUpdates).length === 0) {
+    return res.status(400).json({ error: '수정할 필드가 없습니다.' });
+  }
+  const current = await dbGet('SELECT * FROM measurements WHERE user_id = ?', [req.user.id]);
+  if (!current) return res.status(404).json({ error: '측정값이 없습니다. 먼저 회원가입을 완료해주세요.' });
+
+  const merged = { ...current, ...fieldUpdates };
+  const bodyType = calculateBodyType(merged);
+  const predictedSize = calculateSize(merged);
+
+  const setClauses = [...Object.keys(fieldUpdates).map(f => `${f} = ?`), 'body_type = ?', 'predicted_size = ?', 'updated_at = CURRENT_TIMESTAMP'];
+  const vals = [...Object.values(fieldUpdates), bodyType, predictedSize, req.user.id];
+
+  await dbRun(`UPDATE measurements SET ${setClauses.join(', ')} WHERE user_id = ?`, vals);
   const updated = await dbGet('SELECT * FROM measurements WHERE user_id = ?', [req.user.id]);
   res.json(updated);
 });

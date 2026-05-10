@@ -199,8 +199,9 @@ window.API = {
   login:    (body) => apiFetch('/api/auth/login',    { method: 'POST', body: JSON.stringify(body) }),
 
   // Measurements
-  getMeasurements: ()   => apiFetch('/api/measurements'),
-  saveMeasurements:(m)  => apiFetch('/api/measurements', { method: 'PUT', body: JSON.stringify(m) }),
+  getMeasurements:   ()  => apiFetch('/api/measurements'),
+  saveMeasurements:  (m) => apiFetch('/api/measurements', { method: 'PUT',   body: JSON.stringify(m) }),
+  patchMeasurements: (m) => apiFetch('/api/measurements', { method: 'PATCH', body: JSON.stringify(m) }),
 
   // Closet
   getCloset:   (q = {}) => apiFetch('/api/closet?' + new URLSearchParams(q)),
@@ -2016,6 +2017,123 @@ window.Body3D = Body3DComponent;
 <script type="text/babel" data-name="fit-lab">
 // Coordit — Fit Lab (핏 분석) — redesigned hero + editorial layout
 
+function MySizePanel({ onUpdate }) {
+  const [top, setTop] = useState({ total: '', chest: '', shoulder: '', sleeve: '' });
+  const [bot, setBot] = useState({ total: '', waist: '', hip: '', thigh: '', rise: '', hem: '' });
+  const [status, setStatus] = useState('idle');
+
+  const setTopField = (k, v) => setTop(prev => ({ ...prev, [k]: v }));
+  const setBotField = (k, v) => setBot(prev => ({ ...prev, [k]: v }));
+
+  const toNum = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : undefined; };
+
+  const handleSave = async () => {
+    const patch = {};
+    if (toNum(top.shoulder) !== undefined) patch.shoulder   = toNum(top.shoulder);
+    if (toNum(top.chest)    !== undefined) patch.chest      = toNum(top.chest);
+    if (toNum(top.sleeve)   !== undefined) patch.sleeve     = toNum(top.sleeve);
+    if (toNum(top.total)    !== undefined) patch.top_length = toNum(top.total);
+    if (toNum(bot.waist)    !== undefined) patch.waist      = toNum(bot.waist);
+    if (toNum(bot.hip)      !== undefined) patch.hip        = toNum(bot.hip);
+    if (toNum(bot.thigh)    !== undefined) patch.thigh      = toNum(bot.thigh);
+    if (toNum(bot.rise)     !== undefined) patch.rise       = toNum(bot.rise);
+    if (toNum(bot.hem)      !== undefined) patch.hem        = toNum(bot.hem);
+    if (toNum(bot.total)    !== undefined) patch.bot_length = toNum(bot.total);
+    if (Object.keys(patch).length === 0) return;
+    setStatus('saving');
+    try {
+      const updated = await window.API.patchMeasurements(patch);
+      if (onUpdate) onUpdate(updated);
+      setStatus('saved');
+      setTimeout(() => setStatus('idle'), 2500);
+    } catch(e) {
+      window.Toast && window.Toast.show(e.message, 'error');
+      setStatus('error');
+    }
+  };
+
+  const inputStyle = {
+    width: '100%', padding: '8px 10px', fontSize: 13,
+    border: '1px solid var(--line)', borderRadius: 2,
+    background: 'var(--bg-base)', color: 'var(--obsidian)',
+    fontFamily: 'JetBrains Mono, monospace',
+    outline: 'none',
+  };
+  const fieldStyle = { display: 'flex', flexDirection: 'column', gap: 5 };
+  const labelStyle = { fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.12em', color: 'var(--text-muted)' };
+
+  const hasAny = Object.values(top).some(v => v !== '') || Object.values(bot).some(v => v !== '');
+
+  return (
+    <section style={{ padding: '32px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
+      <div style={{ background: 'var(--bg-raised)', border: '1px solid var(--line)', borderRadius: 4, padding: '28px 36px' }}>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+          <div>
+            <div className="eyebrow">MY FIT PROFILE · MEASUREMENTS</div>
+            <h3 style={{ margin: '8px 0 6px', fontSize: 26, fontWeight: 500, letterSpacing: '-0.02em', fontFamily: 'var(--font-korean-display, serif)' }}>
+              내 신체 실측값
+            </h3>
+            <p className="korean-sans" style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              가장 잘 맞는 옷의 실측 수치를 입력하세요. 비워도 됩니다. 입력한 값이 핏 분석 기준으로 저장됩니다.
+            </p>
+          </div>
+          <button onClick={handleSave} disabled={!hasAny || status === 'saving'} className="btn btn-primary"
+            style={{ padding: '12px 28px', opacity: !hasAny ? 0.35 : 1, whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 24 }}>
+            {status === 'saving' ? '저장 중...' : status === 'saved' ? '저장됨 ✓' : status === 'error' ? '저장 실패' : '측정값 저장'}
+          </button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
+
+          <div>
+            <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', color: 'var(--text-muted)', marginBottom: 14, paddingBottom: 10, borderBottom: '1px solid var(--line)' }}>
+              상의 · TOP
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {[
+                { key: 'total',    label: '총장 (cm)',    val: top.total,    set: v => setTopField('total', v) },
+                { key: 'chest',    label: '가슴단면 (cm)', val: top.chest,    set: v => setTopField('chest', v) },
+                { key: 'shoulder', label: '어깨너비 (cm)', val: top.shoulder, set: v => setTopField('shoulder', v) },
+                { key: 'sleeve',   label: '소매길이 (cm)', val: top.sleeve,   set: v => setTopField('sleeve', v) },
+              ].map(f => (
+                <div key={f.key} style={fieldStyle}>
+                  <span style={labelStyle}>{f.label}</span>
+                  <input type="number" step="0.1" placeholder="—" value={f.val}
+                    onChange={e => f.set(e.target.value)} style={inputStyle} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.15em', color: 'var(--text-muted)', marginBottom: 14, paddingBottom: 10, borderBottom: '1px solid var(--line)' }}>
+              하의 · BOTTOM
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {[
+                { key: 'total', label: '총장 (cm)',      val: bot.total, set: v => setBotField('total', v) },
+                { key: 'waist', label: '허리단면 (cm)',   val: bot.waist, set: v => setBotField('waist', v) },
+                { key: 'hip',   label: '엉덩이단면 (cm)', val: bot.hip,   set: v => setBotField('hip', v) },
+                { key: 'thigh', label: '허벅지단면 (cm)', val: bot.thigh, set: v => setBotField('thigh', v) },
+                { key: 'rise',  label: '밑위 (cm)',      val: bot.rise,  set: v => setBotField('rise', v) },
+                { key: 'hem',   label: '밑단단면 (cm)',   val: bot.hem,   set: v => setBotField('hem', v) },
+              ].map(f => (
+                <div key={f.key} style={fieldStyle}>
+                  <span style={labelStyle}>{f.label}</span>
+                  <input type="number" step="0.1" placeholder="—" value={f.val}
+                    onChange={e => f.set(e.target.value)} style={inputStyle} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FitLab({ onNav, brand, user, onLogout }) {
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [closetItems, setClosetItems] = useState([]);
@@ -2089,6 +2207,8 @@ function FitLab({ onNav, brand, user, onLogout }) {
           당신의 실측 체형 데이터와 브랜드 사이즈 표를 AI가 교차 분석합니다. <span style={{ color: 'var(--walnut)', fontStyle: 'italic', fontFamily: 'var(--font-display, serif)' }}>±0.3cm</span>의 정밀도로.
         </p>
       </section>
+
+      <MySizePanel onUpdate={setMeasurements} />
 
       {/* ═══ FORENSIC SCAN — full-bleed editorial ═══ */}
       <section style={{ padding: '40px 48px 0', maxWidth: 1600, margin: '0 auto' }}>
