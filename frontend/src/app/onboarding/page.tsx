@@ -10,18 +10,24 @@ import { api } from "../../lib/api";
 function StepMeasurements({ onNext, onPrev }: { onNext: () => void; onPrev: () => void }) {
   const [values, setValues] = useState({ height: 172, weight: 62, shoulder: 44.5, chest: 98, waist: 82, hip: 96, inseam: 80 });
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
-    api<{ height?: number; weight?: number; shoulder?: number; chest?: number; waist?: number; hip?: number; inseam?: number }>("/body-measurements")
-      .then(m => { if (m?.height) setValues(v => ({ ...v, ...m })); })
+    api<Array<{ height_cm?: number; weight_kg?: number; shoulder_width?: number; chest_circumference?: number; waist_circumference?: number; hip_circumference?: number; inseam?: number }>>("/body-measurements")
+      .then(list => {
+        const m = Array.isArray(list) ? list[0] : null;
+        if (m?.height_cm) setValues(v => ({ ...v, height: m.height_cm ?? v.height, weight: m.weight_kg ?? v.weight, shoulder: m.shoulder_width ?? v.shoulder, chest: m.chest_circumference ?? v.chest, waist: m.waist_circumference ?? v.waist, hip: m.hip_circumference ?? v.hip, inseam: m.inseam ?? v.inseam }));
+      })
       .catch(() => {});
   }, []);
 
   const save = async () => {
-    setSaving(true);
+    setSaving(true); setSaveError("");
     try {
       await api("/body-measurements", { method: "POST", body: { height_cm: values.height, weight_kg: values.weight, shoulder_width: values.shoulder, chest_circumference: values.chest, waist_circumference: values.waist, hip_circumference: values.hip, inseam: values.inseam } });
       onNext();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "저장 오류가 발생했습니다.");
     } finally { setSaving(false); }
   };
 
@@ -55,7 +61,8 @@ function StepMeasurements({ onNext, onPrev }: { onNext: () => void; onPrev: () =
             </div>
           ))}
         </div>
-        <div style={{ display: "flex", gap: 10, marginTop: 32 }}>
+        {saveError && <div style={{ marginTop: 16, padding: "10px 14px", background: "rgba(168,66,58,0.08)", border: "1px solid rgba(168,66,58,0.2)", borderRadius: 4, fontSize: 13, color: "var(--fit-tight)", fontFamily: "var(--font-korean)" }}>{saveError}</div>}
+        <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
           <button className="btn btn-secondary" onClick={onPrev}>이전</button>
           <button className="btn btn-primary" style={{ flex: 1, opacity: saving ? 0.7 : 1 }} onClick={save} disabled={saving}>
             {saving ? "저장중..." : "저장 & 다음 →"}
@@ -231,7 +238,7 @@ export default function OnboardingPage() {
         {/* Step rail */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 40 }}>
           {STEPS.map((s, i) => (
-            <div key={i} onClick={() => setStep(i + 1)} style={{ padding: 20, borderRadius: 4, background: i === step - 1 ? "var(--obsidian)" : "var(--bg-raised)", color: i === step - 1 ? "var(--ivory)" : "var(--obsidian)", border: "1px solid var(--line)", opacity: i > step - 1 ? 0.5 : 1, cursor: "pointer" }}>
+            <div key={i} onClick={() => { if (i + 1 >= 2) setStep(i + 1); }} style={{ padding: 20, borderRadius: 4, background: i === step - 1 ? "var(--obsidian)" : "var(--bg-raised)", color: i === step - 1 ? "var(--ivory)" : "var(--obsidian)", border: "1px solid var(--line)", opacity: i > step - 1 ? 0.5 : 1, cursor: i + 1 >= 2 ? "pointer" : "default" }}>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 28, fontStyle: "italic", fontWeight: 500, color: i === step - 1 ? "var(--camel-soft)" : "var(--walnut)" }}>{s.n}</div>
               <div className="korean-sans" style={{ fontSize: 14, fontWeight: 500, marginTop: 8 }}>{s.ko}</div>
               <div style={{ fontSize: 10, fontFamily: "JetBrains Mono, monospace", letterSpacing: "0.1em", opacity: 0.6, marginTop: 2 }}>{s.t}</div>

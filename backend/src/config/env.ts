@@ -16,6 +16,7 @@ export const env = {
   supabaseUrl: required("SUPABASE_URL"),
   supabaseAnonKey: required("SUPABASE_ANON_KEY"),
   supabaseServiceRoleKey: required("SUPABASE_SERVICE_ROLE_KEY"),
-  jwtSecret: process.env.JWT_SECRET ?? "local-dev-secret"
+  jwtSecret: process.env.JWT_SECRET ?? "local-dev-secret",
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? null,
 };
 

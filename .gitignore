@@ -12,4 +12,7 @@ pnpm-debug.log*
 .DS_Store
 coverage
 *.tsbuildinfo
+.claude/
+coordit.db
+uploads/
 

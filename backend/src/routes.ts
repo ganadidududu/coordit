@@ -48,6 +48,11 @@ import {
   markRecommendationPurchased
 } from "./modules/recommendation-logs/recommendation-logs.controller";
 import { getMe, updateMe } from "./modules/users/users.controller";
+import {
+  generateStylingController,
+  listSavedStylingController,
+  saveStylingLookController,
+} from "./modules/styling/styling.controller";
 import { authMiddleware } from "./middleware/auth.middleware";
 
 export const routes = Router();
@@ -96,6 +101,10 @@ routes.get("/fit-analysis-results", recentFitAnalysisResultsController);
 routes.get("/fit-analysis-results/:id", getFitAnalysisResultController);
 
 routes.post("/fit-analysis-results/:id/feedback", createFeedback);
+
+routes.get("/styling/saved", listSavedStylingController);
+routes.post("/styling/generate", generateStylingController);
+routes.post("/styling/:id/save", saveStylingLookController);
 routes.get("/user-feedback", listFeedback);
 routes.get("/recommendation-logs", listRecommendationLogs);
 routes.patch("/recommendation-logs/:id/click", markRecommendationClicked);
