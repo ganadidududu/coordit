@@ -50,11 +50,11 @@ coordit-dev/
 
 추천 품질에 직접 영향을 주는 데이터는 다음입니다.
 
-- `clothing_items`: 사용자가 보유한 의류 정보
+- `clothing_items`: 사용자가 보유한 의류 **정보**
 - `clothing_sizes`: 보유 의류의 실측값
 - `reference_clothing`: 추천 기준으로 선택된 보유 의류
 - `external_products`: 비교 대상 외부 상품
-- `external_product_sizes`: 외부 상품의 사이즈표
+- **`external_product_sizes`**: 외부 상품의 사이즈표
 - `fit_analysis_results`: 추천 실행 결과
 - `recommendation_logs`: 추천 노출/클릭/구매 로그
 - `user_feedback`: 실제 착용 또는 구매 후 피드백
