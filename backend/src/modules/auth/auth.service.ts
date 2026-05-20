@@ -1,4 +1,4 @@
-import { supabase } from "../../config/supabase";
+import { supabaseAuth } from "../../config/supabase";
 import { createHttpError } from "../../shared/utils/http-error";
 import { upsertUserProfile } from "../users/users.service";
 
@@ -33,7 +33,7 @@ export const signupWithEmail = async (
   email: string,
   password: string
 ): Promise<AuthResponse> => {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabaseAuth.auth.signUp({ email, password });
   if (error || !data.user) throw createHttpError(400, error?.message ?? "Signup failed");
   return toAuthResponse(data.user, data.session);
 };
@@ -42,7 +42,7 @@ export const loginWithEmail = async (
   email: string,
   password: string
 ): Promise<AuthResponse> => {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabaseAuth.auth.signInWithPassword({ email, password });
   if (error || !data.user) throw createHttpError(401, error?.message ?? "Login failed");
   return toAuthResponse(data.user, data.session);
 };

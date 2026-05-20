@@ -30,7 +30,12 @@ export const upsertUserProfile = async (user: {
     .select("*")
     .single<UserRow>();
 
-  if (error || !data) throw createHttpError(500, "Failed to save user profile");
+  if (error || !data) {
+    console.error("ERROR:", error);
+    console.error("DATA:", data);
+
+    throw createHttpError(500, "Failed to save user profile");
+  }  
   return data;
 };
 
