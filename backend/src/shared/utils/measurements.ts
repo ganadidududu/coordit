@@ -9,7 +9,7 @@ export const measurementKeys: MeasurementKey[] = [
   "waist_width",
   "hip_width",
   "rise",
-  "inseam"
+  "outseam"
 ];
 
 export const pickMeasurements = (source: Record<string, unknown>): MeasurementMap =>

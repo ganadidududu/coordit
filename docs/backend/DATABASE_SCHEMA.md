@@ -1,7 +1,7 @@
 # Database Schema
 
 문서 상태: 최신  
-기준일: 2026-05-19  
+기준일: 2026-05-22  
 기준 SQL: `supabase/schema.sql`, `supabase/indexes.sql`, `supabase/rls.sql`
 
 coordit DB는 Supabase PostgreSQL을 사용합니다. SQL 원본은 `supabase/` 디렉터리에 있습니다.
@@ -87,7 +87,7 @@ auth.users
 - `waist_width`
 - `hip_width`
 - `rise`
-- `inseam`
+- `outseam`
 - `raw_measurements`
 
 ### `reference_clothing`
@@ -138,7 +138,7 @@ auth.users
 - `waist_width`
 - `hip_width`
 - `rise`
-- `inseam`
+- `outseam`
 - `raw_size_data`
 - `parsing_status`
 - `measurement_source`
@@ -164,7 +164,14 @@ OCR/파서 확장을 위해 `raw_size_data`, `parsing_status`, `measurement_sour
 - `recommendation_confidence`
 - `result_details`
 
-`result_details`에는 부위별 차이, 설명, 상태, 전체 사이즈 점수, 추천에 사용한 기준 의류 목록이 들어갑니다.
+`result_details`에는 부위별 차이, 설명, 상태, 전체 사이즈 점수, 추천에 사용한 기준 의류 목록, 동적 가중치 메타데이터가 들어갑니다.
+
+동적 가중치 메타데이터:
+
+- `baseWeights`
+- `dynamicWeights`
+- `referenceVariance`
+- `weightingStrategy`
 
 현재 여러 기준 의류를 사용해도 `reference_clothing_id` 컬럼에는 첫 번째 기준 의류만 저장됩니다. 전체 목록은 `result_details.referenceClothingIds`에서 확인합니다.
 
@@ -230,7 +237,7 @@ Fit type:
 - `waist_width`
 - `hip_width`
 - `rise`
-- `inseam`
+- `outseam`
 
 API 요청에서도 측정값은 snake_case를 기준으로 사용합니다.
 
@@ -256,3 +263,13 @@ API 요청에서도 측정값은 snake_case를 기준으로 사용합니다.
 `supabase/rls.sql`은 모든 user-owned 테이블에 RLS를 활성화합니다. 기본 정책은 `auth.uid() = user_id`입니다. `users` 테이블만 `auth.uid() = id` 기준입니다.
 
 단, 백엔드가 service role key를 사용하므로 API 코드에서 `user_id` 필터를 반드시 유지해야 합니다.
+
+## Migration Notes
+
+Fit Engine v1.2에서 하의 길이 측정 항목을 `inseam`에서 `outseam`으로 변경했습니다.
+
+관련 migration:
+
+- `supabase/migrations/20260522_rename_inseam_to_outseam.sql`
+
+기존 `inseam` 데이터를 `outseam`으로 마이그레이션할지 여부는 실제 운영 데이터 존재 여부에 따라 결정해야 합니다.

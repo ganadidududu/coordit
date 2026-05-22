@@ -12,7 +12,7 @@ const aliases: Record<string, MeasurementKey> = {
   허리: "waist_width",
   엉덩이: "hip_width",
   밑위: "rise",
-  인심: "inseam"
+  아웃심: "outseam"
 };
 
 export const mapRawMeasurements = (raw: Record<string, unknown>): MeasurementMap =>

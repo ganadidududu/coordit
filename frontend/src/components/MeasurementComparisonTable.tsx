@@ -8,7 +8,7 @@ const labels: Record<keyof MeasurementFields, string> = {
   waist_width: "허리",
   hip_width: "엉덩이",
   rise: "밑위",
-  inseam: "인심"
+  outseam: "아웃심"
 };
 
 export function MeasurementComparisonTable({ result }: { result: FitRecommendationResponse }) {

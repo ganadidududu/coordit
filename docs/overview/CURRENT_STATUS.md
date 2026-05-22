@@ -1,7 +1,7 @@
 # 현재 개발 상황
 
 문서 상태: 최신  
-기준일: 2026-05-19  
+기준일: 2026-05-22  
 기준 코드: `backend/src/routes.ts`, `frontend/src/app/*`, `supabase/schema.sql`
 
 현재 coordit은 기준 의류 기반 핏 추천 MVP가 구현된 상태입니다. 백엔드 REST API, Supabase DB 스키마, 주요 프론트 화면은 존재하며, 추천 결과 저장과 로그/피드백 흐름까지 기본 골격이 연결되어 있습니다.
@@ -58,7 +58,9 @@
 - Rule-based 추천 엔진 구현
 - 단일/다중 기준 의류 지원
 - `preference_score` 기반 다중 기준 의류 가중 평균
+- 다중 기준 의류 사용 시 reference variance 기반 dynamic weight 적용
 - 상의/하의 카테고리별 측정값 가중치 분리
+- 하의 길이 측정 항목을 `outseam` 기준으로 사용
 - fit type penalty 적용
 - 카테고리 호환성 검사
 - 부위별 차이, 설명, 상태, confidence 반환
@@ -71,7 +73,7 @@
 - 추천 엔진은 ML이 아니라 rule-based입니다.
 - `external_product_sizes`의 OCR/파싱 관련 컬럼은 준비되어 있으나 실제 OCR 파이프라인은 없습니다.
 - 프론트 랜딩 페이지 일부 문구는 현재 제품 방향인 “실측 기반 핏 추천”보다 더 넓은 스타일링 제품처럼 보일 수 있습니다.
-- API 문서와 실제 request key 사이에 과거 camelCase 예시가 있었고, 이번 정리에서 snake_case 중심으로 바로잡았습니다.
+- API 문서와 실제 request key 사이에 과거 camelCase 예시가 있었고, snake_case 중심으로 바로잡았습니다.
 
 ## 미구현 또는 보강 필요
 

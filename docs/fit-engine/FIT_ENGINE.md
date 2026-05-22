@@ -1,7 +1,7 @@
 # Fit Engine
 
 문서 상태: 최신  
-기준일: 2026-05-19  
+기준일: 2026-05-22  
 관련 코드: `backend/src/modules/fit/*`, `backend/src/shared/utils/category-compatibility.ts`
 
 coordit의 현재 Fit Engine은 ML이 아닌 rule-based 추천 엔진입니다. 사용자가 이미 가지고 있고 잘 맞는 기준 의류의 실측값과 외부 상품의 사이즈표를 비교해 가장 가까운 사이즈를 추천합니다.
@@ -9,7 +9,7 @@ coordit의 현재 Fit Engine은 ML이 아닌 rule-based 추천 엔진입니다. 
 ## 현재 버전
 
 ```ts
-ALGORITHM_VERSION = "mvp_rule_v1"
+ALGORITHM_VERSION = "mvp_rule_v1_2"
 ```
 
 ## 입력 데이터
@@ -71,7 +71,7 @@ ALGORITHM_VERSION = "mvp_rule_v1"
 | `waist_width` | 0.35 |
 | `hip_width` | 0.25 |
 | `rise` | 0.15 |
-| `inseam` | 0.25 |
+| `outseam` | 0.25 |
 
 누락된 측정값은 `0`으로 보지 않고 비교에서 제외합니다. 비교 가능한 측정값이 없으면 추천을 계산할 수 없습니다.
 
@@ -120,6 +120,35 @@ final_score = sum(reference_score * preference_score) / sum(preference_score)
 ```
 
 대표 diff와 설명은 가장 점수가 높은 기준 의류 결과를 기반으로 합니다.
+
+### Reference Variance Weighting
+
+사용자가 여러 기준 의류를 선택한 경우, coordit은 단순 평균만 사용하지 않습니다. 기준 의류들 사이에서 측정값이 일관되게 유지되는 항목을 더 중요한 핏 기준으로 봅니다. 예를 들어 사용자의 여러 기준 상의에서 어깨너비의 표준편차가 작다면, 사용자가 어깨 핏에 대해 비교적 일관된 선호를 가지고 있다고 해석할 수 있습니다. 따라서 해당 항목의 가중치를 높여 추천 정확도를 개선합니다.
+
+수식 흐름:
+
+```text
+measurement_values = 여러 reference clothing의 동일 측정 항목 값 목록
+stdDev = standardDeviation(measurement_values)
+importanceMultiplier = stdDev가 작을수록 증가
+dynamicWeight = baseWeight × importanceMultiplier
+normalizedWeight = dynamicWeight / sum(dynamicWeights)
+```
+
+적용 조건:
+
+- 기준 의류가 2개 이상일 때만 적용합니다.
+- 기준 의류가 1개뿐이면 기존 base weight를 그대로 사용합니다.
+- 특정 측정 항목의 값이 2개 미만이면 동적 보정 대상에서 제외합니다.
+- 누락값은 표준편차 계산에서 제외합니다.
+- 최종 dynamic weight 합은 항상 1이 되도록 정규화합니다.
+
+추천 결과의 `result_details`에는 다음 메타데이터가 저장됩니다.
+
+- `baseWeights`
+- `dynamicWeights`
+- `referenceVariance`
+- `weightingStrategy`
 
 ## Confidence
 

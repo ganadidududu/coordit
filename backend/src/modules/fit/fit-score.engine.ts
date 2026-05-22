@@ -15,6 +15,8 @@ import type {
   MeasurementKey,
   MeasurementMap,
   MeasurementWeights,
+  ReferenceVarianceImportance,
+  ReferenceVarianceMap,
   ReferenceClothingInput,
   SizeFitScore
 } from "./fit.types";
@@ -36,6 +38,122 @@ export const getWeightsByCategory = (category: Category): MeasurementWeights => 
     return BOTTOM_WEIGHTS;
   }
   return TOP_WEIGHTS;
+};
+
+const getMeasurementKeysFromWeights = (weights: MeasurementWeights): MeasurementKey[] =>
+  Object.keys(weights) as MeasurementKey[];
+
+export const normalizeWeights = (weights: MeasurementWeights): MeasurementWeights => {
+  const entries = (Object.entries(weights) as [MeasurementKey, number][])
+    .filter(([, weight]) => isNumber(weight) && weight > 0);
+  const sum = entries.reduce((total, [, weight]) => total + weight, 0);
+  if (sum === 0) return {};
+  let runningTotal = 0;
+  return entries.reduce<MeasurementWeights>((normalized, [key, weight], index) => {
+    const normalizedWeight =
+      index === entries.length - 1 ? round(1 - runningTotal, 4) : round(weight / sum, 4);
+    normalized[key] = normalizedWeight;
+    runningTotal += normalizedWeight;
+    return normalized;
+  }, {});
+};
+
+export const calculateStandardDeviation = (values: number[]): number => {
+  const numericValues = values.filter(isNumber);
+  if (numericValues.length < 2) return 0;
+  const mean = numericValues.reduce((sum, value) => sum + value, 0) / numericValues.length;
+  const variance =
+    numericValues.reduce((sum, value) => sum + (value - mean) ** 2, 0) / numericValues.length;
+  return round(Math.sqrt(variance), 3);
+};
+
+export const collectReferenceMeasurementValues = (
+  references: ReferenceClothingInput[],
+  measurementKeys: MeasurementKey[]
+): Partial<Record<MeasurementKey, number[]>> =>
+  measurementKeys.reduce<Partial<Record<MeasurementKey, number[]>>>((collected, key) => {
+    const values = references
+      .map((reference) => reference.measurements[key])
+      .filter(isNumber);
+    collected[key] = values;
+    return collected;
+  }, {});
+
+const getImportanceByStdDev = (stdDev: number): ReferenceVarianceImportance => {
+  if (stdDev <= 0.5) return "very_high";
+  if (stdDev <= 1.5) return "high";
+  if (stdDev <= 3) return "medium";
+  if (stdDev <= 5) return "low";
+  return "very_low";
+};
+
+const getImportanceMultiplier = (importance: ReferenceVarianceImportance): number => {
+  switch (importance) {
+    case "very_high":
+      return 1.3;
+    case "high":
+      return 1.15;
+    case "medium":
+      return 1;
+    case "low":
+      return 0.85;
+    case "very_low":
+      return 0.7;
+  }
+};
+
+export const calculateReferenceVarianceMap = (
+  references: ReferenceClothingInput[],
+  measurementKeys: MeasurementKey[]
+): ReferenceVarianceMap => {
+  const valuesByKey = collectReferenceMeasurementValues(references, measurementKeys);
+  return measurementKeys.reduce<ReferenceVarianceMap>((varianceMap, key) => {
+    const values = valuesByKey[key] ?? [];
+    if (values.length < 2) return varianceMap;
+    const stdDev = calculateStandardDeviation(values);
+    varianceMap[key] = {
+      stdDev,
+      sampleCount: values.length,
+      importance: getImportanceByStdDev(stdDev)
+    };
+    return varianceMap;
+  }, {});
+};
+
+export const calculateDynamicWeightsByReferenceVariance = (
+  baseWeights: MeasurementWeights,
+  references: ReferenceClothingInput[]
+): {
+  dynamicWeights: MeasurementWeights;
+  referenceVariance: ReferenceVarianceMap;
+  weightingStrategy: "base_static" | "reference_variance_v1";
+} => {
+  const normalizedBaseWeights = normalizeWeights(baseWeights);
+  const measurementKeys = getMeasurementKeysFromWeights(normalizedBaseWeights);
+
+  if (references.length < 2) {
+    return {
+      dynamicWeights: normalizedBaseWeights,
+      referenceVariance: {},
+      weightingStrategy: "base_static"
+    };
+  }
+
+  const referenceVariance = calculateReferenceVarianceMap(references, measurementKeys);
+  const adjustedWeights = measurementKeys.reduce<MeasurementWeights>((weights, key) => {
+    const baseWeight = normalizedBaseWeights[key];
+    if (!isNumber(baseWeight)) return weights;
+    const varianceInfo = referenceVariance[key];
+    const multiplier = varianceInfo ? getImportanceMultiplier(varianceInfo.importance) : 1;
+    weights[key] = baseWeight * multiplier;
+    return weights;
+  }, {});
+
+  return {
+    dynamicWeights: normalizeWeights(adjustedWeights),
+    referenceVariance,
+    weightingStrategy: Object.keys(referenceVariance).length > 0 ? "reference_variance_v1" : "base_static"
+  };
 };
 
 export const calculateDiff = (
@@ -114,7 +232,7 @@ export const applyFitTypePenalty = (
 
 const getAverageMajorDiff = (diffs: MeasurementDiffs, category: Category): number => {
   const keys: MeasurementKey[] = BOTTOM_CATEGORIES.includes(category)
-    ? ["waist_width", "hip_width", "rise", "inseam"]
+    ? ["waist_width", "hip_width", "rise", "outseam"]
     : ["shoulder_width", "chest_width", "total_length", "sleeve_length"];
   const values = keys.map((key) => diffs[key]).filter(isNumber);
   if (values.length === 0) return 0;
@@ -183,9 +301,9 @@ export const calculateRecommendationConfidence = (
 export const calculateFitScoreForSize = (
   referenceClothing: ReferenceClothingInput,
   externalProductSize: ExternalProductSizeInput,
-  category: Category
+  category: Category,
+  weights: MeasurementWeights = getWeightsByCategory(category)
 ): SizeFitScore => {
-  const weights = getWeightsByCategory(category);
   const diffs = calculateDiff(referenceClothing.measurements, externalProductSize.measurements);
   const weightedFitDistance = calculateWeightedFitDistance(
     referenceClothing.measurements,
@@ -229,14 +347,15 @@ export const calculateFitScoreForSize = (
 export const calculateWeightedScoreForSize = (
   referenceClothing: ReferenceClothingInput[],
   externalProductSize: ExternalProductSizeInput,
-  category: Category
+  category: Category,
+  weights: MeasurementWeights = getWeightsByCategory(category)
 ): SizeFitScore => {
   if (referenceClothing.length === 0) {
     throw new Error("At least one reference clothing item is required");
   }
 
   const scoredReferences = referenceClothing.map((reference) => ({
-    score: calculateFitScoreForSize(reference, externalProductSize, category),
+    score: calculateFitScoreForSize(reference, externalProductSize, category, weights),
     weight: Math.max(1, reference.preferenceScore ?? 100)
   }));
   const totalWeight = scoredReferences.reduce((sum, item) => sum + item.weight, 0);
@@ -300,7 +419,11 @@ export const recommendBestSize = (
         score.weightedFitDistance,
         score.finalFitScore - (allSizeScores[index + 1]?.finalFitScore ?? 0)
       )
-    }))
+    })),
+    baseWeights: normalizeWeights(getWeightsByCategory(category)),
+    dynamicWeights: normalizeWeights(getWeightsByCategory(category)),
+    referenceVariance: {},
+    weightingStrategy: "base_static"
   };
 };
 
@@ -313,8 +436,12 @@ export const recommendBestSizeWithReferences = (
     throw new Error("At least one external product size is required");
   }
 
+  const baseWeights = normalizeWeights(getWeightsByCategory(category));
+  const { dynamicWeights, referenceVariance, weightingStrategy } =
+    calculateDynamicWeightsByReferenceVariance(baseWeights, referenceClothing);
+
   const allSizeScores = externalProductSizes
-    .map((size) => calculateWeightedScoreForSize(referenceClothing, size, category))
+    .map((size) => calculateWeightedScoreForSize(referenceClothing, size, category, dynamicWeights))
     .sort((a, b) => b.finalFitScore - a.finalFitScore);
 
   return {
@@ -327,6 +454,18 @@ export const recommendBestSizeWithReferences = (
         allSizeScores[0].finalFitScore - (allSizeScores[1]?.finalFitScore ?? 0)
       )
     },
-    allSizeScores
+    allSizeScores: allSizeScores.map((score, index) => ({
+      ...score,
+      recommendationConfidence: calculateRecommendationConfidence(
+        score.finalFitScore,
+        score.comparedMeasurements.length,
+        score.weightedFitDistance,
+        score.finalFitScore - (allSizeScores[index + 1]?.finalFitScore ?? 0)
+      )
+    })),
+    baseWeights,
+    dynamicWeights,
+    referenceVariance,
+    weightingStrategy
   };
 };

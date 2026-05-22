@@ -1,7 +1,7 @@
 # coordit 개발 문서
 
 문서 상태: 최신 정리본  
-기준일: 2026-05-19  
+기준일: 2026-05-22  
 기준 코드: `backend/src/routes.ts`, `supabase/schema.sql`, `frontend/src/app/*`
 
 이 디렉터리는 coordit 프로젝트를 개발, 유지보수, 발표, 인수할 때 필요한 문서를 목적별로 나눈 공간입니다. 핸드오버 문서는 현재 정리 범위에서 제외했습니다.

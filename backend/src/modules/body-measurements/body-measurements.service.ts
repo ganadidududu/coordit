@@ -13,7 +13,7 @@ export const createBodyMeasurementForUser = async (userId: string, body: Record<
       chest_circumference: asOptionalNumber(body.chestCircumference ?? body.chest_circumference),
       waist_circumference: asOptionalNumber(body.waistCircumference ?? body.waist_circumference),
       hip_circumference: asOptionalNumber(body.hipCircumference ?? body.hip_circumference),
-      inseam: asOptionalNumber(body.inseam),
+      outseam: asOptionalNumber(body.outseam),
       raw_data: asOptionalRecord(body.rawData ?? body.raw_data)
     })
     .select("*")

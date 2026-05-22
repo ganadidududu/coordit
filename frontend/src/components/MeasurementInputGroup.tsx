@@ -8,7 +8,7 @@ const fields = [
   ["waist_width", "허리단면"],
   ["hip_width", "엉덩이단면"],
   ["rise", "밑위"],
-  ["inseam", "인심"]
+  ["outseam", "아웃심"]
 ] as const;
 
 export function MeasurementInputGroup() {

@@ -53,7 +53,7 @@ export default function WardrobePage() {
           waist_width: numberValue(formData, "waist_width"),
           hip_width: numberValue(formData, "hip_width"),
           rise: numberValue(formData, "rise"),
-          inseam: numberValue(formData, "inseam")
+          outseam: numberValue(formData, "outseam")
         }
       });
       event.currentTarget.reset();
@@ -83,7 +83,7 @@ export default function WardrobePage() {
             <Input name="waist_width" label="허리" type="number" step="0.1" />
             <Input name="hip_width" label="엉덩이" type="number" step="0.1" />
             <Input name="rise" label="밑위" type="number" step="0.1" />
-            <Input name="inseam" label="인심" type="number" step="0.1" />
+            <Input name="outseam" label="아웃심" type="number" step="0.1" />
           </div>
           <Button type="submit" disabled={loading}>{loading ? "Saving..." : "Save clothing item"}</Button>
         </FormSection>

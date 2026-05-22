@@ -31,7 +31,7 @@ interface BodyMeasurement {
   chest_circumference?: number;
   waist_circumference?: number;
   hip_circumference?: number;
-  inseam?: number;
+  outseam?: number;
   created_at: string;
 }
 
@@ -89,7 +89,7 @@ const PART_NAMES: Record<string, string> = {
   sleeve_length:  "소매 길이",
   total_length:   "총장",
   rise:           "밑위",
-  inseam:         "인심",
+  outseam:         "아웃심",
 };
 
 function partStatusToScore(status: "very_similar" | "slightly_small" | "slightly_large" | "large_gap"): number {
@@ -195,7 +195,7 @@ function MySizePanel({ onSaved }: MySizePanelProps) {
         body.waist_circumference = parseFloat(bottomFields.waist_width);
       if (Number.isFinite(parseFloat(bottomFields.hip_width)))
         body.hip_circumference = parseFloat(bottomFields.hip_width);
-      // Extra fields → raw_data JSONB (rise ≠ inseam; total_length/sleeve_length/thigh/hem have no direct column)
+      // Extra fields → raw_data JSONB (rise ≠ outseam; total_length/sleeve_length/thigh/hem have no direct column)
       const rawData: Record<string, number> = {};
       const extras: Array<[string, string]> = [
         ["total_length",        topFields.total_length],
@@ -362,7 +362,7 @@ const DETAIL_ROWS: Array<{
   { part: "가슴 단면",  bodyKey: "chest_circumference",  diffKey: "chest_width" },
   { part: "허리 단면",  bodyKey: "waist_circumference",  diffKey: "waist_width" },
   { part: "힙 단면",   bodyKey: "hip_circumference",    diffKey: "hip_width" },
-  { part: "인심",      bodyKey: "inseam",               diffKey: "inseam" },
+  { part: "아웃심",      bodyKey: "outseam",               diffKey: "outseam" },
 ];
 
 export default function FitLabPage() {

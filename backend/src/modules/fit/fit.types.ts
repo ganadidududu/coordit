@@ -30,11 +30,21 @@ export type MeasurementKey =
   | "waist_width"
   | "hip_width"
   | "rise"
-  | "inseam";
+  | "outseam";
 
 export type MeasurementMap = Partial<Record<MeasurementKey, number | null>>;
 export type MeasurementWeights = Partial<Record<MeasurementKey, number>>;
 export type MeasurementDiffs = Partial<Record<MeasurementKey, number>>;
+export type ReferenceVarianceImportance = "very_high" | "high" | "medium" | "low" | "very_low";
+
+export interface ReferenceVarianceInfo {
+  stdDev: number;
+  sampleCount: number;
+  importance: ReferenceVarianceImportance;
+}
+
+export type ReferenceVarianceMap = Partial<Record<MeasurementKey, ReferenceVarianceInfo>>;
+export type WeightingStrategy = "base_static" | "reference_variance_v1";
 
 export interface ReferenceClothingInput {
   id: string;
@@ -72,4 +82,8 @@ export interface SizeFitScore {
 export interface BestSizeRecommendation {
   recommended: SizeFitScore;
   allSizeScores: SizeFitScore[];
+  baseWeights: MeasurementWeights;
+  dynamicWeights: MeasurementWeights;
+  referenceVariance: ReferenceVarianceMap;
+  weightingStrategy: WeightingStrategy;
 }

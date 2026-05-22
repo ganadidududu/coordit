@@ -19,7 +19,7 @@ create table public.body_measurements (
   chest_circumference numeric(5,2),
   waist_circumference numeric(5,2),
   hip_circumference numeric(5,2),
-  inseam numeric(5,2),
+  outseam numeric(5,2),
   raw_data jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -52,7 +52,7 @@ create table public.clothing_sizes (
   waist_width numeric(5,2),
   hip_width numeric(5,2),
   rise numeric(5,2),
-  inseam numeric(5,2),
+  outseam numeric(5,2),
   raw_measurements jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -100,7 +100,7 @@ create table public.external_product_sizes (
   waist_width numeric(5,2),
   hip_width numeric(5,2),
   rise numeric(5,2),
-  inseam numeric(5,2),
+  outseam numeric(5,2),
   raw_size_data jsonb not null default '{}'::jsonb,
   parsing_status text not null default 'manual',
   measurement_source text not null default 'manual',

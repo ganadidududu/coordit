@@ -1,7 +1,7 @@
 # API Flow
 
 문서 상태: 최신  
-기준일: 2026-05-19  
+기준일: 2026-05-22  
 관련 코드: `backend/src/routes.ts`, `backend/src/modules/fit/fit.service.ts`
 
 이 문서는 MVP 사용 흐름을 API 호출 순서로 설명합니다.
@@ -54,6 +54,8 @@
 10. `fit_analysis_results`에 결과를 저장합니다.
 11. `recommendation_logs`에 `shown` 이벤트를 저장합니다.
 12. 추천 결과를 응답합니다.
+
+다중 기준 의류가 들어오면 기준 의류 간 표준편차를 이용해 `dynamicWeights`를 계산합니다. 변화 폭이 작은 측정 항목은 사용자의 일관된 선호로 보고 가중치를 높이고, 변화 폭이 큰 측정 항목은 상대적으로 낮춥니다.
 
 ## 추천 요청 예시
 

@@ -1,7 +1,7 @@
 # 프론트엔드 아키텍처
 
 문서 상태: 최신  
-기준일: 2026-05-19  
+기준일: 2026-05-22  
 관련 코드: `frontend/src/app/*`, `frontend/src/lib/*`, `frontend/src/components/*`
 
 coordit 프론트엔드는 Next.js App Router 기반 MVP입니다. 백엔드 Express API와 통신하며, access token을 API client에 주입해 보호 API를 호출합니다.
@@ -101,5 +101,6 @@ Authorization: Bearer <token>
 - API base URL은 `NEXT_PUBLIC_API_BASE_URL`로 바꿀 수 있습니다.
 - 보호 API 호출 전 token이 설정되어 있어야 합니다.
 - 측정값 필드는 백엔드 기준으로 snake_case를 사용해야 합니다.
+- 하의 길이 측정값은 `outseam`을 사용합니다.
 - 백엔드 route가 바뀌면 `frontend/src/lib/types.ts`와 화면 호출부를 함께 수정해야 합니다.
 - 화면별 데이터 흐름은 `frontend/ROUTES_AND_SCREENS.md`를 참고합니다.

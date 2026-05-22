@@ -23,7 +23,7 @@ export type MeasurementKey =
   | "waist_width"
   | "hip_width"
   | "rise"
-  | "inseam";
+  | "outseam";
 
 export type MeasurementMap = Partial<Record<MeasurementKey, number | null>>;
 

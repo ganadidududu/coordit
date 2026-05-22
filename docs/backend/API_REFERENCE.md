@@ -1,7 +1,7 @@
 # API Reference
 
 문서 상태: 최신  
-기준일: 2026-05-19  
+기준일: 2026-05-22  
 기준 코드: `backend/src/routes.ts`
 
 Base URL: `http://localhost:4000`
@@ -96,6 +96,7 @@ Supabase Auth 사용자를 만들고 `public.users` 프로필을 보장합니다
   "heightCm": 172,
   "weightKg": 64,
   "shoulderWidth": 42,
+  "outseam": 100,
   "rawData": {}
 }
 ```
@@ -140,7 +141,8 @@ Supabase Auth 사용자를 만들고 `public.users` 프로필을 보장합니다
   "total_length": 73,
   "shoulder_width": 48,
   "chest_width": 57,
-  "sleeve_length": 62
+  "sleeve_length": 62,
+  "outseam": 100
 }
 ```
 
@@ -210,6 +212,7 @@ Supabase Auth 사용자를 만들고 `public.users` 프로필을 보장합니다
   "shoulder_width": 49,
   "chest_width": 58,
   "sleeve_length": 63,
+  "outseam": 101,
   "parsingStatus": "manual",
   "measurementSource": "manual"
 }
@@ -254,10 +257,15 @@ Supabase Auth 사용자를 만들고 `public.users` 프로필을 보장합니다
   "recommendationConfidence": "medium",
   "diff": {
     "shoulder_width": 1,
-    "chest_width": 2
+    "chest_width": 2,
+    "outseam": 1
   },
+  "baseWeights": {},
+  "dynamicWeights": {},
+  "referenceVariance": {},
+  "weightingStrategy": "reference_variance_v1",
   "allSizeScores": [],
-  "algorithmVersion": "mvp_rule_v1"
+  "algorithmVersion": "mvp_rule_v1_2"
 }
 ```
 

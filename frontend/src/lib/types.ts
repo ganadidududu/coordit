@@ -21,8 +21,17 @@ export interface MeasurementFields {
   waist_width?: number;
   hip_width?: number;
   rise?: number;
-  inseam?: number;
+  outseam?: number;
 }
+
+export interface ReferenceVarianceInfo {
+  stdDev: number;
+  sampleCount: number;
+  importance: "very_high" | "high" | "medium" | "low" | "very_low";
+}
+
+export type MeasurementWeights = Partial<Record<keyof MeasurementFields, number>>;
+export type ReferenceVarianceMap = Partial<Record<keyof MeasurementFields, ReferenceVarianceInfo>>;
 
 export interface SizeScore {
   externalProductSizeId: string;
@@ -43,6 +52,10 @@ export interface FitRecommendationResponse {
   diff: MeasurementFields;
   partExplanations: string[];
   partStatuses: Partial<Record<keyof MeasurementFields, string>>;
+  baseWeights?: MeasurementWeights;
+  dynamicWeights?: MeasurementWeights;
+  referenceVariance?: ReferenceVarianceMap;
+  weightingStrategy?: "base_static" | "reference_variance_v1";
   allSizeScores: SizeScore[];
   algorithmVersion: string;
 }

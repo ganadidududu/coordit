@@ -1,6 +1,6 @@
 import type { Category, MeasurementKey, MeasurementWeights } from "./fit.types";
 
-export const ALGORITHM_VERSION = "mvp_rule_v1";
+export const ALGORITHM_VERSION = "mvp_rule_v1_2";
 
 export const TOP_CATEGORIES: Category[] = [
   "tshirt",
@@ -25,7 +25,7 @@ export const BOTTOM_WEIGHTS: MeasurementWeights = {
   waist_width: 0.35,
   hip_width: 0.25,
   rise: 0.15,
-  inseam: 0.25
+  outseam: 0.25
 };
 
 export const MEASUREMENT_LABELS: Record<MeasurementKey, string> = {
@@ -36,6 +36,5 @@ export const MEASUREMENT_LABELS: Record<MeasurementKey, string> = {
   waist_width: "허리단면",
   hip_width: "엉덩이단면",
   rise: "밑위",
-  inseam: "인심"
+  outseam: "아웃심"
 };
-

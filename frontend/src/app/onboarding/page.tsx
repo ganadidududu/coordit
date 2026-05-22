@@ -8,15 +8,15 @@ import { api } from "../../lib/api";
 
 // ─── Step 2: Measurements ────────────────────────────────────────────
 function StepMeasurements({ onNext, onPrev }: { onNext: () => void; onPrev: () => void }) {
-  const [values, setValues] = useState({ height: 172, weight: 62, shoulder: 44.5, chest: 98, waist: 82, hip: 96, inseam: 80 });
+  const [values, setValues] = useState({ height: 172, weight: 62, shoulder: 44.5, chest: 98, waist: 82, hip: 96, outseam: 80 });
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
-    api<Array<{ height_cm?: number; weight_kg?: number; shoulder_width?: number; chest_circumference?: number; waist_circumference?: number; hip_circumference?: number; inseam?: number }>>("/body-measurements")
+    api<Array<{ height_cm?: number; weight_kg?: number; shoulder_width?: number; chest_circumference?: number; waist_circumference?: number; hip_circumference?: number; outseam?: number }>>("/body-measurements")
       .then(list => {
         const m = Array.isArray(list) ? list[0] : null;
-        if (m?.height_cm) setValues(v => ({ ...v, height: m.height_cm ?? v.height, weight: m.weight_kg ?? v.weight, shoulder: m.shoulder_width ?? v.shoulder, chest: m.chest_circumference ?? v.chest, waist: m.waist_circumference ?? v.waist, hip: m.hip_circumference ?? v.hip, inseam: m.inseam ?? v.inseam }));
+        if (m?.height_cm) setValues(v => ({ ...v, height: m.height_cm ?? v.height, weight: m.weight_kg ?? v.weight, shoulder: m.shoulder_width ?? v.shoulder, chest: m.chest_circumference ?? v.chest, waist: m.waist_circumference ?? v.waist, hip: m.hip_circumference ?? v.hip, outseam: m.outseam ?? v.outseam }));
       })
       .catch(() => {});
   }, []);
@@ -24,7 +24,7 @@ function StepMeasurements({ onNext, onPrev }: { onNext: () => void; onPrev: () =
   const save = async () => {
     setSaving(true); setSaveError("");
     try {
-      await api("/body-measurements", { method: "POST", body: { height_cm: values.height, weight_kg: values.weight, shoulder_width: values.shoulder, chest_circumference: values.chest, waist_circumference: values.waist, hip_circumference: values.hip, inseam: values.inseam } });
+      await api("/body-measurements", { method: "POST", body: { height_cm: values.height, weight_kg: values.weight, shoulder_width: values.shoulder, chest_circumference: values.chest, waist_circumference: values.waist, hip_circumference: values.hip, outseam: values.outseam } });
       onNext();
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : "저장 오류가 발생했습니다.");
