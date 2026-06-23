@@ -184,6 +184,7 @@ export const recommendFit = async ({
         dynamicWeights: recommendation.dynamicWeights,
         referenceVariance: recommendation.referenceVariance,
         weightingStrategy: recommendation.weightingStrategy,
+        referenceProfile: recommendation.referenceProfile,
         diffs: best.diffs,
         partExplanations: best.partExplanations,
         partStatuses: best.partStatuses,
@@ -222,6 +223,7 @@ export const recommendFit = async ({
     dynamicWeights: recommendation.dynamicWeights,
     referenceVariance: recommendation.referenceVariance,
     weightingStrategy: recommendation.weightingStrategy,
+    referenceProfile: recommendation.referenceProfile,
     allSizeScores: recommendation.allSizeScores.map((score) => ({
       externalProductSizeId: score.externalProductSizeId,
       sizeLabel: score.sizeLabel,

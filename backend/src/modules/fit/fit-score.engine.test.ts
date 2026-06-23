@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import {
   calculateDynamicWeightsByReferenceVariance,
+  calculateFitScoreForReferenceProfile,
+  calculateReferenceFitProfile,
   calculateStandardDeviation,
   getWeightsByCategory,
   recommendBestSizeWithReferences
@@ -104,6 +106,43 @@ const externalSizes: ExternalProductSizeInput[] = [
 const recommendation = recommendBestSizeWithReferences(bottomReferences, externalSizes, "pants");
 assert.equal(recommendation.recommended.sizeLabel, "M");
 assert.ok(typeof recommendation.recommended.diffs.outseam === "number");
-assert.equal(recommendation.weightingStrategy, "reference_variance_v1");
+assert.equal(recommendation.weightingStrategy, "reference_profile_v1");
+assert.ok(recommendation.referenceProfile);
+
+const profile = calculateReferenceFitProfile(bottomReferences, recommendation.dynamicWeights);
+assert.deepEqual(profile.measurements, {
+  waist_width: 40.25,
+  hip_width: 52.5,
+  rise: 30,
+  outseam: 100.5
+});
+assert.equal(profile.tolerances.waist_width, 0.5);
+assert.equal(profile.tolerances.outseam, 1);
+
+const outlierResistantProfile = calculateReferenceFitProfile(
+  [
+    { id: "stable-a", fitType: "regular", measurements: { waist_width: 40 } },
+    { id: "stable-b", fitType: "regular", measurements: { waist_width: 40.2 } },
+    { id: "outlier", fitType: "regular", measurements: { waist_width: 50 } }
+  ],
+  { waist_width: 1 }
+);
+assert.ok((outlierResistantProfile.measurements.waist_width ?? 0) < 41);
+assert.equal(outlierResistantProfile.sampleCounts.waist_width, 3);
+
+const virtualPerfectSize: ExternalProductSizeInput = {
+  id: "size-virtual-perfect",
+  sizeLabel: "Virtual perfect",
+  fitType: "regular",
+  measurements: profile.measurements
+};
+const virtualPerfectScore = calculateFitScoreForReferenceProfile(
+  profile,
+  virtualPerfectSize,
+  "pants",
+  recommendation.dynamicWeights
+);
+assert.equal(virtualPerfectScore.finalFitScore, 100);
+assert.equal(virtualPerfectScore.weightedFitDistance, 0);
 
 console.log("fit-score.engine tests passed");

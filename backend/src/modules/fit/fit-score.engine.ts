@@ -14,7 +14,9 @@ import type {
   MeasurementDiffs,
   MeasurementKey,
   MeasurementMap,
+  MeasurementToleranceMap,
   MeasurementWeights,
+  ReferenceFitProfile,
   ReferenceVarianceImportance,
   ReferenceVarianceMap,
   ReferenceClothingInput,
@@ -23,8 +25,36 @@ import type {
 
 const round = (value: number, digits = 2): number => Number(value.toFixed(digits));
 
+const PROFILE_SCORE_PENALTY_PER_TOLERANCE = 30;
+const HUBER_OUTLIER_THRESHOLD = 1.5;
+
+const PROFILE_MIN_TOLERANCES: Record<MeasurementKey, number> = {
+  shoulder_width: 0.5,
+  chest_width: 0.75,
+  total_length: 1,
+  sleeve_length: 0.75,
+  waist_width: 0.5,
+  hip_width: 0.75,
+  rise: 0.5,
+  outseam: 1
+};
+
+const PROFILE_MAX_TOLERANCES: Record<MeasurementKey, number> = {
+  shoulder_width: 3,
+  chest_width: 5,
+  total_length: 6,
+  sleeve_length: 5,
+  waist_width: 3,
+  hip_width: 5,
+  rise: 4,
+  outseam: 8
+};
+
 const isNumber = (value: number | null | undefined): value is number =>
   typeof value === "number" && Number.isFinite(value);
+
+const clamp = (value: number, minimum: number, maximum: number): number =>
+  Math.max(minimum, Math.min(maximum, value));
 
 const getPartStatus = (diff: number) => {
   if (Math.abs(diff) <= 1) return "very_similar" as const;
@@ -78,6 +108,89 @@ export const collectReferenceMeasurementValues = (
     collected[key] = values;
     return collected;
   }, {});
+
+type WeightedMeasurementValue = { value: number; weight: number };
+
+const getReferencePreferenceWeight = (reference: ReferenceClothingInput): number =>
+  Math.max(1, reference.preferenceScore ?? 100);
+
+export const calculateWeightedMedian = (values: WeightedMeasurementValue[]): number => {
+  const usable = values
+    .filter(({ value, weight }) => isNumber(value) && isNumber(weight) && weight > 0)
+    .sort((a, b) => a.value - b.value);
+  const totalWeight = usable.reduce((sum, item) => sum + item.weight, 0);
+  if (totalWeight === 0) throw new Error("No weighted measurement values were provided");
+
+  const midpoint = totalWeight / 2;
+  let cumulativeWeight = 0;
+  for (const item of usable) {
+    cumulativeWeight += item.weight;
+    if (cumulativeWeight >= midpoint) return item.value;
+  }
+
+  return usable[usable.length - 1].value;
+};
+
+const calculateWeightedMad = (values: WeightedMeasurementValue[], center: number): number =>
+  calculateWeightedMedian(
+    values.map(({ value, weight }) => ({ value: Math.abs(value - center), weight }))
+  );
+
+/**
+ * Builds a virtual 100-point fit profile from several reference garments.
+ * A weighted median supplies an outlier-resistant center, then one Huber-weighted
+ * mean pass keeps preference-weighted detail without letting distant values dominate.
+ */
+export const calculateReferenceFitProfile = (
+  references: ReferenceClothingInput[],
+  weights: MeasurementWeights
+): ReferenceFitProfile => {
+  if (references.length === 0) throw new Error("At least one reference clothing item is required");
+
+  const measurements: MeasurementMap = {};
+  const tolerances: MeasurementToleranceMap = {};
+  const robustScales: MeasurementToleranceMap = {};
+  const sampleCounts: Partial<Record<MeasurementKey, number>> = {};
+
+  for (const key of getMeasurementKeysFromWeights(weights)) {
+    const values = references.flatMap((reference) => {
+      const value = reference.measurements[key];
+      return isNumber(value) ? [{ value, weight: getReferencePreferenceWeight(reference) }] : [];
+    });
+    if (values.length === 0) continue;
+
+    const center = calculateWeightedMedian(values);
+    const robustScale = round(calculateWeightedMad(values, center) * 1.4826, 3);
+    const toleranceFloor = PROFILE_MIN_TOLERANCES[key];
+    const tolerance = round(
+      clamp(robustScale, toleranceFloor, PROFILE_MAX_TOLERANCES[key]),
+      3
+    );
+    const huberLimit = HUBER_OUTLIER_THRESHOLD * Math.max(robustScale, toleranceFloor);
+    const adjustedValues = values.map((item) => {
+      const distance = Math.abs(item.value - center);
+      const outlierWeight = distance === 0 ? 1 : Math.min(1, huberLimit / distance);
+      return { ...item, weight: item.weight * outlierWeight };
+    });
+    const adjustedWeightTotal = adjustedValues.reduce((sum, item) => sum + item.weight, 0);
+
+    measurements[key] = round(
+      adjustedValues.reduce((sum, item) => sum + item.value * item.weight, 0) / adjustedWeightTotal,
+      3
+    );
+    tolerances[key] = tolerance;
+    robustScales[key] = robustScale;
+    sampleCounts[key] = values.length;
+  }
+
+  return {
+    measurements,
+    tolerances,
+    robustScales,
+    sampleCounts,
+    strategy: "weighted_huber_profile_v1"
+  };
+};
 
 const getImportanceByStdDev = (stdDev: number): ReferenceVarianceImportance => {
   if (stdDev <= 0.5) return "very_high";
@@ -344,6 +457,67 @@ export const calculateFitScoreForSize = (
   };
 };
 
+/**
+ * Scores a size against a virtual reference profile. Each raw measurement gap is
+ * divided by that measurement's learned tolerance before dynamic weights are applied.
+ */
+export const calculateFitScoreForReferenceProfile = (
+  profile: ReferenceFitProfile,
+  externalProductSize: ExternalProductSizeInput,
+  category: Category,
+  weights: MeasurementWeights
+): SizeFitScore => {
+  const diffs = calculateDiff(profile.measurements, externalProductSize.measurements);
+  let weightedDistance = 0;
+  let usedWeight = 0;
+
+  for (const [key, weight] of Object.entries(weights) as [MeasurementKey, number][]) {
+    const diff = diffs[key];
+    const tolerance = profile.tolerances[key];
+    if (!isNumber(diff) || !isNumber(tolerance) || tolerance <= 0) continue;
+    weightedDistance += (Math.abs(diff) / tolerance) * weight;
+    usedWeight += weight;
+  }
+
+  if (usedWeight === 0) throw new Error("No comparable measurements were provided");
+
+  const normalizedFitDistance = round(weightedDistance / usedWeight, 3);
+  const baseScore = round(clamp(100 - normalizedFitDistance * PROFILE_SCORE_PENALTY_PER_TOLERANCE, 0, 100));
+  const { finalScore, penalty } = applyFitTypePenalty(
+    baseScore,
+    externalProductSize.fitType ?? "regular",
+    diffs
+  );
+  const fitLabel = getFitLabel(finalScore, diffs, category);
+  const comparedMeasurements = (Object.keys(weights) as MeasurementKey[]).filter((key) =>
+    isNumber(diffs[key]) && isNumber(profile.tolerances[key])
+  );
+  const result: SizeFitScore = {
+    externalProductSizeId: externalProductSize.id,
+    sizeLabel: externalProductSize.sizeLabel,
+    fitScore: baseScore,
+    finalFitScore: finalScore,
+    fitLabel,
+    fitComment: "",
+    partExplanations: [],
+    partStatuses: Object.fromEntries(
+      (Object.entries(diffs) as [MeasurementKey, number][]).map(([key, diff]) => [key, getPartStatus(diff)])
+    ),
+    recommendationConfidence: "low",
+    weightedFitDistance: normalizedFitDistance,
+    penalty,
+    diffs,
+    comparedMeasurements,
+    algorithmVersion: ALGORITHM_VERSION
+  };
+
+  return {
+    ...result,
+    fitComment: generateFitComment(result),
+    partExplanations: generatePartExplanations(diffs)
+  };
+};
+
 export const calculateWeightedScoreForSize = (
   referenceClothing: ReferenceClothingInput[],
   externalProductSize: ExternalProductSizeInput,
@@ -437,11 +611,12 @@ export const recommendBestSizeWithReferences = (
   }
 
   const baseWeights = normalizeWeights(getWeightsByCategory(category));
-  const { dynamicWeights, referenceVariance, weightingStrategy } =
+  const { dynamicWeights, referenceVariance } =
     calculateDynamicWeightsByReferenceVariance(baseWeights, referenceClothing);
+  const referenceProfile = calculateReferenceFitProfile(referenceClothing, dynamicWeights);
 
   const allSizeScores = externalProductSizes
-    .map((size) => calculateWeightedScoreForSize(referenceClothing, size, category, dynamicWeights))
+    .map((size) => calculateFitScoreForReferenceProfile(referenceProfile, size, category, dynamicWeights))
     .sort((a, b) => b.finalFitScore - a.finalFitScore);
 
   return {
@@ -466,6 +641,7 @@ export const recommendBestSizeWithReferences = (
     baseWeights,
     dynamicWeights,
     referenceVariance,
-    weightingStrategy
+    weightingStrategy: "reference_profile_v1",
+    referenceProfile
   };
 };

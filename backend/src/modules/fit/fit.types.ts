@@ -44,7 +44,16 @@ export interface ReferenceVarianceInfo {
 }
 
 export type ReferenceVarianceMap = Partial<Record<MeasurementKey, ReferenceVarianceInfo>>;
-export type WeightingStrategy = "base_static" | "reference_variance_v1";
+export type MeasurementToleranceMap = Partial<Record<MeasurementKey, number>>;
+export type WeightingStrategy = "base_static" | "reference_variance_v1" | "reference_profile_v1";
+
+export interface ReferenceFitProfile {
+  measurements: MeasurementMap;
+  tolerances: MeasurementToleranceMap;
+  robustScales: MeasurementToleranceMap;
+  sampleCounts: Partial<Record<MeasurementKey, number>>;
+  strategy: "weighted_huber_profile_v1";
+}
 
 export interface ReferenceClothingInput {
   id: string;
@@ -86,4 +95,5 @@ export interface BestSizeRecommendation {
   dynamicWeights: MeasurementWeights;
   referenceVariance: ReferenceVarianceMap;
   weightingStrategy: WeightingStrategy;
+  referenceProfile?: ReferenceFitProfile;
 }

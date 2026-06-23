@@ -32,6 +32,15 @@ export interface ReferenceVarianceInfo {
 
 export type MeasurementWeights = Partial<Record<keyof MeasurementFields, number>>;
 export type ReferenceVarianceMap = Partial<Record<keyof MeasurementFields, ReferenceVarianceInfo>>;
+export type MeasurementToleranceMap = Partial<Record<keyof MeasurementFields, number>>;
+
+export interface ReferenceFitProfile {
+  measurements: MeasurementFields;
+  tolerances: MeasurementToleranceMap;
+  robustScales: MeasurementToleranceMap;
+  sampleCounts: Partial<Record<keyof MeasurementFields, number>>;
+  strategy: "weighted_huber_profile_v1";
+}
 
 export interface SizeScore {
   externalProductSizeId: string;
@@ -55,7 +64,8 @@ export interface FitRecommendationResponse {
   baseWeights?: MeasurementWeights;
   dynamicWeights?: MeasurementWeights;
   referenceVariance?: ReferenceVarianceMap;
-  weightingStrategy?: "base_static" | "reference_variance_v1";
+  weightingStrategy?: "base_static" | "reference_variance_v1" | "reference_profile_v1";
+  referenceProfile?: ReferenceFitProfile;
   allSizeScores: SizeScore[];
   algorithmVersion: string;
 }

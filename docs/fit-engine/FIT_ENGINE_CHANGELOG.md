@@ -1,7 +1,7 @@
 # Fit Engine 변경 이력
 
 문서 상태: 최신  
-기준일: 2026-05-22  
+기준일: 2026-06-23
 관련 문서: `fit-engine/FIT_ENGINE.md`
 
 이 문서는 추천 엔진의 변화와 다음 개선 후보를 기록합니다. 현재 실제 동작 기준 문서는 `FIT_ENGINE.md`입니다.
@@ -41,22 +41,33 @@
 - 하의 측정 항목을 `inseam`에서 `outseam`으로 변경
 - `outseam`은 MVP 단계에서 바지 전체 기장 비교에 더 직관적인 항목으로 사용
 
+## v1.3 Virtual Reference Profile
+
+현재 코드에 반영된 주요 개선입니다.
+
+- 다중 기준 의류의 개별 점수 평균을 제거하고 가상 100점 핏 프로필 기반 비교로 변경
+- `preference_score`와 가중 중앙값을 이용해 항목별 중심값 계산
+- Huber 방식의 이상치 완화로 유난히 큰/작은 기준 의류의 영향 축소
+- MAD 기반 항목별 허용 오차를 적용해 cm 차이를 정규화
+- 가상 프로필과 동일한 후보는 100점을 받을 수 있음
+- `result_details`와 API 응답에 `referenceProfile` 저장/반환
+
 ## 다음 개선 후보
 
-### v1.3 Measurement Input Normalization
+### v1.4 Measurement Input Normalization
 
 - camelCase 측정값 입력 지원
 - cm/mm 단위 정규화
 - 문자열 기반 치수 파싱
 - 필수 측정값 부족 시 더 명확한 에러 메시지
 
-### v1.4 Feedback-aware Score Adjustment
+### v1.5 Feedback-aware Score Adjustment
 
 - `user_feedback` 기반 penalty 조정
 - 사용자별 선호 여유분 학습
 - 카테고리별 오차 보정
 
-### v1.5 Product Parsing Confidence
+### v1.6 Product Parsing Confidence
 
 - OCR/URL 파싱 confidence를 추천 confidence에 반영
 - `measurement_source`별 신뢰도 차등 적용
