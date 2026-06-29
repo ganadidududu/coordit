@@ -1,7 +1,7 @@
 # Fit Engine 변경 이력
 
 문서 상태: 최신  
-기준일: 2026-06-23
+기준일: 2026-06-29
 관련 문서: `fit-engine/FIT_ENGINE.md`
 
 이 문서는 추천 엔진의 변화와 다음 개선 후보를 기록합니다. 현재 실제 동작 기준 문서는 `FIT_ENGINE.md`입니다.
@@ -52,22 +52,34 @@
 - 가상 프로필과 동일한 후보는 100점을 받을 수 있음
 - `result_details`와 API 응답에 `referenceProfile` 저장/반환
 
+## v1.4 Feedback-adjusted Profile
+
+현재 코드에 반영된 주요 개선입니다.
+
+- `actualFitLabel` 기반 사용자/카테고리별 전체 핏 방향 보정 추가
+- `partFeedback` 기반 부위별 offset 보정 추가
+- 반복적으로 문제가 발생한 부위의 weight multiplier 적용
+- `user_feedback.part_feedback` JSONB 컬럼 추가
+- 추천 실행 시 최근 피드백을 `feedbackProfile`로 요약
+- 추천 결과의 `result_details`와 API 응답에 `feedbackProfile` 저장/반환
+- `weightingStrategy = "feedback_adjusted_profile_v1"` 추가
+
 ## 다음 개선 후보
 
-### v1.4 Measurement Input Normalization
+### v1.5 Measurement Input Normalization
 
 - camelCase 측정값 입력 지원
 - cm/mm 단위 정규화
 - 문자열 기반 치수 파싱
 - 필수 측정값 부족 시 더 명확한 에러 메시지
 
-### v1.5 Feedback-aware Score Adjustment
+### v1.6 Feedback-aware Score Adjustment
 
-- `user_feedback` 기반 penalty 조정
-- 사용자별 선호 여유분 학습
-- 카테고리별 오차 보정
+- 피드백 보정값의 decay 또는 기간별 가중치
+- 사용자별 confidence calibration
+- 피드백 부족 사용자에 대한 cohort fallback
 
-### v1.6 Product Parsing Confidence
+### v1.7 Product Parsing Confidence
 
 - OCR/URL 파싱 confidence를 추천 confidence에 반영
 - `measurement_source`별 신뢰도 차등 적용

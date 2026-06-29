@@ -268,6 +268,7 @@ OCR/URL 파싱 확장 준비 컬럼:
 - `purchased_size_label`
 - `actual_fit_rating`
 - `actual_fit_label`
+- `part_feedback`
 - `comment`
 - `raw_data`
 - `created_at`
@@ -276,6 +277,25 @@ OCR/URL 파싱 확장 준비 컬럼:
 
 - `user_id`는 `users(id)`를 참조한다.
 - `fit_analysis_result_id`는 `fit_analysis_results(id)`를 참조한다.
+
+`part_feedback`은 부위별 실제 핏 평가를 저장하는 JSON 객체다.
+
+예:
+
+```json
+{
+  "chest_width": "too_small",
+  "sleeve_length": "good"
+}
+```
+
+허용 label:
+
+- `too_small`
+- `slightly_small`
+- `good`
+- `slightly_large`
+- `too_large`
 
 ### `recommendation_logs`
 
@@ -393,9 +413,11 @@ RLS 대상:
 
 - `supabase/migrations/20260511_add_styling_looks.sql`
 - `supabase/migrations/20260522_rename_inseam_to_outseam.sql`
+- `supabase/migrations/20260629_add_part_feedback_to_user_feedback.sql`
 
 Migration notes:
 
 - Fit Engine v1.2에서 하의 길이 측정 항목을 `inseam`에서 `outseam`으로 변경했다.
 - 기존 운영 데이터가 있다면 `inseam` 값을 `outseam`으로 이전할지 별도 판단이 필요하다.
 - Styling 확장용 테이블은 별도 migration에 포함되어 있다.
+- MVP+2 피드백 보정을 위해 `user_feedback.part_feedback` JSONB 컬럼을 추가했다.

@@ -4,6 +4,7 @@ import { areCategoriesCompatible } from "../../shared/utils/category-compatibili
 import { createHttpError } from "../../shared/utils/http-error";
 import { rowToMeasurements } from "../../shared/utils/measurements";
 import { ALGORITHM_VERSION } from "./fit.constants";
+import { buildUserFeedbackFitProfile } from "./feedback-fit-profile";
 import { recommendBestSizeWithReferences } from "./fit-score.engine";
 import type {
   Category,
@@ -158,10 +159,16 @@ export const recommendFit = async ({
     measurements: rowToMeasurements(size)
   }));
 
+  const feedbackProfile = await buildUserFeedbackFitProfile(
+    userId,
+    externalProduct.category as Category
+  );
+
   const recommendation = recommendBestSizeWithReferences(
     referenceInput,
     sizeInputs,
-    externalProduct.category as Category
+    externalProduct.category as Category,
+    feedbackProfile
   );
   const best = recommendation.recommended;
 
@@ -185,6 +192,7 @@ export const recommendFit = async ({
         referenceVariance: recommendation.referenceVariance,
         weightingStrategy: recommendation.weightingStrategy,
         referenceProfile: recommendation.referenceProfile,
+        feedbackProfile: recommendation.feedbackProfile,
         diffs: best.diffs,
         partExplanations: best.partExplanations,
         partStatuses: best.partStatuses,
@@ -224,6 +232,7 @@ export const recommendFit = async ({
     referenceVariance: recommendation.referenceVariance,
     weightingStrategy: recommendation.weightingStrategy,
     referenceProfile: recommendation.referenceProfile,
+    feedbackProfile: recommendation.feedbackProfile,
     allSizeScores: recommendation.allSizeScores.map((score) => ({
       externalProductSizeId: score.externalProductSizeId,
       sizeLabel: score.sizeLabel,

@@ -9,6 +9,7 @@ import type {
   BestSizeRecommendation,
   Category,
   ExternalProductSizeInput,
+  FeedbackFitProfile,
   FitLabel,
   FitType,
   MeasurementDiffs,
@@ -267,6 +268,39 @@ export const calculateDynamicWeightsByReferenceVariance = (
     referenceVariance,
     weightingStrategy: Object.keys(referenceVariance).length > 0 ? "reference_variance_v1" : "base_static"
   };
+};
+
+export const applyFeedbackOffsetsToProfile = (
+  profile: ReferenceFitProfile,
+  feedbackProfile?: FeedbackFitProfile
+): ReferenceFitProfile => {
+  if (!feedbackProfile || feedbackProfile.sampleCount === 0) return profile;
+
+  const measurements: MeasurementMap = { ...profile.measurements };
+  for (const [key, offset] of Object.entries(feedbackProfile.measurementOffsets) as [MeasurementKey, number][]) {
+    const current = measurements[key];
+    if (isNumber(current) && isNumber(offset)) {
+      measurements[key] = round(current + offset, 3);
+    }
+  }
+
+  return { ...profile, measurements };
+};
+
+export const applyFeedbackWeightMultipliers = (
+  weights: MeasurementWeights,
+  feedbackProfile?: FeedbackFitProfile
+): MeasurementWeights => {
+  if (!feedbackProfile || feedbackProfile.sampleCount === 0) return weights;
+
+  const adjustedWeights = (Object.entries(weights) as [MeasurementKey, number][])
+    .reduce<MeasurementWeights>((adjusted, [key, weight]) => {
+      const multiplier = feedbackProfile.weightMultipliers[key] ?? 1;
+      adjusted[key] = weight * multiplier;
+      return adjusted;
+    }, {});
+
+  return normalizeWeights(adjustedWeights);
 };
 
 export const calculateDiff = (
@@ -604,7 +638,8 @@ export const recommendBestSize = (
 export const recommendBestSizeWithReferences = (
   referenceClothing: ReferenceClothingInput[],
   externalProductSizes: ExternalProductSizeInput[],
-  category: Category
+  category: Category,
+  feedbackProfile?: FeedbackFitProfile
 ): BestSizeRecommendation => {
   if (externalProductSizes.length === 0) {
     throw new Error("At least one external product size is required");
@@ -614,9 +649,12 @@ export const recommendBestSizeWithReferences = (
   const { dynamicWeights, referenceVariance } =
     calculateDynamicWeightsByReferenceVariance(baseWeights, referenceClothing);
   const referenceProfile = calculateReferenceFitProfile(referenceClothing, dynamicWeights);
+  const adjustedProfile = applyFeedbackOffsetsToProfile(referenceProfile, feedbackProfile);
+  const adjustedWeights = applyFeedbackWeightMultipliers(dynamicWeights, feedbackProfile);
+  const hasFeedbackAdjustment = Boolean(feedbackProfile && feedbackProfile.sampleCount > 0);
 
   const allSizeScores = externalProductSizes
-    .map((size) => calculateFitScoreForReferenceProfile(referenceProfile, size, category, dynamicWeights))
+    .map((size) => calculateFitScoreForReferenceProfile(adjustedProfile, size, category, adjustedWeights))
     .sort((a, b) => b.finalFitScore - a.finalFitScore);
 
   return {
@@ -639,9 +677,10 @@ export const recommendBestSizeWithReferences = (
       )
     })),
     baseWeights,
-    dynamicWeights,
+    dynamicWeights: adjustedWeights,
     referenceVariance,
-    weightingStrategy: "reference_profile_v1",
-    referenceProfile
+    weightingStrategy: hasFeedbackAdjustment ? "feedback_adjusted_profile_v1" : "reference_profile_v1",
+    referenceProfile: adjustedProfile,
+    feedbackProfile
   };
 };

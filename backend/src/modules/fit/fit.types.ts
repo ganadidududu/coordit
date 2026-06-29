@@ -36,6 +36,8 @@ export type MeasurementMap = Partial<Record<MeasurementKey, number | null>>;
 export type MeasurementWeights = Partial<Record<MeasurementKey, number>>;
 export type MeasurementDiffs = Partial<Record<MeasurementKey, number>>;
 export type ReferenceVarianceImportance = "very_high" | "high" | "medium" | "low" | "very_low";
+export type FeedbackFitLabel = "too_small" | "slightly_small" | "good" | "slightly_large" | "too_large";
+export type PartFeedbackMap = Partial<Record<MeasurementKey, FeedbackFitLabel>>;
 
 export interface ReferenceVarianceInfo {
   stdDev: number;
@@ -45,7 +47,11 @@ export interface ReferenceVarianceInfo {
 
 export type ReferenceVarianceMap = Partial<Record<MeasurementKey, ReferenceVarianceInfo>>;
 export type MeasurementToleranceMap = Partial<Record<MeasurementKey, number>>;
-export type WeightingStrategy = "base_static" | "reference_variance_v1" | "reference_profile_v1";
+export type WeightingStrategy =
+  | "base_static"
+  | "reference_variance_v1"
+  | "reference_profile_v1"
+  | "feedback_adjusted_profile_v1";
 
 export interface ReferenceFitProfile {
   measurements: MeasurementMap;
@@ -53,6 +59,17 @@ export interface ReferenceFitProfile {
   robustScales: MeasurementToleranceMap;
   sampleCounts: Partial<Record<MeasurementKey, number>>;
   strategy: "weighted_huber_profile_v1";
+}
+
+export interface FeedbackFitProfile {
+  category: Category;
+  sampleCount: number;
+  overallSampleCount: number;
+  partSampleCount: number;
+  measurementOffsets: MeasurementDiffs;
+  weightMultipliers: MeasurementWeights;
+  partFeedbackCounts: Partial<Record<MeasurementKey, Partial<Record<FeedbackFitLabel, number>>>>;
+  strategy: "feedback_offset_weight_v1";
 }
 
 export interface ReferenceClothingInput {
@@ -96,4 +113,5 @@ export interface BestSizeRecommendation {
   referenceVariance: ReferenceVarianceMap;
   weightingStrategy: WeightingStrategy;
   referenceProfile?: ReferenceFitProfile;
+  feedbackProfile?: FeedbackFitProfile;
 }

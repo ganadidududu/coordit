@@ -134,6 +134,7 @@ create table public.user_feedback (
   purchased_size_label text,
   actual_fit_rating integer check (actual_fit_rating between 1 and 5),
   actual_fit_label text,
+  part_feedback jsonb not null default '{}'::jsonb,
   comment text,
   raw_data jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()

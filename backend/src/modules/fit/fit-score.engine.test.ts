@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import {
+  applyFeedbackOffsetsToProfile,
+  applyFeedbackWeightMultipliers,
   calculateDynamicWeightsByReferenceVariance,
   calculateFitScoreForReferenceProfile,
   calculateReferenceFitProfile,
@@ -7,7 +9,12 @@ import {
   getWeightsByCategory,
   recommendBestSizeWithReferences
 } from "./fit-score.engine";
-import type { ExternalProductSizeInput, MeasurementWeights, ReferenceClothingInput } from "./fit.types";
+import type {
+  ExternalProductSizeInput,
+  FeedbackFitProfile,
+  MeasurementWeights,
+  ReferenceClothingInput
+} from "./fit.types";
 
 const sumWeights = (weights: MeasurementWeights): number =>
   Number(Object.values(weights).reduce((sum, weight) => sum + (weight ?? 0), 0).toFixed(4));
@@ -144,5 +151,46 @@ const virtualPerfectScore = calculateFitScoreForReferenceProfile(
 );
 assert.equal(virtualPerfectScore.finalFitScore, 100);
 assert.equal(virtualPerfectScore.weightedFitDistance, 0);
+
+const feedbackProfile: FeedbackFitProfile = {
+  category: "pants",
+  sampleCount: 2,
+  overallSampleCount: 1,
+  partSampleCount: 1,
+  measurementOffsets: { waist_width: 1, hip_width: 1 },
+  weightMultipliers: { waist_width: 1.2 },
+  partFeedbackCounts: { waist_width: { too_small: 1 } },
+  strategy: "feedback_offset_weight_v1"
+};
+const feedbackAdjustedProfile = applyFeedbackOffsetsToProfile(profile, feedbackProfile);
+assert.equal(feedbackAdjustedProfile.measurements.waist_width, 41.25);
+assert.equal(feedbackAdjustedProfile.measurements.hip_width, 53.5);
+
+const feedbackAdjustedWeights = applyFeedbackWeightMultipliers(recommendation.dynamicWeights, feedbackProfile);
+assert.equal(sumWeights(feedbackAdjustedWeights), 1);
+assert.ok((feedbackAdjustedWeights.waist_width ?? 0) > (recommendation.dynamicWeights.waist_width ?? 0));
+
+const feedbackRecommendation = recommendBestSizeWithReferences(
+  bottomReferences,
+  [
+    {
+      id: "size-original",
+      sizeLabel: "Original",
+      fitType: "regular",
+      measurements: profile.measurements
+    },
+    {
+      id: "size-feedback-fit",
+      sizeLabel: "Feedback fit",
+      fitType: "regular",
+      measurements: feedbackAdjustedProfile.measurements
+    }
+  ],
+  "pants",
+  feedbackProfile
+);
+assert.equal(feedbackRecommendation.recommended.sizeLabel, "Feedback fit");
+assert.equal(feedbackRecommendation.weightingStrategy, "feedback_adjusted_profile_v1");
+assert.equal(feedbackRecommendation.feedbackProfile?.sampleCount, 2);
 
 console.log("fit-score.engine tests passed");

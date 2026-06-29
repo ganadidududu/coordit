@@ -1,6 +1,6 @@
 import type { Category, MeasurementKey, MeasurementWeights } from "./fit.types";
 
-export const ALGORITHM_VERSION = "mvp_rule_v1_3";
+export const ALGORITHM_VERSION = "mvp_rule_v1_4";
 
 export const TOP_CATEGORIES: Category[] = [
   "tshirt",

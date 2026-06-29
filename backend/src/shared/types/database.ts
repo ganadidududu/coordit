@@ -121,3 +121,16 @@ export interface FitAnalysisResultRow {
   result_details: JsonObject;
   created_at: string;
 }
+
+export interface UserFeedbackRow {
+  id: string;
+  user_id: string;
+  fit_analysis_result_id: string;
+  purchased_size_label: string | null;
+  actual_fit_rating: number | null;
+  actual_fit_label: string | null;
+  part_feedback: JsonObject;
+  comment: string | null;
+  raw_data: JsonObject;
+  created_at: string;
+}
