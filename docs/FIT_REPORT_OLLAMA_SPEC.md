@@ -518,14 +518,34 @@ curl http://localhost:11434/api/generate \
 
 ### 9.1 테스트 단계
 
-1. Fit Lab에서 추천 실행
-2. 추천 결과 JSON 확보
-3. 앱 또는 테스트 스크립트가 `reportInput` 생성
-4. 로컬 Ollama API 호출
-5. LLM JSON 응답 파싱
-6. 앱에서 그래프와 리포트 함께 표시
+현재 테스트 브랜치에서는 `fit-score-tester.html`이 아래 흐름을 한 파일 안에서 수행한다.
+
+1. 기준 의류, 피드백, 상품 사이즈 후보 입력
+2. Fit Score Engine v1.4 계산 재현
+3. `reportInput` 생성
+4. `chartData` 생성
+5. Ollama prompt 생성
+6. 로컬 Ollama API 호출
+7. LLM JSON 응답 파싱
+8. 리포트 화면 렌더링
+9. Ollama 실패 시 fallback 리포트 표시
 
 테스트 단계에서는 DB 저장 없이 on-demand 생성으로 충분하다.
+
+테스터 기본값:
+
+- URL: `http://localhost:11434/api/generate`
+- Model: `llama3.1:8b`
+- Temperature: `0.2`
+- Stream: `false`
+
+실행 전 확인:
+
+```bash
+ollama run llama3.1:8b
+```
+
+브라우저에서 직접 Ollama를 호출하므로 로컬 환경에 따라 CORS 설정이 필요할 수 있다.
 
 ### 9.2 백엔드 API 후보
 

@@ -303,6 +303,50 @@
       line-height: 1.55;
     }
 
+    .report-layout {
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .report-box {
+      min-height: 120px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      padding: 14px;
+    }
+
+    .report-box h3 {
+      margin-bottom: 8px;
+    }
+
+    .report-box ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .report-json {
+      max-height: 420px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font: 12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--code);
+    }
+
+    .status-line {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
     .error {
       display: none;
       margin-top: 12px;
@@ -332,6 +376,7 @@
       .config-grid, .fields, .candidate-fields, .feedback-fields, .weights-grid, .step-grid, .summary {
         grid-template-columns: 1fr 1fr;
       }
+      .report-layout { grid-template-columns: 1fr; }
       .stat.best { grid-column: span 2; }
     }
 
@@ -569,6 +614,64 @@
       <tbody id="results-body"></tbody>
     </table>
   </section>
+
+  <section class="card">
+    <div class="head">
+      <div>
+        <h2>7. Local LLM Report</h2>
+        <p>현재 계산 결과를 report payload로 만들고 로컬 Ollama 8B 모델에 전달해 실제 사용자 리포트를 생성합니다.</p>
+      </div>
+      <span class="pill warn" id="ollama-status">not requested</span>
+    </div>
+
+    <div class="report-layout">
+      <div>
+        <div class="config-grid">
+          <div>
+            <label for="ollama-url">Ollama URL</label>
+            <input id="ollama-url" value="http://localhost:11434/api/generate">
+          </div>
+          <div>
+            <label for="ollama-model">Model</label>
+            <input id="ollama-model" value="llama3.1:8b">
+          </div>
+          <div>
+            <label for="report-style">Report style</label>
+            <select id="report-style">
+              <option value="concise_but_explanatory" selected>concise_but_explanatory</option>
+              <option value="detailed">detailed</option>
+              <option value="short">short</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions" style="margin-top: 12px;">
+          <button class="primary" id="generate-report">Ollama 리포트 생성</button>
+          <button class="secondary" id="preview-payload">Payload 미리보기</button>
+          <button class="secondary" id="fallback-report">Fallback 리포트 생성</button>
+        </div>
+        <p class="note" style="margin-top: 12px;">
+          브라우저에서 Ollama를 직접 호출합니다. 연결이 실패하면 Ollama 실행 여부, 모델 설치 여부,
+          CORS 설정을 확인하세요. 예: <span class="mono">ollama run llama3.1:8b</span>
+        </p>
+        <div class="error" id="report-error"></div>
+      </div>
+
+      <div class="report-box">
+        <div class="status-line">
+          <span class="pill" id="report-model">model: -</span>
+          <span class="pill" id="report-source">source: -</span>
+        </div>
+        <div id="report-output" style="margin-top: 12px;">
+          <p>아직 생성된 리포트가 없습니다. 왼쪽 버튼으로 현재 계산 결과를 Ollama에 보내보세요.</p>
+        </div>
+      </div>
+    </div>
+
+    <details style="margin-top: 14px;">
+      <summary><strong>Report input JSON / prompt 확인</strong></summary>
+      <pre class="report-json" id="report-debug">{}</pre>
+    </details>
+  </section>
 </main>
 
 <script>
@@ -675,6 +778,7 @@
   let referenceId = 0;
   let candidateId = 0;
   let feedbackId = 0;
+  let latestState = null;
 
   const input = (id, value = "", step = "0.1") =>
     `<input id="${id}" type="number" min="0" step="${step}" value="${value ?? ""}">`;
@@ -1200,6 +1304,7 @@
   }
 
   function render(state) {
+    latestState = state;
     const hasFeedback = Boolean(state.feedbackProfile);
     $("strategy-pill").textContent = hasFeedback ? "feedback_adjusted_profile_v1" : "reference_profile_v1";
     $("best-size").textContent = state.scored[0].name;
@@ -1314,6 +1419,287 @@
     `).join("");
   }
 
+  function measurementRowsForReport(state) {
+    const best = state.scored[0];
+    return measurementKeys()
+      .filter((key) => isNumber(state.adjustedProfile[key]) && isNumber(best.diffs[key]))
+      .map((key) => ({
+        key,
+        label: LABELS[key],
+        ideal: round(state.adjustedProfile[key], 3),
+        product: round(state.adjustedProfile[key] + best.diffs[key], 3),
+        diff: best.diffs[key],
+        unit: "cm",
+        weight: state.finalWeights[key],
+        tolerance: state.referenceProfile.tolerances[key],
+        status: best.details[key]?.status ?? partStatus(best.diffs[key])
+      }));
+  }
+
+  function buildChartData(state) {
+    const measurements = measurementRowsForReport(state);
+    return {
+      idealVsProduct: measurements.map((row) => ({
+        measurement: row.key,
+        label: row.label,
+        ideal: row.ideal,
+        product: row.product,
+        diff: row.diff,
+        status: row.status
+      })),
+      differenceBar: measurements.map((row) => ({
+        measurement: row.key,
+        label: row.label,
+        diff: row.diff,
+        direction: row.diff > 0 ? "larger" : row.diff < 0 ? "smaller" : "same",
+        status: row.status
+      })),
+      sizeScoreRanking: state.scored.map((score) => ({
+        sizeLabel: score.name,
+        fitScore: score.finalFitScore,
+        fitLabel: score.fitLabel,
+        weightedFitDistance: score.weightedFitDistance,
+        recommendationConfidence: score.recommendationConfidence
+      })),
+      feedbackAdjustment: measurementKeys().map((key) => ({
+        measurement: key,
+        label: LABELS[key],
+        offset: state.feedbackProfile?.measurementOffsets[key] ?? 0,
+        weightMultiplier: state.feedbackProfile?.weightMultipliers[key] ?? 1
+      }))
+    };
+  }
+
+  function buildReportInput(state) {
+    const best = state.scored[0];
+    const second = state.scored[1];
+    const measurements = measurementRowsForReport(state);
+    return {
+      locale: "ko-KR",
+      reportStyle: $("report-style").value,
+      engineVersion: ALGORITHM_VERSION,
+      recommendation: {
+        recommendedSize: best.name,
+        fitScore: best.finalFitScore,
+        fitLabel: best.fitLabel,
+        recommendationConfidence: best.recommendationConfidence,
+        weightedFitDistance: best.weightedFitDistance,
+        scoreGapToSecond: second ? round(best.finalFitScore - second.finalFitScore, 2) : null,
+        weightingStrategy: $("strategy-pill").textContent
+      },
+      targetProduct: {
+        productName: "테스터 입력 상품",
+        brand: "local-test",
+        category: category(),
+        selectedSizeLabel: best.name,
+        recommendedSizeLabel: best.name,
+        fitType: best.fitType
+      },
+      referenceClothingSummary: state.references.map((reference) => ({
+        name: reference.name,
+        preferenceScore: reference.preferenceScore,
+        measurements: Object.fromEntries(
+          measurementKeys()
+            .filter((key) => isNumber(reference.measurements[key]))
+            .map((key) => [key, reference.measurements[key]])
+        )
+      })),
+      idealFitNumbers: {
+        measurements: Object.fromEntries(
+          measurementKeys()
+            .filter((key) => isNumber(state.adjustedProfile[key]))
+            .map((key) => [key, state.adjustedProfile[key]])
+        ),
+        tolerances: state.referenceProfile.tolerances,
+        weights: state.finalWeights
+      },
+      measurements,
+      sizeScores: state.scored.map((score) => ({
+        sizeLabel: score.name,
+        fitScore: score.finalFitScore,
+        fitLabel: score.fitLabel,
+        weightedFitDistance: score.weightedFitDistance,
+        recommendationConfidence: score.recommendationConfidence
+      })),
+      feedbackPersonalization: {
+        applied: Boolean(state.feedbackProfile),
+        sampleCount: state.feedbackProfile?.sampleCount ?? 0,
+        measurementOffsets: state.feedbackProfile?.measurementOffsets ?? {},
+        weightMultipliers: state.feedbackProfile?.weightMultipliers ?? {},
+        partFeedbackCounts: state.feedbackProfile?.partFeedbackCounts ?? {}
+      },
+      chartData: buildChartData(state)
+    };
+  }
+
+  function buildReportPrompt(reportInput) {
+    return `너는 Coordit의 핏 리포트 작성자다.
+너는 패션 핏 컨설턴트처럼 설명하지만 반드시 제공된 숫자만 사용한다.
+추천 사이즈, fit score, confidence는 입력값을 그대로 따른다.
+새로운 수치를 계산하거나 추측하지 마라.
+소재, 신축성, 실제 착용감은 확정하지 말고 가능성으로만 표현한다.
+
+아래 JSON은 Coordit Fit Score Engine의 계산 결과다.
+이 숫자를 바탕으로 한국어 핏 리포트를 작성해라.
+
+요구사항:
+1. 추천 사이즈와 fit score를 첫 문단에 포함해라.
+2. 기준 수치와 상품 수치를 부위별로 자연스럽게 설명해라.
+3. 가장 중요한 차이 2~3개를 우선 설명해라.
+4. feedbackPersonalization.applied가 true면 피드백 보정이 어떻게 반영됐는지 설명해라.
+5. confidence가 low 또는 medium이면 주의할 점을 분명히 써라.
+6. JSON에 없는 숫자는 만들지 마라.
+7. 출력은 아래 JSON 형식으로만 해라.
+
+출력 형식:
+{
+  "title": "...",
+  "summary": "...",
+  "recommendationReason": "...",
+  "fitDnaSummary": "...",
+  "measurementAnalysis": [
+    { "measurement": "...", "text": "..." }
+  ],
+  "feedbackPersonalization": "...",
+  "cautions": ["..."],
+  "nextActions": ["..."]
+}
+
+입력 JSON:
+${JSON.stringify(reportInput, null, 2)}`;
+  }
+
+  function extractJsonObject(text) {
+    if (!text || typeof text !== "string") throw new Error("Empty LLM response");
+    try {
+      return JSON.parse(text);
+    } catch {
+      const start = text.indexOf("{");
+      const end = text.lastIndexOf("}");
+      if (start === -1 || end === -1 || end <= start) throw new Error("LLM response did not contain JSON");
+      return JSON.parse(text.slice(start, end + 1));
+    }
+  }
+
+  function buildFallbackReport(reportInput) {
+    const topMeasurements = [...reportInput.measurements]
+      .sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff))
+      .slice(0, 3);
+    return {
+      title: `${reportInput.targetProduct.recommendedSizeLabel} 사이즈 핏 리포트`,
+      summary: `${reportInput.recommendation.recommendedSize} 사이즈가 ${reportInput.recommendation.fitScore}점으로 가장 적합합니다. 추천 신뢰도는 ${reportInput.recommendation.recommendationConfidence}입니다.`,
+      recommendationReason: `1위 사이즈는 weighted distance ${reportInput.recommendation.weightedFitDistance} 기준으로 가장 낮은 차이를 보였습니다.${reportInput.recommendation.scoreGapToSecond !== null ? ` 2위와의 점수 차이는 ${reportInput.recommendation.scoreGapToSecond}점입니다.` : ""}`,
+      fitDnaSummary: `기준 의류 ${reportInput.referenceClothingSummary.length}벌을 바탕으로 나에게 맞는 기준 수치를 만들고, 피드백 보정 ${reportInput.feedbackPersonalization.applied ? "을 반영했습니다" : "은 적용되지 않았습니다"}.`,
+      measurementAnalysis: topMeasurements.map((row) => ({
+        measurement: row.label,
+        text: `${row.label}은 기준 ${row.ideal}cm, 상품 ${row.product}cm로 ${signed(row.diff)}cm 차이입니다. 상태는 ${row.status}입니다.`
+      })),
+      feedbackPersonalization: reportInput.feedbackPersonalization.applied
+        ? `최근 피드백 ${reportInput.feedbackPersonalization.sampleCount}개가 반영되어 ${Object.keys(reportInput.feedbackPersonalization.measurementOffsets).join(", ") || "일부 부위"}의 기준 수치나 가중치가 조정됐습니다.`
+        : "반영된 피드백 보정은 없습니다.",
+      cautions: reportInput.recommendation.recommendationConfidence === "high"
+        ? ["소재와 신축성에 따라 실제 착용감은 달라질 수 있습니다."]
+        : ["추천 신뢰도가 아주 높지 않으므로 차이가 큰 부위의 실측을 다시 확인하세요.", "소재와 신축성에 따라 실제 착용감은 달라질 수 있습니다."],
+      nextActions: ["상품 상세 사이즈표를 한 번 더 확인하세요.", "구매 후 실제 핏 피드백을 남기면 다음 추천이 더 개인화됩니다."]
+    };
+  }
+
+  function renderReport(report, source, model) {
+    $("report-model").textContent = `model: ${model || "-"}`;
+    $("report-source").textContent = `source: ${source}`;
+    $("report-output").innerHTML = `
+      <h3>${escapeHtml(report.title ?? "핏 리포트")}</h3>
+      <p>${escapeHtml(report.summary ?? "")}</p>
+      <div class="report-box" style="margin-top: 12px;">
+        <h3>추천 이유</h3>
+        <p>${escapeHtml(report.recommendationReason ?? "")}</p>
+      </div>
+      <div class="report-box" style="margin-top: 12px;">
+        <h3>나에게 맞는 기준 수치</h3>
+        <p>${escapeHtml(report.fitDnaSummary ?? "")}</p>
+      </div>
+      <div class="report-box" style="margin-top: 12px;">
+        <h3>부위별 분석</h3>
+        <ul>
+          ${(report.measurementAnalysis ?? []).map((item) => `<li><strong>${escapeHtml(item.measurement ?? "")}</strong>: ${escapeHtml(item.text ?? "")}</li>`).join("")}
+        </ul>
+      </div>
+      <div class="report-box" style="margin-top: 12px;">
+        <h3>피드백 개인화</h3>
+        <p>${escapeHtml(report.feedbackPersonalization ?? "")}</p>
+      </div>
+      <div class="report-box" style="margin-top: 12px;">
+        <h3>주의할 점</h3>
+        <ul>${(report.cautions ?? []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+      <div class="report-box" style="margin-top: 12px;">
+        <h3>다음 액션</h3>
+        <ul>${(report.nextActions ?? []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+    `;
+  }
+
+  function currentReportInputOrThrow() {
+    if (!latestState) calculateAll(true);
+    if (!latestState) throw new Error("먼저 Fit Score를 계산해 주세요.");
+    return buildReportInput(latestState);
+  }
+
+  function previewPayload() {
+    const reportInput = currentReportInputOrThrow();
+    $("report-debug").textContent = JSON.stringify({
+      reportInput,
+      prompt: buildReportPrompt(reportInput)
+    }, null, 2);
+  }
+
+  async function generateOllamaReport() {
+    const error = $("report-error");
+    error.style.display = "none";
+    const model = textValue("ollama-model") || "llama3.1:8b";
+    const url = textValue("ollama-url") || "http://localhost:11434/api/generate";
+    const reportInput = currentReportInputOrThrow();
+    const prompt = buildReportPrompt(reportInput);
+    $("report-debug").textContent = JSON.stringify({ reportInput, prompt }, null, 2);
+    $("ollama-status").textContent = "requesting";
+    $("report-output").innerHTML = "<p>Ollama에 요청 중입니다...</p>";
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model,
+          prompt,
+          stream: false,
+          options: {
+            temperature: 0.2,
+            top_p: 0.9
+          }
+        })
+      });
+      if (!response.ok) {
+        throw new Error(`Ollama HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      const report = extractJsonObject(data.response);
+      $("ollama-status").textContent = "success";
+      renderReport(report, "ollama", model);
+    } catch (err) {
+      $("ollama-status").textContent = "failed";
+      error.textContent = `${err.message}. Fallback 리포트를 표시합니다. Ollama 서버와 CORS 설정을 확인하세요.`;
+      error.style.display = "block";
+      renderReport(buildFallbackReport(reportInput), "fallback", model);
+    }
+  }
+
+  function generateFallbackOnly() {
+    const reportInput = currentReportInputOrThrow();
+    $("report-debug").textContent = JSON.stringify({ reportInput }, null, 2);
+    $("ollama-status").textContent = "fallback";
+    renderReport(buildFallbackReport(reportInput), "fallback", "none");
+  }
+
   function escapeHtml(value) {
     return String(value)
       .replaceAll("&", "&amp;")
@@ -1391,6 +1777,9 @@
   };
   $("add-perfect").onclick = addPerfectCandidate;
   $("calculate").onclick = () => calculateAll(true);
+  $("generate-report").onclick = generateOllamaReport;
+  $("preview-payload").onclick = previewPayload;
+  $("fallback-report").onclick = generateFallbackOnly;
   $("category").addEventListener("change", rebuildForCategory);
   $("max-offset").addEventListener("input", () => calculateAll(false));
   $("max-multiplier").addEventListener("input", () => calculateAll(false));
