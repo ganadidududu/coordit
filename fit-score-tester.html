@@ -1,0 +1,1408 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coordit Fit Score Engine v1.4 Tester</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #667085;
+      --line: #d9e1e7;
+      --bg: #f3f6f8;
+      --panel: #fff;
+      --soft: #eef7f5;
+      --soft-line: #cce8e2;
+      --accent: #106b62;
+      --accent-2: #1f7a8c;
+      --warn: #a15c00;
+      --danger: #b42318;
+      --code: #101828;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, #dfe8ff 0, transparent 26rem),
+        radial-gradient(circle at 92% 6%, #d9f3ec 0, transparent 24rem),
+        var(--bg);
+      font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 42px 20px 72px;
+    }
+
+    h1, h2, h3 { margin: 0; letter-spacing: 0; }
+    h1 { font-size: clamp(30px, 4vw, 46px); }
+    h2 { font-size: 20px; }
+    h3 { font-size: 15px; }
+    p { margin: 0; color: var(--muted); line-height: 1.55; }
+
+    header {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .lead { max-width: 920px; }
+
+    .formula {
+      display: inline-block;
+      max-width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .78);
+      color: var(--code);
+      font: 12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, .55fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(16, 24, 40, .05);
+      margin-top: 18px;
+    }
+
+    .head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .head p {
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #edf2f4;
+      color: #43515b;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .pill.good { background: var(--soft); color: var(--accent); border: 1px solid var(--soft-line); }
+    .pill.warn { background: #fff6e8; color: var(--warn); border: 1px solid #ffdfaa; }
+
+    .toolbar, .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .toolbar {
+      margin-top: 4px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 13px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .primary { background: var(--accent); color: #fff; }
+    .secondary { background: #fff; color: #344054; border: 1px solid #cbd5dc; }
+    .danger { background: #fff0f0; color: var(--danger); }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #43515b;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    input, select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid #cbd5dc;
+      border-radius: 8px;
+      padding: 8px 9px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    input:focus, select:focus {
+      outline: 3px solid rgba(16, 107, 98, .16);
+      border-color: var(--accent);
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .row-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .data-row {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      background: #fff;
+    }
+
+    .row-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: 1.2fr repeat(4, minmax(88px, 1fr)) .8fr;
+      gap: 10px;
+    }
+
+    .candidate-fields {
+      grid-template-columns: 1.1fr repeat(4, minmax(88px, 1fr)) .8fr;
+    }
+
+    .feedback-fields {
+      grid-template-columns: 1fr repeat(4, minmax(100px, 1fr));
+    }
+
+    .weights-grid, .step-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric-card, .step-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      padding: 12px;
+    }
+
+    .metric-card strong, .step-card strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--ink);
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .metric-card small, .step-card small {
+      display: block;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-top: 4px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: right;
+      vertical-align: top;
+    }
+
+    th:first-child, td:first-child { text-align: left; }
+    th { color: var(--muted); font-size: 12px; font-weight: 800; }
+
+    .summary {
+      display: grid;
+      grid-template-columns: 1.25fr repeat(3, .75fr);
+      gap: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #f8fafb;
+    }
+
+    .stat.best {
+      border-color: var(--soft-line);
+      background: var(--soft);
+    }
+
+    .stat .k {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .stat .v {
+      color: var(--ink);
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .stat.best .v { color: var(--accent); }
+
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      background: #e7edf1;
+      overflow: hidden;
+      margin: 16px 0 8px;
+    }
+
+    .bar > div {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #ca4d44, #dda23b, #15936f);
+      transition: width .2s ease;
+    }
+
+    .note {
+      border: 1px solid #cde7ff;
+      background: #f0f8ff;
+      border-radius: 8px;
+      padding: 12px;
+      color: #28526f;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .error {
+      display: none;
+      margin-top: 12px;
+      border: 1px solid #ffd0d0;
+      background: #fff0f0;
+      border-radius: 8px;
+      padding: 11px 13px;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .muted { color: var(--muted); }
+    .nowrap { white-space: nowrap; }
+
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 820px) {
+      main { padding: 30px 14px 56px; }
+      .config-grid, .fields, .candidate-fields, .feedback-fields, .weights-grid, .step-grid, .summary {
+        grid-template-columns: 1fr 1fr;
+      }
+      .stat.best { grid-column: span 2; }
+    }
+
+    @media (max-width: 560px) {
+      .card { padding: 15px; }
+      .head { flex-direction: column; }
+      .config-grid, .fields, .candidate-fields, .feedback-fields, .weights-grid, .step-grid, .summary {
+        grid-template-columns: 1fr;
+      }
+      .stat.best { grid-column: auto; }
+      table { font-size: 12px; }
+      th, td { padding: 8px 6px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="toolbar">
+      <span class="pill good">mvp_rule_v1_4</span>
+      <span class="pill">feedback_adjusted_profile_v1</span>
+      <span class="pill">standalone html</span>
+    </div>
+    <h1>Coordit Fit Score Engine Tester</h1>
+    <p class="lead">
+      기준 의류 입력부터 가상 100점 핏 프로필, reference variance 가중치, 피드백 offset/weight 보정,
+      후보 사이즈 점수 계산, confidence 판정까지 한 화면에서 추적하는 단일 HTML 테스터입니다.
+    </p>
+    <span class="formula">
+      adjustedProfile = referenceProfile + feedbackOffset,
+      adjustedWeights = normalize(dynamicWeights × feedbackWeightMultiplier),
+      score = clamp(100 - 30 × Σ(adjustedWeight × |candidate - adjustedProfile| / tolerance), 0, 100)
+    </span>
+  </header>
+
+  <section class="card">
+    <div class="head">
+      <div>
+        <h2>0. 테스트 설정</h2>
+        <p>카테고리에 따라 측정 항목, 기본 가중치, 허용 오차 범위가 바뀝니다.</p>
+      </div>
+      <span class="pill" id="strategy-pill">reference_profile_v1</span>
+    </div>
+    <div class="config-grid">
+      <div>
+        <label for="category">카테고리</label>
+        <select id="category">
+          <optgroup label="상의">
+            <option value="shirt">shirt</option>
+            <option value="tshirt">tshirt</option>
+            <option value="sweatshirt">sweatshirt</option>
+            <option value="hoodie">hoodie</option>
+            <option value="knit">knit</option>
+            <option value="jacket">jacket</option>
+            <option value="coat">coat</option>
+          </optgroup>
+          <optgroup label="하의">
+            <option value="pants" selected>pants</option>
+            <option value="jeans">jeans</option>
+            <option value="shorts">shorts</option>
+            <option value="skirt">skirt</option>
+          </optgroup>
+        </select>
+      </div>
+      <div>
+        <label for="max-offset">피드백 offset 최대값(cm)</label>
+        <input id="max-offset" type="number" min="0" step="0.1" value="2">
+      </div>
+      <div>
+        <label for="max-multiplier">부위별 weight multiplier 최대값</label>
+        <input id="max-multiplier" type="number" min="1" step="0.05" value="1.3">
+      </div>
+    </div>
+    <div class="actions" style="margin-top: 14px;">
+      <button class="secondary" id="load-bottom">하의 샘플 로드</button>
+      <button class="secondary" id="load-top">상의 샘플 로드</button>
+      <button class="primary" id="calculate">전체 계산</button>
+    </div>
+    <div class="error" id="error"></div>
+  </section>
+
+  <div class="grid">
+    <div>
+      <section class="card">
+        <div class="head">
+          <div>
+            <h2>1. 기준 의류</h2>
+            <p>선호도 점수는 가상 프로필 중심값을 만들 때 가중치로 사용됩니다.</p>
+          </div>
+          <span class="pill" id="reference-count">0벌</span>
+        </div>
+        <div class="row-list" id="references"></div>
+        <div class="actions" style="margin-top: 12px;">
+          <button class="secondary" id="add-reference">+ 기준 의류 추가</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="head">
+          <div>
+            <h2>2. 피드백 입력</h2>
+            <p>actualFitLabel은 전체 방향 offset, partFeedback은 부위별 offset과 weight multiplier에 반영됩니다.</p>
+          </div>
+          <span class="pill" id="feedback-count">0개</span>
+        </div>
+        <div class="row-list" id="feedbacks"></div>
+        <div class="actions" style="margin-top: 12px;">
+          <button class="secondary" id="add-feedback">+ 피드백 추가</button>
+          <button class="secondary" id="clear-feedback">피드백 비우기</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="head">
+          <div>
+            <h2>3. 외부 상품 사이즈 후보</h2>
+            <p>후보별 실측값을 adjusted profile과 비교해 점수를 계산합니다.</p>
+          </div>
+          <span class="pill" id="candidate-count">0개</span>
+        </div>
+        <div class="row-list" id="candidates"></div>
+        <div class="actions" style="margin-top: 12px;">
+          <button class="secondary" id="add-candidate">+ 후보 추가</button>
+          <button class="secondary" id="add-perfect">현재 adjusted profile 후보 추가</button>
+        </div>
+      </section>
+    </div>
+
+    <aside>
+      <section class="card">
+        <div class="head">
+          <div>
+            <h2>계산 요약</h2>
+            <p>추천 결과와 핵심 metadata입니다.</p>
+          </div>
+          <span class="pill good" id="algorithm-version">v1.4</span>
+        </div>
+        <div class="summary">
+          <div class="stat best">
+            <div class="k">추천 사이즈</div>
+            <div class="v" id="best-size">계산 전</div>
+          </div>
+          <div class="stat">
+            <div class="k">점수</div>
+            <div class="v" id="best-score">-</div>
+          </div>
+          <div class="stat">
+            <div class="k">거리</div>
+            <div class="v" id="best-distance">-</div>
+          </div>
+          <div class="stat">
+            <div class="k">신뢰도</div>
+            <div class="v" id="best-confidence">-</div>
+          </div>
+        </div>
+        <div class="bar"><div id="score-bar"></div></div>
+        <p id="best-comment">기준 의류와 후보 사이즈를 입력한 뒤 계산하세요.</p>
+      </section>
+
+      <section class="card">
+        <div class="head">
+          <div>
+            <h2>Feedback Profile</h2>
+            <p>최근 피드백이 엔진에 들어가는 형태입니다.</p>
+          </div>
+          <span class="pill" id="feedback-strategy">none</span>
+        </div>
+        <div id="feedback-profile" class="note">피드백이 없거나 모두 good이면 보정값이 없습니다.</div>
+      </section>
+    </aside>
+  </div>
+
+  <section class="card">
+    <div class="head">
+      <div>
+        <h2>4. Step A - Base Weights & Reference Variance</h2>
+        <p>기준 의류 간 표준편차가 작으면 그 부위가 일관된 선호로 해석되어 가중치가 올라갑니다.</p>
+      </div>
+      <span class="pill">reference_variance_v1</span>
+    </div>
+    <div class="step-grid" id="weights-view"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>측정값</th>
+          <th>기본 가중치</th>
+          <th>표준편차</th>
+          <th>중요도</th>
+          <th>동적 가중치</th>
+          <th>피드백 multiplier</th>
+          <th>최종 가중치</th>
+        </tr>
+      </thead>
+      <tbody id="weights-table"></tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <div class="head">
+      <div>
+        <h2>5. Step B - Virtual Reference Profile</h2>
+        <p>weighted median, MAD, Huber 이상치 완화로 기준 의류들을 하나의 100점 핏 프로필로 합칩니다.</p>
+      </div>
+      <span class="pill">weighted_huber_profile_v1</span>
+    </div>
+    <div class="step-grid" id="profile-view"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>측정값</th>
+          <th>표본</th>
+          <th>가중 중앙값</th>
+          <th>MAD</th>
+          <th>robust scale</th>
+          <th>허용 오차</th>
+          <th>원본 프로필</th>
+          <th>피드백 offset</th>
+          <th>최종 프로필</th>
+        </tr>
+      </thead>
+      <tbody id="profile-table"></tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <div class="head">
+      <div>
+        <h2>6. Step C - Candidate Score</h2>
+        <p>후보 사이즈별 diff, tolerance-normalized distance, fit type penalty, confidence를 확인합니다.</p>
+      </div>
+      <span class="pill">candidate scoring</span>
+    </div>
+    <table>
+      <thead id="results-head"></thead>
+      <tbody id="results-body"></tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+  const ALGORITHM_VERSION = "mvp_rule_v1_4";
+  const TOP_CATEGORIES = ["tshirt", "shirt", "sweatshirt", "hoodie", "knit", "jacket", "coat"];
+  const BOTTOM_CATEGORIES = ["pants", "jeans", "shorts", "skirt"];
+  const TOP_KEYS = ["shoulder_width", "chest_width", "total_length", "sleeve_length"];
+  const BOTTOM_KEYS = ["waist_width", "hip_width", "rise", "outseam"];
+  const LABELS = {
+    total_length: "총장",
+    shoulder_width: "어깨",
+    chest_width: "가슴단면",
+    sleeve_length: "소매",
+    waist_width: "허리단면",
+    hip_width: "엉덩이단면",
+    rise: "밑위",
+    outseam: "아웃심"
+  };
+  const BASE_WEIGHTS = {
+    top: { shoulder_width: 0.35, chest_width: 0.30, total_length: 0.20, sleeve_length: 0.15 },
+    bottom: { waist_width: 0.35, hip_width: 0.25, rise: 0.15, outseam: 0.25 }
+  };
+  const MIN_TOLERANCES = {
+    shoulder_width: 0.5,
+    chest_width: 0.75,
+    total_length: 1,
+    sleeve_length: 0.75,
+    waist_width: 0.5,
+    hip_width: 0.75,
+    rise: 0.5,
+    outseam: 1
+  };
+  const MAX_TOLERANCES = {
+    shoulder_width: 3,
+    chest_width: 5,
+    total_length: 6,
+    sleeve_length: 5,
+    waist_width: 3,
+    hip_width: 5,
+    rise: 4,
+    outseam: 8
+  };
+  const OFFSET_SCALE = {
+    shoulder_width: 1,
+    chest_width: 1,
+    total_length: 1.5,
+    sleeve_length: 1.25,
+    waist_width: 0.75,
+    hip_width: 1,
+    rise: 0.75,
+    outseam: 1.5
+  };
+
+  const bottomReferenceSeed = [
+    ["Ref Pants A", 100, { waist_width: 40, hip_width: 52, rise: 30, outseam: 100 }],
+    ["Ref Pants B", 92, { waist_width: 40.5, hip_width: 53, rise: 30, outseam: 101 }],
+    ["Loose Pants", 65, { waist_width: 42, hip_width: 56, rise: 32, outseam: 104 }]
+  ];
+  const bottomCandidateSeed = [
+    ["M", "regular", { waist_width: 40, hip_width: 52, rise: 30, outseam: 100 }],
+    ["L", "regular", { waist_width: 41.5, hip_width: 54, rise: 31, outseam: 102 }],
+    ["XL", "regular", { waist_width: 44, hip_width: 57, rise: 32, outseam: 106 }]
+  ];
+  const topReferenceSeed = [
+    ["Oxford Shirt", 100, { shoulder_width: 48, chest_width: 57, total_length: 73, sleeve_length: 62 }],
+    ["Relaxed Shirt", 88, { shoulder_width: 49, chest_width: 58, total_length: 74, sleeve_length: 62.5 }],
+    ["Oversized Shirt", 60, { shoulder_width: 53, chest_width: 63, total_length: 77, sleeve_length: 64 }]
+  ];
+  const topCandidateSeed = [
+    ["M", "regular", { shoulder_width: 47, chest_width: 55, total_length: 72, sleeve_length: 61 }],
+    ["L", "regular", { shoulder_width: 49, chest_width: 58, total_length: 74, sleeve_length: 62 }],
+    ["XL", "regular", { shoulder_width: 51, chest_width: 61, total_length: 76, sleeve_length: 64 }]
+  ];
+
+  const $ = (id) => document.getElementById(id);
+  const round = (value, digits = 2) => Number(Number(value).toFixed(digits));
+  const isNumber = (value) => typeof value === "number" && Number.isFinite(value);
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const fmt = (value, digits = 2) => {
+    if (!isNumber(value)) return "-";
+    const fixed = Number(value).toFixed(digits);
+    return fixed.replace(/\.?0+$/, "");
+  };
+  const signed = (value, digits = 2) => {
+    if (!isNumber(value)) return "-";
+    return `${value > 0 ? "+" : ""}${fmt(value, digits)}`;
+  };
+  const numberValue = (id) => {
+    const el = $(id);
+    if (!el) return null;
+    const raw = el.value.trim();
+    if (raw === "") return null;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+  const textValue = (id) => ($(id)?.value ?? "").trim();
+  const category = () => $("category").value;
+  const isBottom = () => BOTTOM_CATEGORIES.includes(category());
+  const measurementKeys = () => isBottom() ? BOTTOM_KEYS : TOP_KEYS;
+  const baseWeights = () => isBottom() ? BASE_WEIGHTS.bottom : BASE_WEIGHTS.top;
+  const maxOffset = () => numberValue("max-offset") ?? 2;
+  const maxMultiplier = () => numberValue("max-multiplier") ?? 1.3;
+
+  let referenceId = 0;
+  let candidateId = 0;
+  let feedbackId = 0;
+
+  const input = (id, value = "", step = "0.1") =>
+    `<input id="${id}" type="number" min="0" step="${step}" value="${value ?? ""}">`;
+
+  const option = (value, label, selected = false) =>
+    `<option value="${value}"${selected ? " selected" : ""}>${label}</option>`;
+
+  const metricInputs = (prefix, values = {}) => measurementKeys().map((key) => `
+    <div>
+      <label>${LABELS[key]} <span class="muted">(cm)</span></label>
+      ${input(`${prefix}-${key}`, values[key] ?? "")}
+    </div>
+  `).join("");
+
+  const partFeedbackInputs = (prefix, values = {}) => measurementKeys().map((key) => `
+    <div>
+      <label>${LABELS[key]}</label>
+      <select id="${prefix}-${key}">
+        ${option("", "선택 안 함", !values[key])}
+        ${option("too_small", "너무 작음", values[key] === "too_small")}
+        ${option("slightly_small", "약간 작음", values[key] === "slightly_small")}
+        ${option("good", "좋음", values[key] === "good")}
+        ${option("slightly_large", "약간 큼", values[key] === "slightly_large")}
+        ${option("too_large", "너무 큼", values[key] === "too_large")}
+      </select>
+    </div>
+  `).join("");
+
+  function updateCounts() {
+    $("reference-count").textContent = `${document.querySelectorAll(".reference-row").length}벌`;
+    $("candidate-count").textContent = `${document.querySelectorAll(".candidate-row").length}개`;
+    $("feedback-count").textContent = `${document.querySelectorAll(".feedback-row").length}개`;
+  }
+
+  function addReference(name = "", preference = 100, measurements = {}) {
+    const id = ++referenceId;
+    const el = document.createElement("article");
+    el.className = "data-row reference-row";
+    el.dataset.id = id;
+    el.innerHTML = `
+      <div class="row-title">
+        <h3>기준 의류 #${id}</h3>
+        <button class="danger" type="button">삭제</button>
+      </div>
+      <div class="fields">
+        <div>
+          <label>이름</label>
+          <input id="ref-${id}-name" value="${name}" placeholder="예: 잘 맞는 셔츠">
+        </div>
+        ${metricInputs(`ref-${id}`, measurements)}
+        <div>
+          <label>선호도</label>
+          ${input(`ref-${id}-preference`, preference, "1")}
+        </div>
+      </div>
+    `;
+    el.querySelector("button").onclick = () => {
+      el.remove();
+      updateCounts();
+      calculateAll(false);
+    };
+    $("references").append(el);
+    updateCounts();
+  }
+
+  function addCandidate(name = "", fitType = "regular", measurements = {}) {
+    const id = ++candidateId;
+    const el = document.createElement("article");
+    el.className = "data-row candidate-row";
+    el.dataset.id = id;
+    el.innerHTML = `
+      <div class="row-title">
+        <h3>상품 사이즈 #${id}</h3>
+        <button class="danger" type="button">삭제</button>
+      </div>
+      <div class="fields candidate-fields">
+        <div>
+          <label>사이즈명</label>
+          <input id="cand-${id}-name" value="${name}" placeholder="예: M / 30">
+        </div>
+        ${metricInputs(`cand-${id}`, measurements)}
+        <div>
+          <label>Fit type</label>
+          <select id="cand-${id}-fit">
+            ${option("regular", "regular", fitType === "regular")}
+            ${option("slim", "slim", fitType === "slim")}
+            ${option("relaxed", "relaxed", fitType === "relaxed")}
+            ${option("oversized", "oversized", fitType === "oversized")}
+          </select>
+        </div>
+      </div>
+    `;
+    el.querySelector("button").onclick = () => {
+      el.remove();
+      updateCounts();
+      calculateAll(false);
+    };
+    $("candidates").append(el);
+    updateCounts();
+  }
+
+  function addFeedback(actualFitLabel = "good", partFeedback = {}) {
+    const id = ++feedbackId;
+    const el = document.createElement("article");
+    el.className = "data-row feedback-row";
+    el.dataset.id = id;
+    el.innerHTML = `
+      <div class="row-title">
+        <h3>피드백 #${id}</h3>
+        <button class="danger" type="button">삭제</button>
+      </div>
+      <div class="fields feedback-fields">
+        <div>
+          <label>actualFitLabel</label>
+          <select id="fb-${id}-overall">
+            ${option("too_small", "too_small", actualFitLabel === "too_small")}
+            ${option("slightly_small", "slightly_small", actualFitLabel === "slightly_small")}
+            ${option("good", "good", actualFitLabel === "good")}
+            ${option("slightly_large", "slightly_large", actualFitLabel === "slightly_large")}
+            ${option("too_large", "too_large", actualFitLabel === "too_large")}
+          </select>
+        </div>
+        ${partFeedbackInputs(`fb-${id}`, partFeedback)}
+      </div>
+    `;
+    el.querySelector("button").onclick = () => {
+      el.remove();
+      updateCounts();
+      calculateAll(false);
+    };
+    $("feedbacks").append(el);
+    updateCounts();
+  }
+
+  function readReferences() {
+    return [...document.querySelectorAll(".reference-row")].map((el) => {
+      const id = el.dataset.id;
+      const measurements = {};
+      for (const key of measurementKeys()) measurements[key] = numberValue(`ref-${id}-${key}`);
+      return {
+        id: `ref-${id}`,
+        name: textValue(`ref-${id}-name`) || `기준 의류 #${id}`,
+        preferenceScore: Math.max(1, numberValue(`ref-${id}-preference`) ?? 100),
+        measurements
+      };
+    });
+  }
+
+  function readCandidates() {
+    return [...document.querySelectorAll(".candidate-row")].map((el) => {
+      const id = el.dataset.id;
+      const measurements = {};
+      for (const key of measurementKeys()) measurements[key] = numberValue(`cand-${id}-${key}`);
+      return {
+        id: `cand-${id}`,
+        name: textValue(`cand-${id}-name`) || `상품 사이즈 #${id}`,
+        fitType: $(`cand-${id}-fit`).value,
+        measurements
+      };
+    });
+  }
+
+  function readFeedbackRows() {
+    return [...document.querySelectorAll(".feedback-row")].map((el) => {
+      const id = el.dataset.id;
+      const partFeedback = {};
+      for (const key of measurementKeys()) {
+        const value = $(`fb-${id}-${key}`).value;
+        if (value) partFeedback[key] = value;
+      }
+      return {
+        actualFitLabel: $(`fb-${id}-overall`).value,
+        partFeedback
+      };
+    });
+  }
+
+  function normalizeWeights(weights) {
+    const entries = Object.entries(weights).filter(([, weight]) => isNumber(weight) && weight > 0);
+    const sum = entries.reduce((total, [, weight]) => total + weight, 0);
+    if (!sum) return {};
+    const normalized = {};
+    let running = 0;
+    entries.forEach(([key, weight], index) => {
+      normalized[key] = index === entries.length - 1 ? round(1 - running, 4) : round(weight / sum, 4);
+      running += normalized[key];
+    });
+    return normalized;
+  }
+
+  function weightedMedian(values) {
+    const usable = values
+      .filter(({ value, weight }) => isNumber(value) && isNumber(weight) && weight > 0)
+      .sort((a, b) => a.value - b.value);
+    const totalWeight = usable.reduce((sum, item) => sum + item.weight, 0);
+    if (!totalWeight) return null;
+    const midpoint = totalWeight / 2;
+    let cumulative = 0;
+    for (const item of usable) {
+      cumulative += item.weight;
+      if (cumulative >= midpoint) return item.value;
+    }
+    return usable[usable.length - 1].value;
+  }
+
+  function standardDeviation(values) {
+    if (values.length < 2) return 0;
+    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+    const variance = values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length;
+    return round(Math.sqrt(variance), 3);
+  }
+
+  function importanceByStdDev(stdDev) {
+    if (stdDev <= 0.5) return "very_high";
+    if (stdDev <= 1.5) return "high";
+    if (stdDev <= 3) return "medium";
+    if (stdDev <= 5) return "low";
+    return "very_low";
+  }
+
+  function importanceMultiplier(importance) {
+    return {
+      very_high: 1.3,
+      high: 1.15,
+      medium: 1,
+      low: 0.85,
+      very_low: 0.7
+    }[importance] ?? 1;
+  }
+
+  function feedbackDirection(label) {
+    return {
+      too_small: 1,
+      slightly_small: 0.5,
+      good: 0,
+      slightly_large: -0.5,
+      too_large: -1
+    }[label] ?? 0;
+  }
+
+  function calculateReferenceVariance(references, normalizedBaseWeights) {
+    const variance = {};
+    const rawWeights = {};
+    for (const key of measurementKeys()) {
+      const values = references.map((ref) => ref.measurements[key]).filter(isNumber);
+      const baseWeight = normalizedBaseWeights[key] ?? 0;
+      if (values.length >= 2) {
+        const stdDev = standardDeviation(values);
+        const importance = importanceByStdDev(stdDev);
+        variance[key] = { stdDev, sampleCount: values.length, importance };
+        rawWeights[key] = baseWeight * importanceMultiplier(importance);
+      } else {
+        rawWeights[key] = baseWeight;
+      }
+    }
+    return { variance, dynamicWeights: normalizeWeights(rawWeights) };
+  }
+
+  function calculateReferenceProfile(references, weights) {
+    const profile = {
+      measurements: {},
+      tolerances: {},
+      robustScales: {},
+      sampleCounts: {},
+      centers: {},
+      mads: {}
+    };
+
+    for (const key of measurementKeys()) {
+      if (!weights[key]) continue;
+      const values = references.flatMap((ref) => {
+        const value = ref.measurements[key];
+        return isNumber(value) ? [{ value, weight: Math.max(1, ref.preferenceScore ?? 100) }] : [];
+      });
+      if (!values.length) continue;
+
+      const center = weightedMedian(values);
+      const mad = weightedMedian(values.map(({ value, weight }) => ({ value: Math.abs(value - center), weight }))) ?? 0;
+      const robustScale = round(mad * 1.4826, 3);
+      const tolerance = round(clamp(robustScale, MIN_TOLERANCES[key], MAX_TOLERANCES[key]), 3);
+      const huberLimit = 1.5 * Math.max(robustScale, MIN_TOLERANCES[key]);
+      const adjusted = values.map((item) => {
+        const distance = Math.abs(item.value - center);
+        const outlierWeight = distance === 0 ? 1 : Math.min(1, huberLimit / distance);
+        return { ...item, adjustedWeight: item.weight * outlierWeight, outlierWeight };
+      });
+      const totalWeight = adjusted.reduce((sum, item) => sum + item.adjustedWeight, 0);
+      profile.measurements[key] = round(adjusted.reduce((sum, item) => sum + item.value * item.adjustedWeight, 0) / totalWeight, 3);
+      profile.tolerances[key] = tolerance;
+      profile.robustScales[key] = robustScale;
+      profile.sampleCounts[key] = values.length;
+      profile.centers[key] = center;
+      profile.mads[key] = round(mad, 3);
+    }
+
+    return profile;
+  }
+
+  function buildFeedbackProfile() {
+    const feedbackRows = readFeedbackRows();
+    const keys = measurementKeys();
+    const offsetTotals = {};
+    const offsetCounts = {};
+    const issueCounts = {};
+    const partFeedbackCounts = {};
+    let overallSampleCount = 0;
+    let partSampleCount = 0;
+
+    for (const row of feedbackRows) {
+      const overallDirection = feedbackDirection(row.actualFitLabel);
+      if (overallDirection !== 0) {
+        overallSampleCount += 1;
+        for (const key of keys) {
+          offsetTotals[key] = (offsetTotals[key] ?? 0) + overallDirection * OFFSET_SCALE[key];
+          offsetCounts[key] = (offsetCounts[key] ?? 0) + 1;
+        }
+      }
+
+      for (const [key, label] of Object.entries(row.partFeedback)) {
+        if (!keys.includes(key)) continue;
+        partSampleCount += 1;
+        partFeedbackCounts[key] = {
+          ...partFeedbackCounts[key],
+          [label]: (partFeedbackCounts[key]?.[label] ?? 0) + 1
+        };
+        const direction = feedbackDirection(label);
+        if (direction !== 0) {
+          offsetTotals[key] = (offsetTotals[key] ?? 0) + direction * OFFSET_SCALE[key];
+          offsetCounts[key] = (offsetCounts[key] ?? 0) + 1;
+          issueCounts[key] = (issueCounts[key] ?? 0) + 1;
+        }
+      }
+    }
+
+    const measurementOffsets = {};
+    const weightMultipliers = {};
+    for (const key of keys) {
+      const count = offsetCounts[key] ?? 0;
+      if (count > 0) measurementOffsets[key] = round(clamp((offsetTotals[key] ?? 0) / count, -maxOffset(), maxOffset()), 3);
+      const issueCount = issueCounts[key] ?? 0;
+      if (issueCount > 0) weightMultipliers[key] = round(clamp(1 + issueCount * 0.1, 1, maxMultiplier()), 3);
+    }
+
+    const sampleCount = overallSampleCount + partSampleCount;
+    if (!sampleCount) return null;
+    return {
+      category: category(),
+      sampleCount,
+      overallSampleCount,
+      partSampleCount,
+      measurementOffsets,
+      weightMultipliers,
+      partFeedbackCounts,
+      strategy: "feedback_offset_weight_v1"
+    };
+  }
+
+  function applyFeedbackOffsets(profile, feedbackProfile) {
+    const adjusted = { ...profile.measurements };
+    if (!feedbackProfile) return adjusted;
+    for (const [key, offset] of Object.entries(feedbackProfile.measurementOffsets)) {
+      if (isNumber(adjusted[key]) && isNumber(offset)) adjusted[key] = round(adjusted[key] + offset, 3);
+    }
+    return adjusted;
+  }
+
+  function applyFeedbackWeightMultipliers(dynamicWeights, feedbackProfile) {
+    if (!feedbackProfile) return dynamicWeights;
+    const adjusted = {};
+    for (const [key, weight] of Object.entries(dynamicWeights)) {
+      adjusted[key] = weight * (feedbackProfile.weightMultipliers[key] ?? 1);
+    }
+    return normalizeWeights(adjusted);
+  }
+
+  function calculateDiffs(profileMeasurements, candidateMeasurements) {
+    const diffs = {};
+    for (const key of measurementKeys()) {
+      const ref = profileMeasurements[key];
+      const target = candidateMeasurements[key];
+      if (isNumber(ref) && isNumber(target)) diffs[key] = round(target - ref, 2);
+    }
+    return diffs;
+  }
+
+  function fitTypePenalty(score, fitType, diffs) {
+    let penalty = 0;
+    const shoulderDiff = diffs.shoulder_width;
+    const chestDiff = diffs.chest_width;
+    const waistDiff = diffs.waist_width;
+    if (fitType === "oversized" && isNumber(shoulderDiff) && shoulderDiff < -2) penalty += 5;
+    if (fitType === "oversized" && isNumber(chestDiff) && chestDiff < -2) penalty += 5;
+    if (fitType === "relaxed" && isNumber(chestDiff) && chestDiff < -2) penalty += 5;
+    if (fitType === "slim" && isNumber(chestDiff) && chestDiff > 3) penalty += 3;
+    if (fitType === "slim" && isNumber(waistDiff) && waistDiff > 2) penalty += 3;
+    const majorDiffs = [shoulderDiff, chestDiff, waistDiff, diffs.hip_width].filter(isNumber);
+    if (fitType === "regular" && majorDiffs.some((diff) => Math.abs(diff) > 4)) penalty += 3;
+    return { finalScore: round(Math.max(0, score - penalty)), penalty };
+  }
+
+  function averageMajorDiff(diffs) {
+    const values = measurementKeys().map((key) => diffs[key]).filter(isNumber);
+    if (!values.length) return 0;
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  }
+
+  function fitLabel(score, diffs) {
+    if (score >= 95) return "very_good_fit";
+    if (score >= 85) return "good_fit";
+    if (score >= 70) return "acceptable";
+    const avg = averageMajorDiff(diffs);
+    if (score >= 50) return avg < 0 ? "slightly_small" : "slightly_large";
+    return avg < 0 ? "too_small" : "too_large";
+  }
+
+  function partStatus(diff) {
+    if (Math.abs(diff) <= 1) return "very_similar";
+    if (diff < 0 && Math.abs(diff) <= 3) return "slightly_small";
+    if (diff > 0 && Math.abs(diff) <= 3) return "slightly_large";
+    return "large_gap";
+  }
+
+  function confidence(score, comparedCount, weightedFitDistance, scoreGap) {
+    if (comparedCount >= 4 && score >= 85 && weightedFitDistance <= 1.5 && scoreGap >= 5) return "high";
+    if (comparedCount >= 3 && score >= 70 && weightedFitDistance <= 3) return "medium";
+    return "low";
+  }
+
+  function scoreCandidate(candidate, adjustedProfile, tolerances, finalWeights) {
+    const diffs = calculateDiffs(adjustedProfile, candidate.measurements);
+    let weightedDistance = 0;
+    let usedWeight = 0;
+    const details = {};
+
+    for (const key of measurementKeys()) {
+      const diff = diffs[key];
+      const tolerance = tolerances[key];
+      const weight = finalWeights[key];
+      if (!isNumber(diff) || !isNumber(tolerance) || !isNumber(weight) || tolerance <= 0 || weight <= 0) continue;
+      const normalized = Math.abs(diff) / tolerance;
+      const contribution = normalized * weight;
+      weightedDistance += contribution;
+      usedWeight += weight;
+      details[key] = {
+        diff,
+        tolerance,
+        weight,
+        normalized: round(normalized, 3),
+        contribution: round(contribution, 3),
+        status: partStatus(diff)
+      };
+    }
+
+    if (!usedWeight) return null;
+    const weightedFitDistance = round(weightedDistance / usedWeight, 3);
+    const baseScore = round(clamp(100 - weightedFitDistance * 30, 0, 100));
+    const { finalScore, penalty } = fitTypePenalty(baseScore, candidate.fitType, diffs);
+    return {
+      ...candidate,
+      diffs,
+      details,
+      comparedMeasurements: Object.keys(details),
+      weightedFitDistance,
+      baseScore,
+      finalFitScore: finalScore,
+      penalty,
+      fitLabel: fitLabel(finalScore, diffs),
+      recommendationConfidence: "low"
+    };
+  }
+
+  function calculateAll(showErrors = true) {
+    const error = $("error");
+    error.style.display = "none";
+
+    const references = readReferences();
+    const candidates = readCandidates();
+    if (references.length === 0) return showError("기준 의류를 하나 이상 입력해 주세요.", showErrors);
+    if (candidates.length === 0) return showError("상품 사이즈 후보를 하나 이상 입력해 주세요.", showErrors);
+
+    const normalizedBaseWeights = normalizeWeights(baseWeights());
+    const { variance, dynamicWeights } = calculateReferenceVariance(references, normalizedBaseWeights);
+    const referenceProfile = calculateReferenceProfile(references, dynamicWeights);
+    const feedbackProfile = buildFeedbackProfile();
+    const adjustedProfile = applyFeedbackOffsets(referenceProfile, feedbackProfile);
+    const finalWeights = applyFeedbackWeightMultipliers(dynamicWeights, feedbackProfile);
+
+    const scored = candidates
+      .map((candidate) => scoreCandidate(candidate, adjustedProfile, referenceProfile.tolerances, finalWeights))
+      .filter(Boolean)
+      .sort((a, b) => b.finalFitScore - a.finalFitScore);
+
+    if (!scored.length) return showError("기준 프로필과 후보 사이즈에 공통 측정값이 없습니다.", showErrors);
+
+    scored.forEach((score, index) => {
+      score.recommendationConfidence = confidence(
+        score.finalFitScore,
+        score.comparedMeasurements.length,
+        score.weightedFitDistance,
+        score.finalFitScore - (scored[index + 1]?.finalFitScore ?? 0)
+      );
+    });
+
+    render({
+      references,
+      candidates,
+      normalizedBaseWeights,
+      variance,
+      dynamicWeights,
+      referenceProfile,
+      feedbackProfile,
+      adjustedProfile,
+      finalWeights,
+      scored
+    });
+  }
+
+  function showError(message, show) {
+    if (!show) return;
+    const error = $("error");
+    error.textContent = message;
+    error.style.display = "block";
+  }
+
+  function render(state) {
+    const hasFeedback = Boolean(state.feedbackProfile);
+    $("strategy-pill").textContent = hasFeedback ? "feedback_adjusted_profile_v1" : "reference_profile_v1";
+    $("best-size").textContent = state.scored[0].name;
+    $("best-score").textContent = `${fmt(state.scored[0].finalFitScore)}점`;
+    $("best-distance").textContent = fmt(state.scored[0].weightedFitDistance, 3);
+    $("best-confidence").textContent = state.scored[0].recommendationConfidence;
+    $("score-bar").style.width = `${state.scored[0].finalFitScore}%`;
+    $("best-comment").textContent = `${state.scored[0].name} 사이즈를 추천합니다. fit label은 ${state.scored[0].fitLabel}이며, 계산 전략은 ${$("strategy-pill").textContent}입니다.`;
+
+    renderFeedbackProfile(state.feedbackProfile);
+    renderWeights(state);
+    renderProfile(state);
+    renderResults(state);
+  }
+
+  function renderFeedbackProfile(feedbackProfile) {
+    $("feedback-strategy").textContent = feedbackProfile?.strategy ?? "none";
+    if (!feedbackProfile) {
+      $("feedback-profile").innerHTML = "피드백이 없거나 모두 good이면 보정값이 없습니다.";
+      return;
+    }
+    $("feedback-profile").innerHTML = `
+      <div><strong>sampleCount:</strong> ${feedbackProfile.sampleCount}</div>
+      <div><strong>overallSampleCount:</strong> ${feedbackProfile.overallSampleCount}</div>
+      <div><strong>partSampleCount:</strong> ${feedbackProfile.partSampleCount}</div>
+      <div style="margin-top:8px;"><strong>measurementOffsets</strong><br><span class="mono">${escapeHtml(JSON.stringify(feedbackProfile.measurementOffsets))}</span></div>
+      <div style="margin-top:8px;"><strong>weightMultipliers</strong><br><span class="mono">${escapeHtml(JSON.stringify(feedbackProfile.weightMultipliers))}</span></div>
+    `;
+  }
+
+  function renderWeights(state) {
+    $("weights-view").innerHTML = measurementKeys().map((key) => `
+      <div class="step-card">
+        <span class="muted">${LABELS[key]}</span>
+        <strong>${fmt(state.finalWeights[key], 4)}</strong>
+        <small>base ${fmt(state.normalizedBaseWeights[key], 4)} · dynamic ${fmt(state.dynamicWeights[key], 4)}</small>
+      </div>
+    `).join("");
+
+    $("weights-table").innerHTML = measurementKeys().map((key) => {
+      const variance = state.variance[key];
+      const multiplier = state.feedbackProfile?.weightMultipliers[key] ?? 1;
+      return `
+        <tr>
+          <td>${LABELS[key]}<br><span class="mono muted">${key}</span></td>
+          <td>${fmt(state.normalizedBaseWeights[key], 4)}</td>
+          <td>${variance ? fmt(variance.stdDev, 3) : "-"}</td>
+          <td>${variance ? variance.importance : "base"}</td>
+          <td>${fmt(state.dynamicWeights[key], 4)}</td>
+          <td>${fmt(multiplier, 3)}</td>
+          <td><strong>${fmt(state.finalWeights[key], 4)}</strong></td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function renderProfile(state) {
+    $("profile-view").innerHTML = measurementKeys().map((key) => `
+      <div class="step-card">
+        <span class="muted">${LABELS[key]} adjusted profile</span>
+        <strong>${fmt(state.adjustedProfile[key], 3)} cm</strong>
+        <small>raw ${fmt(state.referenceProfile.measurements[key], 3)} · offset ${signed(state.feedbackProfile?.measurementOffsets[key] ?? 0, 3)}</small>
+        <small>tolerance ±${fmt(state.referenceProfile.tolerances[key], 3)}cm</small>
+      </div>
+    `).join("");
+
+    $("profile-table").innerHTML = measurementKeys().map((key) => `
+      <tr>
+        <td>${LABELS[key]}<br><span class="mono muted">${key}</span></td>
+        <td>${state.referenceProfile.sampleCounts[key] ?? 0}</td>
+        <td>${fmt(state.referenceProfile.centers[key], 3)}</td>
+        <td>${fmt(state.referenceProfile.mads[key], 3)}</td>
+        <td>${fmt(state.referenceProfile.robustScales[key], 3)}</td>
+        <td>${fmt(state.referenceProfile.tolerances[key], 3)}</td>
+        <td>${fmt(state.referenceProfile.measurements[key], 3)}</td>
+        <td>${signed(state.feedbackProfile?.measurementOffsets[key] ?? 0, 3)}</td>
+        <td><strong>${fmt(state.adjustedProfile[key], 3)}</strong></td>
+      </tr>
+    `).join("");
+  }
+
+  function renderResults(state) {
+    $("results-head").innerHTML = `
+      <tr>
+        <th>순위</th>
+        <th>사이즈</th>
+        <th>점수</th>
+        <th>base</th>
+        <th>penalty</th>
+        <th>거리</th>
+        <th>label</th>
+        <th>confidence</th>
+        ${measurementKeys().map((key) => `<th>${LABELS[key]} diff / 기여도</th>`).join("")}
+      </tr>
+    `;
+    $("results-body").innerHTML = state.scored.map((score, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td><strong>${score.name}</strong><br><span class="mono muted">${score.fitType}</span></td>
+        <td><strong>${fmt(score.finalFitScore)}</strong></td>
+        <td>${fmt(score.baseScore)}</td>
+        <td>${fmt(score.penalty)}</td>
+        <td>${fmt(score.weightedFitDistance, 3)}</td>
+        <td>${score.fitLabel}</td>
+        <td>${score.recommendationConfidence}</td>
+        ${measurementKeys().map((key) => {
+          const detail = score.details[key];
+          if (!detail) return "<td>-</td>";
+          return `<td>${signed(detail.diff)}cm<br><span class="muted">norm ${fmt(detail.normalized, 3)} · ${fmt(detail.contribution, 3)}</span><br><span class="mono muted">${detail.status}</span></td>`;
+        }).join("")}
+      </tr>
+    `).join("");
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function clearRows() {
+    $("references").innerHTML = "";
+    $("candidates").innerHTML = "";
+    $("feedbacks").innerHTML = "";
+    referenceId = 0;
+    candidateId = 0;
+    feedbackId = 0;
+  }
+
+  function loadBottomSample() {
+    $("category").value = "pants";
+    clearRows();
+    bottomReferenceSeed.forEach(([name, preference, measurements]) => addReference(name, preference, measurements));
+    bottomCandidateSeed.forEach(([name, fitType, measurements]) => addCandidate(name, fitType, measurements));
+    addFeedback("slightly_small", { waist_width: "too_small" });
+    addFeedback("good", { outseam: "good" });
+    calculateAll(false);
+  }
+
+  function loadTopSample() {
+    $("category").value = "shirt";
+    clearRows();
+    topReferenceSeed.forEach(([name, preference, measurements]) => addReference(name, preference, measurements));
+    topCandidateSeed.forEach(([name, fitType, measurements]) => addCandidate(name, fitType, measurements));
+    addFeedback("slightly_small", { chest_width: "too_small" });
+    addFeedback("good", { sleeve_length: "good" });
+    calculateAll(false);
+  }
+
+  function rebuildForCategory() {
+    const selected = category();
+    if (BOTTOM_CATEGORIES.includes(selected)) loadBottomSample();
+    else loadTopSample();
+  }
+
+  function addPerfectCandidate() {
+    const references = readReferences();
+    if (!references.length) return showError("기준 의류가 먼저 필요합니다.", true);
+    const normalizedBaseWeights = normalizeWeights(baseWeights());
+    const { dynamicWeights } = calculateReferenceVariance(references, normalizedBaseWeights);
+    const profile = calculateReferenceProfile(references, dynamicWeights);
+    const adjustedProfile = applyFeedbackOffsets(profile, buildFeedbackProfile());
+    addCandidate("Adjusted 100", "regular", adjustedProfile);
+    calculateAll(false);
+  }
+
+  $("load-bottom").onclick = loadBottomSample;
+  $("load-top").onclick = loadTopSample;
+  $("add-reference").onclick = () => {
+    addReference();
+    calculateAll(false);
+  };
+  $("add-candidate").onclick = () => {
+    addCandidate();
+    calculateAll(false);
+  };
+  $("add-feedback").onclick = () => {
+    addFeedback("good", {});
+    calculateAll(false);
+  };
+  $("clear-feedback").onclick = () => {
+    $("feedbacks").innerHTML = "";
+    feedbackId = 0;
+    updateCounts();
+    calculateAll(false);
+  };
+  $("add-perfect").onclick = addPerfectCandidate;
+  $("calculate").onclick = () => calculateAll(true);
+  $("category").addEventListener("change", rebuildForCategory);
+  $("max-offset").addEventListener("input", () => calculateAll(false));
+  $("max-multiplier").addEventListener("input", () => calculateAll(false));
+
+  document.addEventListener("input", (event) => {
+    if (event.target.closest(".data-row")) calculateAll(false);
+  });
+  document.addEventListener("change", (event) => {
+    if (event.target.closest(".data-row")) calculateAll(false);
+  });
+
+  loadBottomSample();
+</script>
+</body>
+</html>
