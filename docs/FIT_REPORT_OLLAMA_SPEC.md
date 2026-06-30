@@ -547,9 +547,9 @@ ollama run llama3.1:8b
 
 브라우저에서 직접 Ollama를 호출하므로 로컬 환경에 따라 CORS 설정이 필요할 수 있다.
 
-### 9.2 백엔드 API 후보
+### 9.2 백엔드 API
 
-운영 단계에서는 아래 API를 추가할 수 있다.
+1단계 구현에서는 아래 API를 사용한다. 리포트는 DB에 저장하지 않고 요청 시점에 생성해 반환한다.
 
 ```text
 POST /fit-analysis-results/:id/report
@@ -561,13 +561,16 @@ POST /fit-analysis-results/:id/report
 - Ollama 호출
 - LLM 응답 검증
 - 리포트 반환
+- Ollama 실패 시 fallback 리포트 반환
 
 요청:
 
 ```json
 {
   "selectedSizeLabel": "L",
-  "style": "concise_but_explanatory"
+  "style": "concise_but_explanatory",
+  "model": "llama3.1:8b",
+  "includeDebug": false
 }
 ```
 
@@ -576,6 +579,9 @@ POST /fit-analysis-results/:id/report
 ```json
 {
   "fitAnalysisResultId": "uuid",
+  "source": "ollama",
+  "modelName": "llama3.1:8b",
+  "promptVersion": "fit_report_v1",
   "report": {
     "title": "...",
     "summary": "...",
@@ -594,6 +600,13 @@ POST /fit-analysis-results/:id/report
   }
 }
 ```
+
+환경변수:
+
+- `OLLAMA_GENERATE_URL`: 기본값 `http://localhost:11434/api/generate`
+- `OLLAMA_MODEL`: 기본값 `llama3.1:8b`
+
+`includeDebug`가 `true`이면 테스트를 위해 `reportInput`과 `prompt`를 응답에 포함한다.
 
 ### 9.3 저장 테이블 후보
 

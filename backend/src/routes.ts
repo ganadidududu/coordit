@@ -34,6 +34,7 @@ import {
   recommendFitBatchController,
   recommendFitController
 } from "./modules/fit/fit.controller";
+import { generateFitReportController } from "./modules/fit-report/fit-report.controller";
 import {
   createReferenceClothing,
   deactivateReferenceClothing,
@@ -99,6 +100,7 @@ routes.post("/fit/recommend/batch", recommendFitBatchController);
 routes.get("/fit-analysis-results/recent", recentFitAnalysisResultsController);
 routes.get("/fit-analysis-results", recentFitAnalysisResultsController);
 routes.get("/fit-analysis-results/:id", getFitAnalysisResultController);
+routes.post("/fit-analysis-results/:id/report", generateFitReportController);
 
 routes.post("/fit-analysis-results/:id/feedback", createFeedback);
 
