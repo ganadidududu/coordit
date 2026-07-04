@@ -1,4 +1,5 @@
 import type { Category, FitType, JsonObject, MeasurementKey, MeasurementMap } from "../../shared/types/database";
+import type { FeedbackReliabilityStatus, FitScoreReasonCode } from "../fit/fit.types";
 
 export type ReportStyle = "concise_but_explanatory" | "detailed" | "short";
 
@@ -31,6 +32,50 @@ export interface ReferenceClothingReportSummary {
   measurements: MeasurementMap;
 }
 
+export interface ConfidenceReasonReportSummary {
+  code: FitScoreReasonCode;
+  explanation: string;
+}
+
+export interface MissingMeasurementReportSummary {
+  comparedMeasurementCount: number | null;
+  comparedMeasurements: MeasurementKey[];
+  missingMeasurementKeys: MeasurementKey[];
+  summary: "complete" | "sparse" | "unavailable";
+}
+
+export interface DataQualityReportSummary {
+  comparedMeasurementRatio: number | null;
+  missingMeasurementKeys: MeasurementKey[];
+  summary: "complete" | "sparse" | "unavailable";
+}
+
+export interface FeedbackReliabilityReportSummary {
+  applied: boolean;
+  sampleCount: number;
+  overallSampleCount: number;
+  partSampleCount: number;
+  status: FeedbackReliabilityStatus | "unavailable";
+  weightedSampleCount: number;
+  summary: FeedbackReliabilityStatus | "unavailable";
+}
+
+export interface ExplanationFactorReportSummary {
+  measurement: MeasurementKey;
+  label: string;
+  diff: number;
+  weightedImpact: number;
+  status: string;
+}
+
+export interface FitReportExplanationSummary {
+  confidenceReasons: ConfidenceReasonReportSummary[];
+  missingMeasurementSummary: MissingMeasurementReportSummary;
+  dataQualitySummary: DataQualityReportSummary;
+  feedbackReliability: FeedbackReliabilityReportSummary;
+  topExplanationFactors: ExplanationFactorReportSummary[];
+}
+
 export interface FitReportInput {
   locale: "ko-KR";
   reportStyle: ReportStyle;
@@ -44,6 +89,7 @@ export interface FitReportInput {
     scoreGapToSecond: number | null;
     weightingStrategy: string | null;
   };
+  explanation: FitReportExplanationSummary;
   targetProduct: {
     productName: string;
     brand: string | null;
@@ -121,7 +167,7 @@ export interface GenerateFitReportResult {
   fitAnalysisResultId: string;
   source: "ollama" | "fallback";
   modelName: string;
-  promptVersion: "fit_report_v1";
+  promptVersion: "fit_report_v2";
   report: FitReportJson;
   chartData: FitReportChartData;
   reportInput?: FitReportInput;

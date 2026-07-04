@@ -8,6 +8,8 @@ import { IMG } from "../../lib/images";
 import { TopBar } from "../../components/TopBar";
 import { Footer } from "../../components/Footer";
 import type { FitData as Body3DFitData, Measurements as Body3DMeasurements } from "../../components/Body3D";
+import { ConfidenceExplanationText } from "./confidence-display";
+import type { ConfidenceDisplayResult } from "./confidence-display";
 
 const Body3D = dynamic(() => import("../../components/Body3D"), { ssr: false });
 
@@ -35,7 +37,7 @@ interface BodyMeasurement {
   created_at: string;
 }
 
-interface FitAnalysisResult {
+interface FitAnalysisResult extends ConfidenceDisplayResult {
   id: string;
   recommended_size_label: string;
   fit_score: number;
@@ -46,6 +48,8 @@ interface FitAnalysisResult {
     partStatuses?: Record<string, "very_similar" | "slightly_small" | "slightly_large" | "large_gap">;
     diffs?: Record<string, number>;
     partExplanations?: string[];
+    scoreExplanation?: ConfidenceDisplayResult["scoreExplanation"];
+    confidenceBreakdown?: ConfidenceDisplayResult["confidenceBreakdown"];
   };
   created_at: string;
 }
@@ -671,6 +675,7 @@ export default function FitLabPage() {
                   transition: "width 0.6s ease",
                 }} />
               </div>
+              <ConfidenceExplanationText result={analysis} />
             </div>
 
             {/* Item picker */}
@@ -820,6 +825,7 @@ export default function FitLabPage() {
               {confidencePct > 0 ? `${confidencePct}%` : "—"}
             </div>
             <div style={{ fontSize: 11, color: "rgba(245,240,230,0.5)", marginTop: 12, fontFamily: "JetBrains Mono, monospace", letterSpacing: "0.08em" }}>예측 신뢰도</div>
+            <ConfidenceExplanationText result={analysis} tone="dark" />
           </div>
         </div>
       </section>
@@ -931,8 +937,10 @@ export default function FitLabPage() {
           {DETAIL_ROWS.map(({ part, bodyKey, diffKey }) => {
             const myVal  = bodyKey && latestMeasurement ? latestMeasurement[bodyKey] : undefined;
             const diffVal = diffKey ? diffs[diffKey] : undefined;
-            const garmentVal = Number.isFinite(myVal) && Number.isFinite(diffVal)
-              ? ((myVal as number) + (diffVal as number)).toFixed(1)
+            const myNumber = typeof myVal === "number" && Number.isFinite(myVal) ? myVal : null;
+            const diffNumber = typeof diffVal === "number" && Number.isFinite(diffVal) ? diffVal : null;
+            const garmentVal = myNumber !== null && diffNumber !== null
+              ? (myNumber + diffNumber).toFixed(1)
               : "—";
 
             const statusEntry = diffKey ? analysis?.result_details?.partStatuses?.[diffKey] : undefined;
@@ -954,8 +962,8 @@ export default function FitLabPage() {
                 <div style={{ fontFamily: "JetBrains Mono, monospace", fontSize: 13, color: "var(--text-muted)" }}>
                   {garmentVal !== "—" ? `${garmentVal}cm` : "—"}
                 </div>
-                <div style={{ fontFamily: "JetBrains Mono, monospace", fontSize: 13, color: Number.isFinite(diffVal) ? (diffVal! >= 0 ? "var(--fit-perfect)" : "var(--fit-tight)") : "var(--text-dim)" }}>
-                  {Number.isFinite(diffVal) ? `${diffVal! > 0 ? "+" : ""}${(diffVal!).toFixed(1)}` : "—"}
+                <div style={{ fontFamily: "JetBrains Mono, monospace", fontSize: 13, color: diffNumber !== null ? (diffNumber >= 0 ? "var(--fit-perfect)" : "var(--fit-tight)") : "var(--text-dim)" }}>
+                  {diffNumber !== null ? `${diffNumber > 0 ? "+" : ""}${diffNumber.toFixed(1)}` : "—"}
                 </div>
                 <div style={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace", color: statusColor, letterSpacing: "0.06em" }}>
                   {statusEntry ? statusEntry.replace(/_/g, " ") : "—"}

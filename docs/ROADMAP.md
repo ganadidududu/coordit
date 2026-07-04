@@ -156,6 +156,7 @@ API 보강 후보:
 - ML 또는 통계 모델은 추천 설명 가능성을 해치지 않아야 한다.
 - 사용자가 이해할 수 있는 부위별 설명은 계속 제공해야 한다.
 - ML 모델은 추천 사이즈뿐 아니라 confidence calibration과 부위별 설명 품질 개선에도 사용한다.
+- 분석용 export/data contract는 `docs/fit-engine/HYBRID_SCORING_READINESS.md`를 기준으로 하며, 현재 단계에서는 ML 학습, prediction serving, shadow recommendation, LLM 점수 계산을 제공하지 않는다.
 
 ## 8. Phase 6. Styling 확장
 
