@@ -9,6 +9,7 @@ import { recommendBestSizeWithReferences } from "./fit-score.engine";
 import type {
   Category,
   ExternalProductSizeInput,
+  FitRecommendationResult,
   FitType,
   MeasurementMap,
   ReferenceClothingInput
@@ -52,6 +53,9 @@ interface DbExternalProduct {
 interface DbExternalProductSize extends MeasurementMap {
   id: string;
   size_label: string;
+  measurement_source: string | null;
+  parsing_status: string | null;
+  extraction_confidence: number | null;
 }
 
 export const recommendFit = async ({
@@ -59,7 +63,7 @@ export const recommendFit = async ({
   referenceClothingId,
   referenceClothingIds,
   externalProductId
-}: RecommendFitParams) => {
+}: RecommendFitParams): Promise<FitRecommendationResult> => {
   const selectedReferenceIds = referenceClothingIds?.length
     ? referenceClothingIds
     : referenceClothingId
@@ -156,7 +160,12 @@ export const recommendFit = async ({
     id: size.id,
     sizeLabel: size.size_label,
     fitType: externalProduct.fit_type,
-    measurements: rowToMeasurements(size)
+    measurements: rowToMeasurements(size),
+    measurementQuality: {
+      measurementSource: size.measurement_source,
+      parsingStatus: size.parsing_status,
+      extractionConfidence: size.extraction_confidence
+    }
   }));
 
   const feedbackProfile = await buildUserFeedbackFitProfile(
@@ -196,6 +205,8 @@ export const recommendFit = async ({
         diffs: best.diffs,
         partExplanations: best.partExplanations,
         partStatuses: best.partStatuses,
+        scoreExplanation: best.scoreExplanation,
+        confidenceBreakdown: best.confidenceBreakdown,
         referenceClothingIds: referenceInput.map((reference) => reference.id),
         allSizeScores: recommendation.allSizeScores
       }
@@ -227,6 +238,8 @@ export const recommendFit = async ({
     diff: best.diffs,
     partExplanations: best.partExplanations,
     partStatuses: best.partStatuses,
+    scoreExplanation: best.scoreExplanation,
+    confidenceBreakdown: best.confidenceBreakdown,
     baseWeights: recommendation.baseWeights,
     dynamicWeights: recommendation.dynamicWeights,
     referenceVariance: recommendation.referenceVariance,
@@ -239,7 +252,9 @@ export const recommendFit = async ({
       fitScore: score.finalFitScore,
       fitLabel: score.fitLabel,
       weightedFitDistance: score.weightedFitDistance,
-      recommendationConfidence: score.recommendationConfidence
+      recommendationConfidence: score.recommendationConfidence,
+      scoreExplanation: score.scoreExplanation,
+      confidenceBreakdown: score.confidenceBreakdown
     })),
     algorithmVersion: ALGORITHM_VERSION
   };

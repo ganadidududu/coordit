@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { runFitAccuracyFixtureTests } from "./fit-score.accuracy-fixtures";
 import {
   applyFeedbackOffsetsToProfile,
   applyFeedbackWeightMultipliers,
@@ -12,7 +13,9 @@ import {
 import type {
   ExternalProductSizeInput,
   FeedbackFitProfile,
+  FitScoreReasonCode,
   MeasurementWeights,
+  RecommendationConfidence,
   ReferenceClothingInput
 } from "./fit.types";
 
@@ -192,5 +195,157 @@ const feedbackRecommendation = recommendBestSizeWithReferences(
 assert.equal(feedbackRecommendation.recommended.sizeLabel, "Feedback fit");
 assert.equal(feedbackRecommendation.weightingStrategy, "feedback_adjusted_profile_v1");
 assert.equal(feedbackRecommendation.feedbackProfile?.sampleCount, 2);
+
+const qualityReference: ReferenceClothingInput[] = [
+  {
+    id: "quality-reference-a",
+    fitType: "regular",
+    preferenceScore: 100,
+    measurements: { waist_width: 40, hip_width: 52, rise: 30, outseam: 100 }
+  },
+  {
+    id: "quality-reference-b",
+    fitType: "regular",
+    preferenceScore: 100,
+    measurements: { waist_width: 40.4, hip_width: 52.6, rise: 30.2, outseam: 100.8 }
+  }
+];
+
+const createQualitySize = (
+  id: string,
+  measurementSource: string,
+  parsingStatus: string,
+  extractionConfidence: number | null
+): ExternalProductSizeInput => ({
+  id,
+  sizeLabel: "M",
+  fitType: "regular" as const,
+  measurements: { waist_width: 40.2, hip_width: 52.3, rise: 30.1, outseam: 100.4 },
+  measurementQuality: {
+    measurementSource,
+    parsingStatus,
+    extractionConfidence
+  }
+});
+
+const qualityScenarios: readonly {
+  readonly id: string;
+  readonly measurementSource: string;
+  readonly parsingStatus: string;
+  readonly extractionConfidence: number | null;
+  readonly expectedConfidence: RecommendationConfidence;
+  readonly expectedTrusted: boolean;
+  readonly expectedReasonCodes: readonly FitScoreReasonCode[];
+}[] = [
+  {
+    id: "quality-manual",
+    measurementSource: "manual",
+    parsingStatus: "manual",
+    extractionConfidence: null,
+    expectedConfidence: "high",
+    expectedTrusted: true,
+    expectedReasonCodes: []
+  },
+  {
+    id: "quality-ocr-confirmed",
+    measurementSource: "ocr",
+    parsingStatus: "confirmed",
+    extractionConfidence: 0.96,
+    expectedConfidence: "high",
+    expectedTrusted: true,
+    expectedReasonCodes: []
+  },
+  {
+    id: "quality-ocr-pending",
+    measurementSource: "ocr",
+    parsingStatus: "pending",
+    extractionConfidence: 0.96,
+    expectedConfidence: "medium",
+    expectedTrusted: false,
+    expectedReasonCodes: ["unverified_product_measurement_status"]
+  },
+  {
+    id: "quality-ocr-failed",
+    measurementSource: "ocr",
+    parsingStatus: "failed",
+    extractionConfidence: 0.96,
+    expectedConfidence: "medium",
+    expectedTrusted: false,
+    expectedReasonCodes: ["unverified_product_measurement_status"]
+  },
+  {
+    id: "quality-ocr-mocked-status",
+    measurementSource: "ocr",
+    parsingStatus: "mocked",
+    extractionConfidence: 0.96,
+    expectedConfidence: "medium",
+    expectedTrusted: false,
+    expectedReasonCodes: ["unverified_product_measurement_status"]
+  },
+  {
+    id: "quality-ocr-low-confidence",
+    measurementSource: "ocr",
+    parsingStatus: "parsed",
+    extractionConfidence: 0.42,
+    expectedConfidence: "medium",
+    expectedTrusted: false,
+    expectedReasonCodes: ["low_measurement_extraction_confidence"]
+  }
+];
+
+const manualQualityRecommendation = recommendBestSizeWithReferences(
+  qualityReference,
+  [createQualitySize("quality-manual", "manual", "manual", null)],
+  "pants"
+);
+
+for (const scenario of qualityScenarios) {
+  const recommendation = recommendBestSizeWithReferences(
+    qualityReference,
+    [
+      createQualitySize(
+        scenario.id,
+        scenario.measurementSource,
+        scenario.parsingStatus,
+        scenario.extractionConfidence
+      )
+    ],
+    "pants"
+  );
+  const productMeasurementQuality =
+    recommendation.recommended.confidenceBreakdown.dataQuality.productMeasurementQuality;
+
+  assert.equal(
+    recommendation.recommended.finalFitScore,
+    manualQualityRecommendation.recommended.finalFitScore,
+    `${scenario.id} must preserve the numeric fit score for identical measurements`
+  );
+  assert.equal(
+    recommendation.recommended.recommendationConfidence,
+    scenario.expectedConfidence,
+    `${scenario.id} must expose the expected metadata confidence`
+  );
+  assert.ok(productMeasurementQuality, `${scenario.id} must expose product measurement quality`);
+  assert.equal(
+    productMeasurementQuality.trusted,
+    scenario.expectedTrusted,
+    `${scenario.id} must expose the expected product measurement trust flag`
+  );
+  assert.deepEqual(
+    productMeasurementQuality.reasonCodes,
+    scenario.expectedReasonCodes,
+    `${scenario.id} must expose only its own product quality reason codes`
+  );
+  for (const reasonCode of scenario.expectedReasonCodes) {
+    assert.ok(
+      recommendation.recommended.confidenceBreakdown.reasonCodes.includes(reasonCode),
+      `${scenario.id} confidence breakdown must include ${reasonCode}`
+    );
+  }
+}
+
+console.log("fixture passed: OCR/source quality metadata scenarios preserve score and isolate reasons");
+
+runFitAccuracyFixtureTests();
 
 console.log("fit-score.engine tests passed");

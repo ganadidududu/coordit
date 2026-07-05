@@ -64,25 +64,58 @@ const formatSigned = (value: number): string => `${value > 0 ? "+" : ""}${value}
 const getTopMeasurements = (measurements: MeasurementReportRow[]): MeasurementReportRow[] =>
   [...measurements].sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff)).slice(0, 3);
 
+const formatConfidenceReasons = (reportInput: FitReportInput): string => {
+  const reasons = reportInput.explanation.confidenceReasons.map((reason) => reason.explanation);
+  return reasons.length > 0 ? reasons.join(", ") : "별도 confidence 이유 없음";
+};
+
+const formatTopExplanationFactors = (reportInput: FitReportInput): string => {
+  const factors = reportInput.explanation.topExplanationFactors.map((factor) =>
+    `${factor.label} ${formatSigned(factor.diff)}cm, 영향도 ${factor.weightedImpact}`
+  );
+  return factors.length > 0 ? factors.join("; ") : "상위 영향 부위 정보 없음";
+};
+
+const formatMissingMeasurements = (reportInput: FitReportInput): string => {
+  const missingKeys = reportInput.explanation.missingMeasurementSummary.missingMeasurementKeys;
+  return missingKeys.length > 0 ? missingKeys.join(", ") : "없음";
+};
+
+const buildConfidenceCautions = (reportInput: FitReportInput): string[] => {
+  const confidence = reportInput.recommendation.recommendationConfidence;
+  if (confidence === "high") return [];
+  const reasons = reportInput.explanation.confidenceReasons.map((reason) =>
+    `추천 신뢰도 ${confidence} 이유: ${reason.explanation}.`
+  );
+  return reasons.length > 0
+    ? reasons
+    : ["추천 신뢰도가 아주 높지 않으므로 차이가 큰 부위의 실측을 다시 확인하세요."];
+};
+
 export const buildFallbackFitReport = (reportInput: FitReportInput): FitReportJson => {
   const topMeasurements = getTopMeasurements(reportInput.measurements);
   const confidence = reportInput.recommendation.recommendationConfidence;
+  const confidenceReasons = formatConfidenceReasons(reportInput);
+  const topExplanationFactors = formatTopExplanationFactors(reportInput);
+  const missingMeasurements = formatMissingMeasurements(reportInput);
   return {
     title: `${reportInput.recommendation.recommendedSize} 사이즈 핏 리포트`,
     summary:
       `${reportInput.recommendation.recommendedSize} 사이즈가 ` +
       `${reportInput.recommendation.fitScore}점으로 가장 적합합니다. ` +
-      `추천 신뢰도는 ${confidence}입니다.`,
+      `추천 신뢰도는 ${confidence}입니다. confidence 이유는 ${confidenceReasons}입니다.`,
     recommendationReason:
       `추천 사이즈는 weighted distance ${reportInput.recommendation.weightedFitDistance} 기준으로 가장 가까운 후보입니다.` +
       (reportInput.recommendation.scoreGapToSecond !== null
         ? ` 2위와의 점수 차이는 ${reportInput.recommendation.scoreGapToSecond}점입니다.`
-        : ""),
+        : "") +
+      ` 주요 설명 요인은 ${topExplanationFactors}입니다. 누락된 측정값은 ${missingMeasurements}입니다.`,
     fitDnaSummary:
       `기준 의류 ${reportInput.referenceClothingSummary.length}개를 바탕으로 나에게 맞는 기준 수치를 만들었습니다. ` +
       (reportInput.feedbackPersonalization.applied
         ? `최근 피드백 ${reportInput.feedbackPersonalization.sampleCount}개가 보정에 반영됐습니다.`
-        : "반영된 피드백 보정은 없습니다."),
+        : "반영된 피드백 보정은 없습니다.") +
+      ` 피드백 신뢰도 요약은 ${reportInput.explanation.feedbackReliability.summary}, 데이터 품질 요약은 ${reportInput.explanation.dataQualitySummary.summary}입니다.`,
     measurementAnalysis: topMeasurements.map((row) => ({
       measurement: row.label,
       text:
@@ -95,7 +128,7 @@ export const buildFallbackFitReport = (reportInput: FitReportInput): FitReportJs
     cautions: confidence === "high"
       ? ["소재와 신축성에 따라 실제 착용감은 달라질 수 있습니다."]
       : [
-        "추천 신뢰도가 아주 높지 않으므로 차이가 큰 부위의 실측을 다시 확인하세요.",
+        ...buildConfidenceCautions(reportInput),
         "소재와 신축성에 따라 실제 착용감은 달라질 수 있습니다."
       ],
     nextActions: [

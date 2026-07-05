@@ -1,7 +1,7 @@
 # Fit Engine 변경 이력
 
 문서 상태: 최신  
-기준일: 2026-06-29
+기준일: 2026-07-03
 관련 문서: `fit-engine/FIT_ENGINE.md`
 
 이 문서는 추천 엔진의 변화와 다음 개선 후보를 기록합니다. 현재 실제 동작 기준 문서는 `FIT_ENGINE.md`입니다.
@@ -64,26 +64,40 @@
 - 추천 결과의 `result_details`와 API 응답에 `feedbackProfile` 저장/반환
 - `weightingStrategy = "feedback_adjusted_profile_v1"` 추가
 
+## v1.5 Reliability-gated Confidence Metadata
+
+현재 코드에 반영된 주요 개선입니다.
+
+- `ALGORITHM_VERSION = "mvp_rule_v1_5"`로 변경
+- 추천 결과와 후보 사이즈에 선택 필드 `scoreExplanation`, `confidenceBreakdown` 추가
+- `result_details.scoreExplanation`에 비교 측정값, 누락 측정값, 2위 후보와의 점수 차이, 정규화 거리, 패널티, 주요 기여 부위, reason code 저장
+- `result_details.confidenceBreakdown`에 최종 confidence 근거, 피드백 신뢰도, 상품 실측 데이터 품질 요약 저장
+- 피드백 보정은 카테고리 5개 이상, 부위별 3개 이상 등 신뢰도 기준을 통과할 때만 강하게 적용
+- 오래된 피드백은 최근 피드백보다 낮게 반영하고, 상충 피드백은 보수적으로 처리
+- `measurement_source`, `parsing_status`, `extraction_confidence`는 fit score가 아니라 confidence와 report caveat에 반영
+- 저장 형식은 기존 `fit_analysis_results.result_details` JSONB를 사용하므로 no schema migration이 필요하지 않음
+- 새 `result_details` 필드는 legacy-tolerant 하며, 과거 row에 설명 메타데이터가 없어도 report builder는 기존 필드로 fallback
+- `fit_report_v2`는 confidence reason, missing measurement, data quality, feedback reliability summary를 리포트 입력과 prompt에 포함
+
 ## 다음 개선 후보
 
-### v1.5 Measurement Input Normalization
+### v1.6 Measurement Input Normalization
 
 - camelCase 측정값 입력 지원
 - cm/mm 단위 정규화
 - 문자열 기반 치수 파싱
 - 필수 측정값 부족 시 더 명확한 에러 메시지
 
-### v1.6 Feedback-aware Score Adjustment
+### v1.7 Feedback-aware Score Adjustment
 
-- 피드백 보정값의 decay 또는 기간별 가중치
 - 사용자별 confidence calibration
 - 피드백 부족 사용자에 대한 cohort fallback
+- 충분한 검증 fixture 확보 후 score 자체의 보정 여부 판단
 
-### v1.7 Product Parsing Confidence
+### v1.8 Product Parsing Confidence Expansion
 
-- OCR/URL 파싱 confidence를 추천 confidence에 반영
-- `measurement_source`별 신뢰도 차등 적용
-- 수동 입력과 자동 추출 데이터 구분
+- OCR/URL 파싱 원본 수집과 사용자 확인 workflow 강화
+- `measurement_source`별 품질 감사 리포트
 
 ### v2.0 Data-driven Fit Model
 
