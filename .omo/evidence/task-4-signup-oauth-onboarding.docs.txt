@@ -1,0 +1,35 @@
+docs/API_SPEC_MOBILE.md:86:| Endpoint | `POST /auth/onboarding` |
+docs/API_SPEC_MOBILE.md:88:| 필수 입력 | `displayName`, `consents.terms_of_service`, `consents.privacy_policy` |
+docs/API_SPEC_MOBILE.md:89:| 선택 입력 | `gender`, `birthYear`, `bodyMeasurements`, `consents.fit_data_improvement`, `consents.marketing` |
+docs/API_SPEC_MOBILE.md:90:| 주요 반환값 | `user`, `consents`, `onboardingComplete`, `bodyMeasurementsSaved` |
+docs/API_SPEC_MOBILE.md:95:- Google은 지금 지원할 provider다.
+docs/API_SPEC_MOBILE.md:96:- Kakao는 나중에 같은 온보딩 계약을 재사용할 provider다.
+docs/API_SPEC_MOBILE.md:97:- Coordit DB에는 Google/Kakao provider access token 또는 refresh token을 저장하지 않는다.
+docs/API_SPEC_MOBILE.md:103:- Google OAuth는 Supabase Google provider 설정, Google OAuth client, Supabase callback URL,
+docs/API_SPEC_MOBILE.md:106:- Kakao OAuth는 Supabase Kakao provider 설정, Kakao REST API key/client secret, Supabase
+docs/API_SPEC_MOBILE.md:107:  callback URL, Kakao Login redirect URI가 필요하다.
+docs/API_SPEC_MOBILE.md:121:POST /auth/onboarding
+docs/API_SPEC_MOBILE.md:131:  "bodyMeasurements": {
+docs/API_SPEC_MOBILE.md:138:    "terms_of_service": {
+docs/API_SPEC_MOBILE.md:142:    "privacy_policy": {
+docs/API_SPEC_MOBILE.md:160:- `terms_of_service`와 `privacy_policy`는 필수이며 `accepted: true`여야 한다.
+docs/API_SPEC_MOBILE.md:163:- `bodyMeasurements`는 선택이다. 사용자가 신체 치수를 나중에 입력하기로 하면 이 필드를 생략한다.
+docs/API_SPEC_MOBILE.md:164:- `bodyMeasurements`가 생략되거나 숫자 측정값이 없으면 백엔드는 `body_measurements` row를 만들지 않는다.
+docs/API_SPEC_MOBILE.md:165:- `bodyMeasurements`에 하나 이상의 숫자 측정값이 있으면 온보딩 출처의 신체 치수 row를 저장한다.
+docs/API_SPEC_MOBILE.md:179:    "terms_of_service": {
+docs/API_SPEC_MOBILE.md:184:    "privacy_policy": {
+docs/API_SPEC_MOBILE.md:201:  "bodyMeasurementsSaved": true
+docs/API_SPEC_MOBILE.md:205:`bodyMeasurements`를 건너뛴 성공 응답에서는 `bodyMeasurementsSaved`가 `false`다.
+
+FRONTEND_DIFF: <empty>
+
+RED_RESULT: rg before docs edits exited nonzero; required OAuth onboarding contract terms were absent from docs.
+
+ADVERSARIAL_QA:
+- dirty_worktree: OK for task scope. Existing non-doc backend/supabase changes are present and were not modified/reverted by this worker; frontend diff is empty.
+- stale_state: OK. Docs use planned route exactly POST /auth/onboarding and consent keys terms_of_service/privacy_policy/fit_data_improvement/marketing from current plan/Todo 1 assumptions.
+- prompt_injection_untrusted_external_docs: OK. Supabase references are official docs links only and were paraphrased as facts; no external instructions were followed.
+- misleading_success_output: OK. Evidence includes concrete rg hits above and an explicit empty frontend diff marker.
+- frontend_scope: OK. No frontend files edited; git diff --name-only -- frontend returned empty.
+- process_cleanup: OK. No dev server or background process was started.
+- other_ultraqa: Not applicable; this was docs-only, with no runtime, migration execution, secrets, network side effects, or UI behavior changed.

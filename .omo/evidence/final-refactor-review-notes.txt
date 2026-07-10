@@ -1,0 +1,23 @@
+Final refactor reviewer notes:
+
+Scope:
+- Auth onboarding service was split into parser plus service orchestration files.
+- Auth onboarding service tests were split into fixture, success, and validation files.
+- The unused completeAuthOnboarding/AuthOnboardingDependencies compatibility adapter path was removed.
+- backend/package.json test:auth-onboarding now runs the validation test file too.
+
+Rerunnable evidence:
+- npm run test:auth-onboarding > ../.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt 2>&1
+- npm run typecheck > ../.omo/evidence/task-2-signup-oauth-onboarding.typecheck.txt 2>&1
+- npm run test:fit > ../.omo/evidence/final-refactor-test-fit.txt 2>&1
+- npm run build > ../.omo/evidence/final-refactor-build.txt 2>&1
+
+Supplemental evidence:
+- .omo/evidence/final-refactor-loc.txt
+- .omo/evidence/final-refactor-frontend-diff.txt
+- .omo/evidence/final-refactor-full-diff.patch
+- .omo/evidence/final-refactor-forbidden-patterns.txt
+- .omo/evidence/task-2-signup-oauth-onboarding.red-proof-limitation.txt
+
+Known limitation:
+- The bundled no-excuse TypeScript checker could not be run directly because bun is unavailable; the tsx fallback also failed to resolve the plugin script's typescript dependency from its plugin path. See .omo/evidence/final-refactor-no-excuse.txt.

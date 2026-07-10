@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { signup, login } from "./modules/auth/auth.controller";
+import { completeOnboardingController } from "./modules/auth/auth-onboarding.controller";
 import { createBodyMeasurement, listBodyMeasurements } from "./modules/body-measurements/body-measurements.controller";
 import {
   createClothingItem,
@@ -62,6 +63,8 @@ routes.post("/auth/signup", signup);
 routes.post("/auth/login", login);
 
 routes.use(authMiddleware);
+
+routes.post("/auth/onboarding", completeOnboardingController);
 
 routes.get("/users/me", getMe);
 routes.patch("/users/me", updateMe);

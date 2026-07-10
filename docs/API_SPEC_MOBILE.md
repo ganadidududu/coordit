@@ -73,6 +73,129 @@ Content-Type: application/json
 | 주요 반환값 | `accessToken`, `refreshToken`, `user` |
 | 사용 화면 | Auth |
 
+### OAuth 온보딩 계약
+
+이 섹션은 백엔드/API 계약이다. 현재 문서는 프론트엔드 구현 완료를 의미하지 않는다.
+모바일 또는 웹 클라이언트는 Supabase OAuth를 완료한 뒤 Supabase access token을
+Coordit 백엔드 보호 API의 bearer token으로 넘긴다.
+
+| 항목 | 내용 |
+| --- | --- |
+| 기능명 | OAuth 온보딩 완료 |
+| 목적 | Supabase OAuth 사용자의 Coordit 프로필, 필수 약관 동의, 선택 신체 치수를 저장한다. |
+| Endpoint | `POST /auth/onboarding` |
+| 인증 | `Authorization: Bearer <supabase_access_token>` |
+| 필수 입력 | `displayName`, `consents.terms_of_service`, `consents.privacy_policy` |
+| 선택 입력 | `gender`, `birthYear`, `bodyMeasurements`, `consents.fit_data_improvement`, `consents.marketing` |
+| 주요 반환값 | `user`, `consentStatus`, `onboardingComplete`, `bodyMeasurementsSaved` |
+| 사용 화면 | Auth onboarding |
+
+OAuth provider 방향:
+
+- Google은 지금 지원할 provider다.
+- Kakao는 나중에 같은 온보딩 계약을 재사용할 provider다.
+- Coordit DB에는 Google/Kakao provider access token 또는 refresh token을 저장하지 않는다.
+- provider별 로그인, code exchange, redirect allow-list는 Supabase Auth 설정과 클라이언트
+  OAuth 플로우가 담당한다.
+
+Supabase 연동 사실:
+
+- Google OAuth는 Supabase Google provider 설정, Google OAuth client, Supabase callback URL,
+  앱 redirect URL allow-list가 필요하다.
+  참고: <https://supabase.com/docs/guides/auth/social-login/auth-google>
+- Kakao OAuth는 Supabase Kakao provider 설정, Kakao REST API key/client secret, Supabase
+  callback URL, Kakao Login redirect URI가 필요하다.
+  참고: <https://supabase.com/docs/guides/auth/social-login/auth-kakao>
+- PKCE 플로우에서는 callback에서 authorization code를 session으로 교환한다.
+  참고: <https://supabase.com/docs/guides/auth/sessions/pkce-flow>,
+  <https://supabase.com/docs/reference/javascript/auth-exchangecodeforsession>
+- redirect URL은 Supabase allow-list에 등록되어야 한다.
+  참고: <https://supabase.com/docs/guides/auth/redirect-urls>
+- 이 endpoint는 Supabase-issued access token이 필요하며, 백엔드는 전달받은
+  Supabase JWT/access token을 Supabase Auth 사용자 조회로 다시 검증한다.
+  일부 기존 보호 route가 허용하던 local JWT fallback, 즉 locally signed fallback JWT는
+  온보딩 완료 요청에서 거부된다.
+  참고: <https://supabase.com/docs/guides/auth/jwts>,
+  <https://supabase.com/docs/reference/javascript/auth-getuser>
+
+요청 예:
+
+```http
+POST /auth/onboarding
+Authorization: Bearer <supabase_access_token>
+Content-Type: application/json
+```
+
+```json
+{
+  "displayName": "테스트",
+  "gender": "female",
+  "birthYear": 1995,
+  "bodyMeasurements": {
+    "heightCm": 168,
+    "weightKg": 58,
+    "shoulderWidth": 40,
+    "outseam": 96
+  },
+  "consents": {
+    "terms_of_service": {
+      "accepted": true,
+      "version": "2026-07-07"
+    },
+    "privacy_policy": {
+      "accepted": true,
+      "version": "2026-07-07"
+    },
+    "fit_data_improvement": {
+      "accepted": false,
+      "version": "2026-07-07"
+    },
+    "marketing": {
+      "accepted": false,
+      "version": "2026-07-07"
+    }
+  }
+}
+```
+
+요청 규칙:
+
+- `terms_of_service`와 `privacy_policy`는 필수이며 `accepted: true`여야 한다.
+- `fit_data_improvement`와 `marketing`은 선택 동의다. 거절하거나 생략해도 온보딩을 막지 않는다.
+- `birthYear`를 사용한다. 매년 값이 바뀌는 `age`는 canonical 입력/저장값으로 사용하지 않는다.
+- `bodyMeasurements`는 선택이다. 사용자가 신체 치수를 나중에 입력하기로 하면 이 필드를 생략한다.
+- `bodyMeasurements`가 생략되거나 숫자 측정값이 없으면 백엔드는 `body_measurements` row를 만들지 않는다.
+- `bodyMeasurements`에 하나 이상의 숫자 측정값이 있으면 온보딩 출처의 신체 치수 row를 저장한다.
+
+응답 예:
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "display_name": "테스트",
+    "gender": "female",
+    "birth_year": 1995
+  },
+  "consentStatus": {
+    "savedConsentKeys": [
+      "terms_of_service",
+      "privacy_policy",
+      "fit_data_improvement",
+      "marketing"
+    ],
+    "requiredAccepted": true,
+    "optionalAccepted": []
+  },
+  "onboardingComplete": true,
+  "bodyMeasurementsSaved": true
+}
+```
+
+`bodyMeasurements`를 건너뛴 성공 응답에서는 `bodyMeasurementsSaved`가 `false`다.
+이 호출은 같은 사용자가 다시 호출할 수 있는 완료/갱신 성격의 요청이며 성공 시 HTTP 200을 사용한다.
+
 ### 인증 상태 확인
 
 | 항목 | 내용 |
@@ -94,7 +217,7 @@ Content-Type: application/json
 | 목적 | 사용자 표시 이름과 기본 정보를 가져온다. |
 | Endpoint | `GET /users/me` |
 | 필수 입력 | Authorization header |
-| 주요 반환값 | `id`, `email`, `displayName`, `gender`, `birthYear` |
+| 주요 반환값 | `id`, `email`, `display_name`, `gender`, `birth_year` |
 | 사용 화면 | Home, Profile |
 
 ### 내 프로필 수정

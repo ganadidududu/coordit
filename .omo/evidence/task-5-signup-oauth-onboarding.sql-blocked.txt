@@ -1,0 +1,8 @@
+SQL REAL-SURFACE BLOCKED
+timestamp: 2026-07-09T13:09:29Z
+surface: disposable/dev database migration and contract verification
+exact invocation attempted: tool/env prerequisite check captured in .omo/evidence/task-5-signup-oauth-onboarding.sql-prereq.txt
+blocker: no disposable/dev database URL is available because SUPABASE_DB_URL is missing.
+additional missing prerequisites: psql missing, supabase CLI missing, postgres missing, SUPABASE_URL missing, SUPABASE_ANON_KEY missing, SUPABASE_SERVICE_ROLE_KEY missing.
+secret hygiene: only presence/absence was recorded; no env values printed.
+verdict: BLOCKED_ALLOWED_BY_PLAN for real SQL apply/contract checks.

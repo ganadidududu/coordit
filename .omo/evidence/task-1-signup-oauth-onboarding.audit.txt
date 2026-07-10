@@ -1,0 +1,91 @@
+Task 1 consent schema evidence
+
+Branch and plan
+branch: codex/signup-oauth-onboarding
+head: b3e2c9e2870888c4eda148c64e1f48bdaa01f091
+merge-base origin/main: b3e2c9e2870888c4eda148c64e1f48bdaa01f091
+plan: .omo/plans/signup-oauth-onboarding.md exists
+
+RED evidence
+Initial requested command attempted with status variable and failed because zsh treats status as read-only; rerun used rc.
+Command: rg -n "create table public.consent_versions|create table public.user_consents|enable row level security|terms_of_service|privacy_policy" supabase backend/src/shared/types/database.ts > .omo/evidence/task-1-signup-oauth-onboarding.schema-red.txt 2>&1
+Outcome: exit 0 from generic existing RLS matches, but lacks consent table definitions and required consent keys. Lines:
+supabase/rls.sql:1:alter table public.users enable row level security;
+supabase/rls.sql:2:alter table public.body_measurements enable row level security;
+supabase/rls.sql:3:alter table public.clothing_items enable row level security;
+supabase/rls.sql:4:alter table public.clothing_sizes enable row level security;
+supabase/rls.sql:5:alter table public.reference_clothing enable row level security;
+supabase/rls.sql:6:alter table public.external_products enable row level security;
+supabase/rls.sql:7:alter table public.external_product_sizes enable row level security;
+supabase/rls.sql:8:alter table public.fit_analysis_results enable row level security;
+supabase/rls.sql:9:alter table public.user_feedback enable row level security;
+supabase/rls.sql:10:alter table public.recommendation_logs enable row level security;
+
+GREEN evidence
+Command: rg -n "create table public.consent_versions|create table public.user_consents|enable row level security|terms_of_service|privacy_policy" supabase backend/src/shared/types/database.ts > .omo/evidence/task-1-signup-oauth-onboarding.schema-green.txt 2>&1
+Outcome: exit 0; key lines:
+supabase/rls.sql:1:alter table public.users enable row level security;
+supabase/rls.sql:2:alter table public.consent_versions enable row level security;
+supabase/rls.sql:3:alter table public.user_consents enable row level security;
+supabase/rls.sql:4:alter table public.body_measurements enable row level security;
+supabase/rls.sql:5:alter table public.clothing_items enable row level security;
+supabase/rls.sql:6:alter table public.clothing_sizes enable row level security;
+supabase/rls.sql:7:alter table public.reference_clothing enable row level security;
+supabase/rls.sql:8:alter table public.external_products enable row level security;
+supabase/rls.sql:9:alter table public.external_product_sizes enable row level security;
+supabase/rls.sql:10:alter table public.fit_analysis_results enable row level security;
+supabase/rls.sql:11:alter table public.user_feedback enable row level security;
+supabase/rls.sql:12:alter table public.recommendation_logs enable row level security;
+supabase/schema.sql:13:create table public.consent_versions (
+supabase/schema.sql:26:create table public.user_consents (
+supabase/schema.sql:193:  ('terms_of_service', '2026-07-07', 'Terms of Service', 'Required agreement to Coordit service terms.', true, '2026-07-07 00:00:00+00'),
+supabase/schema.sql:194:  ('privacy_policy', '2026-07-07', 'Privacy Policy', 'Required agreement to Coordit privacy policy.', true, '2026-07-07 00:00:00+00'),
+supabase/migrations/20260707_add_consent_schema.sql:37:  ('terms_of_service', '2026-07-07', 'Terms of Service', 'Required agreement to Coordit service terms.', true, '2026-07-07 00:00:00+00'),
+supabase/migrations/20260707_add_consent_schema.sql:38:  ('privacy_policy', '2026-07-07', 'Privacy Policy', 'Required agreement to Coordit privacy policy.', true, '2026-07-07 00:00:00+00'),
+supabase/migrations/20260707_add_consent_schema.sql:51:alter table public.consent_versions enable row level security;
+supabase/migrations/20260707_add_consent_schema.sql:52:alter table public.user_consents enable row level security;
+
+SQL/text validation
+command -v psql/postgres/supabase: none found, so DB-backed SQL parse/apply validation not run.
+git diff --check -- scoped files: exit 0.
+backend typecheck command: cd backend && npm run typecheck; outcome blocked: sh: tsc: command not found.
+TypeScript no-excuse audit: not run; bun not found.
+
+Manual QA channel
+PASS: schema-green evidence contains consent table definitions, RLS enablement references, and terms_of_service/privacy_policy keys.
+
+Adversarial QA
+dirty_worktree: frontend diff command output follows; expected empty.
+changed files under scoped diff command:
+backend/src/shared/types/database.ts
+supabase/indexes.sql
+supabase/rls.sql
+supabase/schema.sql
+full status, including concurrent/unowned changes:
+ M backend/src/shared/types/database.ts
+ M docs/API_SPEC_MOBILE.md
+ M supabase/indexes.sql
+ M supabase/rls.sql
+ M supabase/schema.sql
+?? .omo/
+?? supabase/migrations/20260707_add_consent_schema.sql
+stale_state: branch/head/merge-base recorded above; plan path was read.
+misleading_success_output: RED grep exit 0 was not treated as success because output lacked consent tables/keys. GREEN key lines recorded above.
+malformed input: not applicable; schema-only task with fixed consent keys and no runtime input parser.
+prompt injection: not applicable; no external untrusted prompt/document content consumed.
+cancel/resume: not applicable; no interruption occurred.
+hung commands: not applicable; no command exceeded expected time.
+flaky tests: not applicable; no tests were runnable due missing local TypeScript toolchain.
+repeated interruption: not applicable.
+
+Cleanup
+No dev server, tmux session, or background process was started for this task.
+
+Supplemental verifier-blocker evidence - 2026-07-08T14:30:35+09:00
+contract-check artifact: .omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt; OVERALL_RESULT: 104:OVERALL_RESULT: PASS
+typecheck artifact: .omo/evidence/task-1-signup-oauth-onboarding.typecheck.txt; RESULT: 33:RESULT: PASS
+COMMAND: git diff --check -- supabase/schema.sql supabase/indexes.sql supabase/rls.sql supabase/migrations/20260707_add_consent_schema.sql backend/src/shared/types/database.ts
+EXIT_STATUS: 0
+COMMAND: git diff --name-only -- frontend
+EXIT_STATUS: 0 (empty output expected)
+backend/node_modules: created by npm ci; ignored/generated dependency tree, not part of git diff.

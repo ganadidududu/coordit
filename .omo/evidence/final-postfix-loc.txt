@@ -1,0 +1,7 @@
+     250 backend/src/modules/auth/auth-onboarding.controller.test.ts
+     126 backend/src/modules/auth/auth-onboarding.service.test.ts
+     139 backend/src/modules/auth/auth-onboarding.validation.test.ts
+     193 backend/src/modules/auth/auth-onboarding.parser.ts
+      90 backend/src/modules/auth/auth-onboarding.service.ts
+     127 backend/src/modules/auth/auth-onboarding.controller.ts
+     925 total

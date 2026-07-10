@@ -1,0 +1,9 @@
+Surface: backend typecheck
+Invocation: npm run typecheck
+---
+
+> coordit-backend@0.1.0 typecheck
+> tsc --noEmit
+
+
+Exit code: 0

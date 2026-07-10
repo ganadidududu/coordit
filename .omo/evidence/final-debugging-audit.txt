@@ -1,0 +1,51 @@
+Final debugging audit: signup-oauth-onboarding
+Timestamp: 2026-07-10
+Worktree: /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding
+Overall verdict: PASS
+
+Scope control:
+- Product files were not edited.
+- Evidence files written for this audit:
+  - .omo/evidence/final-debugging-audit-test-auth-onboarding.txt
+  - .omo/evidence/final-debugging-audit-docs-controller-response.txt
+  - .omo/evidence/final-debugging-audit-todo5-blockers.txt
+  - .omo/evidence/final-debugging-audit-frontend-diff.txt
+  - .omo/evidence/final-debugging-audit-parser-service-repository.txt
+  - .omo/evidence/final-debugging-audit.txt
+
+manualQa.surfaceEvidence:
+| scenario id | criterion reference | surface | exact invocation | verdict | artifactRefs |
+| --- | --- | --- | --- | --- | --- |
+| H1-local-jwt-fallback | Hypothesis 1 | Backend auth onboarding controller test/code path | `cd /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend && npm run test:auth-onboarding` | PASS: test output includes `PASS local JWT fallback bearer returns 401 before service`; controller independently calls Supabase bearer verification and rejects null before service. | A1, A5 |
+| H2-minimal-optional-fields | Hypothesis 2 | Backend auth onboarding service test/parser path | `cd /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend && npm run test:auth-onboarding` | PASS: test output includes `PASS minimal success saves required consents only and no body row`; parser treats `gender`, `birthYear`, and `bodyMeasurements` as optional. | A1, A5 |
+| H3-body-retry-no-duplicate | Hypothesis 3 | Backend auth onboarding service/repository retry path | `cd /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend && npm run test:auth-onboarding` | PASS: test output includes `PASS retry body measurements updates existing onboarding row`; service uses `findLatestOnboardingBodyMeasurement` then `updateOnboardingBodyMeasurement` when present. | A1, A5 |
+| H4-docs-controller-response | Hypothesis 4 | Docs/API_SPEC_MOBILE.md vs controller/test response | `sed -n '170,196p' docs/API_SPEC_MOBILE.md`; `sed -n '18,105p' backend/src/modules/auth/auth-onboarding.controller.ts`; `sed -n '187,214p' backend/src/modules/auth/auth-onboarding.controller.test.ts` | PASS: docs, controller, and test all expose `user`, `consentStatus.savedConsentKeys`, `consentStatus.requiredAccepted`, `consentStatus.optionalAccepted`, `onboardingComplete`, and `bodyMeasurementsSaved`. | A2 |
+| H5-external-qa-honesty | Hypothesis 5 | Existing Todo 5 evidence and blockers | `sed -n '1,220p' .omo/evidence/task-5-signup-oauth-onboarding.manualQa.md`; `sed -n '1,180p' .omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt`; `sed -n '1,120p' .omo/evidence/task-5-signup-oauth-onboarding.final-audit.txt` | PASS: existing evidence explicitly blocks real HTTP happy path for missing `SUPABASE_ACCESS_TOKEN` and says fake JWT was not used; SQL real-surface is blocked for missing DB/tooling. | A3 |
+| frontend-no-diff | Verify requirement | Worktree frontend diff | `git diff -- frontend` | PASS: transcript records observed byte count `0`. | A4 |
+
+manualQa.adversarialCases:
+| scenario id | criterion reference | adversarial class | expected behavior | verdict | artifactRefs |
+| --- | --- | --- | --- | --- | --- |
+| ADV-local-jwt-through-middleware | Hypothesis 1 | local JWT fallback allowed by shared middleware | `/auth/onboarding` must still reject locally signed fallback JWT before onboarding service. | PASS: controller-level Supabase verification is distinct from shared middleware fallback and test proves service was not called. | A1, A5 |
+| ADV-minimal-payload-friction | Hypothesis 2 | optional fields accidentally required | Required consents plus displayName should succeed without gender, birthYear, or bodyMeasurements. | PASS: minimal success test passed; fake repository operations were user + two consent writes only. | A1 |
+| ADV-empty-body-measurements | Hypothesis 2 | empty optional body object creates friction or side effect | Empty/non-numeric body measurements should not create a body row. | PASS: validation test output includes `PASS body measurements without numeric values create no row`. | A1 |
+| ADV-body-retry-duplicate | Hypothesis 3 | retry duplicate insert | Retry with existing onboarding body row should update, not insert. | PASS: retry test passed and implementation branches through update when existing row is found. | A1, A5 |
+| ADV-response-shape-drift | Hypothesis 4 | docs/controller response mismatch | Documentation should not promise a different `consentStatus` or user shape than controller/test. | PASS: captured docs/controller/test excerpts match for the audited response fields. | A2 |
+| ADV-fake-external-proof | Hypothesis 5 | fake JWT happy proof | Missing Supabase token/db must be reported as blocked, not as a happy-path pass. | PASS: Todo 5 evidence says no real token, fake JWT not acceptable, and fake token not used. | A3 |
+| ADV-frontend-regression | Verify requirement | unintended frontend changes | No frontend diff should exist. | PASS: `git diff -- frontend` byte count is 0. | A4 |
+
+manualQa.artifactRefs:
+| id | kind | description | path |
+| --- | --- | --- | --- |
+| A1 | transcript | Fresh `npm run test:auth-onboarding` run; includes all auth onboarding service, validation, and controller test PASS lines plus `EXIT_STATUS=0`. | .omo/evidence/final-debugging-audit-test-auth-onboarding.txt |
+| A2 | transcript | Docs, controller response type/mapper, and controller response assertion excerpts for response-shape comparison. | .omo/evidence/final-debugging-audit-docs-controller-response.txt |
+| A3 | transcript | Existing Todo 5 manual QA, HTTP blocker, and final audit excerpts showing honest external QA blockers and no fake JWT happy proof. | .omo/evidence/final-debugging-audit-todo5-blockers.txt |
+| A4 | transcript | Frontend diff check transcript showing exact invocation and observed byte count 0. | .omo/evidence/final-debugging-audit-frontend-diff.txt |
+| A5 | transcript | Parser, service, and repository excerpts for optional-field parsing and body retry update path. | .omo/evidence/final-debugging-audit-parser-service-repository.txt |
+
+Verdict details:
+- H1 ruled out by fresh passing controller test and controller implementation: local fallback bearer reaches injected verifier, receives null, returns 401, and does not call service.
+- H2 ruled out by fresh passing service/validation tests and parser implementation: only displayName plus required consents are mandatory; optional fields may be absent.
+- H3 ruled out by fresh passing service test and service/repository implementation: existing onboarding body row is looked up and updated on retry.
+- H4 ruled out by docs/controller/test excerpt comparison for `consentStatus` and response fields.
+- H5 ruled out as a false-positive concern: external happy path was not falsely claimed; existing evidence records missing Supabase token/db/tooling blockers and explicitly rejects fake JWT as proof.

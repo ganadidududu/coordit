@@ -1,3 +1,6 @@
+Surface: backend package scripts
+Invocation: sed -n "1,220p" backend/package.json
+---
 {
   "name": "coordit-backend",
   "version": "0.1.0",

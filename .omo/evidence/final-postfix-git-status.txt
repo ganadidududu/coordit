@@ -1,0 +1,18 @@
+ M backend/package.json
+ M backend/src/routes.ts
+ M backend/src/shared/types/database.ts
+ M docs/API_SPEC_MOBILE.md
+ M supabase/indexes.sql
+ M supabase/rls.sql
+ M supabase/schema.sql
+?? .omo/
+?? backend/src/modules/auth/auth-onboarding.controller.test.ts
+?? backend/src/modules/auth/auth-onboarding.controller.ts
+?? backend/src/modules/auth/auth-onboarding.parser.ts
+?? backend/src/modules/auth/auth-onboarding.repository.ts
+?? backend/src/modules/auth/auth-onboarding.service.test.ts
+?? backend/src/modules/auth/auth-onboarding.service.ts
+?? backend/src/modules/auth/auth-onboarding.test-fixtures.ts
+?? backend/src/modules/auth/auth-onboarding.types.ts
+?? backend/src/modules/auth/auth-onboarding.validation.test.ts
+?? supabase/migrations/20260707_add_consent_schema.sql

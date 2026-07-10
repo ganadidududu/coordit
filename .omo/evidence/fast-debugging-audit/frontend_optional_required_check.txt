@@ -1,0 +1,3 @@
+Surface: frontend optional field required check
+Invocation: rg -n "required|gender|birthYear|bodyMeasurements|terms_of_service|privacy_policy|fit_data_improvement|marketing" frontend/src/app/onboarding/page.tsx
+---

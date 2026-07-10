@@ -1,0 +1,7 @@
+HTTP verification prerequisites - 2026-07-09T13:09:44Z
+worktree: /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding
+API_BASE_URL: missing; defaulting to http://localhost:4000 for local no-auth attempt
+SUPABASE_ACCESS_TOKEN: missing
+SUPABASE_URL: missing
+SUPABASE_ANON_KEY: missing
+SUPABASE_SERVICE_ROLE_KEY: missing
