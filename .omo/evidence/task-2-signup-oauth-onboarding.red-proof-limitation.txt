@@ -1,0 +1,19 @@
+Original Todo 2 RED limitation:
+
+The earlier saved RED artifact for signup OAuth onboarding failed because the test environment was not wired yet, so it did not prove product behavior went red for the intended malformed onboarding input.
+
+I did not reconstruct a true historical RED by reverting implementation code, because that would risk disturbing the current final-gate worktree and could create fake or misleading evidence.
+
+Current behavior-negative evidence:
+
+The rerunnable auth onboarding suite now includes explicit malformed-input checks, including:
+- blank displayName returns 400 and writes nothing
+- missing required consent returns 400 and writes nothing
+- false required consent returns 400 and writes nothing
+- unknown consent key returns 400 and writes nothing
+- auth user missing email returns 400 and writes nothing
+
+The current GREEN transcript is captured at:
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt
+
+This is not a substitute for historical RED. It is current negative-case behavior proof and an explicit limitation record.

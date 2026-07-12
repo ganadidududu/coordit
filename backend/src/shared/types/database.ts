@@ -37,6 +37,31 @@ export interface UserRow {
   updated_at: string;
 }
 
+export interface ConsentVersionRow {
+  readonly key: string;
+  readonly version: string;
+  readonly title: string;
+  readonly description: string | null;
+  readonly required: boolean;
+  readonly effective_from: string;
+  readonly created_at: string;
+}
+
+export interface UserConsentRow {
+  readonly id: string;
+  readonly user_id: string;
+  readonly consent_key: string;
+  readonly consent_version: string;
+  readonly accepted: boolean;
+  readonly accepted_at: string | null;
+  readonly revoked_at: string | null;
+  readonly required: boolean;
+  readonly ip_address: string | null;
+  readonly user_agent: string | null;
+  readonly created_at: string;
+  readonly updated_at: string;
+}
+
 export interface ClothingItemRow {
   id: string;
   user_id: string;

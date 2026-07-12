@@ -1,0 +1,148 @@
+DOCS RESPONSE LINES
+응답 예:
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "displayName": "테스트",
+    "gender": "female",
+    "birthYear": 1995
+  },
+  "consentStatus": {
+    "savedConsentKeys": [
+      "terms_of_service",
+      "privacy_policy",
+      "fit_data_improvement",
+      "marketing"
+    ],
+    "requiredAccepted": true,
+    "optionalAccepted": []
+  },
+  "onboardingComplete": true,
+  "bodyMeasurementsSaved": true
+}
+```
+
+`bodyMeasurements`를 건너뛴 성공 응답에서는 `bodyMeasurementsSaved`가 `false`다.
+
+CONTROLLER RESPONSE LINES
+  readonly savedConsentKeys: readonly ConsentKey[];
+  readonly requiredAccepted: boolean;
+  readonly optionalAccepted: readonly ConsentKey[];
+};
+
+type CompleteOnboardingResponse = {
+  readonly onboardingComplete: true;
+  readonly user: CompleteOnboardingResult["user"];
+  readonly consentStatus: ConsentStatusSummary;
+  readonly bodyMeasurementsSaved: boolean;
+};
+
+export type CompleteOnboardingHandlerDependencies = {
+  readonly verifySupabaseBearer: (token: string) => Promise<OnboardingAuthUser | null>;
+  readonly completeOnboarding: (
+    authUser: OnboardingAuthUser,
+    payload: CompleteOnboardingPayload,
+    options: CompleteOnboardingOptions
+  ) => Promise<CompleteOnboardingResult>;
+};
+
+const extractBearerToken = (req: AuthenticatedRequest): string => {
+  const header = req.headers.authorization;
+  if (!header?.startsWith("Bearer ")) {
+    throw createHttpError(401, "Missing bearer token");
+  }
+  return header.slice("Bearer ".length);
+};
+
+const verifySupabaseBearer = async (token: string): Promise<OnboardingAuthUser | null> => {
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user) return null;
+  return { id: data.user.id, email: data.user.email };
+};
+
+const toConsentKey = (key: string): ConsentKey | null => {
+  switch (key) {
+    case "terms_of_service":
+    case "privacy_policy":
+    case "fit_data_improvement":
+    case "marketing":
+      return key;
+    default:
+      return null;
+  }
+};
+
+const toOptionalConsentKey = (key: string): OptionalConsentKey | null => {
+  switch (key) {
+    case "fit_data_improvement":
+    case "marketing":
+      return key;
+    default:
+      return null;
+  }
+};
+
+const toConsentStatus = (result: CompleteOnboardingResult): ConsentStatusSummary => {
+  const savedConsentKeys = result.consentRows.flatMap((row) => {
+    const consentKey = toConsentKey(row.consent_key);
+    return consentKey ? [consentKey] : [];
+  });
+  const optionalAccepted = result.consentRows
+    .filter((row) => row.accepted)
+    .flatMap((row) => {
+      const consentKey = toOptionalConsentKey(row.consent_key);
+      return consentKey ? [consentKey] : [];
+    });
+
+  return {
+    savedConsentKeys,
+    requiredAccepted: REQUIRED_CONSENT_KEYS.every((requiredKey) => {
+      return result.consentRows.some((row) => row.consent_key === requiredKey && row.accepted);
+    }),
+    optionalAccepted
+  };
+};
+
+const toResponse = (result: CompleteOnboardingResult): CompleteOnboardingResponse => {
+  return {
+    onboardingComplete: true,
+    user: result.user,
+    consentStatus: toConsentStatus(result),
+    bodyMeasurementsSaved: result.bodyMeasurementsSaved
+  };
+};
+
+export const createCompleteOnboardingController = (
+
+CONTROLLER TEST RESPONSE ASSERTION
+    name: "Supabase-valid bearer calls service and returns 200 onboarding shape",
+    run: async () => {
+      let serviceUserId: string | null = null;
+      const createController = await loadCreateController();
+      const controller = createController({
+        verifySupabaseBearer: async () => ({ id: "user-1", email: "user@example.com" }),
+        completeOnboarding: async (authUser) => {
+          serviceUserId = authUser.id;
+          return result;
+        }
+      });
+      const response = createResponse();
+      await controller(createRequest("Bearer supabase-token"), response, ((error: unknown) => {
+        throw error;
+      }) as NextFunction);
+      assert.equal(serviceUserId, "user-1");
+      assert.equal(response.statusCode, 200);
+      assert.deepEqual(response.body, {
+        onboardingComplete: true,
+        user: result.user,
+        consentStatus: {
+          savedConsentKeys: ["terms_of_service", "privacy_policy"],
+          requiredAccepted: true,
+          optionalAccepted: []
+        },
+        bodyMeasurementsSaved: true
+      });
+    }

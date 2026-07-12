@@ -1,0 +1,3 @@
+177:    "display_name": "테스트",
+179:    "birth_year": 1995
+220:| 주요 반환값 | `id`, `email`, `display_name`, `gender`, `birth_year` |

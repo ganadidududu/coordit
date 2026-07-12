@@ -1,0 +1,19 @@
+
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'typescript' imported from /Users/insihwan/.codex/plugins/cache/sisyphuslabs/omo/4.15.1/skills/programming/scripts/typescript/check-no-excuse-rules.ts
+    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:268:9)
+    at packageResolve (node:internal/modules/esm/resolve:768:81)
+    at moduleResolve (node:internal/modules/esm/resolve:858:18)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at resolveBase (file:///Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend/node_modules/tsx/dist/esm/index.mjs?1783603439476:2:3744)
+    at resolveDirectory (file:///Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend/node_modules/tsx/dist/esm/index.mjs?1783603439476:2:4243)
+    at resolveTsPaths (file:///Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend/node_modules/tsx/dist/esm/index.mjs?1783603439476:2:4984)
+    at resolve (file:///Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend/node_modules/tsx/dist/esm/index.mjs?1783603439476:2:5361)
+    at nextResolve (node:internal/modules/esm/hooks:748:28) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v24.8.0

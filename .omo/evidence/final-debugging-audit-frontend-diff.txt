@@ -1,0 +1,5 @@
+Surface: frontend diff check
+Exact invocation: git diff -- frontend
+Observed output follows:
+Observed byte count:
+       0

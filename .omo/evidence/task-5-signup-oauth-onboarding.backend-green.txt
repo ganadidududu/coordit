@@ -1,0 +1,50 @@
+
+> coordit-backend@0.1.0 test:auth-onboarding
+> tsx src/modules/auth/auth-onboarding.service.test.ts && tsx src/modules/auth/auth-onboarding.controller.test.ts
+
+PASS minimal success saves required consents only and no body row
+PASS full success persists optional fields body and all consents
+PASS retry body measurements updates existing onboarding row
+PASS omitted optional consents are absent
+PASS blank displayName returns 400 and writes nothing
+PASS missing required consent returns 400 and writes nothing
+PASS false required consent returns 400 and writes nothing
+PASS optional false consent is allowed
+PASS body measurements without numeric values create no row
+PASS missing latest required consent version returns 500 and writes nothing
+PASS auth user missing email returns 400 and writes nothing
+PASS route is mounted as POST /auth/onboarding after auth middleware
+PASS missing bearer returns 401 before service
+PASS local JWT fallback bearer returns 401 before service
+PASS Supabase-valid bearer calls service and returns 200 onboarding shape
+PASS missing displayName is rejected through service
+
+> coordit-backend@0.1.0 test:fit
+> tsx src/modules/fit/fit-score.engine.test.ts
+
+fixture passed: OCR/source quality metadata scenarios preserve score and isolate reasons
+reason codes asserted: top category close match recommends the closest regular size with high confidence: feedback_profile_unavailable
+fixture passed: top category close match recommends the closest regular size with high confidence
+reason codes asserted: bottom category close match recommends the closest pants size with high confidence: feedback_profile_unavailable
+fixture passed: bottom category close match recommends the closest pants size with high confidence
+reason codes asserted: missing measurements still recommends from comparable top measurements: missing_measurements, feedback_profile_unavailable
+fixture passed: missing measurements still recommends from comparable top measurements
+reason codes asserted: outlier reference is dampened before ranking candidate sizes: feedback_profile_unavailable
+fixture passed: outlier reference is dampened before ranking candidate sizes
+reason codes asserted: ambiguous size gap keeps deterministic recommendation with medium confidence: small_score_gap, feedback_profile_unavailable
+fixture passed: ambiguous size gap keeps deterministic recommendation with medium confidence
+reason codes asserted: feedback adjusted preferred size wins after bounded offsets: feedback_profile_applied
+fixture passed: feedback adjusted preferred size wins after bounded offsets
+reason codes asserted: low data confidence stays low when only two measurements are comparable: missing_measurements, feedback_profile_unavailable
+fixture passed: low data confidence stays low when only two measurements are comparable
+reason codes asserted: data-quality degraded confidence follows sparse product measurements: insufficient_comparable_measurements, missing_measurements, data_quality_unverified_or_sparse, feedback_profile_unavailable
+fixture passed: data-quality degraded confidence follows sparse product measurements
+fit-score.engine tests passed
+
+> coordit-backend@0.1.0 typecheck
+> tsc --noEmit
+
+
+> coordit-backend@0.1.0 build
+> tsc
+

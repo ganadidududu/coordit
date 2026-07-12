@@ -1,0 +1,29 @@
+Todo 2 fix audit - signup OAuth onboarding
+
+Audited at: 2026-07-08T14:46:06+09:00
+Worktree: /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding
+Branch: codex/signup-oauth-onboarding
+HEAD: b3e2c9e2870888c4eda148c64e1f48bdaa01f091
+
+Stale evidence issue:
+- Independent verifier found stale Todo 2 GREEN/typecheck evidence. The RED failure recorded in `.omo/evidence/task-2-signup-oauth-onboarding.service-red.txt` was `Missing required environment variable: SUPABASE_URL`.
+- Fresh verification in this audit reran commands against the current worktree rather than trusting old success output.
+
+Exact repairs present in the current Todo 2 implementation:
+- `backend/src/modules/auth/auth-onboarding.service.test.ts` sets `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` before dynamically importing `auth-onboarding.service.ts`.
+- Tests load `completeOnboardingWithRepository` dynamically and inject an in-memory `OnboardingRepository` fake, so no real Supabase request or unsafe client patch is needed.
+- `backend/src/modules/auth/auth-onboarding.types.ts` exports all service/test dependency types used by the Todo 2 code, including repository types plus compatibility `AuthOnboarding*` types.
+- `backend/src/modules/auth/auth-onboarding.service.ts` exposes `completeOnboardingWithRepository` for tests and `completeOnboarding` for future route wiring. The compatibility `completeAuthOnboarding` wrapper remains exported for existing Todo 2 references.
+- Contract coverage includes required displayName, optional gender/birthYear, latest consent version lookup from repository data, omitted optional consents staying absent, onboarding body retry update behavior, missing email 400, blank displayName 400, missing/false required consent 400, and no row for nonnumeric body measurements.
+
+Fresh verification to replace stale success evidence:
+- `npm run test:auth-onboarding` was rerun into `.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt`.
+- `npm run typecheck` was rerun into `.omo/evidence/task-2-signup-oauth-onboarding.typecheck.txt`.
+- `git diff --check -- backend/src/modules/auth backend/package.json` was rerun and exited 0.
+- `git diff --name-only -- frontend` was rerun and produced no output.
+
+Scope notes:
+- No Todo 3 route/controller mounting was touched in this repair pass.
+- No frontend files were changed.
+- No provider tokens were added.
+- No `as any`, `ts-ignore`, or `ts-expect-error` was introduced in the auth onboarding files.

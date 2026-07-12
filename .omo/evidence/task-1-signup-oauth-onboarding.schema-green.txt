@@ -1,0 +1,20 @@
+supabase/rls.sql:1:alter table public.users enable row level security;
+supabase/rls.sql:2:alter table public.consent_versions enable row level security;
+supabase/rls.sql:3:alter table public.user_consents enable row level security;
+supabase/rls.sql:4:alter table public.body_measurements enable row level security;
+supabase/rls.sql:5:alter table public.clothing_items enable row level security;
+supabase/rls.sql:6:alter table public.clothing_sizes enable row level security;
+supabase/rls.sql:7:alter table public.reference_clothing enable row level security;
+supabase/rls.sql:8:alter table public.external_products enable row level security;
+supabase/rls.sql:9:alter table public.external_product_sizes enable row level security;
+supabase/rls.sql:10:alter table public.fit_analysis_results enable row level security;
+supabase/rls.sql:11:alter table public.user_feedback enable row level security;
+supabase/rls.sql:12:alter table public.recommendation_logs enable row level security;
+supabase/schema.sql:13:create table public.consent_versions (
+supabase/schema.sql:26:create table public.user_consents (
+supabase/schema.sql:193:  ('terms_of_service', '2026-07-07', 'Terms of Service', 'Required agreement to Coordit service terms.', true, '2026-07-07 00:00:00+00'),
+supabase/schema.sql:194:  ('privacy_policy', '2026-07-07', 'Privacy Policy', 'Required agreement to Coordit privacy policy.', true, '2026-07-07 00:00:00+00'),
+supabase/migrations/20260707_add_consent_schema.sql:37:  ('terms_of_service', '2026-07-07', 'Terms of Service', 'Required agreement to Coordit service terms.', true, '2026-07-07 00:00:00+00'),
+supabase/migrations/20260707_add_consent_schema.sql:38:  ('privacy_policy', '2026-07-07', 'Privacy Policy', 'Required agreement to Coordit privacy policy.', true, '2026-07-07 00:00:00+00'),
+supabase/migrations/20260707_add_consent_schema.sql:51:alter table public.consent_versions enable row level security;
+supabase/migrations/20260707_add_consent_schema.sql:52:alter table public.user_consents enable row level security;

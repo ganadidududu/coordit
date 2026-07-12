@@ -1,0 +1,9 @@
+Surface: duplicate body rows proof excerpts
+Invocation: rg -n "findExistingOnboardingBodyMeasurement|insertBodyMeasurement|updateBodyMeasurement|body measurements without numeric|retry body measurements" backend/src/modules/auth
+---
+backend/src/modules/auth/auth-onboarding.service.test.ts:59:      assert.equal(fake.operations.filter((operation) => operation.kind === "body").length, 1);
+backend/src/modules/auth/auth-onboarding.service.test.ts:64:    name: "retry body measurements updates existing onboarding row",
+backend/src/modules/auth/auth-onboarding.service.test.ts:73:      assert.equal(fake.bodyRows.length, 1);
+backend/src/modules/auth/auth-onboarding.service.test.ts:74:      assert.deepEqual(fake.operations.filter((operation) => operation.kind === "body"), [
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:138:      const row = bodyRow(`body-${bodyRows.length + 1}`, {
+backend/src/modules/auth/auth-onboarding.validation.test.ts:65:    name: "body measurements without numeric values create no row",

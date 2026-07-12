@@ -1,0 +1,22 @@
+
+> coordit-backend@0.1.0 test:auth-onboarding
+> tsx src/modules/auth/auth-onboarding.service.test.ts
+
+/Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend/src/config/env.ts:8
+    throw new Error(`Missing required environment variable: ${key}`);
+          ^
+
+
+Error: Missing required environment variable: SUPABASE_URL
+    at required (/Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend/src/config/env.ts:8:11)
+    at dotenv (/Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend/src/config/env.ts:16:16)
+    at Object.<anonymous> (/Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend/src/config/env.ts:23:1)
+    at Module._compile (node:internal/modules/cjs/loader:1760:14)
+    at Object.transformer (/Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:244:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+
+Node.js v24.8.0

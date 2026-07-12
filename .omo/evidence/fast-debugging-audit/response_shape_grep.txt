@@ -1,0 +1,140 @@
+Surface: controller response shape grep
+Invocation: rg -n "toOnboardingResponse|consentStatus|bodyMeasurementsSaved|onboardingComplete|authUser|accessToken|user" backend/src/modules/auth docs/API_SPEC_MOBILE.md frontend/src/app/onboarding/page.tsx frontend/src/lib/types.ts
+---
+docs/API_SPEC_MOBILE.md:73:| 주요 반환값 | `accessToken`, `refreshToken`, `user` |
+docs/API_SPEC_MOBILE.md:90:| 주요 반환값 | `user`, `consentStatus`, `onboardingComplete`, `bodyMeasurementsSaved` |
+docs/API_SPEC_MOBILE.md:119:  <https://supabase.com/docs/reference/javascript/auth-getuser>
+docs/API_SPEC_MOBILE.md:174:  "user": {
+docs/API_SPEC_MOBILE.md:176:    "email": "user@example.com",
+docs/API_SPEC_MOBILE.md:181:  "consentStatus": {
+docs/API_SPEC_MOBILE.md:191:  "onboardingComplete": true,
+docs/API_SPEC_MOBILE.md:192:  "bodyMeasurementsSaved": true
+docs/API_SPEC_MOBILE.md:196:`bodyMeasurements`를 건너뛴 성공 응답에서는 `bodyMeasurementsSaved`가 `false`다.
+docs/API_SPEC_MOBILE.md:205:| Endpoint | `GET /users/me` |
+docs/API_SPEC_MOBILE.md:218:| Endpoint | `GET /users/me` |
+docs/API_SPEC_MOBILE.md:229:| Endpoint | `PATCH /users/me` |
+docs/API_SPEC_MOBILE.md:806:| Endpoint | `GET /user-feedback` |
+frontend/src/lib/types.ts:143:  accessToken: string;
+frontend/src/lib/types.ts:145:  user: { id: string; email: string };
+backend/src/modules/auth/auth-onboarding.types.ts:35:  readonly userAgent?: string | null;
+backend/src/modules/auth/auth-onboarding.types.ts:59:  readonly user_id: string;
+backend/src/modules/auth/auth-onboarding.types.ts:73:  readonly userId: string;
+backend/src/modules/auth/auth-onboarding.types.ts:80:  readonly userAgent: string | null;
+backend/src/modules/auth/auth-onboarding.types.ts:91:    userId: string
+backend/src/modules/auth/auth-onboarding.types.ts:94:    userId: string,
+backend/src/modules/auth/auth-onboarding.types.ts:104:  readonly user: UserRow;
+backend/src/modules/auth/auth-onboarding.types.ts:105:  readonly onboardingComplete: true;
+backend/src/modules/auth/auth-onboarding.types.ts:106:  readonly bodyMeasurementsSaved: boolean;
+backend/src/modules/auth/auth-onboarding.service.test.ts:19:      const result = await complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload(), {
+backend/src/modules/auth/auth-onboarding.service.test.ts:22:      assert.equal(result.user.display_name, "Mina");
+backend/src/modules/auth/auth-onboarding.service.test.ts:23:      assert.equal(result.bodyMeasurementsSaved, false);
+backend/src/modules/auth/auth-onboarding.service.test.ts:28:      assert.deepEqual(fake.operations.map((operation) => operation.kind), ["user", "consent", "consent"]);
+backend/src/modules/auth/auth-onboarding.service.test.ts:37:        { id: "user-1", email: "user@example.com" },
+backend/src/modules/auth/auth-onboarding.service.test.ts:52:      assert.equal(result.bodyMeasurementsSaved, true);
+backend/src/modules/auth/auth-onboarding.service.test.ts:57:      assert.equal(fake.users[0]?.gender, "female");
+backend/src/modules/auth/auth-onboarding.service.test.ts:58:      assert.equal(fake.users[0]?.birth_year, 1994);
+backend/src/modules/auth/auth-onboarding.service.test.ts:69:        { id: "user-1", email: "user@example.com" },
+backend/src/modules/auth/auth-onboarding.service.test.ts:83:      await complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload(), { now: fixedNow });
+backend/src/modules/auth/auth-onboarding.service.test.ts:96:        { id: "user-1", email: "user@example.com" },
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:23:  | { readonly kind: "user"; readonly profile: OnboardingUserProfile }
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:69:  user_id: "user-1",
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:87:  const users: UserRow[] = [];
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:96:      operations.push({ kind: "user", profile });
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:106:      users.push(row);
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:118:        user_id: input.userId,
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:126:        user_agent: input.userAgent,
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:136:    insertOnboardingBodyMeasurement: async (userId, values) => {
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:139:        user_id: userId,
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:155:  return { repository, operations, bodyRows, users, consents, writtenBodies };
+backend/src/modules/auth/auth-onboarding.controller.ts:24:  readonly onboardingComplete: true;
+backend/src/modules/auth/auth-onboarding.controller.ts:25:  readonly user: CompleteOnboardingResult["user"];
+backend/src/modules/auth/auth-onboarding.controller.ts:26:  readonly consentStatus: ConsentStatusSummary;
+backend/src/modules/auth/auth-onboarding.controller.ts:27:  readonly bodyMeasurementsSaved: boolean;
+backend/src/modules/auth/auth-onboarding.controller.ts:33:    authUser: OnboardingAuthUser,
+backend/src/modules/auth/auth-onboarding.controller.ts:49:  if (error || !data.user) return null;
+backend/src/modules/auth/auth-onboarding.controller.ts:50:  return { id: data.user.id, email: data.user.email };
+backend/src/modules/auth/auth-onboarding.controller.ts:98:    onboardingComplete: true,
+backend/src/modules/auth/auth-onboarding.controller.ts:99:    user: result.user,
+backend/src/modules/auth/auth-onboarding.controller.ts:100:    consentStatus: toConsentStatus(result),
+backend/src/modules/auth/auth-onboarding.controller.ts:101:    bodyMeasurementsSaved: result.bodyMeasurementsSaved
+backend/src/modules/auth/auth-onboarding.controller.ts:110:      const authUser = await dependencies.verifySupabaseBearer(extractBearerToken(req));
+backend/src/modules/auth/auth-onboarding.controller.ts:111:      if (!authUser) throw createHttpError(401, "Supabase bearer token is required");
+backend/src/modules/auth/auth-onboarding.controller.ts:113:      const result = await dependencies.completeOnboarding(authUser, req.body, {
+backend/src/modules/auth/auth-onboarding.controller.ts:115:        userAgent: req.headers["user-agent"] ?? null
+backend/src/modules/auth/auth-onboarding.controller.test.ts:19:  onboardingComplete: true,
+backend/src/modules/auth/auth-onboarding.controller.test.ts:20:  bodyMeasurementsSaved: true,
+backend/src/modules/auth/auth-onboarding.controller.test.ts:21:  user: {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:22:    id: "user-1",
+backend/src/modules/auth/auth-onboarding.controller.test.ts:23:    email: "user@example.com",
+backend/src/modules/auth/auth-onboarding.controller.test.ts:33:      user_id: "user-1",
+backend/src/modules/auth/auth-onboarding.controller.test.ts:41:      user_agent: "agent",
+backend/src/modules/auth/auth-onboarding.controller.test.ts:47:      user_id: "user-1",
+backend/src/modules/auth/auth-onboarding.controller.test.ts:55:      user_agent: "agent",
+backend/src/modules/auth/auth-onboarding.controller.test.ts:82:      "user-agent": "agent"
+backend/src/modules/auth/auth-onboarding.controller.test.ts:86:    user: { id: "local-user", email: "local@example.com" }
+backend/src/modules/auth/auth-onboarding.controller.test.ts:100:    authUser: OnboardingAuthUser,
+backend/src/modules/auth/auth-onboarding.controller.test.ts:102:    options: { readonly ipAddress?: string | null; readonly userAgent?: string | null }
+backend/src/modules/auth/auth-onboarding.controller.test.ts:145:        verifySupabaseBearer: async () => ({ id: "user-1", email: "user@example.com" }),
+backend/src/modules/auth/auth-onboarding.controller.test.ts:192:        verifySupabaseBearer: async () => ({ id: "user-1", email: "user@example.com" }),
+backend/src/modules/auth/auth-onboarding.controller.test.ts:193:        completeOnboarding: async (authUser) => {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:194:          serviceUserId = authUser.id;
+backend/src/modules/auth/auth-onboarding.controller.test.ts:202:      assert.equal(serviceUserId, "user-1");
+backend/src/modules/auth/auth-onboarding.controller.test.ts:205:        onboardingComplete: true,
+backend/src/modules/auth/auth-onboarding.controller.test.ts:206:        user: result.user,
+backend/src/modules/auth/auth-onboarding.controller.test.ts:207:        consentStatus: {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:212:        bodyMeasurementsSaved: true
+backend/src/modules/auth/auth-onboarding.controller.test.ts:221:        verifySupabaseBearer: async () => ({ id: "user-1", email: "user@example.com" }),
+backend/src/modules/auth/auth-onboarding.repository.ts:23:  user_id?: string;
+backend/src/modules/auth/auth-onboarding.repository.ts:49:  userId?: string
+backend/src/modules/auth/auth-onboarding.repository.ts:55:  if (userId !== undefined) row.user_id = userId;
+backend/src/modules/auth/auth-onboarding.repository.ts:87:      .from("users")
+backend/src/modules/auth/auth-onboarding.repository.ts:92:    if (error || !data) throw createHttpError(500, "Failed to save user profile");
+backend/src/modules/auth/auth-onboarding.repository.ts:98:      .from("user_consents")
+backend/src/modules/auth/auth-onboarding.repository.ts:101:          user_id: input.userId,
+backend/src/modules/auth/auth-onboarding.repository.ts:109:          user_agent: input.userAgent ?? null,
+backend/src/modules/auth/auth-onboarding.repository.ts:112:        { onConflict: "user_id,consent_key,consent_version" }
+backend/src/modules/auth/auth-onboarding.repository.ts:117:    if (error || !data) throw createHttpError(500, "Failed to save user consent");
+backend/src/modules/auth/auth-onboarding.repository.ts:122:    userId: string
+backend/src/modules/auth/auth-onboarding.repository.ts:127:      .eq("user_id", userId)
+backend/src/modules/auth/auth-onboarding.repository.ts:138:    userId: string,
+backend/src/modules/auth/auth-onboarding.repository.ts:143:      .insert(toBodyMeasurementRow(values, userId))
+backend/src/modules/auth/auth.service.ts:3:import { upsertUserProfile } from "../users/users.service";
+backend/src/modules/auth/auth.service.ts:6:  accessToken: string;
+backend/src/modules/auth/auth.service.ts:8:  user: {
+backend/src/modules/auth/auth.service.ts:15:  authUser: { id: string; email?: string },
+backend/src/modules/auth/auth.service.ts:18:  if (!authUser.email) throw createHttpError(400, "Auth user email is missing");
+backend/src/modules/auth/auth.service.ts:23:  await upsertUserProfile({ id: authUser.id, email: authUser.email });
+backend/src/modules/auth/auth.service.ts:26:    accessToken: session.access_token,
+backend/src/modules/auth/auth.service.ts:28:    user: { id: authUser.id, email: authUser.email }
+backend/src/modules/auth/auth.service.ts:37:  if (error || !data.user) throw createHttpError(400, error?.message ?? "Signup failed");
+backend/src/modules/auth/auth.service.ts:38:  return toAuthResponse(data.user, data.session);
+backend/src/modules/auth/auth.service.ts:46:  if (error || !data.user) throw createHttpError(401, error?.message ?? "Login failed");
+backend/src/modules/auth/auth.service.ts:47:  return toAuthResponse(data.user, data.session);
+backend/src/modules/auth/auth-onboarding.service.ts:15:  userId: string,
+backend/src/modules/auth/auth-onboarding.service.ts:19:  const existing = await repository.findLatestOnboardingBodyMeasurement(userId);
+backend/src/modules/auth/auth-onboarding.service.ts:24:  await repository.insertOnboardingBodyMeasurement(userId, values);
+backend/src/modules/auth/auth-onboarding.service.ts:29:  userId: string,
+backend/src/modules/auth/auth-onboarding.service.ts:35:    userId,
+backend/src/modules/auth/auth-onboarding.service.ts:42:    userAgent: options.userAgent ?? null
+backend/src/modules/auth/auth-onboarding.service.ts:48:  authUser: OnboardingAuthUser,
+backend/src/modules/auth/auth-onboarding.service.ts:52:  if (!authUser.email) throw createHttpError(400, "Auth user email is missing");
+backend/src/modules/auth/auth-onboarding.service.ts:56:  const user = await repository.upsertUserProfile({
+backend/src/modules/auth/auth-onboarding.service.ts:57:    id: authUser.id,
+backend/src/modules/auth/auth-onboarding.service.ts:58:    email: authUser.email,
+backend/src/modules/auth/auth-onboarding.service.ts:66:    consentRows.push(await repository.saveUserConsent(toConsentInput(user.id, consent, options, nowIso)));
+backend/src/modules/auth/auth-onboarding.service.ts:69:  const bodyMeasurementsSaved = await saveBodyMeasurements(
+backend/src/modules/auth/auth-onboarding.service.ts:71:    user.id,
+backend/src/modules/auth/auth-onboarding.service.ts:76:    user,
+backend/src/modules/auth/auth-onboarding.service.ts:77:    onboardingComplete: true,
+backend/src/modules/auth/auth-onboarding.service.ts:78:    bodyMeasurementsSaved,
+backend/src/modules/auth/auth-onboarding.service.ts:84:  authUser: OnboardingAuthUser,
+backend/src/modules/auth/auth-onboarding.service.ts:89:  return completeOnboardingWithRepository(supabaseOnboardingRepository, authUser, payload, options);
+backend/src/modules/auth/auth-onboarding.validation.test.ts:21:        () => complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload({ displayName: "   " })),
+backend/src/modules/auth/auth-onboarding.validation.test.ts:35:            { id: "user-1", email: "user@example.com" },
+backend/src/modules/auth/auth-onboarding.validation.test.ts:51:            { id: "user-1", email: "user@example.com" },
+backend/src/modules/auth/auth-onboarding.validation.test.ts:70:        { id: "user-1", email: "user@example.com" },
+backend/src/modules/auth/auth-onboarding.validation.test.ts:74:      assert.equal(result.bodyMeasurementsSaved, false);
+backend/src/modules/auth/auth-onboarding.validation.test.ts:86:            { id: "user-1", email: "user@example.com" },
+backend/src/modules/auth/auth-onboarding.validation.test.ts:105:        () => complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload()),
+backend/src/modules/auth/auth-onboarding.validation.test.ts:112:    name: "auth user missing email returns 400 and writes nothing",
+backend/src/modules/auth/auth-onboarding.validation.test.ts:116:        () => complete(fake.repository, { id: "user-1" }, payload()),
