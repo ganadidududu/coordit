@@ -1,0 +1,18 @@
+enum CoorditAssetNames {
+    static let closetFitBottom = "CoorditClosetFitBottom"
+    static let closetFitTop = "CoorditClosetFitTop"
+    static let fitDetail = "CoorditFitDetail"
+    static let fitLower = "CoorditFitLower"
+    static let fitUpper = "CoorditFitUpper"
+    static let loadingMannequin = "CoorditLoadingMannequin"
+    static let loadingOrbit = "CoorditLoadingOrbit"
+    static let mypageAccount = "CoorditMypageAccount"
+    static let mypageBody = "CoorditMypageBody"
+    static let mypageNotifications = "CoorditMypageNotifications"
+    static let mypagePrivacy = "CoorditMypagePrivacy"
+    static let mypageSettings = "CoorditMypageSettings"
+    static let mypageTitle = "CoorditMypageTitle"
+    static let rechargePlay = "CoorditRechargePlay"
+    static let stars = "CoorditStars"
+    static let yarn = "CoorditYarn"
+}
