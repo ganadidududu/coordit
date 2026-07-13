@@ -1,0 +1,22 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icon / Yarn Thread" filter="url(#filter0_g_0_13)">
+<path id="Vector" d="M23.625 42.3C32.075 42.3 38.925 35.45 38.925 27C38.925 18.55 32.075 11.7 23.625 11.7C15.175 11.7 8.325 18.55 8.325 27C8.325 35.45 15.175 42.3 23.625 42.3Z" fill="white" stroke="#000C40" stroke-width="3"/>
+<path id="Vector_2" d="M10.2857 25.7143C16.0714 21.3591 25.9554 18.541 37.2857 22.3838" stroke="#000C40" stroke-width="3" stroke-linecap="round"/>
+<path id="Vector_3" d="M10.8 29.7C18 27.45 26.1 28.125 37.125 34.65" stroke="#000C40" stroke-width="3" stroke-linecap="round"/>
+<path id="Vector_4" d="M18.9 13.275C21.825 22.05 24.975 29.7 33.3 38.475" stroke="#000C40" stroke-width="3" stroke-linecap="round"/>
+<path id="Vector_5" d="M30.825 15.3C26.1 20.925 22.5 28.35 21.15 40.95" stroke="#000C40" stroke-width="3" stroke-linecap="round"/>
+<path id="Vector_6" d="M36 28.2857C41.625 28.7357 44.775 30.7607 45.675 33.6857C46.8 37.5107 43.875 41.1107 38.475 40.8857" stroke="#000C40" stroke-width="3" stroke-linecap="round"/>
+<path id="Vector_7" d="M38.5714 41.1429C40.3714 43.6179 42.6214 44.7429 45.3214 44.5179" stroke="#000C40" stroke-width="3" stroke-linecap="round"/>
+</g>
+<defs>
+<filter id="filter0_g_0_13" x="-0.5" y="-0.5" width="55" height="55" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feTurbulence type="fractalNoise" baseFrequency="0.25 0.25" numOctaves="3" seed="9884" />
+<feDisplacementMap in="shape" scale="1" xChannelSelector="R" yChannelSelector="G" result="displacedImage" width="100%" height="100%" />
+<feMerge result="effect1_texture_0_13">
+<feMergeNode in="displacedImage"/>
+</feMerge>
+</filter>
+</defs>
+</svg>
