@@ -22,6 +22,12 @@ final class CoorditFinalRouteCoverageUITests: XCTestCase {
         "closet-overview",
         "closet-detail-top",
         "closet-detail-bottom",
+        "closet-add-method",
+        "closet-add-link",
+        "closet-add-photo",
+        "closet-add-manual",
+        "closet-add-loading",
+        "closet-add-result",
     ]
 
     override func setUpWithError() throws {

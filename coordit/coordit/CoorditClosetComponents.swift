@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 #if os(iOS)
 enum CoorditClosetColors {
@@ -131,22 +132,8 @@ struct CoorditClosetGarmentCard: View {
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: metrics.value(3)) {
-                RoundedRectangle(cornerRadius: metrics.value(8))
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color(red: 226 / 255, green: 230 / 255, blue: 238 / 255),
-                                Color(red: 239 / 255, green: 242 / 255, blue: 247 / 255),
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
+                CoorditClosetGarmentArtwork(imageData: item.imageData, metrics: metrics)
                     .frame(height: metrics.value(42))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: metrics.value(8))
-                            .stroke(Color(red: 213 / 255, green: 219 / 255, blue: 231 / 255), lineWidth: metrics.value(0.7))
-                    )
                 HStack(alignment: .firstTextBaseline, spacing: metrics.value(6)) {
                     Text(item.category.title)
                         .font(CoorditTypography.gmarketMedium(size: metrics.value(6)))
@@ -177,6 +164,39 @@ struct CoorditClosetGarmentCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(item.name)
+    }
+}
+
+struct CoorditClosetGarmentArtwork: View {
+    let imageData: Data?
+    let metrics: CoorditResponsiveMetrics
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(red: 226 / 255, green: 230 / 255, blue: 238 / 255),
+                    Color(red: 239 / 255, green: 242 / 255, blue: 247 / 255),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+
+            if let imageData, let image = UIImage(data: imageData) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: "tshirt")
+                    .font(.system(size: metrics.value(22), weight: .medium))
+                    .foregroundStyle(CoorditClosetColors.navy.opacity(0.18))
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
+        .overlay(
+            RoundedRectangle(cornerRadius: metrics.value(8))
+                .stroke(Color(red: 213 / 255, green: 219 / 255, blue: 231 / 255), lineWidth: metrics.value(0.7))
+        )
     }
 }
 #endif

@@ -48,6 +48,18 @@ enum CoorditMockData {
             CoorditRouteContent(eyebrow: "CLOSET", title: "Top Detail", detail: route.rawValue)
         case .closetDetailBottom:
             CoorditRouteContent(eyebrow: "CLOSET", title: "Bottom Detail", detail: route.rawValue)
+        case .closetAddMethod:
+            CoorditRouteContent(eyebrow: "CLOSET", title: "Choose Add Method", detail: route.rawValue)
+        case .closetAddLink:
+            CoorditRouteContent(eyebrow: "CLOSET", title: "Link Input", detail: route.rawValue)
+        case .closetAddPhoto:
+            CoorditRouteContent(eyebrow: "CLOSET", title: "Photo Input", detail: route.rawValue)
+        case .closetAddManual:
+            CoorditRouteContent(eyebrow: "CLOSET", title: "Manual Input", detail: route.rawValue)
+        case .closetAddLoading:
+            CoorditRouteContent(eyebrow: "CLOSET", title: "Analyzing Garment", detail: route.rawValue)
+        case .closetAddResult:
+            CoorditRouteContent(eyebrow: "CLOSET", title: "New Garment Detail", detail: route.rawValue)
         }
     }
 }

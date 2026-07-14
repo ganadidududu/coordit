@@ -3,6 +3,9 @@ import SwiftUI
 #if os(iOS)
 struct CoorditRootView: View {
     @State private var route: CoorditFrameRoute
+    @State private var closetItems = CoorditClosetItem.seedItems
+    @State private var selectedClosetItemID: String?
+    @State private var closetDraft = CoorditClosetDraft()
 
     init(startRoute: CoorditFrameRoute = .testingLaunchRoute()) {
         _route = State(initialValue: startRoute)
@@ -35,8 +38,19 @@ struct CoorditRootView: View {
             CoorditMyPageFamilyView(route: route) { route = $0 }
         case .closetOverview,
              .closetDetailTop,
-             .closetDetailBottom:
-            CoorditClosetFamilyView(route: route) { route = $0 }
+             .closetDetailBottom,
+             .closetAddMethod,
+             .closetAddLink,
+             .closetAddPhoto,
+             .closetAddManual,
+             .closetAddLoading,
+             .closetAddResult:
+            CoorditClosetFamilyView(
+                route: route,
+                items: $closetItems,
+                selectedItemID: $selectedClosetItemID,
+                draft: $closetDraft
+            ) { route = $0 }
         }
     }
 }
