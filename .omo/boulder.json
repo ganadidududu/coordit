@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "active_work_id": null,
+  "works": {
+    "fit-score-engine-evolution": {
+      "work_id": "fit-score-engine-evolution",
+      "active_plan": ".omo/plans/fit-score-engine-evolution.md",
+      "plan_name": "fit-score-engine-evolution",
+      "session_ids": ["codex:fit-score-engine-evolution"],
+      "status": "completed",
+      "worktree_path": "/Users/insihwan/Documents/Project/coordit/coordit-dev-fit-score-engine-evolution"
+    },
+    "signup-oauth-onboarding": {
+      "work_id": "signup-oauth-onboarding",
+      "active_plan": ".omo/plans/signup-oauth-onboarding.md",
+      "plan_name": "signup-oauth-onboarding",
+      "session_ids": ["codex:signup-oauth-onboarding"],
+      "status": "completed",
+      "worktree_path": "/Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding"
+    }
+  }
+}

@@ -37,6 +37,31 @@ export interface UserRow {
   updated_at: string;
 }
 
+export interface ConsentVersionRow {
+  readonly key: string;
+  readonly version: string;
+  readonly title: string;
+  readonly description: string | null;
+  readonly required: boolean;
+  readonly effective_from: string;
+  readonly created_at: string;
+}
+
+export interface UserConsentRow {
+  readonly id: string;
+  readonly user_id: string;
+  readonly consent_key: string;
+  readonly consent_version: string;
+  readonly accepted: boolean;
+  readonly accepted_at: string | null;
+  readonly revoked_at: string | null;
+  readonly required: boolean;
+  readonly ip_address: string | null;
+  readonly user_agent: string | null;
+  readonly created_at: string;
+  readonly updated_at: string;
+}
+
 export interface ClothingItemRow {
   id: string;
   user_id: string;
@@ -119,5 +144,18 @@ export interface FitAnalysisResultRow {
   algorithm_version: string;
   recommendation_confidence: string;
   result_details: JsonObject;
+  created_at: string;
+}
+
+export interface UserFeedbackRow {
+  id: string;
+  user_id: string;
+  fit_analysis_result_id: string;
+  purchased_size_label: string | null;
+  actual_fit_rating: number | null;
+  actual_fit_label: string | null;
+  part_feedback: JsonObject;
+  comment: string | null;
+  raw_data: JsonObject;
   created_at: string;
 }

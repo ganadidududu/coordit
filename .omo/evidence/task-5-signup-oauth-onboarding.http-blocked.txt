@@ -1,0 +1,13 @@
+HTTP REAL-SURFACE BLOCKED
+timestamp: 2026-07-09T13:10:12Z
+surface: POST /auth/onboarding with real Supabase OAuth access token
+happy exact invocation not run: curl -i -X POST "$API_BASE_URL/auth/onboarding" -H "Authorization: Bearer <REDACTED>" -H "Content-Type: application/json" --data <valid onboarding JSON>
+happy blocker: SUPABASE_ACCESS_TOKEN is missing; fake JWT is not acceptable as OAuth proof.
+API_BASE_URL: missing; local default considered http://localhost:4000.
+
+malformed/no-auth exact invocation not run: curl -i -X POST "http://localhost:4000/auth/onboarding" -H "Content-Type: application/json" --data <valid onboarding JSON without Authorization>
+no-auth blocker: backend cannot start without required Supabase env. Missing SUPABASE_URL, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY; src/config/env.ts throws at startup.
+pre-check: localhost:4000 /health was not reachable before attempting local server start.
+secret hygiene: values were never printed; no fake token was used.
+cleanup: no backend process was started, so no PID required killing.
+verdict: BLOCKED_ALLOWED_BY_PLAN for real external-token HTTP surface; no-auth blocked by backend startup prerequisite.

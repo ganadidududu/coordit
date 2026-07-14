@@ -1,0 +1,6 @@
+61:| 필수 입력 | `email`, `password`, `displayName` |
+88:| 필수 입력 | `displayName`, `consents.terms_of_service`, `consents.privacy_policy` |
+89:| 선택 입력 | `gender`, `birthYear`, `bodyMeasurements`, `consents.fit_data_improvement`, `consents.marketing` |
+131:  "displayName": "테스트",
+133:  "birthYear": 1995,
+165:- `birthYear`를 사용한다. 매년 값이 바뀌는 `age`는 canonical 입력/저장값으로 사용하지 않는다.

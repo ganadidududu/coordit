@@ -4,10 +4,12 @@ import { areCategoriesCompatible } from "../../shared/utils/category-compatibili
 import { createHttpError } from "../../shared/utils/http-error";
 import { rowToMeasurements } from "../../shared/utils/measurements";
 import { ALGORITHM_VERSION } from "./fit.constants";
+import { buildUserFeedbackFitProfile } from "./feedback-fit-profile";
 import { recommendBestSizeWithReferences } from "./fit-score.engine";
 import type {
   Category,
   ExternalProductSizeInput,
+  FitRecommendationResult,
   FitType,
   MeasurementMap,
   ReferenceClothingInput
@@ -51,6 +53,9 @@ interface DbExternalProduct {
 interface DbExternalProductSize extends MeasurementMap {
   id: string;
   size_label: string;
+  measurement_source: string | null;
+  parsing_status: string | null;
+  extraction_confidence: number | null;
 }
 
 export const recommendFit = async ({
@@ -58,7 +63,7 @@ export const recommendFit = async ({
   referenceClothingId,
   referenceClothingIds,
   externalProductId
-}: RecommendFitParams) => {
+}: RecommendFitParams): Promise<FitRecommendationResult> => {
   const selectedReferenceIds = referenceClothingIds?.length
     ? referenceClothingIds
     : referenceClothingId
@@ -155,13 +160,24 @@ export const recommendFit = async ({
     id: size.id,
     sizeLabel: size.size_label,
     fitType: externalProduct.fit_type,
-    measurements: rowToMeasurements(size)
+    measurements: rowToMeasurements(size),
+    measurementQuality: {
+      measurementSource: size.measurement_source,
+      parsingStatus: size.parsing_status,
+      extractionConfidence: size.extraction_confidence
+    }
   }));
+
+  const feedbackProfile = await buildUserFeedbackFitProfile(
+    userId,
+    externalProduct.category as Category
+  );
 
   const recommendation = recommendBestSizeWithReferences(
     referenceInput,
     sizeInputs,
-    externalProduct.category as Category
+    externalProduct.category as Category,
+    feedbackProfile
   );
   const best = recommendation.recommended;
 
@@ -184,9 +200,13 @@ export const recommendFit = async ({
         dynamicWeights: recommendation.dynamicWeights,
         referenceVariance: recommendation.referenceVariance,
         weightingStrategy: recommendation.weightingStrategy,
+        referenceProfile: recommendation.referenceProfile,
+        feedbackProfile: recommendation.feedbackProfile,
         diffs: best.diffs,
         partExplanations: best.partExplanations,
         partStatuses: best.partStatuses,
+        scoreExplanation: best.scoreExplanation,
+        confidenceBreakdown: best.confidenceBreakdown,
         referenceClothingIds: referenceInput.map((reference) => reference.id),
         allSizeScores: recommendation.allSizeScores
       }
@@ -218,17 +238,23 @@ export const recommendFit = async ({
     diff: best.diffs,
     partExplanations: best.partExplanations,
     partStatuses: best.partStatuses,
+    scoreExplanation: best.scoreExplanation,
+    confidenceBreakdown: best.confidenceBreakdown,
     baseWeights: recommendation.baseWeights,
     dynamicWeights: recommendation.dynamicWeights,
     referenceVariance: recommendation.referenceVariance,
     weightingStrategy: recommendation.weightingStrategy,
+    referenceProfile: recommendation.referenceProfile,
+    feedbackProfile: recommendation.feedbackProfile,
     allSizeScores: recommendation.allSizeScores.map((score) => ({
       externalProductSizeId: score.externalProductSizeId,
       sizeLabel: score.sizeLabel,
       fitScore: score.finalFitScore,
       fitLabel: score.fitLabel,
       weightedFitDistance: score.weightedFitDistance,
-      recommendationConfidence: score.recommendationConfidence
+      recommendationConfidence: score.recommendationConfidence,
+      scoreExplanation: score.scoreExplanation,
+      confidenceBreakdown: score.confidenceBreakdown
     })),
     algorithmVersion: ALGORITHM_VERSION
   };

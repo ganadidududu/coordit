@@ -1,0 +1,24 @@
+Surface: final artifact inventory after manualQa
+Invocation: find .omo/evidence/fast-debugging-audit -maxdepth 1 -type f -print0 | xargs -0 ls -l
+---
+-rw-r--r--@ 1 insihwan  staff   31549 Jul 10 11:57 .omo/evidence/fast-debugging-audit/auth_onboarding_rg.txt
+-rw-r--r--@ 1 insihwan  staff     416 Jul 10 11:58 .omo/evidence/fast-debugging-audit/backend_auth_onboarding_tests.txt
+-rw-r--r--@ 1 insihwan  staff    1318 Jul 10 11:58 .omo/evidence/fast-debugging-audit/backend_auth_onboarding_tests_actual.txt
+-rw-r--r--@ 1 insihwan  staff     982 Jul 10 11:58 .omo/evidence/fast-debugging-audit/backend_package.txt
+-rw-r--r--@ 1 insihwan  staff     126 Jul 10 11:58 .omo/evidence/fast-debugging-audit/backend_typecheck.txt
+-rw-r--r--@ 1 insihwan  staff    1026 Jul 10 11:59 .omo/evidence/fast-debugging-audit/body_rows_proof_grep.txt
+-rw-r--r--@ 1 insihwan  staff  108746 Jul 10 11:57 .omo/evidence/fast-debugging-audit/body_rows_rg.txt
+-rw-r--r--@ 1 insihwan  staff   20527 Jul 10 11:58 .omo/evidence/fast-debugging-audit/current_auth_onboarding_code.txt
+-rw-r--r--@ 1 insihwan  staff   21427 Jul 10 11:58 .omo/evidence/fast-debugging-audit/current_frontend_onboarding_code.txt
+-rw-r--r--@ 1 insihwan  staff   13008 Jul 10 11:58 .omo/evidence/fast-debugging-audit/current_onboarding_tests.txt
+-rw-r--r--@ 1 insihwan  staff    7056 Jul 10 11:59 .omo/evidence/fast-debugging-audit/docs_response_excerpts.txt
+-rw-r--r--@ 1 insihwan  staff   66924 Jul 10 11:57 .omo/evidence/fast-debugging-audit/docs_response_rg.txt
+-rw-r--r--@ 1 insihwan  staff  120691 Jul 10 11:57 .omo/evidence/fast-debugging-audit/fake_external_qa_rg.txt
+-rw-r--r--@ 1 insihwan  staff     150 Jul 10 12:01 .omo/evidence/fast-debugging-audit/final_artifact_inventory.txt
+-rw-r--r--@ 1 insihwan  staff     215 Jul 10 11:59 .omo/evidence/fast-debugging-audit/frontend_optional_required_check.txt
+-rw-r--r--@ 1 insihwan  staff     157 Jul 10 11:58 .omo/evidence/fast-debugging-audit/frontend_typecheck.txt
+-rw-r--r--@ 1 insihwan  staff    2184 Jul 10 11:59 .omo/evidence/fast-debugging-audit/http_prereq_and_probe.txt
+-rw-r--r--@ 1 insihwan  staff    4578 Jul 10 12:01 .omo/evidence/fast-debugging-audit/manualQa.md
+-rw-r--r--@ 1 insihwan  staff    8484 Jul 10 11:59 .omo/evidence/fast-debugging-audit/prior_external_qa_evidence.txt
+-rw-r--r--@ 1 insihwan  staff   11229 Jul 10 11:57 .omo/evidence/fast-debugging-audit/repo_inventory.txt
+-rw-r--r--@ 1 insihwan  staff   14276 Jul 10 11:59 .omo/evidence/fast-debugging-audit/response_shape_grep.txt

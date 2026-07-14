@@ -7,7 +7,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "test:fit": "tsx src/modules/fit/fit-score.engine.test.ts"
+    "test:fit": "tsx src/modules/fit/fit-score.engine.test.ts",
+    "test:auth-onboarding": "tsx src/modules/auth/auth-onboarding.service.test.ts && tsx src/modules/auth/auth-onboarding.validation.test.ts && tsx src/modules/auth/auth-onboarding.controller.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",

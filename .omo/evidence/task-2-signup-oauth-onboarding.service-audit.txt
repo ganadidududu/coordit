@@ -1,0 +1,49 @@
+Todo 2 auth onboarding service audit
+
+RED evidence:
+- Initial RED was captured before implementation as a missing npm script.
+- The retained service-red.txt was later recaptured during reconciliation and shows a real failing harness: static service import loaded Supabase env before fake dependencies, failing on missing SUPABASE_URL.
+- Production verification is recorded in service-green.txt after aligning the harness with the repository seam and lazy-loading the production Supabase repository.
+
+GREEN test cases:
+1. minimal success saves required consents only and no body row
+   - asserts user upsert, two required consent writes, no body write, bodyMeasurementsSaved false.
+2. full success persists optional fields body and all consents
+   - asserts gender, birth_year, ignored age, body raw_data.source onboarding, required and optional consent rows including marketing false.
+3. retry body measurements updates existing onboarding row
+   - fake repository returns an existing raw_data.source onboarding row and asserts update, not insert, with one body row retained.
+4. omitted optional consents are absent
+   - asserts only terms_of_service and privacy_policy rows are persisted.
+5. blank displayName returns 400 and writes nothing
+   - asserts no user, consent, or body persistence operations.
+6. missing required consent returns 400 and writes nothing
+   - asserts missing privacy_policy is rejected before writes.
+7. false required consent returns 400 and writes nothing
+   - asserts terms_of_service accepted=false is rejected before writes.
+8. optional false consent is allowed
+   - asserts marketing false persists with accepted false.
+9. body measurements without numeric values create no row
+   - asserts empty string/null/non-numeric values skip body persistence and return bodyMeasurementsSaved false.
+10. missing latest required consent version returns 500 and writes nothing
+   - fake repository omits privacy_policy latest version and asserts no writes.
+11. auth user missing email returns 400 and writes nothing
+   - asserts no placeholder email and no persistence operations.
+
+Fake persistence operations asserted:
+- user profile upsert rows
+- consent upsert rows with accepted, required, accepted_at/null behavior
+- body insert/update selection by existing raw_data.source onboarding row
+
+Adversarial probes:
+- malformed blank displayName
+- missing required consent
+- false required consent
+- omitted optional consents
+- optional false consent
+- non-numeric bodyMeasurements
+- stale/missing latest consent version
+- auth user without email
+- retry/idempotent onboarding body measurement write
+- misleading age field ignored in favor of birth_year
+- fixed injected clock, no random or wall-clock test dependence
+- dirty worktree/concurrent Todo2 files detected and integrated without revert

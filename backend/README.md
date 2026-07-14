@@ -14,3 +14,11 @@ npm run typecheck
 
 `POST /fit/recommend` performs the MVP recommendation flow with Supabase persistence.
 
+`POST /fit-analysis-results/:id/report` builds a fit report from a saved fit result, calls local Ollama, and falls back to a deterministic report if Ollama is unavailable.
+
+## Ollama Report Env
+
+```bash
+OLLAMA_GENERATE_URL=http://localhost:11434/api/generate
+OLLAMA_MODEL=llama3.1:8b
+```

@@ -1,0 +1,33 @@
+CHECKBOXES
+86:- [x] 1. Add versioned consent schema, migration, indexes, RLS, and backend DB types
+94:- [x] 2. Add backend onboarding service with required nickname, optional demographics, optional measurements, and consent validation
+102:- [x] 3. Add protected backend onboarding route and response contract
+110:- [x] 4. Document backend contract and OAuth dashboard prerequisites without frontend implementation
+118:- [x] 5. Run backend static, unit, migration, and real-surface API verification
+126:- [x] 6. Final cleanup, dirty-worktree audit, and handoff evidence index
+FRONTEND
+FORBIDDEN
+docs/API_SPEC_MOBILE.md:28:Authorization: Bearer <access_token>
+docs/API_SPEC_MOBILE.md:87:| 인증 | `Authorization: Bearer <supabase_access_token>` |
+docs/API_SPEC_MOBILE.md:125:Authorization: Bearer <supabase_access_token>
+backend/src/modules/auth/auth.service.ts:16:  session: { access_token?: string; refresh_token?: string } | null
+backend/src/modules/auth/auth.service.ts:19:  if (!session?.access_token || !session.refresh_token) {
+backend/src/modules/auth/auth.service.ts:26:    accessToken: session.access_token,
+backend/src/modules/auth/auth.service.ts:27:    refreshToken: session.refresh_token,
+STATUS
+ M backend/package.json
+ M backend/src/modules/body-measurements/body-measurements.service.ts
+ M backend/src/routes.ts
+ M backend/src/shared/types/database.ts
+ M docs/API_SPEC_MOBILE.md
+ M supabase/indexes.sql
+ M supabase/rls.sql
+ M supabase/schema.sql
+?? .omo/
+?? backend/src/modules/auth/auth-onboarding.controller.test.ts
+?? backend/src/modules/auth/auth-onboarding.controller.ts
+?? backend/src/modules/auth/auth-onboarding.repository.ts
+?? backend/src/modules/auth/auth-onboarding.service.test.ts
+?? backend/src/modules/auth/auth-onboarding.service.ts
+?? backend/src/modules/auth/auth-onboarding.types.ts
+?? supabase/migrations/20260707_add_consent_schema.sql

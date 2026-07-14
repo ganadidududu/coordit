@@ -1,0 +1,573 @@
+Surface: docs/API response contract search
+Invocation: rg -n "response|Response|curl|POST|GET|/api|fit-report|recommend|onboarding|auth" docs backend/src frontend/src/lib
+---
+docs/API_SPEC_MOBILE.md:60:| Endpoint | `POST /auth/signup` |
+docs/API_SPEC_MOBILE.md:71:| Endpoint | `POST /auth/login` |
+docs/API_SPEC_MOBILE.md:86:| Endpoint | `POST /auth/onboarding` |
+docs/API_SPEC_MOBILE.md:90:| 주요 반환값 | `user`, `consentStatus`, `onboardingComplete`, `bodyMeasurementsSaved` |
+docs/API_SPEC_MOBILE.md:91:| 사용 화면 | Auth onboarding |
+docs/API_SPEC_MOBILE.md:105:  참고: <https://supabase.com/docs/guides/auth/social-login/auth-google>
+docs/API_SPEC_MOBILE.md:108:  참고: <https://supabase.com/docs/guides/auth/social-login/auth-kakao>
+docs/API_SPEC_MOBILE.md:109:- PKCE 플로우에서는 callback에서 authorization code를 session으로 교환한다.
+docs/API_SPEC_MOBILE.md:110:  참고: <https://supabase.com/docs/guides/auth/sessions/pkce-flow>,
+docs/API_SPEC_MOBILE.md:111:  <https://supabase.com/docs/reference/javascript/auth-exchangecodeforsession>
+docs/API_SPEC_MOBILE.md:113:  참고: <https://supabase.com/docs/guides/auth/redirect-urls>
+docs/API_SPEC_MOBILE.md:118:  참고: <https://supabase.com/docs/guides/auth/jwts>,
+docs/API_SPEC_MOBILE.md:119:  <https://supabase.com/docs/reference/javascript/auth-getuser>
+docs/API_SPEC_MOBILE.md:124:POST /auth/onboarding
+docs/API_SPEC_MOBILE.md:191:  "onboardingComplete": true,
+docs/API_SPEC_MOBILE.md:205:| Endpoint | `GET /users/me` |
+docs/API_SPEC_MOBILE.md:218:| Endpoint | `GET /users/me` |
+docs/API_SPEC_MOBILE.md:240:| Endpoint | `POST /body-measurements` |
+docs/API_SPEC_MOBILE.md:251:| Endpoint | `GET /body-measurements` |
+docs/API_SPEC_MOBILE.md:266:| Endpoint | `POST /clothing-items` |
+docs/API_SPEC_MOBILE.md:284:| Endpoint | `GET /clothing-items` |
+docs/API_SPEC_MOBILE.md:295:| Endpoint | `GET /clothing-items/:id` |
+docs/API_SPEC_MOBILE.md:328:| Endpoint | `POST /clothing-items/:id/sizes` |
+docs/API_SPEC_MOBILE.md:353:| Endpoint | `GET /clothing-items/:id/sizes` |
+docs/API_SPEC_MOBILE.md:390:| Endpoint | `POST /reference-clothing` |
+docs/API_SPEC_MOBILE.md:401:| Endpoint | `GET /reference-clothing` |
+docs/API_SPEC_MOBILE.md:412:| Endpoint | `GET /reference-clothing/by-category/:category` |
+docs/API_SPEC_MOBILE.md:423:| Endpoint | `GET /reference-clothing/:id` |
+docs/API_SPEC_MOBILE.md:482:| Endpoint | `POST /external-products` |
+docs/API_SPEC_MOBILE.md:501:| Endpoint | `POST /external-products/from-url` |
+docs/API_SPEC_MOBILE.md:514:| Endpoint | `GET /external-products` |
+docs/API_SPEC_MOBILE.md:525:| Endpoint | `GET /external-products/:id` |
+docs/API_SPEC_MOBILE.md:547:| Endpoint | `POST /external-products/:id/sizes` |
+docs/API_SPEC_MOBILE.md:558:| Endpoint | `GET /external-products/:id/sizes` |
+docs/API_SPEC_MOBILE.md:597:| Endpoint | `POST /external-products/from-url` |
+docs/API_SPEC_MOBILE.md:618:| Endpoint | `POST /fit/recommend` |
+docs/API_SPEC_MOBILE.md:629:| Endpoint | `POST /fit/recommend` 또는 `POST /fit/recommend/batch` |
+docs/API_SPEC_MOBILE.md:637:`recommendationConfidence`, `diff`, `partExplanations`, `partStatuses`,
+docs/API_SPEC_MOBILE.md:647:| `allSizeScores[].confidenceBreakdown` | 후보 사이즈별 신뢰도 메타데이터다. 없으면 `recommendationConfidence`만 사용한다. |
+docs/API_SPEC_MOBILE.md:649:저장된 추천 결과의 `GET /fit-analysis-results/:id` 및 최근 결과 목록은 기존
+docs/API_SPEC_MOBILE.md:650:DB 필드 `fit_score`, `fit_label`, `recommendation_confidence`,
+docs/API_SPEC_MOBILE.md:664:| Endpoint | `GET /fit-analysis-results/recent` |
+docs/API_SPEC_MOBILE.md:675:| Endpoint | `GET /fit-analysis-results/:id` |
+docs/API_SPEC_MOBILE.md:686:| Endpoint | `POST /fit-analysis-results/:id/report` |
+docs/API_SPEC_MOBILE.md:718:    "recommendationReason": "...",
+docs/API_SPEC_MOBILE.md:741:- `OLLAMA_GENERATE_URL`: 기본값 `http://localhost:11434/api/generate`
+docs/API_SPEC_MOBILE.md:758:| Endpoint | `POST /fit-analysis-results/:id/feedback` |
+docs/API_SPEC_MOBILE.md:806:| Endpoint | `GET /user-feedback` |
+docs/API_SPEC_MOBILE.md:817:| Endpoint | `PATCH /recommendation-logs/:id/click` |
+docs/API_SPEC_MOBILE.md:828:| Endpoint | `PATCH /recommendation-logs/:id/purchase` |
+docs/API_SPEC_MOBILE.md:843:| Endpoint | `GET /app/home` |
+docs/API_SPEC_MOBILE.md:854:| Endpoint | `GET /fit/readiness` |
+docs/API_SPEC_MOBILE.md:865:| Endpoint | `POST /external-products/:id/sizes/bulk` |
+docs/API_SPEC_MOBILE.md:876:| Endpoint | `GET /categories` |
+frontend/src/lib/types.ts:116:  recommendationConfidence?: RecommendationConfidence;
+frontend/src/lib/types.ts:121:export interface FitRecommendationResponse {
+frontend/src/lib/types.ts:123:  recommendedSize: string;
+frontend/src/lib/types.ts:127:  recommendationConfidence: RecommendationConfidence;
+frontend/src/lib/types.ts:142:export interface AuthResponse {
+frontend/src/lib/api.ts:19:  const response = await apiClient.request<T>({
+frontend/src/lib/api.ts:21:    method: options.method ?? "GET",
+frontend/src/lib/api.ts:24:  return response.data;
+backend/src/modules/body-measurements/body-measurements.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/body-measurements/body-measurements.controller.ts:6:export const createBodyMeasurement = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/body-measurements/body-measurements.controller.ts:14:export const listBodyMeasurements = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+docs/fit-engine/FIT_ENGINE_CHANGELOG.md:28:- `recommendationConfidence` 반환
+frontend/src/lib/auth-context.tsx:4:import { api, setApiToken } from "./api";
+frontend/src/lib/auth-context.tsx:5:import type { AuthResponse } from "./types";
+frontend/src/lib/auth-context.tsx:32:  const commitAuth = (auth: AuthResponse) => {
+frontend/src/lib/auth-context.tsx:33:    window.localStorage.setItem(TOKEN_KEY, auth.accessToken);
+frontend/src/lib/auth-context.tsx:34:    window.localStorage.setItem(EMAIL_KEY, auth.user.email);
+frontend/src/lib/auth-context.tsx:35:    setToken(auth.accessToken);
+frontend/src/lib/auth-context.tsx:36:    setUserEmail(auth.user.email);
+frontend/src/lib/auth-context.tsx:37:    setApiToken(auth.accessToken);
+frontend/src/lib/auth-context.tsx:45:        commitAuth(await api<AuthResponse>("/auth/login", { method: "POST", body: { email, password } }));
+frontend/src/lib/auth-context.tsx:48:        commitAuth(await api<AuthResponse>("/auth/signup", { method: "POST", body: { email, password } }));
+docs/fit-engine/FIT_ENGINE.md:226:`recommendationConfidence`는 추천 결과의 신뢰도를 나타낸다.
+docs/fit-engine/FIT_ENGINE.md:376:현재 준비된 분석용 데이터 계약은 `docs/fit-engine/HYBRID_SCORING_READINESS.md`에 있다. 이 계약은 future hybrid scoring을 위한 read-only/export 기준이며, ML 학습, prediction serving, shadow recommendation, LLM 기반 점수 계산은 포함하지 않는다.
+docs/fit-engine/HYBRID_SCORING_READINESS.md:3:This artifact defines a bounded, privacy-preserving export shape for future fit recommendation analysis. It is a data contract only.
+docs/fit-engine/HYBRID_SCORING_READINESS.md:5:T8 does not ship ML training, model evaluation, prediction serving, shadow recommendations, report-model calculation of recommendations, or any change to the production recommendation path. The live engine remains the rule-based fit score engine, and Ollama remains a report-writing layer that consumes computed summaries only.
+docs/fit-engine/HYBRID_SCORING_READINESS.md:11:- what Coordit recommended
+docs/fit-engine/HYBRID_SCORING_READINESS.md:17:- which algorithm version generated the recommendation
+docs/fit-engine/HYBRID_SCORING_READINESS.md:19:No database migration is required. Current fields already live in `fit_analysis_results`, `user_feedback`, `recommendation_logs`, `external_products`, `external_product_sizes`, and `fit_analysis_results.result_details`.
+docs/fit-engine/HYBRID_SCORING_READINESS.md:31:| `productContext.fitType` | `external_products.fit_type` | Separates slim/regular/relaxed/oversized recommendation behavior. | Fit type only. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:32:| `recommendation.recommendedSizeLabel` | `fit_analysis_results.recommended_size_label` | Recommended size to compare against purchased/chosen size. | Size label only. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:33:| `recommendation.fitScore` | `fit_analysis_results.fit_score` | Rule-based numeric score at recommendation time. | Derived score only. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:34:| `recommendation.fitLabel` | `fit_analysis_results.fit_label` | Rule-based fit band at recommendation time. | Derived label only. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:35:| `recommendation.weightedFitDistance` | `fit_analysis_results.weighted_fit_distance` | Distance signal used to inspect score calibration. | Derived metric only. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:36:| `recommendation.recommendationConfidence` | `fit_analysis_results.recommendation_confidence` | Public confidence label emitted by the engine. | Derived label only. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:37:| `recommendation.algorithmVersion` | `fit_analysis_results.algorithm_version` and `recommendation_logs.algorithm_version` | Separates analysis by scoring implementation. | Version string only. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:42:| `engagement.eventType` | `recommendation_logs.event_type` | Separates shown/clicked/purchased events. | Event class only. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:43:| `engagement.clicked` | `recommendation_logs.clicked_at` presence | Click corroboration for feedback reliability. | Boolean only; no raw event payload. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:44:| `engagement.purchased` | `recommendation_logs.purchased_at` presence | Purchase corroboration for feedback reliability. | Boolean only; no raw event payload. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:48:| `scoreExplanation.scoreGapToNextCandidate` | `result_details.scoreExplanation.scoreGapToNextCandidate` | Helps identify ambiguous recommendations. | Derived metric only. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:64:| `measurementSource.recommendedSizeLabel` | `external_product_sizes.size_label` for `fit_analysis_results.recommended_external_product_size_id` | Links measurement quality to the recommended size label. | Size label only. |
+docs/fit-engine/HYBRID_SCORING_READINESS.md:74:- auth tokens, session data, emails, phone numbers, addresses, order IDs, or checkout payloads
+docs/fit-engine/HYBRID_SCORING_READINESS.md:77:- `recommendation_logs.raw_data`
+docs/fit-engine/HYBRID_SCORING_READINESS.md:98:`backend/src/modules/fit/fit-learning-export.ts` provides a fixture/injectable JSONL helper for contract verification only. It has no database access, network access, external ML dependency, model training path, prediction serving path, or shadow recommendation path.
+docs/fit-engine/HYBRID_SCORING_READINESS.md:100:The helper whitelists computed fields and omits raw/private fields even when malformed fixture rows contain comments, raw payloads, raw OCR text, private IDs, or auth tokens.
+docs/ROADMAP.md:159:- 분석용 export/data contract는 `docs/fit-engine/HYBRID_SCORING_READINESS.md`를 기준으로 하며, 현재 단계에서는 ML 학습, prediction serving, shadow recommendation, LLM 점수 계산을 제공하지 않는다.
+backend/src/modules/recommendation-logs/recommendation-logs.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/recommendation-logs/recommendation-logs.controller.ts:4:import { listLogsForUser, markLogClicked, markLogPurchased } from "./recommendation-logs.service";
+backend/src/modules/recommendation-logs/recommendation-logs.controller.ts:6:export const listRecommendationLogs = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/recommendation-logs/recommendation-logs.controller.ts:14:export const markRecommendationClicked = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/recommendation-logs/recommendation-logs.controller.ts:22:export const markRecommendationPurchased = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/recommendation-logs/recommendation-logs.service.ts:6:    .from("recommendation_logs")
+backend/src/modules/recommendation-logs/recommendation-logs.service.ts:10:  if (error) throw createHttpError(500, "Failed to load recommendation logs");
+backend/src/modules/recommendation-logs/recommendation-logs.service.ts:16:    .from("recommendation_logs")
+backend/src/modules/recommendation-logs/recommendation-logs.service.ts:22:  if (error || !data) throw createHttpError(500, "Failed to mark recommendation as clicked");
+backend/src/modules/recommendation-logs/recommendation-logs.service.ts:28:    .from("recommendation_logs")
+backend/src/modules/recommendation-logs/recommendation-logs.service.ts:34:  if (error || !data) throw createHttpError(500, "Failed to mark recommendation as purchased");
+docs/DATABASE_SCHEMA.md:25:auth.users
+docs/DATABASE_SCHEMA.md:35:      └─ recommendation_logs
+docs/DATABASE_SCHEMA.md:56:- `id`는 `auth.users(id)`를 참조한다.
+docs/DATABASE_SCHEMA.md:182:- `recommendation_logs.external_product_id`에서 참조된다.
+docs/DATABASE_SCHEMA.md:214:- `fit_analysis_results.recommended_external_product_size_id`에서 참조된다.
+docs/DATABASE_SCHEMA.md:234:- `recommended_external_product_size_id`
+docs/DATABASE_SCHEMA.md:235:- `recommended_size_label`
+docs/DATABASE_SCHEMA.md:241:- `recommendation_confidence`
+docs/DATABASE_SCHEMA.md:250:- `recommended_external_product_size_id`는 `external_product_sizes(id)`를 참조한다.
+docs/DATABASE_SCHEMA.md:252:- `recommendation_logs.fit_analysis_result_id`에서 참조된다.
+docs/DATABASE_SCHEMA.md:304:### `recommendation_logs`
+docs/DATABASE_SCHEMA.md:314:- `recommended_size_label`
+docs/DATABASE_SCHEMA.md:379:- `idx_recommendation_logs_user_created_at`
+docs/DATABASE_SCHEMA.md:401:- `recommendation_logs`
+docs/DATABASE_SCHEMA.md:405:- 대부분의 테이블은 `auth.uid() = user_id`
+docs/DATABASE_SCHEMA.md:406:- `users` 테이블은 `auth.uid() = id`
+docs/FIT_REPORT_OLLAMA_SPEC.md:5:대상 브랜치: `codex/fit-report-ollama-spec`
+docs/FIT_REPORT_OLLAMA_SPEC.md:61:리포트 입력은 `POST /fit/recommend` 또는 `GET /fit-analysis-results/:id` 결과를 기반으로 만든다.
+docs/FIT_REPORT_OLLAMA_SPEC.md:68:  "recommendedSize": "L",
+docs/FIT_REPORT_OLLAMA_SPEC.md:72:  "recommendationConfidence": "high",
+docs/FIT_REPORT_OLLAMA_SPEC.md:165:    "recommendedSizeLabel": "L"
+docs/FIT_REPORT_OLLAMA_SPEC.md:430:  "recommendation": {
+docs/FIT_REPORT_OLLAMA_SPEC.md:431:    "recommendedSize": "L",
+docs/FIT_REPORT_OLLAMA_SPEC.md:434:    "recommendationConfidence": "high",
+docs/FIT_REPORT_OLLAMA_SPEC.md:480:    "recommendedSizeLabel": "L"
+docs/FIT_REPORT_OLLAMA_SPEC.md:567:  "recommendationReason": "...",
+docs/FIT_REPORT_OLLAMA_SPEC.md:587:curl http://localhost:11434/api/generate \
+docs/FIT_REPORT_OLLAMA_SPEC.md:628:- URL: `http://localhost:11434/api/generate`
+docs/FIT_REPORT_OLLAMA_SPEC.md:646:POST /fit-analysis-results/:id/report
+docs/FIT_REPORT_OLLAMA_SPEC.md:679:    "recommendationReason": "...",
+docs/FIT_REPORT_OLLAMA_SPEC.md:697:- `OLLAMA_GENERATE_URL`: 기본값 `http://localhost:11434/api/generate`
+docs/FIT_REPORT_OLLAMA_SPEC.md:739:### 10.2 recommended product measurement 계산
+docs/FIT_REPORT_OLLAMA_SPEC.md:770:  recommendationConfidence: size.recommendationConfidence
+docs/FIT_REPORT_OLLAMA_SPEC.md:822:- 분석용 export/data contract는 `docs/fit-engine/HYBRID_SCORING_READINESS.md`를 기준으로 한다. 현재 리포트 기능은 ML 학습, prediction serving, shadow recommendation, LLM 기반 점수 계산을 제공하지 않는다.
+backend/src/modules/fit-report/fit-report.service.test-fixtures.ts:16:} from "./fit-report.service.test-details";
+backend/src/modules/fit-report/fit-report.service.test-fixtures.ts:18:type QueryResponse<T> = {
+backend/src/modules/fit-report/fit-report.service.test-fixtures.ts:52:  recommended_external_product_size_id: "size-s",
+backend/src/modules/fit-report/fit-report.service.test-fixtures.ts:53:  recommended_size_label: "S",
+backend/src/modules/fit-report/fit-report.service.test-fixtures.ts:59:  recommendation_confidence: "medium",
+backend/src/modules/fit-report/fit-report.service.test-fixtures.ts:161:  async single<T>(): Promise<QueryResponse<T | null>> {
+backend/src/modules/fit-report/fit-report.service.test-fixtures.ts:165:  async returns<T>(): Promise<QueryResponse<T>> {
+backend/src/modules/fit-report/fit-report.service.test-fixtures.ts:192:  process.env.OLLAMA_GENERATE_URL = "http://localhost:11434/api/generate";
+backend/src/modules/external-product-sizes/external-product-sizes.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/external-product-sizes/external-product-sizes.controller.ts:11:export const createExternalProductSize = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/external-product-sizes/external-product-sizes.controller.ts:26:export const listExternalProductSizes = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/external-product-sizes/external-product-sizes.controller.ts:34:export const updateExternalProductSize = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/external-product-sizes/external-product-sizes.controller.ts:42:export const deleteExternalProductSize = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/fit/fit-score.accuracy-fixtures.data.ts:21:  readonly expectedConfidence: SizeFitScore["recommendationConfidence"];
+backend/src/modules/fit/fit-score.accuracy-fixtures.data.ts:102:    name: "top category close match recommends the closest regular size with high confidence",
+backend/src/modules/fit/fit-score.accuracy-fixtures.data.ts:126:    name: "bottom category close match recommends the closest pants size with high confidence",
+backend/src/modules/fit/fit-score.accuracy-fixtures.data.ts:150:    name: "missing measurements still recommends from comparable top measurements",
+backend/src/modules/fit-report/fit-report.service.ts:3:import { buildFitReportInput } from "./fit-report.builder";
+backend/src/modules/fit-report/fit-report.service.ts:4:import { buildFitReportPrompt, FIT_REPORT_PROMPT_VERSION } from "./fit-report.prompt";
+backend/src/modules/fit-report/fit-report.service.ts:11:} from "./fit-report.types";
+backend/src/modules/fit-report/fit-report.service.ts:13:interface OllamaGenerateResponse {
+backend/src/modules/fit-report/fit-report.service.ts:14:  response?: string;
+backend/src/modules/fit-report/fit-report.service.ts:39:    recommendationReason: typeof value.recommendationReason === "string" ? value.recommendationReason : "",
+backend/src/modules/fit-report/fit-report.service.ts:56:      throw new Error("LLM response did not contain JSON");
+backend/src/modules/fit-report/fit-report.service.ts:85:  const confidence = reportInput.recommendation.recommendationConfidence;
+backend/src/modules/fit-report/fit-report.service.ts:97:  const confidence = reportInput.recommendation.recommendationConfidence;
+backend/src/modules/fit-report/fit-report.service.ts:102:    title: `${reportInput.recommendation.recommendedSize} 사이즈 핏 리포트`,
+backend/src/modules/fit-report/fit-report.service.ts:104:      `${reportInput.recommendation.recommendedSize} 사이즈가 ` +
+backend/src/modules/fit-report/fit-report.service.ts:105:      `${reportInput.recommendation.fitScore}점으로 가장 적합합니다. ` +
+backend/src/modules/fit-report/fit-report.service.ts:107:    recommendationReason:
+backend/src/modules/fit-report/fit-report.service.ts:108:      `추천 사이즈는 weighted distance ${reportInput.recommendation.weightedFitDistance} 기준으로 가장 가까운 후보입니다.` +
+backend/src/modules/fit-report/fit-report.service.ts:109:      (reportInput.recommendation.scoreGapToSecond !== null
+backend/src/modules/fit-report/fit-report.service.ts:110:        ? ` 2위와의 점수 차이는 ${reportInput.recommendation.scoreGapToSecond}점입니다.`
+backend/src/modules/fit-report/fit-report.service.ts:142:  const response = await fetch(env.ollamaGenerateUrl, {
+backend/src/modules/fit-report/fit-report.service.ts:143:    method: "POST",
+backend/src/modules/fit-report/fit-report.service.ts:156:  if (!response.ok) {
+backend/src/modules/fit-report/fit-report.service.ts:157:    throw new Error(`Ollama HTTP ${response.status}`);
+backend/src/modules/fit-report/fit-report.service.ts:160:  const data = await response.json() as OllamaGenerateResponse;
+backend/src/modules/fit-report/fit-report.service.ts:161:  if (typeof data.response !== "string") {
+backend/src/modules/fit-report/fit-report.service.ts:162:    throw new Error("Ollama response was missing response text");
+backend/src/modules/fit-report/fit-report.service.ts:164:  return extractJsonObject(data.response);
+backend/src/modules/fit/fit-score.engine.test.ts:11:  recommendBestSizeWithReferences
+backend/src/modules/fit/fit-score.engine.test.ts:116:const recommendation = recommendBestSizeWithReferences(bottomReferences, externalSizes, "pants");
+backend/src/modules/fit/fit-score.engine.test.ts:117:assert.equal(recommendation.recommended.sizeLabel, "M");
+backend/src/modules/fit/fit-score.engine.test.ts:118:assert.ok(typeof recommendation.recommended.diffs.outseam === "number");
+backend/src/modules/fit/fit-score.engine.test.ts:119:assert.equal(recommendation.weightingStrategy, "reference_profile_v1");
+backend/src/modules/fit/fit-score.engine.test.ts:120:assert.ok(recommendation.referenceProfile);
+backend/src/modules/fit/fit-score.engine.test.ts:122:const profile = calculateReferenceFitProfile(bottomReferences, recommendation.dynamicWeights);
+backend/src/modules/fit/fit-score.engine.test.ts:153:  recommendation.dynamicWeights
+backend/src/modules/fit/fit-score.engine.test.ts:172:const feedbackAdjustedWeights = applyFeedbackWeightMultipliers(recommendation.dynamicWeights, feedbackProfile);
+backend/src/modules/fit/fit-score.engine.test.ts:174:assert.ok((feedbackAdjustedWeights.waist_width ?? 0) > (recommendation.dynamicWeights.waist_width ?? 0));
+backend/src/modules/fit/fit-score.engine.test.ts:176:const feedbackRecommendation = recommendBestSizeWithReferences(
+backend/src/modules/fit/fit-score.engine.test.ts:195:assert.equal(feedbackRecommendation.recommended.sizeLabel, "Feedback fit");
+backend/src/modules/fit/fit-score.engine.test.ts:296:const manualQualityRecommendation = recommendBestSizeWithReferences(
+backend/src/modules/fit/fit-score.engine.test.ts:303:  const recommendation = recommendBestSizeWithReferences(
+backend/src/modules/fit/fit-score.engine.test.ts:316:    recommendation.recommended.confidenceBreakdown.dataQuality.productMeasurementQuality;
+backend/src/modules/fit/fit-score.engine.test.ts:319:    recommendation.recommended.finalFitScore,
+backend/src/modules/fit/fit-score.engine.test.ts:320:    manualQualityRecommendation.recommended.finalFitScore,
+backend/src/modules/fit/fit-score.engine.test.ts:324:    recommendation.recommended.recommendationConfidence,
+backend/src/modules/fit/fit-score.engine.test.ts:341:      recommendation.recommended.confidenceBreakdown.reasonCodes.includes(reasonCode),
+backend/src/modules/fit-report/fit-report.repository.ts:13:import type { ReferenceClothingReportSummary } from "./fit-report.types";
+backend/src/modules/fit/feedback-fit-profile.signals.ts:100:  const log = row.recommendationLog;
+backend/src/modules/feedback/feedback.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/feedback/feedback.controller.ts:6:export const createFeedback = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/feedback/feedback.controller.ts:21:export const listFeedback = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/fit-report/fit-report.chart-data.ts:5:import { asNumber, round, type ResultDetails } from "./fit-report.result-details";
+backend/src/modules/fit-report/fit-report.chart-data.ts:6:import type { FitReportChartData, MeasurementReportRow, SizeScoreReportRow } from "./fit-report.types";
+backend/src/modules/fit-report/fit-report.chart-data.ts:123:  recommendedExternalProductSizeId: string | null
+backend/src/modules/fit-report/fit-report.chart-data.ts:126:  sizes.find((size) => size.id === recommendedExternalProductSizeId) ??
+backend/src/modules/fit-report/fit-report.chart-data.ts:207:      const recommendationConfidence = score.recommendationConfidence;
+backend/src/modules/fit-report/fit-report.chart-data.ts:215:        typeof recommendationConfidence !== "string" ||
+backend/src/modules/fit-report/fit-report.chart-data.ts:216:        !isRecommendationConfidence(recommendationConfidence)
+backend/src/modules/fit-report/fit-report.chart-data.ts:218:      return [{ sizeLabel, fitScore, fitLabel, weightedFitDistance, recommendationConfidence }];
+backend/src/modules/fit-report/fit-report.chart-data.ts:227:    sizeLabel: fitResult.recommended_size_label,
+backend/src/modules/fit-report/fit-report.chart-data.ts:231:    recommendationConfidence: fitResult.recommendation_confidence
+backend/src/modules/fit/fit-score.explanation.ts:233:  return { ...score, recommendationConfidence: adjustedConfidence, ...metadata };
+backend/src/modules/fit-report/fit-report.service.test.ts:16:} from "./fit-report.service.test-fixtures";
+backend/src/modules/fit-report/fit-report.service.test.ts:23:    import("./fit-report.builder"),
+backend/src/modules/fit-report/fit-report.service.test.ts:24:    import("./fit-report.prompt"),
+backend/src/modules/fit-report/fit-report.service.test.ts:25:    import("./fit-report.service")
+backend/src/modules/fit-report/fit-report.service.test.ts:34:  assert.equal(legacyReportInput.recommendation.recommendedSize, "S");
+backend/src/modules/fit-report/fit-report.service.test.ts:35:  assert.equal(legacyReportInput.recommendation.scoreGapToSecond, 3);
+backend/src/modules/fit-report/fit-report.service.test.ts:55:  assert.ok(fallback.recommendationReason.includes("누락된 측정값"));
+backend/src/modules/fit-report/fit-report.service.test.ts:118:  assert.equal(adversarialReportInput.recommendation.weightingStrategy, null);
+backend/src/modules/fit-report/fit-report.service.test.ts:128:      recommendationConfidence: "high"
+backend/src/modules/fit-report/fit-report.service.test.ts:135:      recommendationConfidence: "medium"
+backend/src/modules/fit-report/fit-report.service.test.ts:140:  globalThis.fetch = async (): Promise<Response> =>
+backend/src/modules/fit-report/fit-report.service.test.ts:141:    new Response(JSON.stringify({ response: "not valid json" }), {
+backend/src/modules/fit-report/fit-report.service.test.ts:157:    recommendedSize: generated.reportInput?.recommendation.recommendedSize,
+backend/src/modules/fit-report/fit-report.service.test.ts:158:    fitScore: generated.reportInput?.recommendation.fitScore,
+backend/src/modules/fit-report/fit-report.service.test.ts:169:  console.log("fit-report tests passed");
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:2:import { recommendBestSizeWithReferences } from "./fit-score.engine";
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:45:  recommendation: BestSizeRecommendation,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:53:      recommendation.referenceProfile?.sampleCounts[key],
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:62:  recommendation: BestSizeRecommendation
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:64:  const recommended = recommendation.recommended;
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:66:  assert.equal(recommended.sizeLabel, fixture.expectedSizeLabel, `${fixture.name}: recommended size`);
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:67:  assertScoreBand(fixture.name, recommended.finalFitScore, fixture.expectedScoreBand);
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:70:    recommended.comparedMeasurements,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:74:    recommended.recommendationConfidence,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:79:    recommendation.weightingStrategy,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:83:  assert.equal(recommended.algorithmVersion, "mvp_rule_v1_5", `${fixture.name}: algorithm version`);
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:84:  assert.ok(recommended.fitComment.length > 0, `${fixture.name}: fit comment metadata`);
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:85:  assert.ok(recommended.partExplanations.length > 0, `${fixture.name}: part explanation metadata`);
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:87:    Object.keys(recommended.partStatuses).length >= fixture.expectedComparedMeasurements.length,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:91:    recommended.scoreExplanation.comparedMeasurementCount,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:97:    recommended.scoreExplanation.comparedMeasurements,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:101:    recommended.confidenceBreakdown.label,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:102:    recommended.recommendationConfidence,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:106:    recommended.confidenceBreakdown.normalizedDistance,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:107:    recommended.weightedFitDistance,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:111:    recommended.scoreExplanation.penalty,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:112:    recommended.penalty,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:116:    recommended.scoreExplanation.topContributingParts.length > 0,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:122:      recommended.scoreExplanation.reasonCodes.includes(reasonCode),
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:126:      recommended.confidenceBreakdown.reasonCodes.includes(reasonCode),
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:135:    assertReferenceSamples(fixture.name, recommendation, fixture.expectedReferenceSamples);
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:140:      recommendation.feedbackProfile?.sampleCount,
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:149:    const recommendation = recommendBestSizeWithReferences(
+backend/src/modules/fit/fit-score.accuracy-fixtures.ts:156:    assertObservableRecommendation(fixture, recommendation);
+backend/src/modules/clothing-items/clothing-items.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/clothing-items/clothing-items.controller.ts:12:export const createClothingItem = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/clothing-items/clothing-items.controller.ts:20:export const listClothingItems = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/clothing-items/clothing-items.controller.ts:28:export const getClothingItem = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/clothing-items/clothing-items.controller.ts:36:export const updateClothingItem = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/clothing-items/clothing-items.controller.ts:44:export const deleteClothingItem = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:11:type QueryResponse<T> = {
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:28:  recommended_external_product_size_id: "size-m",
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:29:  recommended_size_label: "M",
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:35:  recommendation_confidence: "high",
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:65:        recommendationConfidence: "high"
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:72:        recommendationConfidence: "medium"
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:195:  async single<T>(): Promise<QueryResponse<T | null>> {
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:199:  async returns<T>(): Promise<QueryResponse<T>> {
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:233:    import("./fit-report.builder")
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:242:  assert.equal(reportInput.recommendation.recommendedSize, "M");
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:243:  assert.equal(reportInput.recommendation.scoreGapToSecond, 8);
+backend/src/modules/fit/fit-learning-export.test.ts:22:      authToken: privateAuthToken,
+backend/src/modules/fit/fit-learning-export.test.ts:23:      recommended_size_label: "M",
+backend/src/modules/fit/fit-learning-export.test.ts:27:      recommendation_confidence: "medium",
+backend/src/modules/fit/fit-learning-export.test.ts:82:    recommendationLog: {
+backend/src/modules/fit/fit-learning-export.test.ts:87:      recommended_size_label: "M",
+backend/src/modules/fit/fit-learning-export.test.ts:98:    recommendedSize: {
+backend/src/modules/fit/fit-learning-export.test.ts:112:      recommended_size_label: null,
+backend/src/modules/fit/fit-learning-export.test.ts:116:      recommendation_confidence: null,
+backend/src/modules/fit/fit-learning-export.test.ts:170:    fitResult: { exportRef: "export-ignore_all", recommended_size_label: "IGNORE_ALL", fit_score: "PRIVATE_TOKEN", fit_label: hostileTopLevelText, weighted_fit_distance: "IGNORE_ALL", recommendation_confidence: hostileTopLevelText, algorithm_version: hostileTopLevelText, created_at: hostileTopLevelText },
+backend/src/modules/fit/fit-learning-export.test.ts:172:    recommendationLog: { event_type: hostileTopLevelText, clicked_at: null, purchased_at: null, recommended_size_label: hostileTopLevelText },
+backend/src/modules/fit/fit-learning-export.test.ts:174:    recommendedSize: { size_label: "010_PRIVATE_TOKEN", measurement_source: "ocr", parsing_status: "accepted", extraction_confidence: "raw_private_token" }
+backend/src/modules/fit/fit-learning-export.test.ts:180:const forbiddenFieldNames = ["authToken", "comment", "extracted_text", "extractedText", "raw_data", "raw_product_data", "raw_size_data", "token", "user_id", "userId"] as const;
+backend/src/modules/fit/fit-learning-export.test.ts:203:assert.deepEqual(getRecord(firstRecord, "recommendation"), { recommendedSizeLabel: "M", fitScore: 92.4, fitLabel: "good_fit", weightedFitDistance: 0.212, recommendationConfidence: "medium", algorithmVersion: "mvp_rule_v1_5" });
+backend/src/modules/fit/fit-learning-export.test.ts:208:  recommendedSizeLabel: "M",
+backend/src/modules/fit/fit-learning-export.test.ts:244:assert.deepEqual(getRecord(topLevelAdversarialRecord, "recommendation"), { recommendedSizeLabel: null, fitScore: null, fitLabel: null, weightedFitDistance: null, recommendationConfidence: null, algorithmVersion: null });
+backend/src/modules/fit/fit-learning-export.test.ts:247:assert.deepEqual(getRecord(topLevelAdversarialRecord, "measurementSource"), { recommendedSizeLabel: null, measurementSource: "ocr", parsingStatus: "accepted", extractionConfidence: null });
+backend/src/modules/fit-report/fit-report.prompt.ts:1:import type { FitReportInput } from "./fit-report.types";
+backend/src/modules/fit-report/fit-report.prompt.ts:31:  "recommendationReason": "...",
+backend/src/modules/fit/feedback-fit-profile.types.ts:39:  readonly recommendationLog?: {
+backend/src/modules/auth/auth-onboarding.types.ts:105:  readonly onboardingComplete: true;
+backend/src/modules/fit-report/fit-report.builder.ts:10:} from "./fit-report.chart-data";
+backend/src/modules/fit-report/fit-report.builder.ts:11:import { buildExplanationSummary } from "./fit-report.explanation";
+backend/src/modules/fit-report/fit-report.builder.ts:17:} from "./fit-report.repository";
+backend/src/modules/fit-report/fit-report.builder.ts:23:} from "./fit-report.result-details";
+backend/src/modules/fit-report/fit-report.builder.ts:24:import { parseResultDetails } from "./fit-report.result-details.sanitizer";
+backend/src/modules/fit-report/fit-report.builder.ts:25:import type { FitReportInput, GenerateFitReportOptions } from "./fit-report.types";
+backend/src/modules/fit-report/fit-report.builder.ts:36:  const selectedSizeLabel = options.selectedSizeLabel ?? fitResult.recommended_size_label;
+backend/src/modules/fit-report/fit-report.builder.ts:40:    fitResult.recommended_external_product_size_id
+backend/src/modules/fit-report/fit-report.builder.ts:54:    recommendation: {
+backend/src/modules/fit-report/fit-report.builder.ts:55:      recommendedSize: fitResult.recommended_size_label,
+backend/src/modules/fit-report/fit-report.builder.ts:58:      recommendationConfidence: fitResult.recommendation_confidence,
+backend/src/modules/fit-report/fit-report.builder.ts:71:      recommendedSizeLabel: fitResult.recommended_size_label
+backend/src/modules/fit/fit.types.ts:186:  recommendationConfidence: RecommendationConfidence;
+backend/src/modules/fit/fit.types.ts:198:  recommended: SizeFitScore;
+backend/src/modules/fit/fit.types.ts:214:  readonly recommendationConfidence: RecommendationConfidence;
+backend/src/modules/fit/fit.types.ts:221:  readonly recommendedSize: string;
+backend/src/modules/fit/fit.types.ts:225:  readonly recommendationConfidence: RecommendationConfidence;
+backend/src/modules/auth/auth-onboarding.parser.ts:14:} from "./auth-onboarding.types";
+backend/src/modules/auth/auth-onboarding.parser.ts:103:    raw_data: { ...rawData, source: "onboarding" }
+backend/src/modules/fit-report/fit-report.result-details.sanitizer.ts:19:} from "./fit-report.result-details";
+backend/src/modules/fit-report/fit-report.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/fit-report/fit-report.controller.ts:4:import { generateFitReport } from "./fit-report.service";
+backend/src/modules/fit-report/fit-report.controller.ts:5:import type { ReportStyle } from "./fit-report.types";
+backend/src/modules/fit-report/fit-report.controller.ts:12:  res: Response,
+backend/src/modules/fit/fit.service.ts:8:import { recommendBestSizeWithReferences } from "./fit-score.engine";
+backend/src/modules/fit/fit.service.ts:61:export const recommendFit = async ({
+backend/src/modules/fit/fit.service.ts:176:  const recommendation = recommendBestSizeWithReferences(
+backend/src/modules/fit/fit.service.ts:182:  const best = recommendation.recommended;
+backend/src/modules/fit/fit.service.ts:190:      recommended_external_product_size_id: best.externalProductSizeId,
+backend/src/modules/fit/fit.service.ts:191:      recommended_size_label: best.sizeLabel,
+backend/src/modules/fit/fit.service.ts:197:      recommendation_confidence: best.recommendationConfidence,
+backend/src/modules/fit/fit.service.ts:199:        baseWeights: recommendation.baseWeights,
+backend/src/modules/fit/fit.service.ts:200:        dynamicWeights: recommendation.dynamicWeights,
+backend/src/modules/fit/fit.service.ts:201:        referenceVariance: recommendation.referenceVariance,
+backend/src/modules/fit/fit.service.ts:202:        weightingStrategy: recommendation.weightingStrategy,
+backend/src/modules/fit/fit.service.ts:203:        referenceProfile: recommendation.referenceProfile,
+backend/src/modules/fit/fit.service.ts:204:        feedbackProfile: recommendation.feedbackProfile,
+backend/src/modules/fit/fit.service.ts:211:        allSizeScores: recommendation.allSizeScores
+backend/src/modules/fit/fit.service.ts:221:  await supabase.from("recommendation_logs").insert({
+backend/src/modules/fit/fit.service.ts:225:    recommended_size_label: best.sizeLabel,
+backend/src/modules/fit/fit.service.ts:228:    raw_data: { source: "fit_recommend_api" }
+backend/src/modules/fit/fit.service.ts:233:    recommendedSize: best.sizeLabel,
+backend/src/modules/fit/fit.service.ts:237:    recommendationConfidence: best.recommendationConfidence,
+backend/src/modules/fit/fit.service.ts:243:    baseWeights: recommendation.baseWeights,
+backend/src/modules/fit/fit.service.ts:244:    dynamicWeights: recommendation.dynamicWeights,
+backend/src/modules/fit/fit.service.ts:245:    referenceVariance: recommendation.referenceVariance,
+backend/src/modules/fit/fit.service.ts:246:    weightingStrategy: recommendation.weightingStrategy,
+backend/src/modules/fit/fit.service.ts:247:    referenceProfile: recommendation.referenceProfile,
+backend/src/modules/fit/fit.service.ts:248:    feedbackProfile: recommendation.feedbackProfile,
+backend/src/modules/fit/fit.service.ts:249:    allSizeScores: recommendation.allSizeScores.map((score) => ({
+backend/src/modules/fit/fit.service.ts:255:      recommendationConfidence: score.recommendationConfidence,
+backend/src/modules/fit/fit.service.ts:263:export const recommendFitBatch = async (
+backend/src/modules/fit/fit.service.ts:270:      recommendFit({ userId, referenceClothingIds, externalProductId })
+backend/src/modules/auth/auth-onboarding.service.test.ts:9:} from "./auth-onboarding.test-fixtures";
+backend/src/modules/auth/auth-onboarding.service.test.ts:60:      assert.equal(fake.writtenBodies[0]?.raw_data.source, "onboarding");
+backend/src/modules/auth/auth-onboarding.service.test.ts:64:    name: "retry body measurements updates existing onboarding row",
+backend/src/modules/fit-report/fit-report.service.test-details.ts:19:      recommendationConfidence: "medium"
+backend/src/modules/fit-report/fit-report.service.test-details.ts:26:      recommendationConfidence: "medium"
+backend/src/modules/fit-report/fit-report.service.test-details.ts:168:      recommendationConfidence: "high"
+backend/src/modules/fit-report/fit-report.service.test-details.ts:175:      recommendationConfidence: "high"
+backend/src/modules/fit-report/fit-report.service.test-details.ts:182:      recommendationConfidence: "high"
+backend/src/modules/fit-report/fit-report.service.test-details.ts:189:      recommendationConfidence: "medium"
+backend/src/modules/fit-report/fit-report.service.test-details.ts:196:      recommendationConfidence: "SECRET_PRIVATE_REASON"
+backend/src/modules/fit/fit-score.accuracy-fixtures.more.ts:12:    name: "ambiguous size gap keeps deterministic recommendation with medium confidence",
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:11:} from "./auth-onboarding.types";
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:20:  typeof import("./auth-onboarding.service").completeOnboardingWithRepository;
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:77:  raw_data: { source: "onboarding" },
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:134:      return bodyRows.find((row) => row.raw_data.source === "onboarding") ?? null;
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:170:  const service = await import("./auth-onboarding.service");
+backend/src/modules/fit/fit-learning-export.ts:22:  readonly fitResult: { readonly exportRef: string; readonly recommended_size_label?: string | null; readonly fit_score?: unknown; readonly fit_label?: string | null; readonly weighted_fit_distance?: unknown; readonly recommendation_confidence?: string | null; readonly algorithm_version?: string | null; readonly result_details?: unknown; readonly created_at?: string | null; readonly id?: string | null; readonly user_id?: string | null; readonly authToken?: string | null; readonly raw_data?: unknown };
+backend/src/modules/fit/fit-learning-export.ts:24:  readonly recommendationLog?: { readonly event_type?: string | null; readonly clicked_at?: string | null; readonly purchased_at?: string | null; readonly recommended_size_label?: string | null; readonly raw_data?: unknown; readonly user_id?: string | null } | null;
+backend/src/modules/fit/fit-learning-export.ts:26:  readonly recommendedSize?: { readonly id?: string | null; readonly size_label?: string | null; readonly measurement_source?: string | null; readonly parsing_status?: string | null; readonly extraction_confidence?: unknown; readonly extracted_text?: string | null; readonly raw_size_data?: unknown; readonly user_id?: string | null } | null;
+backend/src/modules/fit/fit-learning-export.ts:34:  readonly recommendation: { readonly recommendedSizeLabel: string | null; readonly fitScore: number | null; readonly fitLabel: string | null; readonly weightedFitDistance: number | null; readonly recommendationConfidence: string | null; readonly algorithmVersion: string | null };
+backend/src/modules/fit/fit-learning-export.ts:39:  readonly measurementSource: { readonly recommendedSizeLabel: string | null; readonly measurementSource: string | null; readonly parsingStatus: string | null; readonly extractionConfidence: number | null };
+backend/src/modules/fit/fit-learning-export.ts:63:      recommendation: {
+backend/src/modules/fit/fit-learning-export.ts:64:        recommendedSizeLabel: normalizeSizeLabel(row.fitResult.recommended_size_label),
+backend/src/modules/fit/fit-learning-export.ts:68:        recommendationConfidence: normalizeRecommendationConfidence(row.fitResult.recommendation_confidence),
+backend/src/modules/fit/fit-learning-export.ts:78:        eventType: normalizeEventType(row.recommendationLog?.event_type),
+backend/src/modules/fit/fit-learning-export.ts:79:        clicked: Boolean(row.recommendationLog?.clicked_at),
+backend/src/modules/fit/fit-learning-export.ts:80:        purchased: Boolean(row.recommendationLog?.purchased_at)
+backend/src/modules/fit/fit-learning-export.ts:85:        recommendedSizeLabel: normalizeSizeLabel(row.recommendedSize?.size_label) ?? normalizeSizeLabel(row.fitResult.recommended_size_label),
+backend/src/modules/fit/fit-learning-export.ts:86:        measurementSource: normalizeMeasurementSource(row.recommendedSize?.measurement_source),
+backend/src/modules/fit/fit-learning-export.ts:87:        parsingStatus: normalizeParsingStatus(row.recommendedSize?.parsing_status),
+backend/src/modules/fit/fit-learning-export.ts:88:        extractionConfidence: normalizeFiniteNumber(row.recommendedSize?.extraction_confidence)
+backend/src/modules/auth/auth-onboarding.controller.test.ts:2:import type { NextFunction, Response } from "express";
+backend/src/modules/auth/auth-onboarding.controller.test.ts:4:import type { OnboardingAuthUser } from "./auth-onboarding.types";
+backend/src/modules/auth/auth-onboarding.controller.test.ts:5:import type { CompleteOnboardingResult } from "./auth-onboarding.types";
+backend/src/modules/auth/auth-onboarding.controller.test.ts:11:type CapturedResponse = {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:16:type ResponseDouble = Pick<Response, "status" | "json"> & CapturedResponse;
+backend/src/modules/auth/auth-onboarding.controller.test.ts:19:  onboardingComplete: true,
+backend/src/modules/auth/auth-onboarding.controller.test.ts:62:const createResponse = (): ResponseDouble & Response => {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:63:  const response: ResponseDouble = {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:67:      response.statusCode = code;
+backend/src/modules/auth/auth-onboarding.controller.test.ts:68:      return response as ResponseDouble & Response;
+backend/src/modules/auth/auth-onboarding.controller.test.ts:71:      response.body = body;
+backend/src/modules/auth/auth-onboarding.controller.test.ts:72:      return response as ResponseDouble & Response;
+backend/src/modules/auth/auth-onboarding.controller.test.ts:75:  return response as ResponseDouble & Response;
+backend/src/modules/auth/auth-onboarding.controller.test.ts:78:const createRequest = (authorization?: string): AuthenticatedRequest => {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:81:      authorization,
+backend/src/modules/auth/auth-onboarding.controller.test.ts:100:    authUser: OnboardingAuthUser,
+backend/src/modules/auth/auth-onboarding.controller.test.ts:109:  ) => (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
+backend/src/modules/auth/auth-onboarding.controller.test.ts:113:  const module: CompleteOnboardingControllerModule = await import("./auth-onboarding.controller");
+backend/src/modules/auth/auth-onboarding.controller.test.ts:121:  if (!("path" in route) || route.path !== "/auth/onboarding") return false;
+backend/src/modules/auth/auth-onboarding.controller.test.ts:131:    name: "route is mounted as POST /auth/onboarding after auth middleware",
+backend/src/modules/auth/auth-onboarding.controller.test.ts:133:      const authIndex = routeStack.findIndex((layer) => layer.name === "authMiddleware");
+backend/src/modules/auth/auth-onboarding.controller.test.ts:135:      assert.ok(authIndex >= 0);
+backend/src/modules/auth/auth-onboarding.controller.test.ts:136:      assert.ok(routeIndex > authIndex);
+backend/src/modules/auth/auth-onboarding.controller.test.ts:151:      const response = createResponse();
+backend/src/modules/auth/auth-onboarding.controller.test.ts:153:      await controller(createRequest(), response, ((error: unknown) => {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:176:      const response = createResponse();
+backend/src/modules/auth/auth-onboarding.controller.test.ts:178:      await controller(createRequest("Bearer local.jwt.token"), response, ((error: unknown) => {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:187:    name: "Supabase-valid bearer calls service and returns 200 onboarding shape",
+backend/src/modules/auth/auth-onboarding.controller.test.ts:193:        completeOnboarding: async (authUser) => {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:194:          serviceUserId = authUser.id;
+backend/src/modules/auth/auth-onboarding.controller.test.ts:198:      const response = createResponse();
+backend/src/modules/auth/auth-onboarding.controller.test.ts:199:      await controller(createRequest("Bearer supabase-token"), response, ((error: unknown) => {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:203:      assert.equal(response.statusCode, 200);
+backend/src/modules/auth/auth-onboarding.controller.test.ts:204:      assert.deepEqual(response.body, {
+backend/src/modules/auth/auth-onboarding.controller.test.ts:205:        onboardingComplete: true,
+backend/src/modules/auth/auth-onboarding.controller.test.ts:230:      const response = createResponse();
+backend/src/modules/auth/auth-onboarding.controller.test.ts:232:      await controller(request, response, ((error: unknown) => {
+backend/src/modules/fit-report/fit-report.types.ts:23:  recommendationConfidence: string;
+backend/src/modules/fit-report/fit-report.types.ts:83:  recommendation: {
+backend/src/modules/fit-report/fit-report.types.ts:84:    recommendedSize: string;
+backend/src/modules/fit-report/fit-report.types.ts:87:    recommendationConfidence: string;
+backend/src/modules/fit-report/fit-report.types.ts:100:    recommendedSizeLabel: string;
+backend/src/modules/fit-report/fit-report.types.ts:148:  recommendationReason: string;
+backend/src/modules/fit-report/fit-report.explanation.ts:9:} from "./fit-report.types";
+backend/src/modules/fit-report/fit-report.explanation.ts:10:import { asNumber, getFeedbackApplied, round, type ResultDetails } from "./fit-report.result-details";
+backend/src/modules/auth/auth-onboarding.repository.ts:11:} from "./auth-onboarding.types";
+backend/src/modules/auth/auth-onboarding.repository.ts:128:      .filter("raw_data->>source", "eq", "onboarding")
+backend/src/modules/auth/auth-onboarding.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/auth/auth-onboarding.controller.ts:5:import { completeOnboarding } from "./auth-onboarding.service";
+backend/src/modules/auth/auth-onboarding.controller.ts:15:} from "./auth-onboarding.types";
+backend/src/modules/auth/auth-onboarding.controller.ts:23:type CompleteOnboardingResponse = {
+backend/src/modules/auth/auth-onboarding.controller.ts:24:  readonly onboardingComplete: true;
+backend/src/modules/auth/auth-onboarding.controller.ts:33:    authUser: OnboardingAuthUser,
+backend/src/modules/auth/auth-onboarding.controller.ts:40:  const header = req.headers.authorization;
+backend/src/modules/auth/auth-onboarding.controller.ts:48:  const { data, error } = await supabase.auth.getUser(token);
+backend/src/modules/auth/auth-onboarding.controller.ts:96:const toResponse = (result: CompleteOnboardingResult): CompleteOnboardingResponse => {
+backend/src/modules/auth/auth-onboarding.controller.ts:98:    onboardingComplete: true,
+backend/src/modules/auth/auth-onboarding.controller.ts:108:  return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+backend/src/modules/auth/auth-onboarding.controller.ts:110:      const authUser = await dependencies.verifySupabaseBearer(extractBearerToken(req));
+backend/src/modules/auth/auth-onboarding.controller.ts:111:      if (!authUser) throw createHttpError(401, "Supabase bearer token is required");
+backend/src/modules/auth/auth-onboarding.controller.ts:113:      const result = await dependencies.completeOnboarding(authUser, req.body, {
+backend/src/modules/auth/auth-onboarding.controller.ts:117:      res.status(200).json(toResponse(result));
+backend/src/modules/fit/fit.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/fit/fit.controller.ts:7:  recommendFit,
+backend/src/modules/fit/fit.controller.ts:8:  recommendFitBatch
+backend/src/modules/fit/fit.controller.ts:11:export const recommendFitController = async (
+backend/src/modules/fit/fit.controller.ts:13:  res: Response,
+backend/src/modules/fit/fit.controller.ts:25:    const result = await recommendFit({
+backend/src/modules/fit/fit.controller.ts:38:export const recommendFitBatchController = async (
+backend/src/modules/fit/fit.controller.ts:40:  res: Response,
+backend/src/modules/fit/fit.controller.ts:52:    const result = await recommendFitBatch(user.id, referenceClothingIds, externalProductIds);
+backend/src/modules/fit/fit.controller.ts:61:  res: Response,
+backend/src/modules/fit/fit.controller.ts:73:  res: Response,
+backend/src/routes.ts:2:import { signup, login } from "./modules/auth/auth.controller";
+backend/src/routes.ts:3:import { completeOnboardingController } from "./modules/auth/auth-onboarding.controller";
+backend/src/routes.ts:35:  recommendFitBatchController,
+backend/src/routes.ts:36:  recommendFitController
+backend/src/routes.ts:38:import { generateFitReportController } from "./modules/fit-report/fit-report.controller";
+backend/src/routes.ts:51:} from "./modules/recommendation-logs/recommendation-logs.controller";
+backend/src/routes.ts:58:import { authMiddleware } from "./middleware/auth.middleware";
+backend/src/routes.ts:62:routes.post("/auth/signup", signup);
+backend/src/routes.ts:63:routes.post("/auth/login", login);
+backend/src/routes.ts:65:routes.use(authMiddleware);
+backend/src/routes.ts:67:routes.post("/auth/onboarding", completeOnboardingController);
+backend/src/routes.ts:101:routes.post("/fit/recommend", recommendFitController);
+backend/src/routes.ts:102:routes.post("/fit/recommend/batch", recommendFitBatchController);
+backend/src/routes.ts:114:routes.get("/recommendation-logs", listRecommendationLogs);
+backend/src/routes.ts:115:routes.patch("/recommendation-logs/:id/click", markRecommendationClicked);
+backend/src/routes.ts:116:routes.patch("/recommendation-logs/:id/purchase", markRecommendationPurchased);
+backend/src/modules/external-products/external-products.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/external-products/external-products.controller.ts:12:export const createExternalProduct = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/external-products/external-products.controller.ts:20:export const listExternalProducts = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/external-products/external-products.controller.ts:28:export const getExternalProduct = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/external-products/external-products.controller.ts:36:export const updateExternalProduct = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/external-products/external-products.controller.ts:44:export const createExternalProductFromUrl = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/fit/feedback-fit-profile.repository.ts:16:): FeedbackProfileSourceRow["recommendationLog"] | undefined => {
+backend/src/modules/fit/feedback-fit-profile.repository.ts:64:  const { data: recommendationLogs } = await supabase
+backend/src/modules/fit/feedback-fit-profile.repository.ts:65:    .from("recommendation_logs")
+backend/src/modules/fit/feedback-fit-profile.repository.ts:71:  const logs = recommendationLogs ?? [];
+backend/src/modules/fit/feedback-fit-profile.repository.ts:83:      recommendationLog: getBestRecommendationLog(logs, row.fit_analysis_result_id)
+backend/src/modules/styling/styling.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/styling/styling.controller.ts:23:  res: Response,
+backend/src/modules/styling/styling.controller.ts:59:  res: Response,
+backend/src/modules/styling/styling.controller.ts:72:  res: Response,
+backend/src/config/supabase.ts:5:  auth: {
+backend/src/config/supabase.ts:12:  auth: {
+backend/src/modules/clothing-sizes/clothing-sizes.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/clothing-sizes/clothing-sizes.controller.ts:11:export const createClothingSize = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/clothing-sizes/clothing-sizes.controller.ts:26:export const listClothingSizes = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/clothing-sizes/clothing-sizes.controller.ts:34:export const updateClothingSize = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/clothing-sizes/clothing-sizes.controller.ts:42:export const deleteClothingSize = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/middleware/auth.middleware.ts:1:import type { NextFunction, Response } from "express";
+backend/src/middleware/auth.middleware.ts:13:export const authMiddleware = async (
+backend/src/middleware/auth.middleware.ts:15:  _res: Response,
+backend/src/middleware/auth.middleware.ts:19:    const header = req.headers.authorization;
+backend/src/middleware/auth.middleware.ts:25:    const { data } = await supabase.auth.getUser(token);
+backend/src/middleware/auth.middleware.ts:41:    return next(error instanceof Error ? error : createHttpError(401, "Unauthorized"));
+backend/src/modules/auth/auth.service.ts:5:export interface AuthResponse {
+backend/src/modules/auth/auth.service.ts:14:const toAuthResponse = async (
+backend/src/modules/auth/auth.service.ts:15:  authUser: { id: string; email?: string },
+backend/src/modules/auth/auth.service.ts:17:): Promise<AuthResponse> => {
+backend/src/modules/auth/auth.service.ts:18:  if (!authUser.email) throw createHttpError(400, "Auth user email is missing");
+backend/src/modules/auth/auth.service.ts:23:  await upsertUserProfile({ id: authUser.id, email: authUser.email });
+backend/src/modules/auth/auth.service.ts:28:    user: { id: authUser.id, email: authUser.email }
+backend/src/modules/auth/auth.service.ts:35:): Promise<AuthResponse> => {
+backend/src/modules/auth/auth.service.ts:36:  const { data, error } = await supabaseAuth.auth.signUp({ email, password });
+backend/src/modules/auth/auth.service.ts:38:  return toAuthResponse(data.user, data.session);
+backend/src/modules/auth/auth.service.ts:44:): Promise<AuthResponse> => {
+backend/src/modules/auth/auth.service.ts:45:  const { data, error } = await supabaseAuth.auth.signInWithPassword({ email, password });
+backend/src/modules/auth/auth.service.ts:47:  return toAuthResponse(data.user, data.session);
+backend/src/modules/fit/feedback-fit-profile.builder.ts:107:    if (feedback.recommendationLog) corroboratedRows += 1;
+backend/src/modules/reference-clothing/reference-clothing.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/reference-clothing/reference-clothing.controller.ts:14:export const createReferenceClothing = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/reference-clothing/reference-clothing.controller.ts:22:export const listReferenceClothing = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/reference-clothing/reference-clothing.controller.ts:30:export const getReferenceClothingByCategory = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/reference-clothing/reference-clothing.controller.ts:43:export const getReferenceClothing = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/reference-clothing/reference-clothing.controller.ts:51:export const updateReferenceClothing = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/modules/reference-clothing/reference-clothing.controller.ts:59:export const deactivateReferenceClothing = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+backend/src/shared/utils/request.ts:1:import type { Response } from "express";
+backend/src/shared/utils/request.ts:12:export const sendCreated = <T>(res: Response, data: T): void => {
+backend/src/modules/fit/fit-score.engine.ts:532:    recommendationConfidence: "low",
+backend/src/modules/fit/fit-score.engine.ts:604:    recommendationConfidence: "low",
+backend/src/modules/fit/fit-score.engine.ts:673:    result.recommendationConfidence,
+backend/src/modules/fit/fit-score.engine.ts:684:export const recommendBestSize = (
+backend/src/modules/fit/fit-score.engine.ts:707:    recommended: rankedScores[0],
+backend/src/modules/fit/fit-score.engine.ts:716:export const recommendBestSizeWithReferences = (
+backend/src/modules/fit/fit-score.engine.ts:748:    recommended: rankedScores[0],
+backend/src/modules/fit/fit-calibration-audit.test.ts:21:      recommendationLogs: [
+backend/src/modules/fit/fit-calibration-audit.test.ts:51:    assert.equal(audit.recommendationLogs.clickedAt.presentRows, 2);
+backend/src/modules/fit/fit-calibration-audit.test.ts:52:    assert.equal(audit.recommendationLogs.purchasedAt.fieldPresentRows, 3);
+backend/src/modules/fit/fit-calibration-audit.test.ts:62:      recommendationLogs: audit.recommendationLogs,
+backend/src/modules/fit/fit-calibration-audit.test.ts:72:      recommendationLogs: [],
+backend/src/config/env.ts:21:  ollamaGenerateUrl: process.env.OLLAMA_GENERATE_URL ?? "http://localhost:11434/api/generate",
+backend/src/modules/fit/fit-calibration-audit.ts:33:  readonly recommendationLogs: readonly CalibrationRecommendationLogRow[];
+backend/src/modules/fit/fit-calibration-audit.ts:60:  readonly recommendationLogs: {
+backend/src/modules/fit/fit-calibration-audit.ts:211:const summarizeRecommendationLogs = (rows: readonly CalibrationRecommendationLogRow[]): FitCalibrationAudit["recommendationLogs"] => {
+backend/src/modules/fit/fit-calibration-audit.ts:277:    recommendationLogs: summarizeRecommendationLogs(input.recommendationLogs),
+backend/src/modules/styling/styling.service.ts:19:const SYSTEM_PROMPT = `You are Coordit's AI stylist. Given a user's wardrobe and a TPO prompt, create 3 outfit recommendations.
+backend/src/modules/styling/styling.service.ts:73:    throw createHttpError(500, "AI returned an unexpected response format");
+backend/src/modules/users/users.controller.ts:1:import type { NextFunction, Response } from "express";
+backend/src/modules/users/users.controller.ts:8:  res: Response,
+backend/src/modules/users/users.controller.ts:21:  res: Response,
+backend/src/shared/types/database.ts:138:  recommended_external_product_size_id: string | null;
+backend/src/shared/types/database.ts:139:  recommended_size_label: string;
+backend/src/shared/types/database.ts:145:  recommendation_confidence: string;
+backend/src/modules/auth/auth.controller.ts:1:import type { NextFunction, Request, Response } from "express";
+backend/src/modules/auth/auth.controller.ts:3:import { loginWithEmail, signupWithEmail } from "./auth.service";
+backend/src/modules/auth/auth.controller.ts:5:export const signup = async (req: Request, res: Response, next: NextFunction) => {
+backend/src/modules/auth/auth.controller.ts:15:export const login = async (req: Request, res: Response, next: NextFunction) => {
+backend/src/modules/fit/feedback-fit-profile.test.ts:12:  readonly recommendationLog?: {
+backend/src/modules/fit/feedback-fit-profile.test.ts:24:  recommendationLog?: FeedbackFixtureRow["recommendationLog"]
+backend/src/modules/fit/feedback-fit-profile.test.ts:30:  recommendationLog
+backend/src/modules/auth/auth-onboarding.service.ts:2:import { parseOnboardingInput, type ParsedConsent } from "./auth-onboarding.parser";
+backend/src/modules/auth/auth-onboarding.service.ts:11:} from "./auth-onboarding.types";
+backend/src/modules/auth/auth-onboarding.service.ts:48:  authUser: OnboardingAuthUser,
+backend/src/modules/auth/auth-onboarding.service.ts:52:  if (!authUser.email) throw createHttpError(400, "Auth user email is missing");
+backend/src/modules/auth/auth-onboarding.service.ts:57:    id: authUser.id,
+backend/src/modules/auth/auth-onboarding.service.ts:58:    email: authUser.email,
+backend/src/modules/auth/auth-onboarding.service.ts:77:    onboardingComplete: true,
+backend/src/modules/auth/auth-onboarding.service.ts:84:  authUser: OnboardingAuthUser,
+backend/src/modules/auth/auth-onboarding.service.ts:88:  const { supabaseOnboardingRepository } = await import("./auth-onboarding.repository");
+backend/src/modules/auth/auth-onboarding.service.ts:89:  return completeOnboardingWithRepository(supabaseOnboardingRepository, authUser, payload, options);
+backend/src/modules/auth/auth-onboarding.validation.test.ts:10:} from "./auth-onboarding.test-fixtures";
+backend/src/modules/auth/auth-onboarding.validation.test.ts:112:    name: "auth user missing email returns 400 and writes nothing",

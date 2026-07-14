@@ -1,0 +1,13 @@
+backend/src/routes.ts:58:import { authMiddleware } from "./middleware/auth.middleware";
+backend/src/routes.ts:65:routes.use(authMiddleware);
+backend/src/routes.ts:67:routes.post("/auth/onboarding", completeOnboardingController);
+backend/src/modules/auth/auth-onboarding.types.ts:105:  readonly onboardingComplete: true;
+backend/src/middleware/auth.middleware.ts:13:export const authMiddleware = async (
+backend/src/middleware/auth.middleware.ts:25:    const { data } = await supabase.auth.getUser(token);
+backend/src/modules/auth/auth-onboarding.controller.ts:24:  readonly onboardingComplete: true;
+backend/src/modules/auth/auth-onboarding.controller.ts:48:  const { data, error } = await supabase.auth.getUser(token);
+backend/src/modules/auth/auth-onboarding.controller.ts:98:    onboardingComplete: true,
+backend/src/modules/auth/auth-onboarding.controller.test.ts:19:  onboardingComplete: true,
+backend/src/modules/auth/auth-onboarding.controller.test.ts:133:      const authIndex = routeStack.findIndex((layer) => layer.name === "authMiddleware");
+backend/src/modules/auth/auth-onboarding.controller.test.ts:205:        onboardingComplete: true,
+backend/src/modules/auth/auth-onboarding.service.ts:266:    onboardingComplete: true,

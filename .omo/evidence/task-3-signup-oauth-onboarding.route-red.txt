@@ -1,0 +1,25 @@
+
+> coordit-backend@0.1.0 test:auth-onboarding
+> tsx src/modules/auth/auth-onboarding.service.test.ts && tsx src/modules/auth/auth-onboarding.controller.test.ts
+
+PASS minimal success saves required consents only and no body row
+PASS full success persists optional fields body and all consents
+PASS retry body measurements updates existing onboarding row
+PASS omitted optional consents are absent
+PASS blank displayName returns 400 and writes nothing
+PASS missing required consent returns 400 and writes nothing
+PASS false required consent returns 400 and writes nothing
+PASS optional false consent is allowed
+PASS body measurements without numeric values create no row
+PASS missing latest required consent version returns 500 and writes nothing
+PASS auth user missing email returns 400 and writes nothing
+AssertionError [ERR_ASSERTION]: false == true
+    at Object.run (/Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend/src/modules/auth/auth-onboarding.controller.test.ts:119:14)
+    at runTests (/Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend/src/modules/auth/auth-onboarding.controller.test.ts:227:16) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

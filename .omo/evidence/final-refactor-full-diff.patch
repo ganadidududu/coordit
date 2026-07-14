@@ -1,0 +1,818 @@
+diff --git a/backend/package.json b/backend/package.json
+index eb19243..39245e9 100644
+--- a/backend/package.json
++++ b/backend/package.json
+@@ -7,7 +7,8 @@
+     "build": "tsc",
+     "start": "node dist/server.js",
+     "typecheck": "tsc --noEmit",
+-    "test:fit": "tsx src/modules/fit/fit-score.engine.test.ts"
++    "test:fit": "tsx src/modules/fit/fit-score.engine.test.ts",
++    "test:auth-onboarding": "tsx src/modules/auth/auth-onboarding.service.test.ts && tsx src/modules/auth/auth-onboarding.validation.test.ts && tsx src/modules/auth/auth-onboarding.controller.test.ts"
+   },
+   "dependencies": {
+     "@anthropic-ai/sdk": "^0.95.1",
+diff --git a/backend/src/modules/auth/auth-onboarding.parser.ts b/backend/src/modules/auth/auth-onboarding.parser.ts
+new file mode 100644
+index 0000000..61f8e5a
+--- /dev/null
++++ b/backend/src/modules/auth/auth-onboarding.parser.ts
+@@ -0,0 +1,193 @@
++import { createHttpError } from "../../shared/utils/http-error";
++import type { ConsentVersionRow } from "../../shared/types/database";
++import { asOptionalNumber, asOptionalRecord, asOptionalString } from "../../shared/utils/request";
++import {
++  OPTIONAL_CONSENT_KEYS,
++  REQUIRED_CONSENT_KEYS,
++  type CompleteOnboardingPayload,
++  type ConsentKey,
++  type OnboardingBodyMeasurementValues,
++  type OnboardingConsentPayload,
++  type OnboardingRepository,
++  type OptionalConsentKey,
++  type RequiredConsentKey
++} from "./auth-onboarding.types";
++
++export type ParsedConsent = {
++  readonly key: ConsentKey;
++  readonly accepted: boolean;
++  readonly version: string;
++  readonly required: boolean;
++};
++
++export type ParsedOnboardingInput = {
++  readonly displayName: string;
++  readonly gender?: string;
++  readonly birthYear?: number;
++  readonly bodyMeasurements: OnboardingBodyMeasurementValues | null;
++  readonly consents: readonly ParsedConsent[];
++};
++
++const BODY_MEASUREMENT_FIELDS = [
++  ["height_cm", "heightCm", "height_cm"],
++  ["weight_kg", "weightKg", "weight_kg"],
++  ["shoulder_width", "shoulderWidth", "shoulder_width"],
++  ["chest_circumference", "chestCircumference", "chest_circumference"],
++  ["waist_circumference", "waistCircumference", "waist_circumference"],
++  ["hip_circumference", "hipCircumference", "hip_circumference"],
++  ["outseam", "outseam", "outseam"]
++] as const;
++
++const isConsentKey = (key: string): key is ConsentKey => {
++  switch (key) {
++    case "terms_of_service":
++    case "privacy_policy":
++    case "fit_data_improvement":
++    case "marketing":
++      return true;
++    default:
++      return false;
++  }
++};
++
++const readConsentPayload = (
++  consents: Record<string, unknown>,
++  key: ConsentKey
++): OnboardingConsentPayload | null => {
++  const value = consents[key];
++  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
++  return value;
++};
++
++const readConsentVersion = (payload: OnboardingConsentPayload, key: ConsentKey): string => {
++  const version = asOptionalString(payload.version);
++  if (!version) throw createHttpError(400, `${key} consent version is required`);
++  return version;
++};
++
++const readAccepted = (payload: OnboardingConsentPayload, key: ConsentKey): boolean => {
++  if (typeof payload.accepted !== "boolean") {
++    throw createHttpError(400, `${key} consent accepted is required`);
++  }
++  return payload.accepted;
++};
++
++const pickNumber = (source: Record<string, unknown>, camelKey: string, snakeKey: string) => {
++  return asOptionalNumber(source[camelKey] ?? source[snakeKey]);
++};
++
++const parseBodyMeasurements = (value: unknown): OnboardingBodyMeasurementValues | null => {
++  const body = asOptionalRecord(value);
++  const rawData = asOptionalRecord(body.rawData ?? body.raw_data);
++  const parsed: Record<string, number | null> = {};
++  let hasNumericValue = false;
++
++  for (const [targetKey, camelKey, snakeKey] of BODY_MEASUREMENT_FIELDS) {
++    const parsedValue = pickNumber(body, camelKey, snakeKey);
++    if (parsedValue !== null) {
++      parsed[targetKey] = parsedValue;
++      hasNumericValue = true;
++    }
++  }
++
++  if (!hasNumericValue) return null;
++
++  return {
++    height_cm: parsed.height_cm,
++    weight_kg: parsed.weight_kg,
++    shoulder_width: parsed.shoulder_width,
++    chest_circumference: parsed.chest_circumference,
++    waist_circumference: parsed.waist_circumference,
++    hip_circumference: parsed.hip_circumference,
++    outseam: parsed.outseam,
++    raw_data: { ...rawData, source: "onboarding" }
++  };
++};
++
++const parseBirthYear = (payload: CompleteOnboardingPayload): number | undefined => {
++  const parsed = asOptionalNumber(payload.birthYear ?? payload.birth_year);
++  if (parsed === null) return undefined;
++  return Math.trunc(parsed);
++};
++
++const parseGender = (payload: CompleteOnboardingPayload): string | undefined => {
++  return asOptionalString(payload.gender) ?? undefined;
++};
++
++const parseRequiredConsent = (
++  consents: Record<string, unknown>,
++  key: RequiredConsentKey,
++  latest: ConsentVersionRow
++): ParsedConsent => {
++  const payload = readConsentPayload(consents, key);
++  if (!payload) throw createHttpError(400, `${key} consent is required`);
++  const accepted = readAccepted(payload, key);
++  if (!accepted) throw createHttpError(400, `${key} consent must be accepted`);
++  const version = readConsentVersion(payload, key);
++  if (version !== latest.version) {
++    throw createHttpError(400, `${key} consent version must match the latest version`);
++  }
++  return { key, accepted, version, required: latest.required };
++};
++
++const parseOptionalConsent = (
++  consents: Record<string, unknown>,
++  key: OptionalConsentKey,
++  latest: ConsentVersionRow
++): ParsedConsent | null => {
++  const payload = readConsentPayload(consents, key);
++  if (!payload) return null;
++  const accepted = readAccepted(payload, key);
++  const version = readConsentVersion(payload, key);
++  if (version !== latest.version) {
++    throw createHttpError(400, `${key} consent version must match the latest version`);
++  }
++  return { key, accepted, version, required: latest.required };
++};
++
++const loadLatestConsentVersion = async (
++  repository: OnboardingRepository,
++  key: ConsentKey,
++  nowIso: string
++) => {
++  const latest = await repository.findLatestConsentVersion(key, nowIso);
++  if (!latest) throw createHttpError(500, `Latest consent version is missing for ${key}`);
++  return latest;
++};
++
++export const parseOnboardingInput = async (
++  repository: OnboardingRepository,
++  payload: CompleteOnboardingPayload,
++  nowIso: string
++): Promise<ParsedOnboardingInput> => {
++  const displayName = asOptionalString(payload.displayName ?? payload.display_name);
++  if (!displayName) throw createHttpError(400, "displayName is required");
++
++  const consents = asOptionalRecord(payload.consents);
++  const parsedConsents: ParsedConsent[] = [];
++
++  for (const key of REQUIRED_CONSENT_KEYS) {
++    const latest = await loadLatestConsentVersion(repository, key, nowIso);
++    parsedConsents.push(parseRequiredConsent(consents, key, latest));
++  }
++
++  for (const key of OPTIONAL_CONSENT_KEYS) {
++    const payloadForKey = readConsentPayload(consents, key);
++    if (!payloadForKey) continue;
++    const latest = await loadLatestConsentVersion(repository, key, nowIso);
++    const parsed = parseOptionalConsent(consents, key, latest);
++    if (parsed) parsedConsents.push(parsed);
++  }
++
++  for (const key of Object.keys(consents)) {
++    if (!isConsentKey(key)) throw createHttpError(400, `${key} is not a supported consent key`);
++  }
++
++  return {
++    displayName,
++    gender: parseGender(payload),
++    birthYear: parseBirthYear(payload),
++    bodyMeasurements: parseBodyMeasurements(payload.bodyMeasurements ?? payload.body_measurements),
++    consents: parsedConsents
++  };
++};
+diff --git a/backend/src/modules/auth/auth-onboarding.service.ts b/backend/src/modules/auth/auth-onboarding.service.ts
+new file mode 100644
+index 0000000..5292123
+--- /dev/null
++++ b/backend/src/modules/auth/auth-onboarding.service.ts
+@@ -0,0 +1,90 @@
++import { createHttpError } from "../../shared/utils/http-error";
++import { parseOnboardingInput, type ParsedConsent } from "./auth-onboarding.parser";
++import type {
++  CompleteOnboardingOptions,
++  CompleteOnboardingPayload,
++  CompleteOnboardingResult,
++  OnboardingAuthUser,
++  OnboardingBodyMeasurementValues,
++  OnboardingRepository,
++  SaveUserConsentInput
++} from "./auth-onboarding.types";
++
++const saveBodyMeasurements = async (
++  repository: OnboardingRepository,
++  userId: string,
++  values: OnboardingBodyMeasurementValues | null
++): Promise<boolean> => {
++  if (!values) return false;
++  const existing = await repository.findLatestOnboardingBodyMeasurement(userId);
++  if (existing) {
++    await repository.updateOnboardingBodyMeasurement(existing.id, values);
++    return true;
++  }
++  await repository.insertOnboardingBodyMeasurement(userId, values);
++  return true;
++};
++
++const toConsentInput = (
++  userId: string,
++  consent: ParsedConsent,
++  options: CompleteOnboardingOptions,
++  nowIso: string
++): SaveUserConsentInput => {
++  return {
++    userId,
++    consentKey: consent.key,
++    consentVersion: consent.version,
++    accepted: consent.accepted,
++    required: consent.required,
++    nowIso,
++    ipAddress: options.ipAddress ?? null,
++    userAgent: options.userAgent ?? null
++  };
++};
++
++export const completeOnboardingWithRepository = async (
++  repository: OnboardingRepository,
++  authUser: OnboardingAuthUser,
++  payload: CompleteOnboardingPayload,
++  options: CompleteOnboardingOptions = {}
++): Promise<CompleteOnboardingResult> => {
++  if (!authUser.email) throw createHttpError(400, "Auth user email is missing");
++
++  const nowIso = (options.now ?? new Date()).toISOString();
++  const parsed = await parseOnboardingInput(repository, payload, nowIso);
++  const user = await repository.upsertUserProfile({
++    id: authUser.id,
++    email: authUser.email,
++    displayName: parsed.displayName,
++    gender: parsed.gender,
++    birthYear: parsed.birthYear
++  });
++
++  const consentRows = [];
++  for (const consent of parsed.consents) {
++    consentRows.push(await repository.saveUserConsent(toConsentInput(user.id, consent, options, nowIso)));
++  }
++
++  const bodyMeasurementsSaved = await saveBodyMeasurements(
++    repository,
++    user.id,
++    parsed.bodyMeasurements
++  );
++
++  return {
++    user,
++    onboardingComplete: true,
++    bodyMeasurementsSaved,
++    consentRows
++  };
++};
++
++export const completeOnboarding = async (
++  authUser: OnboardingAuthUser,
++  payload: CompleteOnboardingPayload,
++  options: CompleteOnboardingOptions = {}
++): Promise<CompleteOnboardingResult> => {
++  const { supabaseOnboardingRepository } = await import("./auth-onboarding.repository");
++  return completeOnboardingWithRepository(supabaseOnboardingRepository, authUser, payload, options);
++};
+diff --git a/backend/src/modules/auth/auth-onboarding.test-fixtures.ts b/backend/src/modules/auth/auth-onboarding.test-fixtures.ts
+new file mode 100644
+index 0000000..b9f9e4f
+--- /dev/null
++++ b/backend/src/modules/auth/auth-onboarding.test-fixtures.ts
+@@ -0,0 +1,172 @@
++import assert from "node:assert/strict";
++import type { ConsentVersionRow, UserConsentRow, UserRow } from "../../shared/types/database";
++import type {
++  CompleteOnboardingPayload,
++  ConsentKey,
++  OnboardingBodyMeasurementRow,
++  OnboardingBodyMeasurementValues,
++  OnboardingRepository,
++  OnboardingUserProfile,
++  SaveUserConsentInput
++} from "./auth-onboarding.types";
++
++process.env.SUPABASE_URL = process.env.SUPABASE_URL ?? "http://localhost:54321";
++process.env.SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? "anon-key";
++process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "service-role-key";
++
++export const fixedNow = new Date("2026-07-08T00:00:00.000Z");
++
++export type CompleteOnboardingWithRepository =
++  typeof import("./auth-onboarding.service").completeOnboardingWithRepository;
++
++export type Operation =
++  | { readonly kind: "user"; readonly profile: OnboardingUserProfile }
++  | { readonly kind: "consent"; readonly key: ConsentKey; readonly accepted: boolean; readonly required: boolean }
++  | { readonly kind: "body"; readonly action: "insert" | "update"; readonly id: string };
++
++type FakeState = {
++  readonly consentVersions?: readonly ConsentVersionRow[];
++  readonly existingBodyMeasurements?: readonly OnboardingBodyMeasurementRow[];
++};
++
++export const consentVersion = (
++  key: ConsentKey,
++  required: boolean,
++  version = "2026-07-07"
++): ConsentVersionRow => ({
++  key,
++  version,
++  title: key,
++  description: null,
++  required,
++  effective_from: "2026-07-07T00:00:00.000Z",
++  created_at: "2026-07-07T00:00:00.000Z"
++});
++
++const allConsentVersions = [
++  consentVersion("terms_of_service", true),
++  consentVersion("privacy_policy", true),
++  consentVersion("fit_data_improvement", false),
++  consentVersion("marketing", false)
++] as const;
++
++export const payload = (
++  overrides: Partial<CompleteOnboardingPayload> = {}
++): CompleteOnboardingPayload => ({
++  displayName: "  Mina  ",
++  consents: {
++    terms_of_service: { accepted: true, version: "2026-07-07" },
++    privacy_policy: { accepted: true, version: "2026-07-07" }
++  },
++  ...overrides
++});
++
++export const bodyRow = (
++  id: string,
++  values: Partial<OnboardingBodyMeasurementRow> = {}
++): OnboardingBodyMeasurementRow => ({
++  id,
++  user_id: "user-1",
++  height_cm: null,
++  weight_kg: null,
++  shoulder_width: null,
++  chest_circumference: null,
++  waist_circumference: null,
++  hip_circumference: null,
++  outseam: null,
++  raw_data: { source: "onboarding" },
++  created_at: fixedNow.toISOString(),
++  updated_at: fixedNow.toISOString(),
++  ...values
++});
++
++export const createFakeRepository = (state: FakeState = {}) => {
++  const operations: Operation[] = [];
++  const versions = state.consentVersions ?? allConsentVersions;
++  const bodyRows = [...(state.existingBodyMeasurements ?? [])];
++  const users: UserRow[] = [];
++  const consents: UserConsentRow[] = [];
++  const writtenBodies: OnboardingBodyMeasurementValues[] = [];
++
++  const repository: OnboardingRepository = {
++    findLatestConsentVersion: async (key) => {
++      return versions.find((version) => version.key === key) ?? null;
++    },
++    upsertUserProfile: async (profile) => {
++      operations.push({ kind: "user", profile });
++      const row: UserRow = {
++        id: profile.id,
++        email: profile.email,
++        display_name: profile.displayName,
++        gender: profile.gender ?? null,
++        birth_year: profile.birthYear ?? null,
++        created_at: fixedNow.toISOString(),
++        updated_at: fixedNow.toISOString()
++      };
++      users.push(row);
++      return row;
++    },
++    saveUserConsent: async (input: SaveUserConsentInput) => {
++      operations.push({
++        kind: "consent",
++        key: input.consentKey,
++        accepted: input.accepted,
++        required: input.required
++      });
++      const row: UserConsentRow = {
++        id: `consent-${consents.length + 1}`,
++        user_id: input.userId,
++        consent_key: input.consentKey,
++        consent_version: input.consentVersion,
++        accepted: input.accepted,
++        accepted_at: input.accepted ? input.nowIso : null,
++        revoked_at: null,
++        required: input.required,
++        ip_address: input.ipAddress,
++        user_agent: input.userAgent,
++        created_at: input.nowIso,
++        updated_at: input.nowIso
++      };
++      consents.push(row);
++      return row;
++    },
++    findLatestOnboardingBodyMeasurement: async () => {
++      return bodyRows.find((row) => row.raw_data.source === "onboarding") ?? null;
++    },
++    insertOnboardingBodyMeasurement: async (userId, values) => {
++      writtenBodies.push(values);
++      const row = bodyRow(`body-${bodyRows.length + 1}`, {
++        user_id: userId,
++        height_cm: values.height_cm ?? null,
++        weight_kg: values.weight_kg ?? null,
++        raw_data: values.raw_data
++      });
++      operations.push({ kind: "body", action: "insert", id: row.id });
++      bodyRows.push(row);
++      return row;
++    },
++    updateOnboardingBodyMeasurement: async (id, values) => {
++      writtenBodies.push(values);
++      operations.push({ kind: "body", action: "update", id });
++      return bodyRows.find((row) => row.id === id) ?? bodyRow(id);
++    }
++  };
++
++  return { repository, operations, bodyRows, users, consents, writtenBodies };
++};
++
++export const assertRejectsWithStatus = async (
++  action: () => Promise<unknown>,
++  statusCode: number
++): Promise<void> => {
++  await assert.rejects(action, (error: unknown) => {
++    assert.ok(error instanceof Error);
++    assert.equal("statusCode" in error ? error.statusCode : undefined, statusCode);
++    return true;
++  });
++};
++
++export const loadCompleteOnboarding = async (): Promise<CompleteOnboardingWithRepository> => {
++  const service = await import("./auth-onboarding.service");
++  return service.completeOnboardingWithRepository;
++};
+diff --git a/backend/src/modules/auth/auth-onboarding.service.test.ts b/backend/src/modules/auth/auth-onboarding.service.test.ts
+new file mode 100644
+index 0000000..56b63d9
+--- /dev/null
++++ b/backend/src/modules/auth/auth-onboarding.service.test.ts
+@@ -0,0 +1,126 @@
++import assert from "node:assert/strict";
++import {
++  bodyRow,
++  createFakeRepository,
++  fixedNow,
++  loadCompleteOnboarding,
++  payload,
++  type CompleteOnboardingWithRepository
++} from "./auth-onboarding.test-fixtures";
++
++const tests: readonly {
++  readonly name: string;
++  readonly run: (complete: CompleteOnboardingWithRepository) => Promise<void>;
++}[] = [
++  {
++    name: "minimal success saves required consents only and no body row",
++    run: async (complete) => {
++      const fake = createFakeRepository();
++      const result = await complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload(), {
++        now: fixedNow
++      });
++      assert.equal(result.user.display_name, "Mina");
++      assert.equal(result.bodyMeasurementsSaved, false);
++      assert.deepEqual(
++        result.consentRows.map((consent) => consent.consent_key),
++        ["terms_of_service", "privacy_policy"]
++      );
++      assert.deepEqual(fake.operations.map((operation) => operation.kind), ["user", "consent", "consent"]);
++    }
++  },
++  {
++    name: "full success persists optional fields body and all consents",
++    run: async (complete) => {
++      const fake = createFakeRepository();
++      const result = await complete(
++        fake.repository,
++        { id: "user-1", email: "user@example.com" },
++        payload({
++          gender: "female",
++          birth_year: "1994",
++          age: "88",
++          bodyMeasurements: { heightCm: 168, weightKg: 54 },
++          consents: {
++            terms_of_service: { accepted: true, version: "2026-07-07" },
++            privacy_policy: { accepted: true, version: "2026-07-07" },
++            fit_data_improvement: { accepted: true, version: "2026-07-07" },
++            marketing: { accepted: false, version: "2026-07-07" }
++          }
++        }),
++        { now: fixedNow }
++      );
++      assert.equal(result.bodyMeasurementsSaved, true);
++      assert.deepEqual(
++        result.consentRows.map((consent) => consent.consent_key),
++        ["terms_of_service", "privacy_policy", "fit_data_improvement", "marketing"]
++      );
++      assert.equal(fake.users[0]?.gender, "female");
++      assert.equal(fake.users[0]?.birth_year, 1994);
++      assert.equal(fake.operations.filter((operation) => operation.kind === "body").length, 1);
++      assert.equal(fake.writtenBodies[0]?.raw_data.source, "onboarding");
++    }
++  },
++  {
++    name: "retry body measurements updates existing onboarding row",
++    run: async (complete) => {
++      const fake = createFakeRepository({ existingBodyMeasurements: [bodyRow("existing-body")] });
++      await complete(
++        fake.repository,
++        { id: "user-1", email: "user@example.com" },
++        payload({ bodyMeasurements: { heightCm: 171 } }),
++        { now: fixedNow }
++      );
++      assert.equal(fake.bodyRows.length, 1);
++      assert.deepEqual(fake.operations.filter((operation) => operation.kind === "body"), [
++        { kind: "body", action: "update", id: "existing-body" }
++      ]);
++    }
++  },
++  {
++    name: "omitted optional consents are absent",
++    run: async (complete) => {
++      const fake = createFakeRepository();
++      await complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload(), { now: fixedNow });
++      assert.deepEqual(
++        fake.consents.map((consent) => consent.consent_key),
++        ["terms_of_service", "privacy_policy"]
++      );
++    }
++  },
++  {
++    name: "optional false consent is allowed",
++    run: async (complete) => {
++      const fake = createFakeRepository();
++      await complete(
++        fake.repository,
++        { id: "user-1", email: "user@example.com" },
++        payload({
++          consents: {
++            terms_of_service: { accepted: true, version: "2026-07-07" },
++            privacy_policy: { accepted: true, version: "2026-07-07" },
++            marketing: { accepted: false, version: "2026-07-07" }
++          }
++        }),
++        { now: fixedNow }
++      );
++      assert.equal(fake.consents.find((consent) => consent.consent_key === "marketing")?.accepted, false);
++    }
++  }
++];
++
++const runTests = async (): Promise<void> => {
++  const complete = await loadCompleteOnboarding();
++  for (const test of tests) {
++    await test.run(complete);
++    console.log(`PASS ${test.name}`);
++  }
++};
++
++runTests().catch((error: unknown) => {
++  if (error instanceof Error) {
++    console.error(error);
++    process.exit(1);
++  }
++  console.error("Unknown test failure");
++  process.exit(1);
++});
+diff --git a/backend/src/modules/auth/auth-onboarding.validation.test.ts b/backend/src/modules/auth/auth-onboarding.validation.test.ts
+new file mode 100644
+index 0000000..78124bb
+--- /dev/null
++++ b/backend/src/modules/auth/auth-onboarding.validation.test.ts
+@@ -0,0 +1,139 @@
++import assert from "node:assert/strict";
++import {
++  assertRejectsWithStatus,
++  consentVersion,
++  createFakeRepository,
++  fixedNow,
++  loadCompleteOnboarding,
++  payload,
++  type CompleteOnboardingWithRepository
++} from "./auth-onboarding.test-fixtures";
++
++const tests: readonly {
++  readonly name: string;
++  readonly run: (complete: CompleteOnboardingWithRepository) => Promise<void>;
++}[] = [
++  {
++    name: "blank displayName returns 400 and writes nothing",
++    run: async (complete) => {
++      const fake = createFakeRepository();
++      await assertRejectsWithStatus(
++        () => complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload({ displayName: "   " })),
++        400
++      );
++      assert.deepEqual(fake.operations, []);
++    }
++  },
++  {
++    name: "missing required consent returns 400 and writes nothing",
++    run: async (complete) => {
++      const fake = createFakeRepository();
++      await assertRejectsWithStatus(
++        () =>
++          complete(
++            fake.repository,
++            { id: "user-1", email: "user@example.com" },
++            payload({ consents: { terms_of_service: { accepted: true, version: "2026-07-07" } } })
++          ),
++        400
++      );
++      assert.deepEqual(fake.operations, []);
++    }
++  },
++  {
++    name: "false required consent returns 400 and writes nothing",
++    run: async (complete) => {
++      const fake = createFakeRepository();
++      await assertRejectsWithStatus(
++        () =>
++          complete(
++            fake.repository,
++            { id: "user-1", email: "user@example.com" },
++            payload({
++              consents: {
++                terms_of_service: { accepted: false, version: "2026-07-07" },
++                privacy_policy: { accepted: true, version: "2026-07-07" }
++              }
++            })
++          ),
++        400
++      );
++      assert.deepEqual(fake.operations, []);
++    }
++  },
++  {
++    name: "body measurements without numeric values create no row",
++    run: async (complete) => {
++      const fake = createFakeRepository();
++      const result = await complete(
++        fake.repository,
++        { id: "user-1", email: "user@example.com" },
++        payload({ bodyMeasurements: { heightCm: "", weightKg: null, note: "not numeric" } }),
++        { now: fixedNow }
++      );
++      assert.equal(result.bodyMeasurementsSaved, false);
++      assert.equal(fake.operations.some((operation) => operation.kind === "body"), false);
++    }
++  },
++  {
++    name: "unknown consent key returns 400 and writes nothing",
++    run: async (complete) => {
++      const fake = createFakeRepository();
++      await assertRejectsWithStatus(
++        () =>
++          complete(
++            fake.repository,
++            { id: "user-1", email: "user@example.com" },
++            payload({
++              consents: {
++                terms_of_service: { accepted: true, version: "2026-07-07" },
++                privacy_policy: { accepted: true, version: "2026-07-07" },
++                analytics_sale: { accepted: true, version: "2026-07-07" }
++              }
++            })
++          ),
++        400
++      );
++      assert.deepEqual(fake.operations, []);
++    }
++  },
++  {
++    name: "missing latest required consent version returns 500 and writes nothing",
++    run: async (complete) => {
++      const fake = createFakeRepository({ consentVersions: [consentVersion("terms_of_service", true)] });
++      await assertRejectsWithStatus(
++        () => complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload()),
++        500
++      );
++      assert.deepEqual(fake.operations, []);
++    }
++  },
++  {
++    name: "auth user missing email returns 400 and writes nothing",
++    run: async (complete) => {
++      const fake = createFakeRepository();
++      await assertRejectsWithStatus(
++        () => complete(fake.repository, { id: "user-1" }, payload()),
++        400
++      );
++      assert.deepEqual(fake.operations, []);
++    }
++  }
++];
++
++const runTests = async (): Promise<void> => {
++  const complete = await loadCompleteOnboarding();
++  for (const test of tests) {
++    await test.run(complete);
++    console.log(`PASS ${test.name}`);
++  }
++};
++
++runTests().catch((error: unknown) => {
++  if (error instanceof Error) {
++    console.error(error);
++    process.exit(1);
++  }
++  console.error("Unknown test failure");
++  process.exit(1);
++});
+diff --git a/.omo/evidence/task-2-signup-oauth-onboarding.red-proof-limitation.txt b/.omo/evidence/task-2-signup-oauth-onboarding.red-proof-limitation.txt
+new file mode 100644
+index 0000000..7571916
+--- /dev/null
++++ b/.omo/evidence/task-2-signup-oauth-onboarding.red-proof-limitation.txt
+@@ -0,0 +1,19 @@
++Original Todo 2 RED limitation:
++
++The earlier saved RED artifact for signup OAuth onboarding failed because the test environment was not wired yet, so it did not prove product behavior went red for the intended malformed onboarding input.
++
++I did not reconstruct a true historical RED by reverting implementation code, because that would risk disturbing the current final-gate worktree and could create fake or misleading evidence.
++
++Current behavior-negative evidence:
++
++The rerunnable auth onboarding suite now includes explicit malformed-input checks, including:
++- blank displayName returns 400 and writes nothing
++- missing required consent returns 400 and writes nothing
++- false required consent returns 400 and writes nothing
++- unknown consent key returns 400 and writes nothing
++- auth user missing email returns 400 and writes nothing
++
++The current GREEN transcript is captured at:
++.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt
++
++This is not a substitute for historical RED. It is current negative-case behavior proof and an explicit limitation record.
+diff --git a/.omo/evidence/final-refactor-review-notes.txt b/.omo/evidence/final-refactor-review-notes.txt
+new file mode 100644
+index 0000000..8e36114
+--- /dev/null
++++ b/.omo/evidence/final-refactor-review-notes.txt
+@@ -0,0 +1,23 @@
++Final refactor reviewer notes:
++
++Scope:
++- Auth onboarding service was split into parser plus service orchestration files.
++- Auth onboarding service tests were split into fixture, success, and validation files.
++- The unused completeAuthOnboarding/AuthOnboardingDependencies compatibility adapter path was removed.
++- backend/package.json test:auth-onboarding now runs the validation test file too.
++
++Rerunnable evidence:
++- npm run test:auth-onboarding > ../.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt 2>&1
++- npm run typecheck > ../.omo/evidence/task-2-signup-oauth-onboarding.typecheck.txt 2>&1
++- npm run test:fit > ../.omo/evidence/final-refactor-test-fit.txt 2>&1
++- npm run build > ../.omo/evidence/final-refactor-build.txt 2>&1
++
++Supplemental evidence:
++- .omo/evidence/final-refactor-loc.txt
++- .omo/evidence/final-refactor-frontend-diff.txt
++- .omo/evidence/final-refactor-full-diff.patch
++- .omo/evidence/final-refactor-forbidden-patterns.txt
++- .omo/evidence/task-2-signup-oauth-onboarding.red-proof-limitation.txt
++
++Known limitation:
++- The bundled no-excuse TypeScript checker could not be run directly because bun is unavailable; the tsx fallback also failed to resolve the plugin script's typescript dependency from its plugin path. See .omo/evidence/final-refactor-no-excuse.txt.

@@ -1,0 +1,10 @@
+Surface: backend auth onboarding tests
+Invocation: npm test -- --runInBand src/modules/auth/auth-onboarding.service.test.ts src/modules/auth/auth-onboarding.controller.test.ts
+---
+npm error Missing script: "test"
+npm error
+npm error To see a list of scripts, run:
+npm error   npm run
+npm error A complete log of this run can be found in: /Users/insihwan/.npm/_logs/2026-07-10T02_58_19_782Z-debug-0.log
+
+Exit code: 1

@@ -1,0 +1,104 @@
+Todo 1 explicit contract check
+Generated: 2026-07-08T14:29:42+09:00
+Worktree: /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding
+Branch: codex/signup-oauth-onboarding
+HEAD: b3e2c9e2870888c4eda148c64e1f48bdaa01f091
+
+## consent_versions table exists in base schema and migration
+COMMAND: rg -n create table (if not exists )?public\.consent_versions supabase/schema.sql supabase/migrations/20260707_add_consent_schema.sql
+supabase/schema.sql:13:create table public.consent_versions (
+supabase/migrations/20260707_add_consent_schema.sql:1:create table if not exists public.consent_versions (
+EXIT_STATUS: 0
+RESULT: PASS
+
+## user_consents table exists in base schema and migration
+COMMAND: rg -n create table (if not exists )?public\.user_consents supabase/schema.sql supabase/migrations/20260707_add_consent_schema.sql
+supabase/migrations/20260707_add_consent_schema.sql:14:create table if not exists public.user_consents (
+supabase/schema.sql:26:create table public.user_consents (
+EXIT_STATUS: 0
+RESULT: PASS
+
+## approved consent keys exist in base schema and migration
+COMMAND: rg -n "terms_of_service|privacy_policy|fit_data_improvement|marketing" supabase/schema.sql supabase/migrations/20260707_add_consent_schema.sql
+supabase/migrations/20260707_add_consent_schema.sql:37:  ('terms_of_service', '2026-07-07', 'Terms of Service', 'Required agreement to Coordit service terms.', true, '2026-07-07 00:00:00+00'),
+supabase/migrations/20260707_add_consent_schema.sql:38:  ('privacy_policy', '2026-07-07', 'Privacy Policy', 'Required agreement to Coordit privacy policy.', true, '2026-07-07 00:00:00+00'),
+supabase/migrations/20260707_add_consent_schema.sql:39:  ('fit_data_improvement', '2026-07-07', 'Fit Data Improvement', 'Optional consent to use fit feedback and measurement data to improve recommendations.', false, '2026-07-07 00:00:00+00'),
+supabase/migrations/20260707_add_consent_schema.sql:40:  ('marketing', '2026-07-07', 'Marketing Communications', 'Optional consent to receive product updates and marketing communications.', false, '2026-07-07 00:00:00+00')
+supabase/schema.sql:193:  ('terms_of_service', '2026-07-07', 'Terms of Service', 'Required agreement to Coordit service terms.', true, '2026-07-07 00:00:00+00'),
+supabase/schema.sql:194:  ('privacy_policy', '2026-07-07', 'Privacy Policy', 'Required agreement to Coordit privacy policy.', true, '2026-07-07 00:00:00+00'),
+supabase/schema.sql:195:  ('fit_data_improvement', '2026-07-07', 'Fit Data Improvement', 'Optional consent to use fit feedback and measurement data to improve recommendations.', false, '2026-07-07 00:00:00+00'),
+supabase/schema.sql:196:  ('marketing', '2026-07-07', 'Marketing Communications', 'Optional consent to receive product updates and marketing communications.', false, '2026-07-07 00:00:00+00')
+EXIT_STATUS: 0
+RESULT: PASS
+
+## idx_* indexes exist in indexes.sql and migration
+COMMAND: rg -n create index (if not exists )?idx_(consent_versions_required_effective|user_consents_user_key|user_consents_user_created_at) supabase/indexes.sql supabase/migrations/20260707_add_consent_schema.sql
+supabase/migrations/20260707_add_consent_schema.sql:47:create index if not exists idx_consent_versions_required_effective on public.consent_versions(required, effective_from desc);
+supabase/migrations/20260707_add_consent_schema.sql:48:create index if not exists idx_user_consents_user_key on public.user_consents(user_id, consent_key);
+supabase/migrations/20260707_add_consent_schema.sql:49:create index if not exists idx_user_consents_user_created_at on public.user_consents(user_id, created_at desc);
+supabase/indexes.sql:2:create index idx_consent_versions_required_effective on public.consent_versions(required, effective_from desc);
+supabase/indexes.sql:3:create index idx_user_consents_user_key on public.user_consents(user_id, consent_key);
+supabase/indexes.sql:4:create index idx_user_consents_user_created_at on public.user_consents(user_id, created_at desc);
+EXIT_STATUS: 0
+RESULT: PASS
+
+## RLS enablement exists in rls.sql and migration
+COMMAND: rg -n alter table public\.(consent_versions|user_consents) enable row level security supabase/rls.sql supabase/migrations/20260707_add_consent_schema.sql
+supabase/migrations/20260707_add_consent_schema.sql:51:alter table public.consent_versions enable row level security;
+supabase/migrations/20260707_add_consent_schema.sql:52:alter table public.user_consents enable row level security;
+supabase/rls.sql:2:alter table public.consent_versions enable row level security;
+supabase/rls.sql:3:alter table public.user_consents enable row level security;
+EXIT_STATUS: 0
+RESULT: PASS
+
+## user-owned consent policies exist in rls.sql and migration
+COMMAND: rg -n users can (read|insert|update) own consents|auth\.uid\(\) = user_id supabase/rls.sql supabase/migrations/20260707_add_consent_schema.sql
+supabase/migrations/20260707_add_consent_schema.sql:77:      and policyname = 'users can read own consents'
+supabase/migrations/20260707_add_consent_schema.sql:79:    create policy "users can read own consents"
+supabase/migrations/20260707_add_consent_schema.sql:82:      using (auth.uid() = user_id);
+supabase/migrations/20260707_add_consent_schema.sql:93:      and policyname = 'users can insert own consents'
+supabase/migrations/20260707_add_consent_schema.sql:95:    create policy "users can insert own consents"
+supabase/migrations/20260707_add_consent_schema.sql:98:      with check (auth.uid() = user_id);
+supabase/migrations/20260707_add_consent_schema.sql:109:      and policyname = 'users can update own consents'
+supabase/migrations/20260707_add_consent_schema.sql:111:    create policy "users can update own consents"
+supabase/migrations/20260707_add_consent_schema.sql:114:      using (auth.uid() = user_id)
+supabase/migrations/20260707_add_consent_schema.sql:115:      with check (auth.uid() = user_id);
+supabase/rls.sql:19:create policy "users can read own consents" on public.user_consents for select using (auth.uid() = user_id);
+supabase/rls.sql:20:create policy "users can insert own consents" on public.user_consents for insert with check (auth.uid() = user_id);
+supabase/rls.sql:21:create policy "users can update own consents" on public.user_consents for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+supabase/rls.sql:23:create policy "body measurements owner access" on public.body_measurements for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+supabase/rls.sql:24:create policy "clothing items owner access" on public.clothing_items for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+supabase/rls.sql:25:create policy "clothing sizes owner access" on public.clothing_sizes for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+supabase/rls.sql:26:create policy "reference clothing owner access" on public.reference_clothing for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+supabase/rls.sql:27:create policy "external products owner access" on public.external_products for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+supabase/rls.sql:28:create policy "external product sizes owner access" on public.external_product_sizes for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+supabase/rls.sql:29:create policy "fit results owner access" on public.fit_analysis_results for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+supabase/rls.sql:30:create policy "feedback owner access" on public.user_feedback for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+supabase/rls.sql:31:create policy "recommendation logs owner access" on public.recommendation_logs for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+EXIT_STATUS: 0
+RESULT: PASS
+
+## ConsentVersionRow and UserConsentRow exist in backend database types
+COMMAND: rg -n export interface (ConsentVersionRow|UserConsentRow) backend/src/shared/types/database.ts
+40:export interface ConsentVersionRow {
+50:export interface UserConsentRow {
+EXIT_STATUS: 0
+RESULT: PASS
+
+## no provider/access/refresh token columns in scoped schema and database type files
+COMMAND: rg -n provider_token|access_token|refresh_token supabase/schema.sql supabase/indexes.sql supabase/rls.sql supabase/migrations/20260707_add_consent_schema.sql backend/src/shared/types/database.ts
+EXIT_STATUS: 1
+RESULT: PASS (no matches)
+
+## scoped product files pass git diff whitespace check
+COMMAND: git diff --check -- supabase/schema.sql supabase/indexes.sql supabase/rls.sql supabase/migrations/20260707_add_consent_schema.sql backend/src/shared/types/database.ts
+EXIT_STATUS: 0
+RESULT: PASS
+
+## frontend diff guard
+COMMAND: git diff --name-only -- frontend
+EXIT_STATUS: 0
+RESULT: PASS (empty output)
+
+OVERALL_EXIT_STATUS: 0
+OVERALL_RESULT: PASS

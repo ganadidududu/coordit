@@ -1,0 +1,26 @@
+Surface: backend auth onboarding tests
+Invocation: npm run test:auth-onboarding
+---
+
+> coordit-backend@0.1.0 test:auth-onboarding
+> tsx src/modules/auth/auth-onboarding.service.test.ts && tsx src/modules/auth/auth-onboarding.validation.test.ts && tsx src/modules/auth/auth-onboarding.controller.test.ts
+
+PASS minimal success saves required consents only and no body row
+PASS full success persists optional fields body and all consents
+PASS retry body measurements updates existing onboarding row
+PASS omitted optional consents are absent
+PASS optional false consent is allowed
+PASS blank displayName returns 400 and writes nothing
+PASS missing required consent returns 400 and writes nothing
+PASS false required consent returns 400 and writes nothing
+PASS body measurements without numeric values create no row
+PASS unknown consent key returns 400 and writes nothing
+PASS missing latest required consent version returns 500 and writes nothing
+PASS auth user missing email returns 400 and writes nothing
+PASS route is mounted as POST /auth/onboarding after auth middleware
+PASS missing bearer returns 401 before service
+PASS local JWT fallback bearer returns 401 before service
+PASS Supabase-valid bearer calls service and returns 200 onboarding shape
+PASS missing displayName is rejected through service
+
+Exit code: 0

@@ -1,0 +1,35 @@
+ADVERSARIAL QA - 2026-07-09T13:10:38Z
+
+[dirty_worktree] surface: git diff --name-only -- frontend
+dirty_worktree verdict: PASS if section above is empty.
+
+[stale_state] surface: plan Todo checkboxes
+86:- [x] 1. Add versioned consent schema, migration, indexes, RLS, and backend DB types
+94:- [x] 2. Add backend onboarding service with required nickname, optional demographics, optional measurements, and consent validation
+102:- [x] 3. Add protected backend onboarding route and response contract
+110:- [x] 4. Document backend contract and OAuth dashboard prerequisites without frontend implementation
+118:- [ ] 5. Run backend static, unit, migration, and real-surface API verification
+stale_state verdict: PASS if Todos 1-4 are checked and Todo 5 state is inspected before final update.
+
+[misleading_success_output] surface: actual evidence file sizes and backend exit status
+backend static exit status observed: 0
+    3249 .omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt
+     338 .omo/evidence/task-5-signup-oauth-onboarding.sql-prereq.txt
+     659 .omo/evidence/task-5-signup-oauth-onboarding.sql-blocked.txt
+     343 .omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt
+    1189 .omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt
+    5778 total
+
+[hung_commands] surface: process check for backend/npm/tsx watch on port 4000
+99919
+hung_commands verdict: PASS if no started QA backend remains; no backend was started because env was missing.
+
+[secret_hygiene] values redacted in prereq artifacts; raw token/env values not printed.
+
+[malformed_input] no-auth curl expected 401 if backend can start; verdict BLOCKED_ALLOWED because backend startup requires missing Supabase env. See http-blocked artifact.
+
+[cleanup_recheck] surface: ps/pgrep/lsof follow-up after transient PID-like output
+ps -p 99919 returned only the header, indicating the process was gone before inspection.
+pgrep -fl 'tsx watch src/server.ts|coordit backend|node dist/server.js' returned no matches on recheck.
+lsof -nP -iTCP:4000 -sTCP:LISTEN returned no listener on recheck.
+cleanup_recheck verdict: PASS.

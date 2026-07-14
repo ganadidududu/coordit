@@ -1,0 +1,13 @@
+SQL verification - 2026-07-09T13:09:19Z
+worktree: /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding
+
+TOOL AVAILABILITY
+psql: missing
+supabase: missing
+postgres: missing
+
+ENV PRESENCE (values redacted)
+SUPABASE_DB_URL: missing
+SUPABASE_URL: missing
+SUPABASE_ANON_KEY: missing
+SUPABASE_SERVICE_ROLE_KEY: missing

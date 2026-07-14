@@ -1,0 +1,854 @@
+Surface: fake external QA / evidence search
+Invocation: rg -n "fake|mock|stub|simulat|TODO|not_applicable|skipped|curl|http|playwright|screenshot|PASS|FAIL" .omo docs backend frontend
+---
+frontend/src/lib/types.ts:47:  | "mocked_product_measurements";
+docs/API_SPEC_MOBILE.md:5:Base URL: `http://localhost:4000`
+docs/API_SPEC_MOBILE.md:27:```http
+docs/API_SPEC_MOBILE.md:105:  참고: <https://supabase.com/docs/guides/auth/social-login/auth-google>
+docs/API_SPEC_MOBILE.md:108:  참고: <https://supabase.com/docs/guides/auth/social-login/auth-kakao>
+docs/API_SPEC_MOBILE.md:110:  참고: <https://supabase.com/docs/guides/auth/sessions/pkce-flow>,
+docs/API_SPEC_MOBILE.md:111:  <https://supabase.com/docs/reference/javascript/auth-exchangecodeforsession>
+docs/API_SPEC_MOBILE.md:113:  참고: <https://supabase.com/docs/guides/auth/redirect-urls>
+docs/API_SPEC_MOBILE.md:118:  참고: <https://supabase.com/docs/guides/auth/jwts>,
+docs/API_SPEC_MOBILE.md:119:  <https://supabase.com/docs/reference/javascript/auth-getuser>
+docs/API_SPEC_MOBILE.md:123:```http
+docs/API_SPEC_MOBILE.md:506:현재 이 기능은 실제 크롤링이 아니라 mock 상품 생성이다.
+docs/API_SPEC_MOBILE.md:599:| 주요 반환값 | mock 기반 외부 상품 |
+docs/API_SPEC_MOBILE.md:741:- `OLLAMA_GENERATE_URL`: 기본값 `http://localhost:11434/api/generate`
+backend/src/server.ts:5:  console.log(`coordit backend listening on http://localhost:${env.port}`);
+frontend/src/lib/api.ts:3:const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+frontend/src/lib/images.ts:2:  heroCamel:    'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=900&h=1200&fit=crop&q=80',
+frontend/src/lib/images.ts:3:  heroPortrait: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=700&h=900&fit=crop&q=80',
+frontend/src/lib/images.ts:4:  heroStill:    'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=500&h=600&fit=crop&q=80',
+frontend/src/lib/images.ts:5:  coat:         'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=500&h=625&fit=crop&q=80',
+frontend/src/lib/images.ts:6:  knit:         'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&h=625&fit=crop&q=80',
+frontend/src/lib/images.ts:7:  trouser:      'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=500&h=625&fit=crop&q=80',
+frontend/src/lib/images.ts:8:  denim:        'https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&h=625&fit=crop&q=80',
+frontend/src/lib/images.ts:9:  shirt:        'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500&h=625&fit=crop&q=80',
+frontend/src/lib/images.ts:10:  moto:         'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&h=625&fit=crop&q=80',
+frontend/src/lib/images.ts:11:  sneaker:      'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&h=625&fit=crop&q=80',
+frontend/src/lib/images.ts:12:  dress:        'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&h=625&fit=crop&q=80',
+frontend/src/lib/images.ts:13:  look1:        'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=1000&fit=crop&q=80',
+frontend/src/lib/images.ts:14:  look2:        'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=1000&fit=crop&q=80',
+frontend/src/lib/images.ts:15:  look3:        'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&h=1000&fit=crop&q=80',
+frontend/src/lib/images.ts:16:  look4:        'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&h=1000&fit=crop&q=80',
+frontend/src/lib/images.ts:17:  look5:        'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?w=800&h=1000&fit=crop&q=80',
+frontend/src/lib/images.ts:18:  look6:        'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&h=1000&fit=crop&q=80',
+frontend/src/lib/images.ts:19:  bodyFront:    'https://images.unsplash.com/photo-1617551307578-7f5160d6615e?w=700&h=1000&fit=crop&q=85',
+frontend/src/lib/images.ts:20:  bodySide:     'https://images.unsplash.com/photo-1551803091-e20673f15770?w=600&h=900&fit=crop&q=85',
+frontend/src/lib/images.ts:21:  bodyFit:      'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&h=1200&fit=crop&q=85',
+frontend/src/lib/images.ts:22:  garmentFlat:  'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=700&h=900&fit=crop&q=85',
+frontend/src/lib/images.ts:23:  productFront: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=900&h=1125&fit=crop&q=85',
+frontend/src/lib/images.ts:24:  productBack:  'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=400&h=400&fit=crop&q=80',
+frontend/src/lib/images.ts:25:  productDetail:'https://images.unsplash.com/photo-1517941823-815bea90d291?w=400&h=400&fit=crop&q=80',
+frontend/src/lib/images.ts:26:  productStyled:'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=400&fit=crop&q=80',
+frontend/src/lib/images.ts:27:  tpoMorning:   'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=600&h=800&fit=crop&q=80',
+frontend/src/lib/images.ts:28:  tpoCafe:      'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&h=800&fit=crop&q=80',
+frontend/src/lib/images.ts:29:  tpoDinner:    'https://images.unsplash.com/photo-1516762689617-e1cffcef479d?w=600&h=800&fit=crop&q=80',
+frontend/src/lib/images.ts:30:  tpoWeekend:   'https://images.unsplash.com/photo-1483721310020-03333e577078?w=600&h=800&fit=crop&q=80',
+backend/src/modules/body-measurements/body-measurements.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+docs/fit-engine/HYBRID_SCORING_READINESS.md:65:| `measurementSource.measurementSource` | `external_product_sizes.measurement_source` | Distinguishes manual, OCR, URL, or mocked measurements. | Source class only. |
+backend/src/modules/body-measurements/body-measurements.service.ts:2:import { createHttpError } from "../../shared/utils/http-error";
+docs/FIT_REPORT_OLLAMA_SPEC.md:587:curl http://localhost:11434/api/generate \
+docs/FIT_REPORT_OLLAMA_SPEC.md:628:- URL: `http://localhost:11434/api/generate`
+docs/FIT_REPORT_OLLAMA_SPEC.md:697:- `OLLAMA_GENERATE_URL`: 기본값 `http://localhost:11434/api/generate`
+backend/src/modules/recommendation-logs/recommendation-logs.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+docs/ROADMAP.md:34:- URL 기반 상품 생성은 실제 크롤링이 아니라 mock 동작이다.
+docs/ROADMAP.md:132:- 현재 URL 기능은 mock이므로 실제 scraping/parsing과 명확히 구분한다.
+backend/src/modules/recommendation-logs/recommendation-logs.service.ts:2:import { createHttpError } from "../../shared/utils/http-error";
+backend/src/modules/fit-report/fit-report.service.test-fixtures.ts:189:  process.env.SUPABASE_URL = "http://localhost:54321";
+backend/src/modules/fit-report/fit-report.service.test-fixtures.ts:192:  process.env.OLLAMA_GENERATE_URL = "http://localhost:11434/api/generate";
+.omo/start-work/ledger.jsonl:3:{"event":"task-completed","created_at":"2026-07-08T15:01:00+09:00","task":"Todo 2","plan":".omo/plans/signup-oauth-onboarding.md","verifier":"orchestrator-integrated-worker-claims-after-reopen","artifact_paths":[".omo/evidence/task-2-signup-oauth-onboarding.service-red.txt",".omo/evidence/task-2-signup-oauth-onboarding.service-green.txt",".omo/evidence/task-2-signup-oauth-onboarding.typecheck.txt",".omo/evidence/task-2-signup-oauth-onboarding.service-audit.txt"],"notes":"Todo 2 was reopened after stale evidence; Hubble/Rawls refreshed implementation evidence and current test/typecheck passed; no frontend diff reported.","adversarial_classes":{"malformed_input":"service tests cover blank displayName, missing/false required consents, non-numeric measurements, missing consent version, missing email","dirty_worktree":"workers reported no frontend diff and did not revert concurrent schema/docs edits","stale_state":"old stale evidence was rejected and fresh test/typecheck evidence regenerated","misleading_success_output":"fresh service-green contains named PASS cases and typecheck transcript","flaky_tests":"tests use fixed clock/no randomness per worker claim"},"cleanup":"no server/tmux/background process"}
+.omo/start-work/ledger.jsonl:7:{"event":"task-completed","created_at":"2026-07-09T22:10:00+09:00","task":"Todo 5","plan":".omo/plans/signup-oauth-onboarding.md","verifier":"manual-qa-executor","artifact_paths":[".omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt",".omo/evidence/task-5-signup-oauth-onboarding.sql-prereq.txt",".omo/evidence/task-5-signup-oauth-onboarding.sql-blocked.txt",".omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt",".omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt",".omo/evidence/task-5-signup-oauth-onboarding.adversarial.txt",".omo/evidence/task-5-signup-oauth-onboarding.manualQa.md",".omo/evidence/task-5-signup-oauth-onboarding.final-audit.txt"],"result":"backend static command passed exit 0; SQL real-surface blocked by missing SUPABASE_DB_URL/Supabase env and missing psql/supabase/postgres tools; HTTP OAuth happy blocked by missing real SUPABASE_ACCESS_TOKEN; no-auth HTTP blocked because backend cannot start without required Supabase env; fake JWT not used.","adversarial_classes":{"dirty_worktree":"git diff --name-only -- frontend empty","stale_state":"Todos 1-4 read as checked before Todo 5 update","misleading_success_output":"actual transcripts and non-empty artifact sizes captured; static exit status observed 0","hung_commands":"no QA backend started; no listener remained on port 4000","secret_hygiene":"only env/token presence recorded; values redacted","malformed_input":"no-auth curl would be expected 401 but backend startup was blocked by missing Supabase env"},"cleanup":"no backend process was started; follow-up process/listener check clean"}
+backend/src/modules/reference-clothing/reference-clothing.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+backend/src/modules/fit-report/fit-report.service.ts:2:import { createHttpError } from "../../shared/utils/http-error";
+.omo/plans/signup-oauth-onboarding.md:44:- Do not create empty body-measurement rows for skipped onboarding.
+.omo/plans/signup-oauth-onboarding.md:46:- Do not use fake local JWT fallback as proof that Supabase OAuth works.
+.omo/plans/signup-oauth-onboarding.md:57:- HTTP evidence: run the backend server against a real Supabase project/dev instance and call the onboarding endpoint with a real Supabase access token produced by Supabase Auth test setup. If no real token can be generated because credentials/provider config are absent, the worker must report that as blocked for real-surface OAuth QA and still provide unit/type/build evidence; do not substitute fake JWT success for OAuth proof.
+.omo/plans/signup-oauth-onboarding.md:63:  - `.omo/evidence/task-3-signup-oauth-onboarding.http.txt`
+.omo/plans/signup-oauth-onboarding.md:91:  QA scenarios (name the exact tool + invocation): Happy: `cd /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding && rg -n "create table public.consent_versions|create table public.user_consents|enable row level security|terms_of_service|privacy_policy" supabase backend/src/shared/types/database.ts > .omo/evidence/task-1-signup-oauth-onboarding.schema-green.txt`, PASS if all expected lines exist. Failure: before schema implementation, run the same command to `.omo/evidence/task-1-signup-oauth-onboarding.schema-red.txt`, PASS as RED if it exits nonzero or lacks required tables/keys.
+.omo/plans/signup-oauth-onboarding.md:99:  QA scenarios (name the exact tool + invocation): Failure: before production service implementation, run `cd /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend && npm run test:auth-onboarding > ../.omo/evidence/task-2-signup-oauth-onboarding.service-red.txt 2>&1`, PASS as RED if it fails for missing behavior. Happy: after implementation, rerun `cd /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend && npm run test:auth-onboarding > ../.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt 2>&1`, PASS if exit 0 and test names show the required behaviors.
+.omo/plans/signup-oauth-onboarding.md:107:  QA scenarios (name the exact tool + invocation): Happy: with backend running and a real Supabase access token in `$SUPABASE_ACCESS_TOKEN`, run `curl -i -X POST "$API_BASE_URL/auth/onboarding" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" --data '{"displayName":"테스트","birthYear":1995,"gender":"female","consents":{"terms_of_service":{"accepted":true,"version":"2026-07-07"},"privacy_policy":{"accepted":true,"version":"2026-07-07"},"fit_data_improvement":{"accepted":false,"version":"2026-07-07"},"marketing":{"accepted":false,"version":"2026-07-07"}}}' > .omo/evidence/task-3-signup-oauth-onboarding.http.txt`, PASS if status is 200 and body contains `onboardingComplete:true`. Failure: run same curl without Authorization into the same evidence file or a sibling file, PASS if status is 401.
+.omo/plans/signup-oauth-onboarding.md:113:  References (executor has NO interview context - be exhaustive): `docs/API_SPEC_MOBILE.md:60`, `docs/API_SPEC_MOBILE.md:71`, `docs/AGENTS.md:25`, Supabase Google docs `https://supabase.com/docs/guides/auth/social-login/auth-google`, Supabase Kakao docs `https://supabase.com/docs/guides/auth/social-login/auth-kakao`
+.omo/plans/signup-oauth-onboarding.md:115:  QA scenarios (name the exact tool + invocation): Happy: `cd /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding && rg -n "Google|Kakao|/auth/onboarding|terms_of_service|privacy_policy|bodyMeasurements" docs > .omo/evidence/task-4-signup-oauth-onboarding.docs.txt`, PASS if all terms are present. Failure: verify `git diff --name-only -- frontend` outputs nothing, append that to the same evidence file, PASS if no frontend path appears.
+.omo/plans/signup-oauth-onboarding.md:119:  What to do / Must NOT do: Run the full backend verification stack available in this repo. If Supabase credentials and a real OAuth/access token are available, start backend and execute the protected onboarding curl scenarios. If no real token/provider config exists, record the exact missing env/config and mark only the real OAuth surface blocked; do not claim OAuth end-to-end done. Must clean up any dev server/tmux session started for QA.
+.omo/plans/signup-oauth-onboarding.md:123:  QA scenarios (name the exact tool + invocation): Happy/static: `cd /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding/backend && { npm run test:auth-onboarding && npm run test:fit && npm run typecheck && npm run build; } > ../.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt 2>&1`, PASS if exit 0. Happy/HTTP: `curl -i` command from Todo 3 with `$SUPABASE_ACCESS_TOKEN`, PASS if status/body match. Failure/HTTP: same endpoint without bearer token, PASS if 401.
+.omo/plans/signup-oauth-onboarding.md:131:  QA scenarios (name the exact tool + invocation): Happy: `cd /Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding && { git status --short; printf '\nFRONTEND DIFF:\n'; git diff --name-only -- frontend; printf '\nEVIDENCE:\n'; find .omo/evidence -maxdepth 1 -type f -name '*signup-oauth-onboarding*' -print | sort; } > .omo/evidence/final-signup-oauth-onboarding.txt`, PASS if frontend diff section is empty and evidence files are listed. Failure: if any frontend path appears, stop and remove/revert only the worker's frontend edits.
+.omo/plans/signup-oauth-onboarding.md:138:- [ ] F3. Real manual QA: run the Todo 3 HTTP happy/failure scenarios with a real Supabase access token if available; otherwise record exact blocked reason and do not claim end-to-end OAuth completion. Evidence: `.omo/evidence/task-3-signup-oauth-onboarding.http.txt`.
+.omo/plans/signup-oauth-onboarding.md:157:- The endpoint creates no body measurement row when measurements are skipped and does not create duplicate onboarding measurement rows on retry.
+.omo/plans/signup-oauth-onboarding.md:163:- Real HTTP OAuth-surface QA is either passing with a real Supabase token or explicitly blocked by missing external credentials/config; no fake token proof is accepted.
+.omo/plans/signup-oauth-onboarding.md:169:- {"event":"task-completed","task":"Todo 5","verifier":"current-state-worker","artifacts":[".omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt",".omo/evidence/task-5-signup-oauth-onboarding.sql-prereq.txt",".omo/evidence/task-5-signup-oauth-onboarding.sql-blocked.txt",".omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt",".omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt"],"notes":"SQL DB verification and real OAuth HTTP happy path are externally blocked per plan; fake JWT is explicitly non-evidence; no-auth HTTP is blocked by backend start secrets.","cleanup":"no server"}
+backend/src/shared/utils/request.ts:2:import type { AuthenticatedRequest, AuthUser } from "../types/http";
+backend/src/shared/utils/request.ts:3:import { createHttpError } from "./http-error";
+backend/src/modules/fit-report/fit-report.repository.ts:11:import { createHttpError } from "../../shared/utils/http-error";
+backend/src/modules/reference-clothing/reference-clothing.repository.ts:3:import { createHttpError } from "../../shared/utils/http-error";
+.omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt:4:happy exact invocation not run: curl -i -X POST "$API_BASE_URL/auth/onboarding" -H "Authorization: Bearer <REDACTED>" -H "Content-Type: application/json" --data <valid onboarding JSON>
+.omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt:5:happy blocker: SUPABASE_ACCESS_TOKEN is missing; fake JWT is not acceptable as OAuth proof.
+.omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt:6:API_BASE_URL: missing; local default considered http://localhost:4000.
+.omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt:8:malformed/no-auth exact invocation not run: curl -i -X POST "http://localhost:4000/auth/onboarding" -H "Content-Type: application/json" --data <valid onboarding JSON without Authorization>
+.omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt:11:secret hygiene: values were never printed; no fake token was used.
+.omo/drafts/signup-oauth-onboarding.md:43:- Supabase Google docs require Google OAuth client configuration, Supabase project callback URL, redirect allow-list, and `signInWithOAuth({ provider: "google", options: { redirectTo } })`; PKCE callback uses `exchangeCodeForSession`. Source: https://supabase.com/docs/guides/auth/social-login/auth-google and https://supabase.com/docs/reference/javascript/auth-signinwithoauth (searched 2026-07-07).
+.omo/drafts/signup-oauth-onboarding.md:44:- Supabase Kakao docs use provider `"kakao"`, Kakao REST API key/client secret, Supabase callback URL, Kakao Login redirect URI, and optional email caveat for non-Biz apps. Source: https://supabase.com/docs/guides/auth/social-login/auth-kakao (searched 2026-07-07).
+.omo/drafts/signup-oauth-onboarding.md:45:- 개인정보보호위원회 2026 guide list includes current 개인정보 처리방침 작성지침; PIPC guidance says service-contract data can be processed without blanket mandatory consent, and consent should be separated where used. Sources: https://www.pipc.go.kr/np/cop/bbs/selectBoardList.do?bbsId=BS217&mCode=D010030000 and https://www.pipc.go.kr/np/cop/bbs/selectBoardArticle.do?bbsId=BS074&mCode=C020010000&nttId=10566 (searched 2026-07-07).
+.omo/drafts/signup-oauth-onboarding.md:68:- No fake OAuth tokens or local JWT bypass as proof of done.
+backend/src/shared/utils/http-error.ts:1:import type { ApiError } from "../types/http";
+backend/src/middleware/auth.middleware.ts:5:import type { AuthenticatedRequest, AuthUser } from "../shared/types/http";
+backend/src/middleware/auth.middleware.ts:6:import { createHttpError } from "../shared/utils/http-error";
+backend/src/modules/fit-report/fit-report.explanation.ts:22:  mocked_product_measurements: "상품 실측이 목업 데이터임"
+frontend/src/styles/globals.css:6:@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Fraunces:ital,wght@0,400;0,500;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Noto+Serif+KR:wght@300;400;500;600;700&family=Pretendard:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+backend/src/modules/fit-report/fit-report.builder.ts:1:import { createHttpError } from "../../shared/utils/http-error";
+backend/README.md:22:OLLAMA_GENERATE_URL=http://localhost:11434/api/generate
+backend/src/shared/utils/size-parser/parser.types.ts:3:export type ParsingStatus = "manual" | "pending" | "parsed" | "failed" | "mocked";
+backend/src/modules/fit-report/fit-report.builder.legacy.test.ts:227:  process.env.SUPABASE_URL = "http://localhost:54321";
+backend/src/modules/fit-report/fit-report.result-details.sanitizer.ts:23:const REASON_CODES: readonly FitScoreReasonCode[] = ["insufficient_comparable_measurements", "missing_measurements", "small_score_gap", "low_reference_sample_count", "feedback_profile_applied", "feedback_profile_unavailable", "data_quality_unverified_or_sparse", "low_measurement_extraction_confidence", "unverified_product_measurement_status", "mocked_product_measurements"] as const;
+backend/src/config/env.ts:21:  ollamaGenerateUrl: process.env.OLLAMA_GENERATE_URL ?? "http://localhost:11434/api/generate",
+backend/src/modules/fit/fit-score.engine.test.ts:277:    id: "quality-ocr-mocked-status",
+backend/src/modules/fit/fit-score.engine.test.ts:279:    parsingStatus: "mocked",
+backend/src/modules/fit-report/fit-report.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+backend/src/modules/clothing-items/clothing-items.repository.ts:3:import { createHttpError } from "../../shared/utils/http-error";
+backend/src/modules/external-product-sizes/external-product-sizes.repository.ts:3:import { createHttpError } from "../../shared/utils/http-error";
+backend/src/modules/feedback/feedback.service.ts:2:import { createHttpError } from "../../shared/utils/http-error";
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:5:PASS minimal success saves required consents only and no body row
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:6:PASS full success persists optional fields body and all consents
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:7:PASS retry body measurements updates existing onboarding row
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:8:PASS omitted optional consents are absent
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:9:PASS optional false consent is allowed
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:10:PASS blank displayName returns 400 and writes nothing
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:11:PASS missing required consent returns 400 and writes nothing
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:12:PASS false required consent returns 400 and writes nothing
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:13:PASS body measurements without numeric values create no row
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:14:PASS unknown consent key returns 400 and writes nothing
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:15:PASS missing latest required consent version returns 500 and writes nothing
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:16:PASS auth user missing email returns 400 and writes nothing
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:17:PASS route is mounted as POST /auth/onboarding after auth middleware
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:18:PASS missing bearer returns 401 before service
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:19:PASS local JWT fallback bearer returns 401 before service
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:20:PASS Supabase-valid bearer calls service and returns 200 onboarding shape
+.omo/evidence/final-debugging-audit-test-auth-onboarding.txt:21:PASS missing displayName is rejected through service
+backend/src/modules/fit/fit.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+backend/package-lock.json:29:      "resolved": "https://registry.npmjs.org/@anthropic-ai/sdk/-/sdk-0.95.1.tgz",
+backend/package-lock.json:50:      "resolved": "https://registry.npmjs.org/@babel/runtime/-/runtime-7.29.2.tgz",
+backend/package-lock.json:59:      "resolved": "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.27.7.tgz",
+backend/package-lock.json:76:      "resolved": "https://registry.npmjs.org/@esbuild/android-arm/-/android-arm-0.27.7.tgz",
+backend/package-lock.json:93:      "resolved": "https://registry.npmjs.org/@esbuild/android-arm64/-/android-arm64-0.27.7.tgz",
+backend/package-lock.json:110:      "resolved": "https://registry.npmjs.org/@esbuild/android-x64/-/android-x64-0.27.7.tgz",
+backend/package-lock.json:127:      "resolved": "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.27.7.tgz",
+backend/package-lock.json:144:      "resolved": "https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-0.27.7.tgz",
+backend/package-lock.json:161:      "resolved": "https://registry.npmjs.org/@esbuild/freebsd-arm64/-/freebsd-arm64-0.27.7.tgz",
+backend/package-lock.json:178:      "resolved": "https://registry.npmjs.org/@esbuild/freebsd-x64/-/freebsd-x64-0.27.7.tgz",
+backend/package-lock.json:195:      "resolved": "https://registry.npmjs.org/@esbuild/linux-arm/-/linux-arm-0.27.7.tgz",
+backend/package-lock.json:212:      "resolved": "https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-0.27.7.tgz",
+backend/package-lock.json:229:      "resolved": "https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-0.27.7.tgz",
+backend/package-lock.json:246:      "resolved": "https://registry.npmjs.org/@esbuild/linux-loong64/-/linux-loong64-0.27.7.tgz",
+backend/package-lock.json:263:      "resolved": "https://registry.npmjs.org/@esbuild/linux-mips64el/-/linux-mips64el-0.27.7.tgz",
+backend/package-lock.json:280:      "resolved": "https://registry.npmjs.org/@esbuild/linux-ppc64/-/linux-ppc64-0.27.7.tgz",
+backend/package-lock.json:297:      "resolved": "https://registry.npmjs.org/@esbuild/linux-riscv64/-/linux-riscv64-0.27.7.tgz",
+backend/package-lock.json:314:      "resolved": "https://registry.npmjs.org/@esbuild/linux-s390x/-/linux-s390x-0.27.7.tgz",
+backend/package-lock.json:331:      "resolved": "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.27.7.tgz",
+backend/package-lock.json:348:      "resolved": "https://registry.npmjs.org/@esbuild/netbsd-arm64/-/netbsd-arm64-0.27.7.tgz",
+backend/package-lock.json:365:      "resolved": "https://registry.npmjs.org/@esbuild/netbsd-x64/-/netbsd-x64-0.27.7.tgz",
+backend/package-lock.json:382:      "resolved": "https://registry.npmjs.org/@esbuild/openbsd-arm64/-/openbsd-arm64-0.27.7.tgz",
+backend/package-lock.json:399:      "resolved": "https://registry.npmjs.org/@esbuild/openbsd-x64/-/openbsd-x64-0.27.7.tgz",
+backend/package-lock.json:416:      "resolved": "https://registry.npmjs.org/@esbuild/openharmony-arm64/-/openharmony-arm64-0.27.7.tgz",
+backend/package-lock.json:433:      "resolved": "https://registry.npmjs.org/@esbuild/sunos-x64/-/sunos-x64-0.27.7.tgz",
+backend/package-lock.json:450:      "resolved": "https://registry.npmjs.org/@esbuild/win32-arm64/-/win32-arm64-0.27.7.tgz",
+backend/package-lock.json:467:      "resolved": "https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-0.27.7.tgz",
+backend/package-lock.json:484:      "resolved": "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.27.7.tgz",
+backend/package-lock.json:501:      "resolved": "https://registry.npmjs.org/@stablelib/base64/-/base64-1.0.1.tgz",
+backend/package-lock.json:507:      "resolved": "https://registry.npmjs.org/@supabase/auth-js/-/auth-js-2.105.3.tgz",
+backend/package-lock.json:519:      "resolved": "https://registry.npmjs.org/@supabase/functions-js/-/functions-js-2.105.3.tgz",
+backend/package-lock.json:531:      "resolved": "https://registry.npmjs.org/@supabase/phoenix/-/phoenix-0.4.1.tgz",
+backend/package-lock.json:537:      "resolved": "https://registry.npmjs.org/@supabase/postgrest-js/-/postgrest-js-2.105.3.tgz",
+backend/package-lock.json:549:      "resolved": "https://registry.npmjs.org/@supabase/realtime-js/-/realtime-js-2.105.3.tgz",
+backend/package-lock.json:564:      "resolved": "https://registry.npmjs.org/@supabase/storage-js/-/storage-js-2.105.3.tgz",
+backend/package-lock.json:577:      "resolved": "https://registry.npmjs.org/@supabase/supabase-js/-/supabase-js-2.105.3.tgz",
+backend/package-lock.json:593:      "resolved": "https://registry.npmjs.org/@types/body-parser/-/body-parser-1.19.6.tgz",
+backend/package-lock.json:604:      "resolved": "https://registry.npmjs.org/@types/connect/-/connect-3.4.38.tgz",
+backend/package-lock.json:614:      "resolved": "https://registry.npmjs.org/@types/cors/-/cors-2.8.19.tgz",
+backend/package-lock.json:624:      "resolved": "https://registry.npmjs.org/@types/express/-/express-4.17.25.tgz",
+backend/package-lock.json:637:      "resolved": "https://registry.npmjs.org/@types/express-serve-static-core/-/express-serve-static-core-4.19.8.tgz",
+backend/package-lock.json:648:    "node_modules/@types/http-errors": {
+backend/package-lock.json:650:      "resolved": "https://registry.npmjs.org/@types/http-errors/-/http-errors-2.0.5.tgz",
+backend/package-lock.json:657:      "resolved": "https://registry.npmjs.org/@types/jsonwebtoken/-/jsonwebtoken-9.0.10.tgz",
+backend/package-lock.json:668:      "resolved": "https://registry.npmjs.org/@types/mime/-/mime-1.3.5.tgz",
+backend/package-lock.json:675:      "resolved": "https://registry.npmjs.org/@types/ms/-/ms-2.1.0.tgz",
+backend/package-lock.json:682:      "resolved": "https://registry.npmjs.org/@types/node/-/node-22.19.17.tgz",
+backend/package-lock.json:691:      "resolved": "https://registry.npmjs.org/@types/qs/-/qs-6.15.1.tgz",
+backend/package-lock.json:698:      "resolved": "https://registry.npmjs.org/@types/range-parser/-/range-parser-1.2.7.tgz",
+backend/package-lock.json:705:      "resolved": "https://registry.npmjs.org/@types/send/-/send-1.2.1.tgz",
+backend/package-lock.json:715:      "resolved": "https://registry.npmjs.org/@types/serve-static/-/serve-static-1.15.10.tgz",
+backend/package-lock.json:720:        "@types/http-errors": "*",
+backend/package-lock.json:727:      "resolved": "https://registry.npmjs.org/@types/send/-/send-0.17.6.tgz",
+backend/package-lock.json:738:      "resolved": "https://registry.npmjs.org/@types/ws/-/ws-8.18.1.tgz",
+backend/package-lock.json:747:      "resolved": "https://registry.npmjs.org/accepts/-/accepts-1.3.8.tgz",
+backend/package-lock.json:760:      "resolved": "https://registry.npmjs.org/array-flatten/-/array-flatten-1.1.1.tgz",
+backend/package-lock.json:766:      "resolved": "https://registry.npmjs.org/body-parser/-/body-parser-1.20.5.tgz",
+backend/package-lock.json:775:        "http-errors": "~2.0.1",
+backend/package-lock.json:790:      "resolved": "https://registry.npmjs.org/qs/-/qs-6.15.1.tgz",
+backend/package-lock.json:800:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:805:      "resolved": "https://registry.npmjs.org/buffer-equal-constant-time/-/buffer-equal-constant-time-1.0.1.tgz",
+backend/package-lock.json:811:      "resolved": "https://registry.npmjs.org/bytes/-/bytes-3.1.2.tgz",
+backend/package-lock.json:820:      "resolved": "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz",
+backend/package-lock.json:833:      "resolved": "https://registry.npmjs.org/call-bound/-/call-bound-1.0.4.tgz",
+backend/package-lock.json:844:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:849:      "resolved": "https://registry.npmjs.org/content-disposition/-/content-disposition-0.5.4.tgz",
+backend/package-lock.json:861:      "resolved": "https://registry.npmjs.org/content-type/-/content-type-1.0.5.tgz",
+backend/package-lock.json:870:      "resolved": "https://registry.npmjs.org/cookie/-/cookie-0.7.2.tgz",
+backend/package-lock.json:879:      "resolved": "https://registry.npmjs.org/cookie-signature/-/cookie-signature-1.0.7.tgz",
+backend/package-lock.json:885:      "resolved": "https://registry.npmjs.org/cors/-/cors-2.8.6.tgz",
+backend/package-lock.json:897:        "url": "https://opencollective.com/express"
+backend/package-lock.json:902:      "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz",
+backend/package-lock.json:911:      "resolved": "https://registry.npmjs.org/depd/-/depd-2.0.0.tgz",
+backend/package-lock.json:920:      "resolved": "https://registry.npmjs.org/destroy/-/destroy-1.2.0.tgz",
+backend/package-lock.json:930:      "resolved": "https://registry.npmjs.org/dotenv/-/dotenv-16.6.1.tgz",
+backend/package-lock.json:937:        "url": "https://dotenvx.com"
+backend/package-lock.json:942:      "resolved": "https://registry.npmjs.org/dunder-proto/-/dunder-proto-1.0.1.tgz",
+backend/package-lock.json:956:      "resolved": "https://registry.npmjs.org/ecdsa-sig-formatter/-/ecdsa-sig-formatter-1.0.11.tgz",
+backend/package-lock.json:965:      "resolved": "https://registry.npmjs.org/ee-first/-/ee-first-1.1.1.tgz",
+backend/package-lock.json:971:      "resolved": "https://registry.npmjs.org/encodeurl/-/encodeurl-2.0.0.tgz",
+backend/package-lock.json:980:      "resolved": "https://registry.npmjs.org/es-define-property/-/es-define-property-1.0.1.tgz",
+backend/package-lock.json:989:      "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+backend/package-lock.json:998:      "resolved": "https://registry.npmjs.org/es-object-atoms/-/es-object-atoms-1.1.1.tgz",
+backend/package-lock.json:1010:      "resolved": "https://registry.npmjs.org/esbuild/-/esbuild-0.27.7.tgz",
+backend/package-lock.json:1052:      "resolved": "https://registry.npmjs.org/escape-html/-/escape-html-1.0.3.tgz",
+backend/package-lock.json:1058:      "resolved": "https://registry.npmjs.org/etag/-/etag-1.8.1.tgz",
+backend/package-lock.json:1067:      "resolved": "https://registry.npmjs.org/express/-/express-4.22.1.tgz",
+backend/package-lock.json:1085:        "http-errors": "~2.0.0",
+backend/package-lock.json:1108:        "url": "https://opencollective.com/express"
+backend/package-lock.json:1113:      "resolved": "https://registry.npmjs.org/fast-sha256/-/fast-sha256-1.3.0.tgz",
+backend/package-lock.json:1119:      "resolved": "https://registry.npmjs.org/finalhandler/-/finalhandler-1.3.2.tgz",
+backend/package-lock.json:1137:      "resolved": "https://registry.npmjs.org/forwarded/-/forwarded-0.2.0.tgz",
+backend/package-lock.json:1146:      "resolved": "https://registry.npmjs.org/fresh/-/fresh-0.5.2.tgz",
+backend/package-lock.json:1155:      "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz",
+backend/package-lock.json:1170:      "resolved": "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz",
+backend/package-lock.json:1174:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:1179:      "resolved": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz",
+backend/package-lock.json:1198:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:1203:      "resolved": "https://registry.npmjs.org/get-proto/-/get-proto-1.0.1.tgz",
+backend/package-lock.json:1216:      "resolved": "https://registry.npmjs.org/get-tsconfig/-/get-tsconfig-4.14.0.tgz",
+backend/package-lock.json:1224:        "url": "https://github.com/privatenumber/get-tsconfig?sponsor=1"
+backend/package-lock.json:1229:      "resolved": "https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz",
+backend/package-lock.json:1236:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:1241:      "resolved": "https://registry.npmjs.org/has-symbols/-/has-symbols-1.1.0.tgz",
+backend/package-lock.json:1248:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:1253:      "resolved": "https://registry.npmjs.org/hasown/-/hasown-2.0.3.tgz",
+backend/package-lock.json:1263:    "node_modules/http-errors": {
+backend/package-lock.json:1265:      "resolved": "https://registry.npmjs.org/http-errors/-/http-errors-2.0.1.tgz",
+backend/package-lock.json:1280:        "url": "https://opencollective.com/express"
+backend/package-lock.json:1285:      "resolved": "https://registry.npmjs.org/iceberg-js/-/iceberg-js-0.8.1.tgz",
+backend/package-lock.json:1294:      "resolved": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.24.tgz",
+backend/package-lock.json:1306:      "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz",
+backend/package-lock.json:1312:      "resolved": "https://registry.npmjs.org/ipaddr.js/-/ipaddr.js-1.9.1.tgz",
+backend/package-lock.json:1321:      "resolved": "https://registry.npmjs.org/json-schema-to-ts/-/json-schema-to-ts-3.1.1.tgz",
+backend/package-lock.json:1334:      "resolved": "https://registry.npmjs.org/jsonwebtoken/-/jsonwebtoken-9.0.3.tgz",
+backend/package-lock.json:1356:      "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz",
+backend/package-lock.json:1362:      "resolved": "https://registry.npmjs.org/jwa/-/jwa-2.0.1.tgz",
+backend/package-lock.json:1373:      "resolved": "https://registry.npmjs.org/jws/-/jws-4.0.1.tgz",
+backend/package-lock.json:1383:      "resolved": "https://registry.npmjs.org/lodash.includes/-/lodash.includes-4.3.0.tgz",
+backend/package-lock.json:1389:      "resolved": "https://registry.npmjs.org/lodash.isboolean/-/lodash.isboolean-3.0.3.tgz",
+backend/package-lock.json:1395:      "resolved": "https://registry.npmjs.org/lodash.isinteger/-/lodash.isinteger-4.0.4.tgz",
+backend/package-lock.json:1401:      "resolved": "https://registry.npmjs.org/lodash.isnumber/-/lodash.isnumber-3.0.3.tgz",
+backend/package-lock.json:1407:      "resolved": "https://registry.npmjs.org/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz",
+backend/package-lock.json:1413:      "resolved": "https://registry.npmjs.org/lodash.isstring/-/lodash.isstring-4.0.1.tgz",
+backend/package-lock.json:1419:      "resolved": "https://registry.npmjs.org/lodash.once/-/lodash.once-4.1.1.tgz",
+backend/package-lock.json:1425:      "resolved": "https://registry.npmjs.org/math-intrinsics/-/math-intrinsics-1.1.0.tgz",
+backend/package-lock.json:1434:      "resolved": "https://registry.npmjs.org/media-typer/-/media-typer-0.3.0.tgz",
+backend/package-lock.json:1443:      "resolved": "https://registry.npmjs.org/merge-descriptors/-/merge-descriptors-1.0.3.tgz",
+backend/package-lock.json:1447:        "url": "https://github.com/sponsors/sindresorhus"
+backend/package-lock.json:1452:      "resolved": "https://registry.npmjs.org/methods/-/methods-1.1.2.tgz",
+backend/package-lock.json:1461:      "resolved": "https://registry.npmjs.org/mime/-/mime-1.6.0.tgz",
+backend/package-lock.json:1473:      "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.52.0.tgz",
+backend/package-lock.json:1482:      "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.35.tgz",
+backend/package-lock.json:1494:      "resolved": "https://registry.npmjs.org/ms/-/ms-2.0.0.tgz",
+backend/package-lock.json:1500:      "resolved": "https://registry.npmjs.org/negotiator/-/negotiator-0.6.3.tgz",
+backend/package-lock.json:1509:      "resolved": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz",
+backend/package-lock.json:1518:      "resolved": "https://registry.npmjs.org/object-inspect/-/object-inspect-1.13.4.tgz",
+backend/package-lock.json:1525:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:1530:      "resolved": "https://registry.npmjs.org/on-finished/-/on-finished-2.4.1.tgz",
+backend/package-lock.json:1542:      "resolved": "https://registry.npmjs.org/parseurl/-/parseurl-1.3.3.tgz",
+backend/package-lock.json:1551:      "resolved": "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-0.1.13.tgz",
+backend/package-lock.json:1557:      "resolved": "https://registry.npmjs.org/proxy-addr/-/proxy-addr-2.0.7.tgz",
+backend/package-lock.json:1570:      "resolved": "https://registry.npmjs.org/qs/-/qs-6.14.2.tgz",
+backend/package-lock.json:1580:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:1585:      "resolved": "https://registry.npmjs.org/range-parser/-/range-parser-1.2.1.tgz",
+backend/package-lock.json:1594:      "resolved": "https://registry.npmjs.org/raw-body/-/raw-body-2.5.3.tgz",
+backend/package-lock.json:1599:        "http-errors": "~2.0.1",
+backend/package-lock.json:1609:      "resolved": "https://registry.npmjs.org/resolve-pkg-maps/-/resolve-pkg-maps-1.0.0.tgz",
+backend/package-lock.json:1614:        "url": "https://github.com/privatenumber/resolve-pkg-maps?sponsor=1"
+backend/package-lock.json:1619:      "resolved": "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.2.1.tgz",
+backend/package-lock.json:1624:          "url": "https://github.com/sponsors/feross"
+backend/package-lock.json:1628:          "url": "https://www.patreon.com/feross"
+backend/package-lock.json:1632:          "url": "https://feross.org/support"
+backend/package-lock.json:1639:      "resolved": "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz",
+backend/package-lock.json:1645:      "resolved": "https://registry.npmjs.org/semver/-/semver-7.7.4.tgz",
+backend/package-lock.json:1657:      "resolved": "https://registry.npmjs.org/send/-/send-0.19.2.tgz",
+backend/package-lock.json:1668:        "http-errors": "~2.0.1",
+backend/package-lock.json:1681:      "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz",
+backend/package-lock.json:1687:      "resolved": "https://registry.npmjs.org/serve-static/-/serve-static-1.16.3.tgz",
+backend/package-lock.json:1702:      "resolved": "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz",
+backend/package-lock.json:1708:      "resolved": "https://registry.npmjs.org/side-channel/-/side-channel-1.1.0.tgz",
+backend/package-lock.json:1722:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:1727:      "resolved": "https://registry.npmjs.org/side-channel-list/-/side-channel-list-1.0.1.tgz",
+backend/package-lock.json:1738:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:1743:      "resolved": "https://registry.npmjs.org/side-channel-map/-/side-channel-map-1.0.1.tgz",
+backend/package-lock.json:1756:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:1761:      "resolved": "https://registry.npmjs.org/side-channel-weakmap/-/side-channel-weakmap-1.0.2.tgz",
+backend/package-lock.json:1775:        "url": "https://github.com/sponsors/ljharb"
+backend/package-lock.json:1780:      "resolved": "https://registry.npmjs.org/standardwebhooks/-/standardwebhooks-1.0.0.tgz",
+backend/package-lock.json:1790:      "resolved": "https://registry.npmjs.org/statuses/-/statuses-2.0.2.tgz",
+backend/package-lock.json:1799:      "resolved": "https://registry.npmjs.org/toidentifier/-/toidentifier-1.0.1.tgz",
+backend/package-lock.json:1808:      "resolved": "https://registry.npmjs.org/ts-algebra/-/ts-algebra-2.0.0.tgz",
+backend/package-lock.json:1814:      "resolved": "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz",
+backend/package-lock.json:1820:      "resolved": "https://registry.npmjs.org/tsx/-/tsx-4.21.0.tgz",
+backend/package-lock.json:1840:      "resolved": "https://registry.npmjs.org/type-is/-/type-is-1.6.18.tgz",
+backend/package-lock.json:1853:      "resolved": "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz",
+backend/package-lock.json:1867:      "resolved": "https://registry.npmjs.org/undici-types/-/undici-types-6.21.0.tgz",
+backend/package-lock.json:1873:      "resolved": "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz",
+backend/package-lock.json:1882:      "resolved": "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.1.tgz",
+backend/package-lock.json:1891:      "resolved": "https://registry.npmjs.org/vary/-/vary-1.1.2.tgz",
+backend/package-lock.json:1900:      "resolved": "https://registry.npmjs.org/ws/-/ws-8.20.0.tgz",
+backend/src/modules/external-product-sizes/external-product-sizes.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+backend/src/modules/styling/styling.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+backend/src/modules/fit/fit-score.measurement-quality.ts:9:const UNTRUSTED_PARSING_STATUSES: readonly string[] = ["unverified", "pending", "failed", "mocked"];
+backend/src/modules/fit/fit-score.measurement-quality.ts:10:const MOCKED_MEASUREMENT_SOURCES: readonly string[] = ["mock", "mocked"];
+backend/src/modules/fit/fit-score.measurement-quality.ts:28:    reasonCodes.push("mocked_product_measurements");
+backend/src/modules/auth/auth-onboarding.parser.ts:1:import { createHttpError } from "../../shared/utils/http-error";
+backend/src/modules/fit/fit-learning-export.test.ts:95:      product_url: "https://private.example.test/item",
+backend/src/modules/fit/fit-learning-export.test.ts:178:const forbiddenStrings = [rawComment, rawOcrText, rawPayloadSecret, privateUserId, privateFitResultId, privateSizeId, privateAuthToken, "https://private.example.test/item", "IGNORE ALL PRIOR INSTRUCTIONS", "private label payload", "private payload hidden in top contributor", "private reason payload", "private feedback summary", "private quality summary", "private product quality payload", hostileTopLevelText, phoneLikeSizeLabel, "export-ignore_all", "IGNORE_ALL", "PRIVATE_TOKEN", "010_PRIVATE_TOKEN", "private phone 010-0000", "raw_private_token"] as const;
+backend/src/modules/feedback/feedback.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+backend/src/modules/clothing-items/clothing-items.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+backend/src/modules/auth/auth-onboarding.repository.ts:3:import { createHttpError } from "../../shared/utils/http-error";
+backend/src/modules/fit/fit.types.ts:82:  | "mocked_product_measurements";
+frontend/next-env.d.ts:5:// see https://nextjs.org/docs/app/building-your-application/configuring/typescript for more information.
+backend/src/modules/fit/fit.service.ts:4:import { createHttpError } from "../../shared/utils/http-error";
+backend/src/modules/auth/auth.service.ts:2:import { createHttpError } from "../../shared/utils/http-error";
+.omo/evidence/final-signup-oauth-onboarding.txt:47:.omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt
+.omo/evidence/final-signup-oauth-onboarding.txt:48:.omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt
+.omo/evidence/final-signup-oauth-onboarding.txt:73:EXTERNAL BLOCKERS FROM TODO 5:
+.omo/evidence/final-signup-oauth-onboarding.txt:86:happy exact invocation not run: curl -i -X POST "$API_BASE_URL/auth/onboarding" -H "Authorization: Bearer <REDACTED>" -H "Content-Type: application/json" --data <valid onboarding JSON>
+.omo/evidence/final-signup-oauth-onboarding.txt:87:happy blocker: SUPABASE_ACCESS_TOKEN is missing; fake JWT is not acceptable as OAuth proof.
+.omo/evidence/final-signup-oauth-onboarding.txt:88:API_BASE_URL: missing; local default considered http://localhost:4000.
+.omo/evidence/final-signup-oauth-onboarding.txt:90:malformed/no-auth exact invocation not run: curl -i -X POST "http://localhost:4000/auth/onboarding" -H "Content-Type: application/json" --data <valid onboarding JSON without Authorization>
+.omo/evidence/final-signup-oauth-onboarding.txt:93:secret hygiene: values were never printed; no fake token was used.
+backend/src/modules/styling/styling.service.ts:4:import { createHttpError } from "../../shared/utils/http-error";
+backend/src/modules/fit/fit-learning-export.normalizers.ts:32:const REASON_CODES: readonly FitScoreReasonCode[] = ["insufficient_comparable_measurements", "missing_measurements", "small_score_gap", "low_reference_sample_count", "feedback_profile_applied", "feedback_profile_unavailable", "data_quality_unverified_or_sparse", "low_measurement_extraction_confidence", "unverified_product_measurement_status", "mocked_product_measurements"] as const;
+backend/src/modules/fit/fit-learning-export.normalizers.ts:37:const MEASUREMENT_SOURCES = ["manual", "ocr", "url", "admin", "mock", "mocked"] as const;
+backend/src/modules/fit/fit-learning-export.normalizers.ts:38:const PARSING_STATUSES = ["manual", "accepted", "confirmed", "parsed", "pending", "failed", "mocked", "unverified"] as const;
+backend/src/modules/auth/auth-onboarding.service.test.ts:18:      const fake = createFakeRepository();
+backend/src/modules/auth/auth-onboarding.service.test.ts:19:      const result = await complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload(), {
+backend/src/modules/auth/auth-onboarding.service.test.ts:28:      assert.deepEqual(fake.operations.map((operation) => operation.kind), ["user", "consent", "consent"]);
+backend/src/modules/auth/auth-onboarding.service.test.ts:34:      const fake = createFakeRepository();
+backend/src/modules/auth/auth-onboarding.service.test.ts:36:        fake.repository,
+backend/src/modules/auth/auth-onboarding.service.test.ts:57:      assert.equal(fake.users[0]?.gender, "female");
+backend/src/modules/auth/auth-onboarding.service.test.ts:58:      assert.equal(fake.users[0]?.birth_year, 1994);
+backend/src/modules/auth/auth-onboarding.service.test.ts:59:      assert.equal(fake.operations.filter((operation) => operation.kind === "body").length, 1);
+backend/src/modules/auth/auth-onboarding.service.test.ts:60:      assert.equal(fake.writtenBodies[0]?.raw_data.source, "onboarding");
+backend/src/modules/auth/auth-onboarding.service.test.ts:66:      const fake = createFakeRepository({ existingBodyMeasurements: [bodyRow("existing-body")] });
+backend/src/modules/auth/auth-onboarding.service.test.ts:68:        fake.repository,
+backend/src/modules/auth/auth-onboarding.service.test.ts:73:      assert.equal(fake.bodyRows.length, 1);
+backend/src/modules/auth/auth-onboarding.service.test.ts:74:      assert.deepEqual(fake.operations.filter((operation) => operation.kind === "body"), [
+backend/src/modules/auth/auth-onboarding.service.test.ts:82:      const fake = createFakeRepository();
+backend/src/modules/auth/auth-onboarding.service.test.ts:83:      await complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload(), { now: fixedNow });
+backend/src/modules/auth/auth-onboarding.service.test.ts:85:        fake.consents.map((consent) => consent.consent_key),
+backend/src/modules/auth/auth-onboarding.service.test.ts:93:      const fake = createFakeRepository();
+backend/src/modules/auth/auth-onboarding.service.test.ts:95:        fake.repository,
+backend/src/modules/auth/auth-onboarding.service.test.ts:106:      assert.equal(fake.consents.find((consent) => consent.consent_key === "marketing")?.accepted, false);
+backend/src/modules/auth/auth-onboarding.service.test.ts:115:    console.log(`PASS ${test.name}`);
+frontend/src/app/closet/page.tsx:130:          image_url: /^https?:\/\//.test(form.image_url) ? form.image_url : undefined,
+frontend/src/app/closet/page.tsx:174:            {form.image_url && /^https?:\/\//.test(form.image_url) && (
+frontend/src/app/closet/page.tsx:179:            <input type="text" value={form.image_url} onChange={e => set("image_url", e.target.value)} placeholder="https://example.com/image.jpg"
+backend/src/modules/users/users.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+backend/src/modules/clothing-sizes/clothing-sizes.repository.ts:3:import { createHttpError } from "../../shared/utils/http-error";
+backend/src/modules/auth/auth-onboarding.service.ts:1:import { createHttpError } from "../../shared/utils/http-error";
+backend/src/modules/auth/auth-onboarding.test-fixtures.ts:13:process.env.SUPABASE_URL = process.env.SUPABASE_URL ?? "http://localhost:54321";
+frontend/src/app/external-products/page.tsx:86:          <Input name="productUrl" label="Product URL" placeholder="https://..." />
+frontend/src/app/external-products/page.tsx:104:        <FormSection title="URL parser mock" description="OCR/URL 확장을 위한 mock parsing 응답입니다.">
+frontend/src/app/external-products/page.tsx:105:          <Input name="url" label="Product URL" placeholder="https://shop.example/product" required />
+backend/src/modules/users/users.service.ts:3:import { createHttpError } from "../../shared/utils/http-error";
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:5:PASS minimal success saves required consents only and no body row
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:6:PASS full success persists optional fields body and all consents
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:7:PASS retry body measurements updates existing onboarding row
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:8:PASS omitted optional consents are absent
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:9:PASS blank displayName returns 400 and writes nothing
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:10:PASS missing required consent returns 400 and writes nothing
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:11:PASS false required consent returns 400 and writes nothing
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:12:PASS optional false consent is allowed
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:13:PASS body measurements without numeric values create no row
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:14:PASS missing latest required consent version returns 500 and writes nothing
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:15:PASS auth user missing email returns 400 and writes nothing
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:16:PASS route is mounted as POST /auth/onboarding after auth middleware
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:17:PASS missing bearer returns 401 before service
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:18:PASS local JWT fallback bearer returns 401 before service
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:19:PASS Supabase-valid bearer calls service and returns 200 onboarding shape
+.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt:20:PASS missing displayName is rejected through service
+backend/src/modules/clothing-sizes/clothing-sizes.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+.omo/evidence/task-2-signup-oauth-onboarding.red-test.txt:5:PASS minimal success saves required consents only and no body row
+.omo/evidence/task-2-signup-oauth-onboarding.red-test.txt:6:PASS full success persists optional fields body and all consents
+.omo/evidence/task-2-signup-oauth-onboarding.red-test.txt:7:PASS retry body measurements updates existing onboarding row
+.omo/evidence/task-2-signup-oauth-onboarding.red-test.txt:8:PASS omitted optional consents are absent
+.omo/evidence/task-2-signup-oauth-onboarding.red-test.txt:9:PASS blank displayName returns 400 and writes nothing
+.omo/evidence/task-2-signup-oauth-onboarding.red-test.txt:10:PASS missing or false required consent returns 400 and writes nothing
+.omo/evidence/task-2-signup-oauth-onboarding.red-test.txt:11:PASS optional false consent is allowed
+.omo/evidence/task-2-signup-oauth-onboarding.red-test.txt:12:PASS body measurements without numeric values create no row
+.omo/evidence/task-2-signup-oauth-onboarding.red-test.txt:13:PASS missing latest required consent version returns 500 and writes nothing
+.omo/evidence/task-2-signup-oauth-onboarding.red-test.txt:14:PASS auth user missing email returns 400 and writes nothing
+.omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt:3:API_BASE_URL: missing; defaulting to http://localhost:4000 for local no-auth attempt
+backend/src/modules/auth/auth-onboarding.controller.ts:3:import type { AuthenticatedRequest } from "../../shared/types/http";
+backend/src/modules/auth/auth-onboarding.controller.ts:4:import { createHttpError } from "../../shared/utils/http-error";
+backend/src/modules/external-products/external-products.repository.ts:3:import { createHttpError } from "../../shared/utils/http-error";
+.omo/evidence/signup-oauth-onboarding-code-review.md:63:   The repository query orders by `effective_from desc` and `version desc` at `backend/src/modules/auth/auth-onboarding.repository.ts:71` through `backend/src/modules/auth/auth-onboarding.repository.ts:79`, but SQL apply/DB checks were externally blocked and the service fake returns the first matching version at `backend/src/modules/auth/auth-onboarding.service.test.ts:88` through `backend/src/modules/auth/auth-onboarding.service.test.ts:91`. The code is plausible, but the exact "latest effective consent" behavior is not proven by tests.
+.omo/evidence/signup-oauth-onboarding-code-review.md:88:- Reran from `backend/`: `npm run typecheck` PASS.
+.omo/evidence/signup-oauth-onboarding-code-review.md:89:- Reran from `backend/`: `npm run build` PASS.
+.omo/evidence/signup-oauth-onboarding-code-review.md:90:- Reran from `backend/`: `npm run test:auth-onboarding` PASS.
+.omo/evidence/signup-oauth-onboarding-code-review.md:91:- Reran from `backend/`: `npm run test:fit` PASS.
+.omo/evidence/signup-oauth-onboarding-code-review.md:93:- Real OAuth-token HTTP checks are externally blocked and recorded in `.omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt`.
+.omo/evidence/signup-oauth-onboarding-code-review.md:101:Final status: FAIL
+.omo/evidence/task-5-signup-oauth-onboarding.adversarial.txt:4:dirty_worktree verdict: PASS if section above is empty.
+.omo/evidence/task-5-signup-oauth-onboarding.adversarial.txt:12:stale_state verdict: PASS if Todos 1-4 are checked and Todo 5 state is inspected before final update.
+.omo/evidence/task-5-signup-oauth-onboarding.adversarial.txt:19:     343 .omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt
+.omo/evidence/task-5-signup-oauth-onboarding.adversarial.txt:20:    1189 .omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt
+.omo/evidence/task-5-signup-oauth-onboarding.adversarial.txt:25:hung_commands verdict: PASS if no started QA backend remains; no backend was started because env was missing.
+.omo/evidence/task-5-signup-oauth-onboarding.adversarial.txt:29:[malformed_input] no-auth curl expected 401 if backend can start; verdict BLOCKED_ALLOWED because backend startup requires missing Supabase env. See http-blocked artifact.
+.omo/evidence/task-5-signup-oauth-onboarding.adversarial.txt:35:cleanup_recheck verdict: PASS.
+backend/src/modules/auth/auth-onboarding.controller.test.ts:3:import type { AuthenticatedRequest } from "../../shared/types/http";
+backend/src/modules/auth/auth-onboarding.controller.test.ts:7:process.env.SUPABASE_URL = process.env.SUPABASE_URL ?? "http://localhost:54321";
+backend/src/modules/auth/auth-onboarding.controller.test.ts:245:    console.log(`PASS ${test.name}`);
+frontend/src/app/fit/confidence-display.tsx:15:  | "mocked_product_measurements";
+frontend/src/app/fit/confidence-display.tsx:63:  mocked_product_measurements: "상품 실측이 임시 데이터입니다."
+frontend/src/app/fit/confidence-display.tsx:75:  "mocked_product_measurements"
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:7:| static-backend-green | Todo 5 Acceptance / Happy static | Backend npm scripts | `cd backend && { npm run test:auth-onboarding && npm run test:fit && npm run typecheck && npm run build; } > ../.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt 2>&1` | PASS, exit 0 observed | A1 |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:8:| sql-prereq | Todo 5 SQL verification | Shell tool/env prerequisite check | `command -v psql`, `command -v supabase`, `command -v postgres`, env presence checks for `SUPABASE_DB_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` with values redacted | PASS for prerequisite inspection | A2 |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:10:| http-prereq | Todo 5 HTTP real-surface | Shell env prerequisite check | Check `API_BASE_URL`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` presence with values redacted | PASS for prerequisite inspection | A4 |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:11:| http-oauth-happy | Todo 5 Happy/HTTP | `curl -i` protected onboarding | `curl -i -X POST "$API_BASE_URL/auth/onboarding" -H "Authorization: Bearer <REDACTED>" -H "Content-Type: application/json" --data <valid onboarding JSON>` | BLOCKED_ALLOWED_BY_PLAN: no real `SUPABASE_ACCESS_TOKEN`; fake JWT not acceptable | A5 |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:12:| http-no-auth | Todo 5 Failure/HTTP | `curl -i` protected onboarding without bearer | `curl -i -X POST "http://localhost:4000/auth/onboarding" -H "Content-Type: application/json" --data <valid onboarding JSON without Authorization>` | BLOCKED_ALLOWED_BY_PLAN: backend cannot start without required Supabase env | A5 |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:13:| cleanup | Todo 5 cleanup | Process/listener check | `pgrep -fl 'tsx watch src/server.ts|coordit backend|node dist/server.js'`; `lsof -nP -iTCP:4000 -sTCP:LISTEN` | PASS: no QA-started backend remained; no listener on 4000 | A6, A7 |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:19:| adv-dirty-worktree | Scope / no frontend edits | dirty_worktree | `git diff --name-only -- frontend` is empty | PASS | A6 |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:20:| adv-stale-state | Todo 5 stale state | stale_state | Plan is read fresh; Todos 1-4 checked before Todo 5 update | PASS | A6 |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:21:| adv-misleading-output | Todo 5 evidence rigor | misleading_success_output | Evidence files are non-empty and static exit status is recorded | PASS | A1, A6 |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:22:| adv-hung-commands | Cleanup | hung commands | No long-running QA backend/tmux/server is left running | PASS | A6, A7 |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:23:| adv-secret-hygiene | Scope / no secrets | secret hygiene | Env/token values are redacted and no fake token is used | PASS | A2, A4, A5 |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:33:| A4 | transcript | HTTP env presence check with values redacted | `.omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt` |
+.omo/evidence/task-5-signup-oauth-onboarding.manualQa.md:34:| A5 | blocker | Explicit HTTP real-surface blocker for missing real Supabase access token and backend startup env | `.omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt` |
+frontend/package-lock.json:30:      "resolved": "https://registry.npmjs.org/@alloc/quick-lru/-/quick-lru-5.2.0.tgz",
+frontend/package-lock.json:38:        "url": "https://github.com/sponsors/sindresorhus"
+frontend/package-lock.json:43:      "resolved": "https://registry.npmjs.org/@dimforge/rapier3d-compat/-/rapier3d-compat-0.12.0.tgz",
+frontend/package-lock.json:49:      "resolved": "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz",
+frontend/package-lock.json:60:      "resolved": "https://registry.npmjs.org/@jridgewell/resolve-uri/-/resolve-uri-3.1.2.tgz",
+frontend/package-lock.json:70:      "resolved": "https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz",
+frontend/package-lock.json:77:      "resolved": "https://registry.npmjs.org/@jridgewell/trace-mapping/-/trace-mapping-0.3.31.tgz",
+frontend/package-lock.json:88:      "resolved": "https://registry.npmjs.org/@next/env/-/env-14.2.35.tgz",
+frontend/package-lock.json:94:      "resolved": "https://registry.npmjs.org/@next/swc-darwin-arm64/-/swc-darwin-arm64-14.2.33.tgz",
+frontend/package-lock.json:110:      "resolved": "https://registry.npmjs.org/@next/swc-darwin-x64/-/swc-darwin-x64-14.2.33.tgz",
+frontend/package-lock.json:126:      "resolved": "https://registry.npmjs.org/@next/swc-linux-arm64-gnu/-/swc-linux-arm64-gnu-14.2.33.tgz",
+frontend/package-lock.json:142:      "resolved": "https://registry.npmjs.org/@next/swc-linux-arm64-musl/-/swc-linux-arm64-musl-14.2.33.tgz",
+frontend/package-lock.json:158:      "resolved": "https://registry.npmjs.org/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-14.2.33.tgz",
+frontend/package-lock.json:174:      "resolved": "https://registry.npmjs.org/@next/swc-linux-x64-musl/-/swc-linux-x64-musl-14.2.33.tgz",
+frontend/package-lock.json:190:      "resolved": "https://registry.npmjs.org/@next/swc-win32-arm64-msvc/-/swc-win32-arm64-msvc-14.2.33.tgz",
+frontend/package-lock.json:206:      "resolved": "https://registry.npmjs.org/@next/swc-win32-ia32-msvc/-/swc-win32-ia32-msvc-14.2.33.tgz",
+frontend/package-lock.json:222:      "resolved": "https://registry.npmjs.org/@next/swc-win32-x64-msvc/-/swc-win32-x64-msvc-14.2.33.tgz",
+frontend/package-lock.json:238:      "resolved": "https://registry.npmjs.org/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz",
+frontend/package-lock.json:252:      "resolved": "https://registry.npmjs.org/@nodelib/fs.stat/-/fs.stat-2.0.5.tgz",
+frontend/package-lock.json:262:      "resolved": "https://registry.npmjs.org/@nodelib/fs.walk/-/fs.walk-1.2.8.tgz",
+frontend/package-lock.json:276:      "resolved": "https://registry.npmjs.org/@swc/counter/-/counter-0.1.3.tgz",
+frontend/package-lock.json:282:      "resolved": "https://registry.npmjs.org/@swc/helpers/-/helpers-0.5.5.tgz",
+frontend/package-lock.json:292:      "resolved": "https://registry.npmjs.org/@tweenjs/tween.js/-/tween.js-23.1.3.tgz",
+frontend/package-lock.json:298:      "resolved": "https://registry.npmjs.org/@types/node/-/node-22.19.17.tgz",
+frontend/package-lock.json:308:      "resolved": "https://registry.npmjs.org/@types/prop-types/-/prop-types-15.7.15.tgz",
+frontend/package-lock.json:315:      "resolved": "https://registry.npmjs.org/@types/react/-/react-18.3.28.tgz",
+frontend/package-lock.json:326:      "resolved": "https://registry.npmjs.org/@types/react-dom/-/react-dom-18.3.7.tgz",
+frontend/package-lock.json:336:      "resolved": "https://registry.npmjs.org/@types/stats.js/-/stats.js-0.17.4.tgz",
+frontend/package-lock.json:342:      "resolved": "https://registry.npmjs.org/@types/three/-/three-0.184.1.tgz",
+frontend/package-lock.json:356:      "resolved": "https://registry.npmjs.org/@types/webxr/-/webxr-0.5.24.tgz",
+frontend/package-lock.json:362:      "resolved": "https://registry.npmjs.org/any-promise/-/any-promise-1.3.0.tgz",
+frontend/package-lock.json:369:      "resolved": "https://registry.npmjs.org/anymatch/-/anymatch-3.1.3.tgz",
+frontend/package-lock.json:383:      "resolved": "https://registry.npmjs.org/arg/-/arg-5.0.2.tgz",
+frontend/package-lock.json:390:      "resolved": "https://registry.npmjs.org/asynckit/-/asynckit-0.4.0.tgz",
+frontend/package-lock.json:396:      "resolved": "https://registry.npmjs.org/autoprefixer/-/autoprefixer-10.5.0.tgz",
+frontend/package-lock.json:402:          "url": "https://opencollective.com/postcss/"
+frontend/package-lock.json:406:          "url": "https://tidelift.com/funding/github/npm/autoprefixer"
+frontend/package-lock.json:410:          "url": "https://github.com/sponsors/ai"
+frontend/package-lock.json:433:      "resolved": "https://registry.npmjs.org/axios/-/axios-1.16.0.tgz",
+frontend/package-lock.json:444:      "resolved": "https://registry.npmjs.org/baseline-browser-mapping/-/baseline-browser-mapping-2.10.27.tgz",
+frontend/package-lock.json:457:      "resolved": "https://registry.npmjs.org/binary-extensions/-/binary-extensions-2.3.0.tgz",
+frontend/package-lock.json:465:        "url": "https://github.com/sponsors/sindresorhus"
+frontend/package-lock.json:470:      "resolved": "https://registry.npmjs.org/braces/-/braces-3.0.3.tgz",
+frontend/package-lock.json:483:      "resolved": "https://registry.npmjs.org/browserslist/-/browserslist-4.28.2.tgz",
+frontend/package-lock.json:489:          "url": "https://opencollective.com/browserslist"
+frontend/package-lock.json:493:          "url": "https://tidelift.com/funding/github/npm/browserslist"
+frontend/package-lock.json:497:          "url": "https://github.com/sponsors/ai"
+frontend/package-lock.json:517:      "resolved": "https://registry.npmjs.org/busboy/-/busboy-1.6.0.tgz",
+frontend/package-lock.json:528:      "resolved": "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz",
+frontend/package-lock.json:541:      "resolved": "https://registry.npmjs.org/camelcase-css/-/camelcase-css-2.0.1.tgz",
+frontend/package-lock.json:551:      "resolved": "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001792.tgz",
+frontend/package-lock.json:556:          "url": "https://opencollective.com/browserslist"
+frontend/package-lock.json:560:          "url": "https://tidelift.com/funding/github/npm/caniuse-lite"
+frontend/package-lock.json:564:          "url": "https://github.com/sponsors/ai"
+frontend/package-lock.json:571:      "resolved": "https://registry.npmjs.org/chokidar/-/chokidar-3.6.0.tgz",
+frontend/package-lock.json:588:        "url": "https://paulmillr.com/funding/"
+frontend/package-lock.json:596:      "resolved": "https://registry.npmjs.org/glob-parent/-/glob-parent-5.1.2.tgz",
+frontend/package-lock.json:609:      "resolved": "https://registry.npmjs.org/client-only/-/client-only-0.0.1.tgz",
+frontend/package-lock.json:615:      "resolved": "https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.8.tgz",
+frontend/package-lock.json:627:      "resolved": "https://registry.npmjs.org/commander/-/commander-4.1.1.tgz",
+frontend/package-lock.json:637:      "resolved": "https://registry.npmjs.org/cssesc/-/cssesc-3.0.0.tgz",
+frontend/package-lock.json:650:      "resolved": "https://registry.npmjs.org/csstype/-/csstype-3.2.3.tgz",
+frontend/package-lock.json:657:      "resolved": "https://registry.npmjs.org/delayed-stream/-/delayed-stream-1.0.0.tgz",
+frontend/package-lock.json:666:      "resolved": "https://registry.npmjs.org/didyoumean/-/didyoumean-1.2.2.tgz",
+frontend/package-lock.json:673:      "resolved": "https://registry.npmjs.org/dlv/-/dlv-1.1.3.tgz",
+frontend/package-lock.json:680:      "resolved": "https://registry.npmjs.org/dunder-proto/-/dunder-proto-1.0.1.tgz",
+frontend/package-lock.json:694:      "resolved": "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.5.352.tgz",
+frontend/package-lock.json:701:      "resolved": "https://registry.npmjs.org/es-define-property/-/es-define-property-1.0.1.tgz",
+frontend/package-lock.json:710:      "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+frontend/package-lock.json:719:      "resolved": "https://registry.npmjs.org/es-object-atoms/-/es-object-atoms-1.1.1.tgz",
+frontend/package-lock.json:731:      "resolved": "https://registry.npmjs.org/es-set-tostringtag/-/es-set-tostringtag-2.1.0.tgz",
+frontend/package-lock.json:746:      "resolved": "https://registry.npmjs.org/escalade/-/escalade-3.2.0.tgz",
+frontend/package-lock.json:756:      "resolved": "https://registry.npmjs.org/fast-glob/-/fast-glob-3.3.3.tgz",
+frontend/package-lock.json:773:      "resolved": "https://registry.npmjs.org/glob-parent/-/glob-parent-5.1.2.tgz",
+frontend/package-lock.json:786:      "resolved": "https://registry.npmjs.org/fastq/-/fastq-1.20.1.tgz",
+frontend/package-lock.json:796:      "resolved": "https://registry.npmjs.org/fflate/-/fflate-0.8.2.tgz",
+frontend/package-lock.json:802:      "resolved": "https://registry.npmjs.org/fill-range/-/fill-range-7.1.1.tgz",
+frontend/package-lock.json:815:      "resolved": "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.16.0.tgz",
+frontend/package-lock.json:820:          "url": "https://github.com/sponsors/RubenVerborgh"
+frontend/package-lock.json:835:      "resolved": "https://registry.npmjs.org/form-data/-/form-data-4.0.5.tgz",
+frontend/package-lock.json:851:      "resolved": "https://registry.npmjs.org/fraction.js/-/fraction.js-5.3.4.tgz",
+frontend/package-lock.json:860:        "url": "https://github.com/sponsors/rawify"
+frontend/package-lock.json:865:      "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz",
+frontend/package-lock.json:880:      "resolved": "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz",
+frontend/package-lock.json:884:        "url": "https://github.com/sponsors/ljharb"
+frontend/package-lock.json:889:      "resolved": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz",
+frontend/package-lock.json:908:        "url": "https://github.com/sponsors/ljharb"
+frontend/package-lock.json:913:      "resolved": "https://registry.npmjs.org/get-proto/-/get-proto-1.0.1.tgz",
+frontend/package-lock.json:926:      "resolved": "https://registry.npmjs.org/glob-parent/-/glob-parent-6.0.2.tgz",
+frontend/package-lock.json:939:      "resolved": "https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz",
+frontend/package-lock.json:946:        "url": "https://github.com/sponsors/ljharb"
+frontend/package-lock.json:951:      "resolved": "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.11.tgz",
+frontend/package-lock.json:957:      "resolved": "https://registry.npmjs.org/has-symbols/-/has-symbols-1.1.0.tgz",
+frontend/package-lock.json:964:        "url": "https://github.com/sponsors/ljharb"
+frontend/package-lock.json:969:      "resolved": "https://registry.npmjs.org/has-tostringtag/-/has-tostringtag-1.0.2.tgz",
+frontend/package-lock.json:979:        "url": "https://github.com/sponsors/ljharb"
+frontend/package-lock.json:984:      "resolved": "https://registry.npmjs.org/hasown/-/hasown-2.0.3.tgz",
+frontend/package-lock.json:996:      "resolved": "https://registry.npmjs.org/is-binary-path/-/is-binary-path-2.1.0.tgz",
+frontend/package-lock.json:1009:      "resolved": "https://registry.npmjs.org/is-core-module/-/is-core-module-2.16.2.tgz",
+frontend/package-lock.json:1020:        "url": "https://github.com/sponsors/ljharb"
+frontend/package-lock.json:1025:      "resolved": "https://registry.npmjs.org/is-extglob/-/is-extglob-2.1.1.tgz",
+frontend/package-lock.json:1035:      "resolved": "https://registry.npmjs.org/is-glob/-/is-glob-4.0.3.tgz",
+frontend/package-lock.json:1048:      "resolved": "https://registry.npmjs.org/is-number/-/is-number-7.0.0.tgz",
+frontend/package-lock.json:1058:      "resolved": "https://registry.npmjs.org/jiti/-/jiti-1.21.7.tgz",
+frontend/package-lock.json:1068:      "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz",
+frontend/package-lock.json:1074:      "resolved": "https://registry.npmjs.org/lilconfig/-/lilconfig-3.1.3.tgz",
+frontend/package-lock.json:1082:        "url": "https://github.com/sponsors/antonk52"
+frontend/package-lock.json:1087:      "resolved": "https://registry.npmjs.org/lines-and-columns/-/lines-and-columns-1.2.4.tgz",
+frontend/package-lock.json:1094:      "resolved": "https://registry.npmjs.org/loose-envify/-/loose-envify-1.4.0.tgz",
+frontend/package-lock.json:1106:      "resolved": "https://registry.npmjs.org/math-intrinsics/-/math-intrinsics-1.1.0.tgz",
+frontend/package-lock.json:1115:      "resolved": "https://registry.npmjs.org/merge2/-/merge2-1.4.1.tgz",
+frontend/package-lock.json:1125:      "resolved": "https://registry.npmjs.org/meshoptimizer/-/meshoptimizer-1.1.1.tgz",
+frontend/package-lock.json:1131:      "resolved": "https://registry.npmjs.org/micromatch/-/micromatch-4.0.8.tgz",
+frontend/package-lock.json:1145:      "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.52.0.tgz",
+frontend/package-lock.json:1154:      "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.35.tgz",
+frontend/package-lock.json:1166:      "resolved": "https://registry.npmjs.org/mz/-/mz-2.7.0.tgz",
+frontend/package-lock.json:1178:      "resolved": "https://registry.npmjs.org/nanoid/-/nanoid-3.3.12.tgz",
+frontend/package-lock.json:1183:          "url": "https://github.com/sponsors/ai"
+frontend/package-lock.json:1196:      "resolved": "https://registry.npmjs.org/next/-/next-14.2.35.tgz",
+frontend/package-lock.json:1227:        "@playwright/test": "^1.41.2",
+frontend/package-lock.json:1236:        "@playwright/test": {
+frontend/package-lock.json:1246:      "resolved": "https://registry.npmjs.org/postcss/-/postcss-8.4.31.tgz",
+frontend/package-lock.json:1251:          "url": "https://opencollective.com/postcss/"
+frontend/package-lock.json:1255:          "url": "https://tidelift.com/funding/github/npm/postcss"
+frontend/package-lock.json:1259:          "url": "https://github.com/sponsors/ai"
+frontend/package-lock.json:1274:      "resolved": "https://registry.npmjs.org/node-releases/-/node-releases-2.0.38.tgz",
+frontend/package-lock.json:1281:      "resolved": "https://registry.npmjs.org/normalize-path/-/normalize-path-3.0.0.tgz",
+frontend/package-lock.json:1291:      "resolved": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz",
+frontend/package-lock.json:1301:      "resolved": "https://registry.npmjs.org/object-hash/-/object-hash-3.0.0.tgz",
+frontend/package-lock.json:1311:      "resolved": "https://registry.npmjs.org/path-parse/-/path-parse-1.0.7.tgz",
+frontend/package-lock.json:1318:      "resolved": "https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz",
+frontend/package-lock.json:1324:      "resolved": "https://registry.npmjs.org/picomatch/-/picomatch-2.3.2.tgz",
+frontend/package-lock.json:1332:        "url": "https://github.com/sponsors/jonschlinkert"
+frontend/package-lock.json:1337:      "resolved": "https://registry.npmjs.org/pify/-/pify-2.3.0.tgz",
+frontend/package-lock.json:1347:      "resolved": "https://registry.npmjs.org/pirates/-/pirates-4.0.7.tgz",
+frontend/package-lock.json:1357:      "resolved": "https://registry.npmjs.org/postcss/-/postcss-8.5.14.tgz",
+frontend/package-lock.json:1363:          "url": "https://opencollective.com/postcss/"
+frontend/package-lock.json:1367:          "url": "https://tidelift.com/funding/github/npm/postcss"
+frontend/package-lock.json:1371:          "url": "https://github.com/sponsors/ai"
+frontend/package-lock.json:1386:      "resolved": "https://registry.npmjs.org/postcss-import/-/postcss-import-15.1.0.tgz",
+frontend/package-lock.json:1404:      "resolved": "https://registry.npmjs.org/postcss-js/-/postcss-js-4.1.0.tgz",
+frontend/package-lock.json:1410:          "url": "https://opencollective.com/postcss/"
+frontend/package-lock.json:1414:          "url": "https://github.com/sponsors/ai"
+frontend/package-lock.json:1430:      "resolved": "https://registry.npmjs.org/postcss-load-config/-/postcss-load-config-6.0.1.tgz",
+frontend/package-lock.json:1436:          "url": "https://opencollective.com/postcss/"
+frontend/package-lock.json:1440:          "url": "https://github.com/sponsors/ai"
+frontend/package-lock.json:1473:      "resolved": "https://registry.npmjs.org/postcss-nested/-/postcss-nested-6.2.0.tgz",
+frontend/package-lock.json:1479:          "url": "https://opencollective.com/postcss/"
+frontend/package-lock.json:1483:          "url": "https://github.com/sponsors/ai"
+frontend/package-lock.json:1499:      "resolved": "https://registry.npmjs.org/postcss-selector-parser/-/postcss-selector-parser-6.1.2.tgz",
+frontend/package-lock.json:1513:      "resolved": "https://registry.npmjs.org/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz",
+frontend/package-lock.json:1520:      "resolved": "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-2.1.0.tgz",
+frontend/package-lock.json:1529:      "resolved": "https://registry.npmjs.org/queue-microtask/-/queue-microtask-1.2.3.tgz",
+frontend/package-lock.json:1535:          "url": "https://github.com/sponsors/feross"
+frontend/package-lock.json:1539:          "url": "https://www.patreon.com/feross"
+frontend/package-lock.json:1543:          "url": "https://feross.org/support"
+frontend/package-lock.json:1550:      "resolved": "https://registry.npmjs.org/react/-/react-18.3.1.tgz",
+frontend/package-lock.json:1562:      "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz",
+frontend/package-lock.json:1575:      "resolved": "https://registry.npmjs.org/read-cache/-/read-cache-1.0.0.tgz",
+frontend/package-lock.json:1585:      "resolved": "https://registry.npmjs.org/readdirp/-/readdirp-3.6.0.tgz",
+frontend/package-lock.json:1598:      "resolved": "https://registry.npmjs.org/resolve/-/resolve-1.22.12.tgz",
+frontend/package-lock.json:1615:        "url": "https://github.com/sponsors/ljharb"
+frontend/package-lock.json:1620:      "resolved": "https://registry.npmjs.org/reusify/-/reusify-1.1.0.tgz",
+frontend/package-lock.json:1631:      "resolved": "https://registry.npmjs.org/run-parallel/-/run-parallel-1.2.0.tgz",
+frontend/package-lock.json:1637:          "url": "https://github.com/sponsors/feross"
+frontend/package-lock.json:1641:          "url": "https://www.patreon.com/feross"
+frontend/package-lock.json:1645:          "url": "https://feross.org/support"
+frontend/package-lock.json:1655:      "resolved": "https://registry.npmjs.org/scheduler/-/scheduler-0.23.2.tgz",
+frontend/package-lock.json:1664:      "resolved": "https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.1.tgz",
+frontend/package-lock.json:1673:      "resolved": "https://registry.npmjs.org/streamsearch/-/streamsearch-1.1.0.tgz",
+frontend/package-lock.json:1681:      "resolved": "https://registry.npmjs.org/styled-jsx/-/styled-jsx-5.1.1.tgz",
+frontend/package-lock.json:1704:      "resolved": "https://registry.npmjs.org/sucrase/-/sucrase-3.35.1.tgz",
+frontend/package-lock.json:1727:      "resolved": "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz",
+frontend/package-lock.json:1735:        "url": "https://github.com/sponsors/ljharb"
+frontend/package-lock.json:1740:      "resolved": "https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.19.tgz",
+frontend/package-lock.json:1778:      "resolved": "https://registry.npmjs.org/thenify/-/thenify-3.3.1.tgz",
+frontend/package-lock.json:1788:      "resolved": "https://registry.npmjs.org/thenify-all/-/thenify-all-1.6.0.tgz",
+frontend/package-lock.json:1801:      "resolved": "https://registry.npmjs.org/three/-/three-0.184.0.tgz",
+frontend/package-lock.json:1807:      "resolved": "https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.16.tgz",
+frontend/package-lock.json:1819:        "url": "https://github.com/sponsors/SuperchupuDev"
+frontend/package-lock.json:1824:      "resolved": "https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz",
+frontend/package-lock.json:1842:      "resolved": "https://registry.npmjs.org/picomatch/-/picomatch-4.0.4.tgz",
+frontend/package-lock.json:1850:        "url": "https://github.com/sponsors/jonschlinkert"
+frontend/package-lock.json:1855:      "resolved": "https://registry.npmjs.org/to-regex-range/-/to-regex-range-5.0.1.tgz",
+frontend/package-lock.json:1868:      "resolved": "https://registry.npmjs.org/ts-interface-checker/-/ts-interface-checker-0.1.13.tgz",
+frontend/package-lock.json:1875:      "resolved": "https://registry.npmjs.org/tslib/-/tslib-2.8.1.tgz",
+frontend/package-lock.json:1881:      "resolved": "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz",
+frontend/package-lock.json:1895:      "resolved": "https://registry.npmjs.org/undici-types/-/undici-types-6.21.0.tgz",
+frontend/package-lock.json:1902:      "resolved": "https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.2.3.tgz",
+frontend/package-lock.json:1908:          "url": "https://opencollective.com/browserslist"
+frontend/package-lock.json:1912:          "url": "https://tidelift.com/funding/github/npm/browserslist"
+frontend/package-lock.json:1916:          "url": "https://github.com/sponsors/ai"
+frontend/package-lock.json:1933:      "resolved": "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz",
+backend/src/modules/external-products/external-products.service.ts:31:export const mockExternalProductFromUrl = (url: string) => ({
+backend/src/modules/external-products/external-products.service.ts:38:  parsingStatus: "mocked",
+.omo/evidence/final-post-refactor-snapshot.txt:26:PASS minimal success saves required consents only and no body row
+.omo/evidence/final-post-refactor-snapshot.txt:27:PASS full success persists optional fields body and all consents
+.omo/evidence/final-post-refactor-snapshot.txt:28:PASS retry body measurements updates existing onboarding row
+.omo/evidence/final-post-refactor-snapshot.txt:29:PASS omitted optional consents are absent
+.omo/evidence/final-post-refactor-snapshot.txt:30:PASS optional false consent is allowed
+.omo/evidence/final-post-refactor-snapshot.txt:31:PASS blank displayName returns 400 and writes nothing
+.omo/evidence/final-post-refactor-snapshot.txt:32:PASS missing required consent returns 400 and writes nothing
+.omo/evidence/final-post-refactor-snapshot.txt:33:PASS false required consent returns 400 and writes nothing
+.omo/evidence/final-post-refactor-snapshot.txt:34:PASS body measurements without numeric values create no row
+.omo/evidence/final-post-refactor-snapshot.txt:35:PASS unknown consent key returns 400 and writes nothing
+.omo/evidence/final-post-refactor-snapshot.txt:36:PASS missing latest required consent version returns 500 and writes nothing
+.omo/evidence/final-post-refactor-snapshot.txt:37:PASS auth user missing email returns 400 and writes nothing
+.omo/evidence/final-post-refactor-snapshot.txt:38:PASS route is mounted as POST /auth/onboarding after auth middleware
+.omo/evidence/final-post-refactor-snapshot.txt:39:PASS missing bearer returns 401 before service
+.omo/evidence/final-post-refactor-snapshot.txt:40:PASS local JWT fallback bearer returns 401 before service
+.omo/evidence/final-post-refactor-snapshot.txt:41:PASS Supabase-valid bearer calls service and returns 200 onboarding shape
+.omo/evidence/final-post-refactor-snapshot.txt:42:PASS missing displayName is rejected through service
+.omo/evidence/task-2-signup-oauth-onboarding.service-audit.txt:5:- The retained service-red.txt was later recaptured during reconciliation and shows a real failing harness: static service import loaded Supabase env before fake dependencies, failing on missing SUPABASE_URL.
+.omo/evidence/task-2-signup-oauth-onboarding.service-audit.txt:14:   - fake repository returns an existing raw_data.source onboarding row and asserts update, not insert, with one body row retained.
+.omo/evidence/task-2-signup-oauth-onboarding.service-audit.txt:28:   - fake repository omits privacy_policy latest version and asserts no writes.
+.omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt:12:RESULT: PASS
+.omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt:19:RESULT: PASS
+.omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt:32:RESULT: PASS
+.omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt:43:RESULT: PASS
+.omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt:52:RESULT: PASS
+.omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt:79:RESULT: PASS
+.omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt:86:RESULT: PASS
+.omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt:91:RESULT: PASS (no matches)
+.omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt:96:RESULT: PASS
+.omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt:101:RESULT: PASS (empty output)
+.omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt:104:OVERALL_RESULT: PASS
+.omo/evidence/final-refactor-full-diff.patch:21:+import { createHttpError } from "../../shared/utils/http-error";
+.omo/evidence/final-refactor-full-diff.patch:220:+import { createHttpError } from "../../shared/utils/http-error";
+.omo/evidence/final-refactor-full-diff.patch:328:+process.env.SUPABASE_URL = process.env.SUPABASE_URL ?? "http://localhost:54321";
+.omo/evidence/final-refactor-full-diff.patch:511:+      const fake = createFakeRepository();
+.omo/evidence/final-refactor-full-diff.patch:512:+      const result = await complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload(), {
+.omo/evidence/final-refactor-full-diff.patch:521:+      assert.deepEqual(fake.operations.map((operation) => operation.kind), ["user", "consent", "consent"]);
+.omo/evidence/final-refactor-full-diff.patch:527:+      const fake = createFakeRepository();
+.omo/evidence/final-refactor-full-diff.patch:529:+        fake.repository,
+.omo/evidence/final-refactor-full-diff.patch:550:+      assert.equal(fake.users[0]?.gender, "female");
+.omo/evidence/final-refactor-full-diff.patch:551:+      assert.equal(fake.users[0]?.birth_year, 1994);
+.omo/evidence/final-refactor-full-diff.patch:552:+      assert.equal(fake.operations.filter((operation) => operation.kind === "body").length, 1);
+.omo/evidence/final-refactor-full-diff.patch:553:+      assert.equal(fake.writtenBodies[0]?.raw_data.source, "onboarding");
+.omo/evidence/final-refactor-full-diff.patch:559:+      const fake = createFakeRepository({ existingBodyMeasurements: [bodyRow("existing-body")] });
+.omo/evidence/final-refactor-full-diff.patch:561:+        fake.repository,
+.omo/evidence/final-refactor-full-diff.patch:566:+      assert.equal(fake.bodyRows.length, 1);
+.omo/evidence/final-refactor-full-diff.patch:567:+      assert.deepEqual(fake.operations.filter((operation) => operation.kind === "body"), [
+.omo/evidence/final-refactor-full-diff.patch:575:+      const fake = createFakeRepository();
+.omo/evidence/final-refactor-full-diff.patch:576:+      await complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload(), { now: fixedNow });
+.omo/evidence/final-refactor-full-diff.patch:578:+        fake.consents.map((consent) => consent.consent_key),
+.omo/evidence/final-refactor-full-diff.patch:586:+      const fake = createFakeRepository();
+.omo/evidence/final-refactor-full-diff.patch:588:+        fake.repository,
+.omo/evidence/final-refactor-full-diff.patch:599:+      assert.equal(fake.consents.find((consent) => consent.consent_key === "marketing")?.accepted, false);
+.omo/evidence/final-refactor-full-diff.patch:608:+    console.log(`PASS ${test.name}`);
+.omo/evidence/final-refactor-full-diff.patch:644:+      const fake = createFakeRepository();
+.omo/evidence/final-refactor-full-diff.patch:646:+        () => complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload({ displayName: "   " })),
+.omo/evidence/final-refactor-full-diff.patch:649:+      assert.deepEqual(fake.operations, []);
+.omo/evidence/final-refactor-full-diff.patch:655:+      const fake = createFakeRepository();
+.omo/evidence/final-refactor-full-diff.patch:659:+            fake.repository,
+.omo/evidence/final-refactor-full-diff.patch:665:+      assert.deepEqual(fake.operations, []);
+.omo/evidence/final-refactor-full-diff.patch:671:+      const fake = createFakeRepository();
+.omo/evidence/final-refactor-full-diff.patch:675:+            fake.repository,
+.omo/evidence/final-refactor-full-diff.patch:686:+      assert.deepEqual(fake.operations, []);
+.omo/evidence/final-refactor-full-diff.patch:692:+      const fake = createFakeRepository();
+.omo/evidence/final-refactor-full-diff.patch:694:+        fake.repository,
+.omo/evidence/final-refactor-full-diff.patch:700:+      assert.equal(fake.operations.some((operation) => operation.kind === "body"), false);
+.omo/evidence/final-refactor-full-diff.patch:706:+      const fake = createFakeRepository();
+.omo/evidence/final-refactor-full-diff.patch:710:+            fake.repository,
+.omo/evidence/final-refactor-full-diff.patch:722:+      assert.deepEqual(fake.operations, []);
+.omo/evidence/final-refactor-full-diff.patch:728:+      const fake = createFakeRepository({ consentVersions: [consentVersion("terms_of_service", true)] });
+.omo/evidence/final-refactor-full-diff.patch:730:+        () => complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload()),
+.omo/evidence/final-refactor-full-diff.patch:733:+      assert.deepEqual(fake.operations, []);
+.omo/evidence/final-refactor-full-diff.patch:739:+      const fake = createFakeRepository();
+.omo/evidence/final-refactor-full-diff.patch:741:+        () => complete(fake.repository, { id: "user-1" }, payload()),
+.omo/evidence/final-refactor-full-diff.patch:744:+      assert.deepEqual(fake.operations, []);
+.omo/evidence/final-refactor-full-diff.patch:753:+    console.log(`PASS ${test.name}`);
+.omo/evidence/final-refactor-full-diff.patch:775:+I did not reconstruct a true historical RED by reverting implementation code, because that would risk disturbing the current final-gate worktree and could create fake or misleading evidence.
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:22:frontend/src/lib/types.ts:47:  | "mocked_product_measurements";
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:58:frontend/src/lib/images.ts:19:  bodyFront:    'https://images.unsplash.com/photo-1617551307578-7f5160d6615e?w=700&h=1000&fit=crop&q=85',
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:59:frontend/src/lib/images.ts:20:  bodySide:     'https://images.unsplash.com/photo-1551803091-e20673f15770?w=600&h=900&fit=crop&q=85',
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:60:frontend/src/lib/images.ts:21:  bodyFit:      'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&h=1200&fit=crop&q=85',
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:69:docs/fit-engine/HYBRID_SCORING_READINESS.md:65:| `measurementSource.measurementSource` | `external_product_sizes.measurement_source` | Distinguishes manual, OCR, URL, or mocked measurements. | Source class only. |
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:215:backend/src/modules/external-products/external-products.controller.ts:47:    res.json(mockExternalProductFromUrl(asRequiredString(req.body.url, "url")));
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:259:backend/src/modules/fit-report/fit-report.explanation.ts:22:  mocked_product_measurements: "상품 실측이 목업 데이터임"
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:302:backend/src/modules/fit-report/fit-report.result-details.sanitizer.ts:23:const REASON_CODES: readonly FitScoreReasonCode[] = ["insufficient_comparable_measurements", "missing_measurements", "small_score_gap", "low_reference_sample_count", "feedback_profile_applied", "feedback_profile_unavailable", "data_quality_unverified_or_sparse", "low_measurement_extraction_confidence", "unverified_product_measurement_status", "mocked_product_measurements"] as const;
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:389:backend/src/modules/auth/auth-onboarding.service.test.ts:28:      assert.deepEqual(fake.operations.map((operation) => operation.kind), ["user", "consent", "consent"]);
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:394:backend/src/modules/auth/auth-onboarding.service.test.ts:59:      assert.equal(fake.operations.filter((operation) => operation.kind === "body").length, 1);
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:396:backend/src/modules/auth/auth-onboarding.service.test.ts:66:      const fake = createFakeRepository({ existingBodyMeasurements: [bodyRow("existing-body")] });
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:398:backend/src/modules/auth/auth-onboarding.service.test.ts:73:      assert.equal(fake.bodyRows.length, 1);
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:399:backend/src/modules/auth/auth-onboarding.service.test.ts:74:      assert.deepEqual(fake.operations.filter((operation) => operation.kind === "body"), [
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:401:backend/src/modules/auth/auth-onboarding.service.test.ts:85:        fake.consents.map((consent) => consent.consent_key),
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:497:backend/src/modules/auth/auth-onboarding.validation.test.ts:75:      assert.equal(fake.operations.some((operation) => operation.kind === "body"), false);
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:657:backend/src/modules/fit/fit.types.ts:82:  | "mocked_product_measurements";
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:692:frontend/src/app/fit/confidence-display.tsx:15:  | "mocked_product_measurements";
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:697:frontend/src/app/fit/confidence-display.tsx:63:  mocked_product_measurements: "상품 실측이 임시 데이터입니다."
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:702:frontend/src/app/fit/confidence-display.tsx:75:  "mocked_product_measurements"
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:707:backend/src/modules/fit/fit-score.measurement-quality.ts:28:    reasonCodes.push("mocked_product_measurements");
+.omo/evidence/fast-debugging-audit/body_rows_rg.txt:863:backend/src/modules/fit/fit-learning-export.normalizers.ts:32:const REASON_CODES: readonly FitScoreReasonCode[] = ["insufficient_comparable_measurements", "missing_measurements", "small_score_gap", "low_reference_sample_count", "feedback_profile_applied", "feedback_profile_unavailable", "data_quality_unverified_or_sparse", "low_measurement_extraction_confidence", "unverified_product_measurement_status", "mocked_product_measurements"] as const;
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:5:PASS minimal success saves required consents only and no body row
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:6:PASS full success persists optional fields body and all consents
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:7:PASS retry body measurements updates existing onboarding row
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:8:PASS omitted optional consents are absent
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:9:PASS optional false consent is allowed
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:10:PASS blank displayName returns 400 and writes nothing
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:11:PASS missing required consent returns 400 and writes nothing
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:12:PASS false required consent returns 400 and writes nothing
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:13:PASS body measurements without numeric values create no row
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:14:PASS unknown consent key returns 400 and writes nothing
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:15:PASS missing latest required consent version returns 500 and writes nothing
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:16:PASS auth user missing email returns 400 and writes nothing
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:17:PASS route is mounted as POST /auth/onboarding after auth middleware
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:18:PASS missing bearer returns 401 before service
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:19:PASS local JWT fallback bearer returns 401 before service
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:20:PASS Supabase-valid bearer calls service and returns 200 onboarding shape
+.omo/evidence/task-2-signup-oauth-onboarding.service-green.txt:21:PASS missing displayName is rejected through service
+.omo/evidence/task-1-signup-oauth-onboarding.audit.txt:55:PASS: schema-green evidence contains consent table definitions, RLS enablement references, and terms_of_service/privacy_policy keys.
+.omo/evidence/task-1-signup-oauth-onboarding.audit.txt:85:contract-check artifact: .omo/evidence/task-1-signup-oauth-onboarding.contract-check.txt; OVERALL_RESULT: 104:OVERALL_RESULT: PASS
+.omo/evidence/task-1-signup-oauth-onboarding.audit.txt:86:typecheck artifact: .omo/evidence/task-1-signup-oauth-onboarding.typecheck.txt; RESULT: 33:RESULT: PASS
+.omo/evidence/final-debugging-audit-parser-service-repository.txt:3:import { createHttpError } from "../../shared/utils/http-error";
+.omo/evidence/final-debugging-audit-parser-service-repository.txt:198:import { createHttpError } from "../../shared/utils/http-error";
+.omo/evidence/task-2-signup-oauth-onboarding.red-proof-limitation.txt:5:I did not reconstruct a true historical RED by reverting implementation code, because that would risk disturbing the current final-gate worktree and could create fake or misleading evidence.
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:2:Invocation: rg -n "response|Response|curl|POST|GET|/api|fit-report|recommend|onboarding|auth" docs backend/src frontend/src/lib
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:9:docs/API_SPEC_MOBILE.md:105:  참고: <https://supabase.com/docs/guides/auth/social-login/auth-google>
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:10:docs/API_SPEC_MOBILE.md:108:  참고: <https://supabase.com/docs/guides/auth/social-login/auth-kakao>
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:12:docs/API_SPEC_MOBILE.md:110:  참고: <https://supabase.com/docs/guides/auth/sessions/pkce-flow>,
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:13:docs/API_SPEC_MOBILE.md:111:  <https://supabase.com/docs/reference/javascript/auth-exchangecodeforsession>
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:14:docs/API_SPEC_MOBILE.md:113:  참고: <https://supabase.com/docs/guides/auth/redirect-urls>
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:15:docs/API_SPEC_MOBILE.md:118:  참고: <https://supabase.com/docs/guides/auth/jwts>,
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:16:docs/API_SPEC_MOBILE.md:119:  <https://supabase.com/docs/reference/javascript/auth-getuser>
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:49:docs/API_SPEC_MOBILE.md:741:- `OLLAMA_GENERATE_URL`: 기본값 `http://localhost:11434/api/generate`
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:141:docs/FIT_REPORT_OLLAMA_SPEC.md:587:curl http://localhost:11434/api/generate \
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:142:docs/FIT_REPORT_OLLAMA_SPEC.md:628:- URL: `http://localhost:11434/api/generate`
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:145:docs/FIT_REPORT_OLLAMA_SPEC.md:697:- `OLLAMA_GENERATE_URL`: 기본값 `http://localhost:11434/api/generate`
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:156:backend/src/modules/fit-report/fit-report.service.test-fixtures.ts:192:  process.env.OLLAMA_GENERATE_URL = "http://localhost:11434/api/generate";
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:360:backend/src/modules/auth/auth-onboarding.service.test.ts:60:      assert.equal(fake.writtenBodies[0]?.raw_data.source, "onboarding");
+.omo/evidence/fast-debugging-audit/docs_response_rg.txt:542:backend/src/config/env.ts:21:  ollamaGenerateUrl: process.env.OLLAMA_GENERATE_URL ?? "http://localhost:11434/api/generate",
+.omo/evidence/task-3-signup-oauth-onboarding.route-red.txt:5:PASS minimal success saves required consents only and no body row
+.omo/evidence/task-3-signup-oauth-onboarding.route-red.txt:6:PASS full success persists optional fields body and all consents
+.omo/evidence/task-3-signup-oauth-onboarding.route-red.txt:7:PASS retry body measurements updates existing onboarding row
+.omo/evidence/task-3-signup-oauth-onboarding.route-red.txt:8:PASS omitted optional consents are absent
+.omo/evidence/task-3-signup-oauth-onboarding.route-red.txt:9:PASS blank displayName returns 400 and writes nothing
+.omo/evidence/task-3-signup-oauth-onboarding.route-red.txt:10:PASS missing required consent returns 400 and writes nothing
+.omo/evidence/task-3-signup-oauth-onboarding.route-red.txt:11:PASS false required consent returns 400 and writes nothing
+.omo/evidence/task-3-signup-oauth-onboarding.route-red.txt:12:PASS optional false consent is allowed
+.omo/evidence/task-3-signup-oauth-onboarding.route-red.txt:13:PASS body measurements without numeric values create no row
+.omo/evidence/task-3-signup-oauth-onboarding.route-red.txt:14:PASS missing latest required consent version returns 500 and writes nothing
+.omo/evidence/task-3-signup-oauth-onboarding.route-red.txt:15:PASS auth user missing email returns 400 and writes nothing
+.omo/evidence/fast-debugging-audit/auth_onboarding_rg.txt:18:docs/API_SPEC_MOBILE.md:118:  참고: <https://supabase.com/docs/guides/auth/jwts>,
+.omo/evidence/fast-debugging-audit/auth_onboarding_rg.txt:47:backend/src/modules/fit-report/fit-report.result-details.sanitizer.ts:23:const REASON_CODES: readonly FitScoreReasonCode[] = ["insufficient_comparable_measurements", "missing_measurements", "small_score_gap", "low_reference_sample_count", "feedback_profile_applied", "feedback_profile_unavailable", "data_quality_unverified_or_sparse", "low_measurement_extraction_confidence", "unverified_product_measurement_status", "mocked_product_measurements"] as const;
+.omo/evidence/fast-debugging-audit/auth_onboarding_rg.txt:117:backend/src/modules/auth/auth-onboarding.service.test.ts:60:      assert.equal(fake.writtenBodies[0]?.raw_data.source, "onboarding");
+.omo/evidence/fast-debugging-audit/auth_onboarding_rg.txt:128:frontend/src/app/external-products/page.tsx:105:          <Input name="url" label="Product URL" placeholder="https://shop.example/product" required />
+.omo/evidence/fast-debugging-audit/auth_onboarding_rg.txt:210:backend/src/modules/fit/fit-learning-export.normalizers.ts:32:const REASON_CODES: readonly FitScoreReasonCode[] = ["insufficient_comparable_measurements", "missing_measurements", "small_score_gap", "low_reference_sample_count", "feedback_profile_applied", "feedback_profile_unavailable", "data_quality_unverified_or_sparse", "low_measurement_extraction_confidence", "unverified_product_measurement_status", "mocked_product_measurements"] as const;
+backend/src/modules/external-products/external-products.controller.ts:2:import type { AuthenticatedRequest } from "../../shared/types/http";
+backend/src/modules/external-products/external-products.controller.ts:8:  mockExternalProductFromUrl,
+backend/src/modules/external-products/external-products.controller.ts:47:    res.json(mockExternalProductFromUrl(asRequiredString(req.body.url, "url")));
+backend/src/modules/auth/auth-onboarding.validation.test.ts:19:      const fake = createFakeRepository();
+backend/src/modules/auth/auth-onboarding.validation.test.ts:21:        () => complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload({ displayName: "   " })),
+backend/src/modules/auth/auth-onboarding.validation.test.ts:24:      assert.deepEqual(fake.operations, []);
+backend/src/modules/auth/auth-onboarding.validation.test.ts:30:      const fake = createFakeRepository();
+backend/src/modules/auth/auth-onboarding.validation.test.ts:34:            fake.repository,
+backend/src/modules/auth/auth-onboarding.validation.test.ts:40:      assert.deepEqual(fake.operations, []);
+backend/src/modules/auth/auth-onboarding.validation.test.ts:46:      const fake = createFakeRepository();
+backend/src/modules/auth/auth-onboarding.validation.test.ts:50:            fake.repository,
+backend/src/modules/auth/auth-onboarding.validation.test.ts:61:      assert.deepEqual(fake.operations, []);
+backend/src/modules/auth/auth-onboarding.validation.test.ts:67:      const fake = createFakeRepository();
+backend/src/modules/auth/auth-onboarding.validation.test.ts:69:        fake.repository,
+backend/src/modules/auth/auth-onboarding.validation.test.ts:75:      assert.equal(fake.operations.some((operation) => operation.kind === "body"), false);
+backend/src/modules/auth/auth-onboarding.validation.test.ts:81:      const fake = createFakeRepository();
+backend/src/modules/auth/auth-onboarding.validation.test.ts:85:            fake.repository,
+backend/src/modules/auth/auth-onboarding.validation.test.ts:97:      assert.deepEqual(fake.operations, []);
+backend/src/modules/auth/auth-onboarding.validation.test.ts:103:      const fake = createFakeRepository({ consentVersions: [consentVersion("terms_of_service", true)] });
+backend/src/modules/auth/auth-onboarding.validation.test.ts:105:        () => complete(fake.repository, { id: "user-1", email: "user@example.com" }, payload()),
+backend/src/modules/auth/auth-onboarding.validation.test.ts:108:      assert.deepEqual(fake.operations, []);
+backend/src/modules/auth/auth-onboarding.validation.test.ts:114:      const fake = createFakeRepository();
+backend/src/modules/auth/auth-onboarding.validation.test.ts:116:        () => complete(fake.repository, { id: "user-1" }, payload()),
+backend/src/modules/auth/auth-onboarding.validation.test.ts:119:      assert.deepEqual(fake.operations, []);
+backend/src/modules/auth/auth-onboarding.validation.test.ts:128:    console.log(`PASS ${test.name}`);
+.omo/evidence/task-1-signup-oauth-onboarding.typecheck.txt:6:RESULT: PASS
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:5:PASS minimal success saves required consents only and no body row
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:6:PASS full success persists optional fields body and all consents
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:7:PASS retry body measurements updates existing onboarding row
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:8:PASS omitted optional consents are absent
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:9:PASS blank displayName returns 400 and writes nothing
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:10:PASS missing required consent returns 400 and writes nothing
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:11:PASS false required consent returns 400 and writes nothing
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:12:PASS optional false consent is allowed
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:13:PASS body measurements without numeric values create no row
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:14:PASS missing latest required consent version returns 500 and writes nothing
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:15:PASS auth user missing email returns 400 and writes nothing
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:16:PASS route is mounted as POST /auth/onboarding after auth middleware
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:17:PASS missing bearer returns 401 before service
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:18:PASS local JWT fallback bearer returns 401 before service
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:19:PASS Supabase-valid bearer calls service and returns 200 onboarding shape
+.omo/evidence/task-3-signup-oauth-onboarding.route-green.txt:20:PASS missing displayName is rejected through service
+.omo/evidence/fast-debugging-audit/repo_inventory.txt:69:.omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt
+.omo/evidence/fast-debugging-audit/repo_inventory.txt:70:.omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt
+.omo/evidence/fast-debugging-audit/repo_inventory.txt:147:backend/node_modules/http-errors/HISTORY.md
+.omo/evidence/fast-debugging-audit/repo_inventory.txt:148:backend/node_modules/http-errors/README.md
+.omo/evidence/task-5-signup-oauth-onboarding.final-audit.txt:1:FINAL TODO 5 QA AUDIT - 2026-07-09T13:12:08Z
+.omo/evidence/task-5-signup-oauth-onboarding.final-audit.txt:3:PLAN TODO 5
+.omo/evidence/task-5-signup-oauth-onboarding.final-audit.txt:7:{"event":"task-completed","created_at":"2026-07-09T22:10:00+09:00","task":"Todo 5","plan":".omo/plans/signup-oauth-onboarding.md","verifier":"manual-qa-executor","artifact_paths":[".omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt",".omo/evidence/task-5-signup-oauth-onboarding.sql-prereq.txt",".omo/evidence/task-5-signup-oauth-onboarding.sql-blocked.txt",".omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt",".omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt",".omo/evidence/task-5-signup-oauth-onboarding.adversarial.txt",".omo/evidence/task-5-signup-oauth-onboarding.manualQa.md"],"result":"backend static command passed exit 0; SQL real-surface blocked by missing SUPABASE_DB_URL/Supabase env and missing psql/supabase/postgres tools; HTTP OAuth happy blocked by missing real SUPABASE_ACCESS_TOKEN; no-auth HTTP blocked because backend cannot start without required Supabase env; fake JWT not used.","adversarial_classes":{"dirty_worktree":"git diff --name-only -- frontend empty","stale_state":"Todos 1-4 read as checked before Todo 5 update","misleading_success_output":"actual transcripts and non-empty artifact sizes captured; static exit status observed 0","hung_commands":"no QA backend started; no listener remained on port 4000","secret_hygiene":"only env/token presence recorded; values redacted","malformed_input":"no-auth curl would be expected 401 but backend startup was blocked by missing Supabase env"},"cleanup":"no backend process was started; follow-up process/listener check clean"}
+.omo/evidence/task-5-signup-oauth-onboarding.final-audit.txt:13:-rw-r--r--@ 1 insihwan  staff  1189 Jul  9 22:10 .omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt
+.omo/evidence/task-5-signup-oauth-onboarding.final-audit.txt:14:-rw-r--r--@ 1 insihwan  staff   343 Jul  9 22:09 .omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:1:TODO5 MANUAL QA
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:8:| static-backend-green | Todo 5 Acceptance / Happy static | Backend npm scripts | `cd backend && { npm run test:auth-onboarding && npm run test:fit && npm run typecheck && npm run build; } > ../.omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt 2>&1` | PASS, exit 0 observed | A1 |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:9:| sql-prereq | Todo 5 SQL verification | Shell tool/env prerequisite check | `command -v psql`, `command -v supabase`, `command -v postgres`, env presence checks for `SUPABASE_DB_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` with values redacted | PASS for prerequisite inspection | A2 |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:11:| http-prereq | Todo 5 HTTP real-surface | Shell env prerequisite check | Check `API_BASE_URL`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` presence with values redacted | PASS for prerequisite inspection | A4 |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:12:| http-oauth-happy | Todo 5 Happy/HTTP | `curl -i` protected onboarding | `curl -i -X POST "$API_BASE_URL/auth/onboarding" -H "Authorization: Bearer <REDACTED>" -H "Content-Type: application/json" --data <valid onboarding JSON>` | BLOCKED_ALLOWED_BY_PLAN: no real `SUPABASE_ACCESS_TOKEN`; fake JWT not acceptable | A5 |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:13:| http-no-auth | Todo 5 Failure/HTTP | `curl -i` protected onboarding without bearer | `curl -i -X POST "http://localhost:4000/auth/onboarding" -H "Content-Type: application/json" --data <valid onboarding JSON without Authorization>` | BLOCKED_ALLOWED_BY_PLAN: backend cannot start without required Supabase env | A5 |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:14:| cleanup | Todo 5 cleanup | Process/listener check | `pgrep -fl 'tsx watch src/server.ts|coordit backend|node dist/server.js'`; `lsof -nP -iTCP:4000 -sTCP:LISTEN` | PASS: no QA-started backend remained; no listener on 4000 | A6, A7 |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:20:| adv-dirty-worktree | Scope / no frontend edits | dirty_worktree | `git diff --name-only -- frontend` is empty | PASS | A6 |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:21:| adv-stale-state | Todo 5 stale state | stale_state | Plan is read fresh; Todos 1-4 checked before Todo 5 update | PASS | A6 |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:22:| adv-misleading-output | Todo 5 evidence rigor | misleading_success_output | Evidence files are non-empty and static exit status is recorded | PASS | A1, A6 |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:23:| adv-hung-commands | Cleanup | hung commands | No long-running QA backend/tmux/server is left running | PASS | A6, A7 |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:24:| adv-secret-hygiene | Scope / no secrets | secret hygiene | Env/token values are redacted and no fake token is used | PASS | A2, A4, A5 |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:34:| A4 | transcript | HTTP env presence check with values redacted | `.omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt` |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:35:| A5 | blocker | Explicit HTTP real-surface blocker for missing real Supabase access token and backend startup env | `.omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt` |
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:43:happy exact invocation not run: curl -i -X POST "$API_BASE_URL/auth/onboarding" -H "Authorization: Bearer <REDACTED>" -H "Content-Type: application/json" --data <valid onboarding JSON>
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:44:happy blocker: SUPABASE_ACCESS_TOKEN is missing; fake JWT is not acceptable as OAuth proof.
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:45:API_BASE_URL: missing; local default considered http://localhost:4000.
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:47:malformed/no-auth exact invocation not run: curl -i -X POST "http://localhost:4000/auth/onboarding" -H "Content-Type: application/json" --data <valid onboarding JSON without Authorization>
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:50:secret hygiene: values were never printed; no fake token was used.
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:55:FINAL TODO 5 QA AUDIT - 2026-07-09T13:12:08Z
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:57:PLAN TODO 5
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:61:{"event":"task-completed","created_at":"2026-07-09T22:10:00+09:00","task":"Todo 5","plan":".omo/plans/signup-oauth-onboarding.md","verifier":"manual-qa-executor","artifact_paths":[".omo/evidence/task-5-signup-oauth-onboarding.backend-green.txt",".omo/evidence/task-5-signup-oauth-onboarding.sql-prereq.txt",".omo/evidence/task-5-signup-oauth-onboarding.sql-blocked.txt",".omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt",".omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt",".omo/evidence/task-5-signup-oauth-onboarding.adversarial.txt",".omo/evidence/task-5-signup-oauth-onboarding.manualQa.md"],"result":"backend static command passed exit 0; SQL real-surface blocked by missing SUPABASE_DB_URL/Supabase env and missing psql/supabase/postgres tools; HTTP OAuth happy blocked by missing real SUPABASE_ACCESS_TOKEN; no-auth HTTP blocked because backend cannot start without required Supabase env; fake JWT not used.","adversarial_classes":{"dirty_worktree":"git diff --name-only -- frontend empty","stale_state":"Todos 1-4 read as checked before Todo 5 update","misleading_success_output":"actual transcripts and non-empty artifact sizes captured; static exit status observed 0","hung_commands":"no QA backend started; no listener remained on port 4000","secret_hygiene":"only env/token presence recorded; values redacted","malformed_input":"no-auth curl would be expected 401 but backend startup was blocked by missing Supabase env"},"cleanup":"no backend process was started; follow-up process/listener check clean"}
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:67:-rw-r--r--@ 1 insihwan  staff  1189 Jul  9 22:10 .omo/evidence/task-5-signup-oauth-onboarding.http-blocked.txt
+.omo/evidence/final-debugging-audit-todo5-blockers.txt:68:-rw-r--r--@ 1 insihwan  staff   343 Jul  9 22:09 .omo/evidence/task-5-signup-oauth-onboarding.http-prereq.txt
+.omo/evidence/task-2-signup-oauth-onboarding.fix-audit.txt:14:- Tests load `completeOnboardingWithRepository` dynamically and inject an in-memory `OnboardingRepository` fake, so no real Supabase request or unsafe client patch is needed.

@@ -18,5 +18,6 @@ export const env = {
   supabaseServiceRoleKey: required("SUPABASE_SERVICE_ROLE_KEY"),
   jwtSecret: process.env.JWT_SECRET ?? "local-dev-secret",
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? null,
+  ollamaGenerateUrl: process.env.OLLAMA_GENERATE_URL ?? "http://localhost:11434/api/generate",
+  ollamaModel: process.env.OLLAMA_MODEL ?? "llama3.1:8b",
 };
-
