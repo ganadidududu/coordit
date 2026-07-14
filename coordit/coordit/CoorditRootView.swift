@@ -31,7 +31,16 @@ struct CoorditRootView: View {
              .myPageAccount,
              .myPagePrivacy,
              .myPageAppSettings,
-             .myPageNotifications:
+             .myPageNotifications,
+             .myPageProfileEdit,
+             .myPagePasswordChange,
+             .myPageLogout,
+             .myPageAccountDeletion,
+             .myPageBodyMeasurements,
+             .myPagePrivacyPolicy,
+             .myPageTerms,
+             .myPageContact,
+             .myPageBugReport:
             CoorditMyPageFamilyView(route: route) { route = $0 }
         case .closetOverview,
              .closetDetailTop,

@@ -123,6 +123,7 @@ struct CoorditSettingsCard<Content: View>: View {
         .overlay {
             RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous)
                 .stroke(CoorditSettingsStyle.line.opacity(0.7), lineWidth: 1)
+                .allowsHitTesting(false)
         }
         .shadow(color: .black.opacity(0.035), radius: metrics.value(9), y: metrics.value(4))
     }
@@ -186,6 +187,7 @@ struct CoorditSettingsDetailRow<Trailing: View>: View {
         }
         .padding(.horizontal, metrics.value(13))
         .frame(height: metrics.value(55))
+        .contentShape(Rectangle())
     }
 }
 
