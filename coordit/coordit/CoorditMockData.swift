@@ -42,6 +42,24 @@ enum CoorditMockData {
             CoorditRouteContent(eyebrow: "MY", title: "App Settings", detail: route.rawValue)
         case .myPageNotifications:
             CoorditRouteContent(eyebrow: "MY", title: "Notifications", detail: route.rawValue)
+        case .myPageProfileEdit:
+            CoorditRouteContent(eyebrow: "MY", title: "Edit Profile", detail: route.rawValue)
+        case .myPagePasswordChange:
+            CoorditRouteContent(eyebrow: "MY", title: "Change Password", detail: route.rawValue)
+        case .myPageLogout:
+            CoorditRouteContent(eyebrow: "MY", title: "Log Out", detail: route.rawValue)
+        case .myPageAccountDeletion:
+            CoorditRouteContent(eyebrow: "MY", title: "Delete Account", detail: route.rawValue)
+        case .myPageBodyMeasurements:
+            CoorditRouteContent(eyebrow: "MY", title: "Body Measurements", detail: route.rawValue)
+        case .myPagePrivacyPolicy:
+            CoorditRouteContent(eyebrow: "MY", title: "Privacy Policy", detail: route.rawValue)
+        case .myPageTerms:
+            CoorditRouteContent(eyebrow: "MY", title: "Terms of Service", detail: route.rawValue)
+        case .myPageContact:
+            CoorditRouteContent(eyebrow: "MY", title: "Contact", detail: route.rawValue)
+        case .myPageBugReport:
+            CoorditRouteContent(eyebrow: "MY", title: "Bug Report", detail: route.rawValue)
         case .closetOverview:
             CoorditRouteContent(eyebrow: "CLOSET", title: "Closet Overview", detail: route.rawValue)
         case .closetDetailTop:

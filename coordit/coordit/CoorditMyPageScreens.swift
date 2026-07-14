@@ -1,25 +1,79 @@
 import SwiftUI
 
+#if canImport(UIKit)
+import UIKit
+#endif
+
 #if os(iOS)
 struct CoorditMyPageFamilyView: View {
     let route: CoorditFrameRoute
     let onRouteChange: (CoorditFrameRoute) -> Void
 
+    @EnvironmentObject var backendSession: CoorditBackendSessionStore
     @State var feedDataConsent = true
     @State var aiDataConsent = false
     @State var marketingNotifications = false
     @State var selectedTheme: MyPageTheme = .system
     @State var selectedLanguage: MyPageLanguage = .korean
-
+    @State var profileName = "코딧 사용자"
+    @State var profileBio = "나에게 꼭 맞는 핏을 찾고 있어요."
+    @State var profileAvatarIndex = 0
+    @State var profileSaved = false
+    @State var currentPassword = ""
+    @State var newPassword = ""
+    @State var confirmedPassword = ""
+    @State var passwordChanged = false
+    @State var logoutCompleted = false
+    @State var deletionAcknowledged = false
+    @State var deletionCompleted = false
+    @State var shoulderMeasurement = "44.5"
+    @State var chestMeasurement = "103.0"
+    @State var waistMeasurement = "80.0"
+    @State var hipMeasurement = "96.0"
+    @State var inseamMeasurement = "78.0"
+    @State var bodyMeasurementsSaved = false
+    @State var contactSubject = ""
+    @State var contactMessage = ""
+    @State var contactSent = false
+    @State var bugSummary = ""
+    @State var bugSteps = ""
+    @State var bugReportSent = false
+    @State var backendEmail = ""
+    @State var backendPassword = ""
     var body: some View {
-        CoorditScreenScaffold(route: route, onRouteChange: onRouteChange, contentTop: 119) { metrics in
+        CoorditScreenScaffold(
+            route: route,
+            onRouteChange: onRouteChange,
+            contentTop: 119,
+            contentBottom: Main01DesignTokens.Metrics.navHeight + 12
+        ) { metrics in
             ScrollView(.vertical, showsIndicators: false) {
                 routeContent(metrics: metrics)
                     .frame(width: metrics.value(370))
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, metrics.value(26))
             }
+            .scrollDismissesKeyboard(.immediately)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("완료") {
+                        UIApplication.shared.sendAction(
+                            #selector(UIResponder.resignFirstResponder),
+                            to: nil,
+                            from: nil,
+                            for: nil
+                        )
+                    }
+                    .accessibilityIdentifier("coordit-keyboard-dismiss")
+                }
+            }
             .accessibilityIdentifier(routeIdentifier)
+        }
+        .task {
+            await backendSession.bootstrap()
+            syncBackendProfile()
+            syncBackendBodyMeasurement()
         }
     }
 
@@ -39,6 +93,24 @@ struct CoorditMyPageFamilyView: View {
             "coordit-screen-mypage-app-settings"
         case .myPageNotifications:
             "coordit-screen-mypage-notifications"
+        case .myPageProfileEdit:
+            "coordit-screen-mypage-profile-edit"
+        case .myPagePasswordChange:
+            "coordit-screen-mypage-password-change"
+        case .myPageLogout:
+            "coordit-screen-mypage-logout"
+        case .myPageAccountDeletion:
+            "coordit-screen-mypage-account-deletion"
+        case .myPageBodyMeasurements:
+            "coordit-screen-mypage-body-measurements"
+        case .myPagePrivacyPolicy:
+            "coordit-screen-mypage-privacy-policy"
+        case .myPageTerms:
+            "coordit-screen-mypage-terms"
+        case .myPageContact:
+            "coordit-screen-mypage-contact"
+        case .myPageBugReport:
+            "coordit-screen-mypage-bug-report"
         default:
             "coordit-screen-mypage"
         }
@@ -61,6 +133,24 @@ struct CoorditMyPageFamilyView: View {
             appSettings(metrics: metrics)
         case .myPageNotifications:
             notifications(metrics: metrics)
+        case .myPageProfileEdit:
+            profileEdit(metrics: metrics)
+        case .myPagePasswordChange:
+            passwordChange(metrics: metrics)
+        case .myPageLogout:
+            logout(metrics: metrics)
+        case .myPageAccountDeletion:
+            accountDeletion(metrics: metrics)
+        case .myPageBodyMeasurements:
+            bodyMeasurements(metrics: metrics)
+        case .myPagePrivacyPolicy:
+            privacyPolicy(metrics: metrics)
+        case .myPageTerms:
+            terms(metrics: metrics)
+        case .myPageContact:
+            contact(metrics: metrics)
+        case .myPageBugReport:
+            bugReport(metrics: metrics)
         default:
             myPageLanding(metrics: metrics)
         }
@@ -121,27 +211,37 @@ struct CoorditMyPageFamilyView: View {
     }
 
     private func account(metrics: CoorditResponsiveMetrics) -> some View {
-        VStack(spacing: metrics.value(27)) {
+        VStack(spacing: metrics.value(18)) {
             pageHeader("계정", metrics: metrics)
+            backendConnectionStatus(metrics: metrics)
+            backendAuthControls(metrics: metrics)
 
             CoorditSettingsCard(metrics: metrics) {
-                CoorditSettingsDetailRow(title: "프로필 수정", subtitle: "이름, 사진, 기본 소개", metrics: metrics, action: {}) {
+                CoorditSettingsDetailRow(title: "프로필 수정", subtitle: "이름, 사진, 기본 소개", metrics: metrics, action: {
+                    onRouteChange(.myPageProfileEdit)
+                }) {
                     CoorditSettingsChevron(metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
                 CoorditSettingsDetailRow(title: "이메일 확인", metrics: metrics) {
-                    CoorditSettingsValuePill(text: "verified@coordit.app", metrics: metrics)
+                    CoorditSettingsValuePill(text: backendSession.emailText, metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
-                CoorditSettingsDetailRow(title: "비밀번호 변경", subtitle: "마지막 변경 32일 전", metrics: metrics, action: {}) {
+                CoorditSettingsDetailRow(title: "비밀번호 변경", subtitle: "마지막 변경 32일 전", metrics: metrics, action: {
+                    onRouteChange(.myPagePasswordChange)
+                }) {
                     CoorditSettingsChevron(metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
-                CoorditSettingsDetailRow(title: "로그아웃", subtitle: "현재 기기에서 로그아웃", metrics: metrics, action: {}) {
+                CoorditSettingsDetailRow(title: "로그아웃", subtitle: "현재 기기에서 로그아웃", metrics: metrics, action: {
+                    onRouteChange(.myPageLogout)
+                }) {
                     CoorditSettingsChevron(metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
-                CoorditSettingsDetailRow(title: "회원 탈퇴", subtitle: "계정 및 데이터 삭제", metrics: metrics, titleColor: CoorditSettingsStyle.danger, action: {}) {
+                CoorditSettingsDetailRow(title: "회원 탈퇴", subtitle: "계정 및 데이터 삭제", metrics: metrics, titleColor: CoorditSettingsStyle.danger, action: {
+                    onRouteChange(.myPageAccountDeletion)
+                }) {
                     CoorditSettingsChevron(metrics: metrics, color: CoorditSettingsStyle.danger)
                 }
             }
@@ -151,14 +251,15 @@ struct CoorditMyPageFamilyView: View {
     private func bodyInfo(metrics: CoorditResponsiveMetrics) -> some View {
         VStack(spacing: metrics.value(27)) {
             pageHeader("내 신체 정보", metrics: metrics)
+            backendConnectionStatus(metrics: metrics)
 
             CoorditSettingsCard(metrics: metrics) {
                 CoorditSettingsDetailRow(title: "키", metrics: metrics) {
-                    CoorditSettingsValuePill(text: "177 cm", metrics: metrics)
+                    CoorditSettingsValuePill(text: "미등록", metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
                 CoorditSettingsDetailRow(title: "몸무게", metrics: metrics) {
-                    CoorditSettingsValuePill(text: "68 kg", metrics: metrics)
+                    CoorditSettingsValuePill(text: "미등록", metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
                 CoorditSettingsDetailRow(title: "성별", metrics: metrics) {
@@ -169,7 +270,9 @@ struct CoorditMyPageFamilyView: View {
                     CoorditSettingsValuePill(text: "1996", metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
-                CoorditSettingsDetailRow(title: "신체 치수 관리", subtitle: "어깨, 가슴, 허리 등", metrics: metrics, action: {}) {
+                CoorditSettingsDetailRow(title: "신체 치수 관리", subtitle: "어깨, 가슴, 허리 등", metrics: metrics, action: {
+                    onRouteChange(.myPageBodyMeasurements)
+                }) {
                     CoorditSettingsChevron(metrics: metrics)
                 }
             }
