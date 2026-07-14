@@ -1,0 +1,158 @@
+#if canImport(XCTest)
+import XCTest
+
+final class CoorditMyPageNestedNavigationUITests: XCTestCase {
+    private struct Destination {
+        let parentRoute: String
+        let rowLabel: String
+        let route: String
+    }
+
+    private let destinations = [
+        Destination(parentRoute: "mypage-account", rowLabel: "프로필 수정", route: "mypage-profile-edit"),
+        Destination(parentRoute: "mypage-account", rowLabel: "비밀번호 변경", route: "mypage-password-change"),
+        Destination(parentRoute: "mypage-account", rowLabel: "로그아웃", route: "mypage-logout"),
+        Destination(parentRoute: "mypage-account", rowLabel: "회원 탈퇴", route: "mypage-account-deletion"),
+        Destination(parentRoute: "mypage-body", rowLabel: "신체 치수 관리", route: "mypage-body-measurements"),
+        Destination(parentRoute: "mypage-privacy", rowLabel: "개인정보 처리방침", route: "mypage-privacy-policy"),
+        Destination(parentRoute: "mypage-privacy", rowLabel: "서비스 이용약관", route: "mypage-terms"),
+        Destination(parentRoute: "mypage-app-settings", rowLabel: "문의하기", route: "mypage-contact"),
+        Destination(parentRoute: "mypage-app-settings", rowLabel: "버그 신고", route: "mypage-bug-report"),
+    ]
+
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+    }
+
+    func testEveryChevronRowOpensItsDestination() throws {
+        for destination in destinations {
+            let app = launchApp(at: destination.parentRoute)
+            assertScreen(destination.parentRoute, in: app)
+
+            let row = app.buttons[destination.rowLabel]
+            XCTAssertTrue(row.waitForExistence(timeout: 5), "Missing row: \(destination.rowLabel)")
+            tap(row, in: app)
+
+            assertScreen(destination.route, in: app)
+            app.terminate()
+            XCTAssertTrue(app.wait(for: .notRunning, timeout: 5))
+        }
+    }
+
+    func testEditableAndConfirmationDestinationsExposeWorkingControls() throws {
+        var app = launchApp(at: "mypage-profile-edit")
+        completeAction("프로필 저장", expecting: "mypage-profile-saved", in: app)
+
+        app = launchApp(at: "mypage-password-change")
+        typeText("current-password", into: "mypage-password-current", in: app)
+        typeText("new-password", into: "mypage-password-new", in: app)
+        typeText("new-password", into: "mypage-password-confirm", in: app)
+        completeAction("비밀번호 변경", expecting: "mypage-password-changed", in: app)
+
+        app = launchApp(at: "mypage-logout")
+        completeAction("로그아웃 확인", expecting: "mypage-logout-complete", in: app)
+
+        app = launchApp(at: "mypage-account-deletion")
+        let acknowledgement = app.buttons["삭제되는 데이터와 복구 불가 안내를 확인했습니다."]
+        XCTAssertTrue(acknowledgement.waitForExistence(timeout: 5))
+        tap(acknowledgement, in: app)
+        completeAction("회원 탈퇴 확인", expecting: "mypage-account-deletion-complete", in: app)
+
+        app = launchApp(at: "mypage-body-measurements")
+        completeAction("신체 치수 저장", expecting: "mypage-body-measurements-saved", in: app)
+
+        app = launchApp(at: "mypage-contact")
+        typeText("사이즈 추천 문의", into: "mypage-contact-subject", in: app)
+        typeText("추천 결과를 확인하고 싶어요.", into: "mypage-contact-message", in: app)
+        completeAction("문의 보내기", expecting: "mypage-contact-sent", in: app)
+
+        app = launchApp(at: "mypage-bug-report")
+        typeText("화면이 멈춰요", into: "mypage-bug-summary", in: app)
+        typeText("앱 설정에서 저장 버튼을 눌렀어요.", into: "mypage-bug-steps", in: app)
+        completeAction("버그 신고 보내기", expecting: "mypage-bug-report-sent", in: app)
+    }
+
+    func testContactFormCanSubmitAfterTypingOnCompactScreen() throws {
+        let app = launchApp(at: "mypage-contact")
+        typeText("사이즈 추천 문의", into: "mypage-contact-subject", in: app)
+        typeText("추천 결과를 확인하고 싶어요.", into: "mypage-contact-message", in: app)
+        completeAction("문의 보내기", expecting: "mypage-contact-sent", in: app)
+    }
+
+    func testPasswordFormCanSubmitAfterTypingOnCompactScreen() throws {
+        let app = launchApp(at: "mypage-password-change")
+        typeText("current-password", into: "mypage-password-current", in: app)
+        typeText("new-password", into: "mypage-password-new", in: app)
+        typeText("new-password", into: "mypage-password-confirm", in: app)
+        completeAction("비밀번호 변경", expecting: "mypage-password-changed", in: app)
+    }
+
+    private func launchApp(at route: String) -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--coordit-ui-testing",
+            "--coordit-start-route",
+            route,
+        ]
+        app.launch()
+        return app
+    }
+
+    private func assertScreen(
+        _ route: String,
+        in app: XCUIApplication,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertTrue(
+            element("coordit-screen-\(route)", in: app).waitForExistence(timeout: 5),
+            "Missing route: \(route)",
+            file: file,
+            line: line
+        )
+    }
+
+    private func element(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+    }
+
+    private func typeText(_ text: String, into identifier: String, in app: XCUIApplication) {
+        let field = element(identifier, in: app)
+        XCTAssertTrue(field.waitForExistence(timeout: 5), "Missing field: \(identifier)")
+        makeHittable(field, in: app)
+        field.tap()
+        field.typeText(text)
+    }
+
+    private func completeAction(_ label: String, expecting identifier: String, in app: XCUIApplication) {
+        let action = app.buttons[label]
+        XCTAssertTrue(action.waitForExistence(timeout: 5), "Missing action: \(label)")
+        tap(action, in: app)
+        XCTAssertTrue(
+            element(identifier, in: app).waitForExistence(timeout: 5),
+            "Missing completion state: \(identifier)"
+        )
+        app.terminate()
+        XCTAssertTrue(app.wait(for: .notRunning, timeout: 5))
+    }
+
+    private func tap(_ element: XCUIElement, in app: XCUIApplication) {
+        makeHittable(element, in: app)
+        XCTAssertTrue(element.isHittable, "Element is not hittable: \(element)")
+        element.tap()
+    }
+
+    private func makeHittable(_ element: XCUIElement, in app: XCUIApplication) {
+        if app.keyboards.firstMatch.exists {
+            let dismissKeyboard = app.buttons["coordit-keyboard-dismiss"]
+            if dismissKeyboard.waitForExistence(timeout: 1), dismissKeyboard.isHittable {
+                dismissKeyboard.tap()
+            }
+        }
+
+        for _ in 0..<5 where !element.isHittable {
+            app.swipeUp()
+        }
+    }
+}
+#endif

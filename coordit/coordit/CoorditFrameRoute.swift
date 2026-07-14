@@ -18,6 +18,15 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
     case myPagePrivacy = "mypage-privacy"
     case myPageAppSettings = "mypage-app-settings"
     case myPageNotifications = "mypage-notifications"
+    case myPageProfileEdit = "mypage-profile-edit"
+    case myPagePasswordChange = "mypage-password-change"
+    case myPageLogout = "mypage-logout"
+    case myPageAccountDeletion = "mypage-account-deletion"
+    case myPageBodyMeasurements = "mypage-body-measurements"
+    case myPagePrivacyPolicy = "mypage-privacy-policy"
+    case myPageTerms = "mypage-terms"
+    case myPageContact = "mypage-contact"
+    case myPageBugReport = "mypage-bug-report"
     case closetOverview = "closet-overview"
     case closetDetailTop = "closet-detail-top"
     case closetDetailBottom = "closet-detail-bottom"
@@ -60,6 +69,15 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
              .myPagePrivacy,
              .myPageAppSettings,
              .myPageNotifications,
+             .myPageProfileEdit,
+             .myPagePasswordChange,
+             .myPageLogout,
+             .myPageAccountDeletion,
+             .myPageBodyMeasurements,
+             .myPagePrivacyPolicy,
+             .myPageTerms,
+             .myPageContact,
+             .myPageBugReport,
              .closetDetailTop,
              .closetDetailBottom:
             "coordit-route-placeholder"
@@ -85,7 +103,16 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
              .myPageAccount,
              .myPagePrivacy,
              .myPageAppSettings,
-             .myPageNotifications:
+             .myPageNotifications,
+             .myPageProfileEdit,
+             .myPagePasswordChange,
+             .myPageLogout,
+             .myPageAccountDeletion,
+             .myPageBodyMeasurements,
+             .myPagePrivacyPolicy,
+             .myPageTerms,
+             .myPageContact,
+             .myPageBugReport:
             nil
         }
     }

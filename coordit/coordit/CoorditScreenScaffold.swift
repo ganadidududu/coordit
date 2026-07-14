@@ -55,7 +55,7 @@ struct CoorditScreenScaffold<Content: View>: View {
                 .frame(width: geometry.size.width, height: geometry.size.height)
             }
         }
-        .ignoresSafeArea()
+        .ignoresSafeArea(.container, edges: .all)
         .preferredColorScheme(.light)
     }
 }

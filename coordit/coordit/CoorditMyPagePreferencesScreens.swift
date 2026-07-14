@@ -7,11 +7,15 @@ extension CoorditMyPageFamilyView {
             pageHeader("개인정보/보안", metrics: metrics)
 
             CoorditSettingsCard(metrics: metrics) {
-                CoorditSettingsDetailRow(title: "개인정보 처리방침", subtitle: "서비스 데이터 처리 기준", metrics: metrics, action: {}) {
+                CoorditSettingsDetailRow(title: "개인정보 처리방침", subtitle: "서비스 데이터 처리 기준", metrics: metrics, action: {
+                    onRouteChange(.myPagePrivacyPolicy)
+                }) {
                     CoorditSettingsChevron(metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
-                CoorditSettingsDetailRow(title: "서비스 이용약관", subtitle: "2026.06.30 기준", metrics: metrics, action: {}) {
+                CoorditSettingsDetailRow(title: "서비스 이용약관", subtitle: "2026.06.30 기준", metrics: metrics, action: {
+                    onRouteChange(.myPageTerms)
+                }) {
                     CoorditSettingsChevron(metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
@@ -57,11 +61,15 @@ extension CoorditMyPageFamilyView {
                     CoorditSettingsValuePill(text: "v1.0.0 beta", metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
-                CoorditSettingsDetailRow(title: "문의하기", subtitle: "support@coordit.app", metrics: metrics, action: {}) {
+                CoorditSettingsDetailRow(title: "문의하기", subtitle: "support@coordit.app", metrics: metrics, action: {
+                    onRouteChange(.myPageContact)
+                }) {
                     CoorditSettingsChevron(metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
-                CoorditSettingsDetailRow(title: "버그 신고", subtitle: "문제 화면과 로그 첨부", metrics: metrics, action: {}) {
+                CoorditSettingsDetailRow(title: "버그 신고", subtitle: "문제 화면과 로그 첨부", metrics: metrics, action: {
+                    onRouteChange(.myPageBugReport)
+                }) {
                     CoorditSettingsChevron(metrics: metrics)
                 }
             }
