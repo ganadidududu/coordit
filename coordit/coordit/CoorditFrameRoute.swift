@@ -41,18 +41,18 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
 
     static func testingLaunchRoute(arguments: [String] = ProcessInfo.processInfo.arguments) -> Self {
         #if DEBUG
-        guard arguments.contains("--coordit-ui-testing") else { return .main01 }
+        guard arguments.contains("--coordit-ui-testing") else { return .splash }
         guard
             let markerIndex = arguments.firstIndex(of: "--coordit-start-route"),
             arguments.indices.contains(arguments.index(after: markerIndex))
         else {
-            return .main01
+            return .splash
         }
 
         let routeValue = arguments[arguments.index(after: markerIndex)]
-        return Self(rawValue: routeValue) ?? .main01
+        return Self(rawValue: routeValue) ?? .splash
         #else
-        return .main01
+        return .splash
         #endif
     }
 

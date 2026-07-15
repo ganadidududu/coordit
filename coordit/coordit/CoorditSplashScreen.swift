@@ -39,87 +39,66 @@ struct CoorditSplashScreen: View {
                     Spacer(minLength: 0)
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    onRouteChange(.main04)
+                }
+                .accessibilityAction {
+                    onRouteChange(.main04)
+                }
+                .accessibilityIdentifier("coordit-screen-splash")
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
+            .ignoresSafeArea()
+            .overlay(alignment: .bottom) {
+                Button("로그인/회원가입") {
+                    onRouteChange(.myPageAccount)
+                }
+                .font(CoorditTypography.gmarketMedium(size: metrics.value(16), relativeTo: .headline))
+                .foregroundStyle(Main01DesignTokens.Colors.chrome)
+                .frame(
+                    width: signupButtonWidth(for: geometry.size),
+                    height: signupButtonHeight(for: metrics)
+                )
+                .background(
+                    Main01DesignTokens.Colors.surface,
+                    in: RoundedRectangle(cornerRadius: metrics.value(14), style: .continuous)
+                )
+                .shadow(
+                    color: Main01DesignTokens.Colors.chrome.opacity(0.16),
+                    radius: metrics.value(16),
+                    y: metrics.value(8)
+                )
+                .buttonStyle(.plain)
+                .padding(.bottom, geometry.safeAreaInsets.bottom + metrics.value(30))
+                .accessibilityIdentifier("splash-signup-entry")
+            }
         }
         .ignoresSafeArea()
         .preferredColorScheme(.light)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            onRouteChange(.main04)
-        }
-        .accessibilityAction {
-            onRouteChange(.main04)
-        }
-        .accessibilityIdentifier("coordit-screen-splash")
+    }
+
+    private func signupButtonWidth(for size: CGSize) -> CGFloat {
+        min(max(size.width * 0.52, 168), 228)
+    }
+
+    private func signupButtonHeight(for metrics: CoorditResponsiveMetrics) -> CGFloat {
+        min(max(metrics.value(52), 48), 58)
     }
 }
 
 private struct CoorditSplashBackground: View {
     var body: some View {
         GeometryReader { geometry in
-            let metrics = CoorditResponsiveMetrics(size: geometry.size)
-
-            ZStack {
-                LinearGradient(
-                    stops: [
-                        .init(color: Main01DesignTokens.Colors.rgb(12, 23, 82), location: 0.0),
-                        .init(color: Main01DesignTokens.Colors.rgb(17, 30, 90), location: 0.20),
-                        .init(color: Main01DesignTokens.Colors.rgb(0, 12, 64), location: 0.50),
-                        .init(color: Main01DesignTokens.Colors.rgb(103, 113, 150), location: 0.79),
-                        .init(color: Main01DesignTokens.Colors.rgb(247, 248, 248), location: 1.0),
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-
-                RadialGradient(
-                    colors: [
-                        .white.opacity(0.0),
-                        .white.opacity(0.07),
-                        .white.opacity(0.23),
-                    ],
-                    center: .center,
-                    startRadius: 80,
-                    endRadius: 260
-                )
-                .blendMode(.screen)
-
-                Canvas { context, size in
-                    let columns = max(Int(size.width), 1)
-                    let rows = max(Int(size.height), 1)
-
-                    for row in 0..<rows {
-                        for column in 0..<columns {
-                            let seed = Double((row * 97 + column * 193) % 1223)
-                            let verticalBias = 1 - min(Double(row) / max(Double(rows), 1), 1)
-                            let opacity = 0.012 + (sin(seed) + 1) * 0.024 + verticalBias * 0.028
-                            let rect = CGRect(x: CGFloat(column), y: CGFloat(row), width: 0.72, height: 0.72)
-                            context.fill(Path(rect), with: .color(.white.opacity(opacity)))
-                        }
-                    }
-                }
-                .blendMode(.overlay)
-
-                LinearGradient(
-                    stops: [
-                        .init(color: .black.opacity(0.58), location: 0.0),
-                        .init(color: .black.opacity(0.22), location: 0.018),
-                        .init(color: .clear, location: 0.070),
-                        .init(color: .clear, location: 0.930),
-                        .init(color: .black.opacity(0.22), location: 0.982),
-                        .init(color: .black.opacity(0.58), location: 1.0),
-                    ],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-
-                RoundedRectangle(cornerRadius: metrics.value(54), style: .continuous)
-                    .stroke(.black.opacity(0.50), lineWidth: metrics.value(4))
-                    .blur(radius: metrics.value(0.45))
-                    .padding(metrics.value(1.2))
-            }
-            .frame(width: geometry.size.width, height: geometry.size.height)
+            Image(CoorditAssetNames.splashReference)
+                .resizable()
+                .scaledToFill()
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .clipped()
+                .background(Main01DesignTokens.Colors.chrome)
+                .accessibilityHidden(true)
+                .allowsHitTesting(false)
+                .frame(width: geometry.size.width, height: geometry.size.height)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -144,6 +123,12 @@ private struct CoorditSplashLogo: View {
             logoO(assetName: "FigmaLogoO2", sizeScale: logoScale)
                 .offset(x: 45.5812 * logoScale, y: 12.1851 * logoScale)
         }
+        .frame(
+            width: 139 * logoScale,
+            height: 38.8087 * logoScale,
+            alignment: .topLeading
+        )
+        .offset(x: 4.08 * logoScale)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("COORDIT"))
     }

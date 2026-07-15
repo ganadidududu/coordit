@@ -159,6 +159,7 @@ struct CoorditMyPageFamilyView: View {
     private func myPageLanding(metrics: CoorditResponsiveMetrics) -> some View {
         VStack(spacing: metrics.value(10)) {
             pageHeader("MY PAGE", metrics: metrics, backRoute: .main04)
+            myPageLoginEntry(metrics: metrics)
 
             VStack(spacing: metrics.value(10)) {
                 CoorditSettingsMenuRow(
@@ -206,8 +207,44 @@ struct CoorditMyPageFamilyView: View {
                     onRouteChange(.myPageAppSettings)
                 }
             }
-            .padding(.top, metrics.value(121))
+            .padding(.top, metrics.value(19))
         }
+    }
+
+    private func myPageLoginEntry(metrics: CoorditResponsiveMetrics) -> some View {
+        CoorditSettingsCard(metrics: metrics) {
+            VStack(alignment: .leading, spacing: metrics.value(13)) {
+                HStack(spacing: metrics.value(10)) {
+                    Image(systemName: backendSession.isAuthenticated ? "checkmark.seal.fill" : "person.crop.circle.badge.plus")
+                        .font(.system(size: metrics.value(21), weight: .semibold))
+                        .foregroundStyle(CoorditSettingsStyle.ink)
+                        .frame(width: metrics.value(32), height: metrics.value(32))
+
+                    VStack(alignment: .leading, spacing: metrics.value(4)) {
+                        Text(backendSession.isAuthenticated ? backendSession.displayNameText : "로그인하고 내 핏 기록을 이어가세요")
+                            .font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .subheadline))
+                            .foregroundStyle(.black)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                        Text(backendSession.isAuthenticated ? backendSession.emailText : "계정으로 신체 정보와 추천 기록을 저장해요")
+                            .font(CoorditTypography.gmarketMedium(size: metrics.value(9), relativeTo: .caption))
+                            .foregroundStyle(CoorditSettingsStyle.muted)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.78)
+                    }
+                }
+
+                CoorditSettingsPrimaryButton(
+                    title: backendSession.isAuthenticated ? "계정 관리" : "로그인 / 회원가입",
+                    identifier: "mypage-login-entry",
+                    metrics: metrics
+                ) {
+                    onRouteChange(.myPageAccount)
+                }
+            }
+            .padding(.horizontal, metrics.value(13))
+        }
+        .padding(.top, metrics.value(18))
     }
 
     private func account(metrics: CoorditResponsiveMetrics) -> some View {

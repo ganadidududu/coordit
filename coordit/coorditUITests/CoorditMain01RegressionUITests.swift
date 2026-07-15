@@ -8,6 +8,11 @@ final class CoorditMain01RegressionUITests: XCTestCase {
 
     func testMain01BaselineStillReachable() throws {
         let app = XCUIApplication()
+        app.launchArguments = [
+            "--coordit-ui-testing",
+            "--coordit-start-route",
+            "main01",
+        ]
         app.launch()
 
         XCTAssertTrue(element("main01-screen", in: app).waitForExistence(timeout: 5))

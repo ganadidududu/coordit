@@ -1,4 +1,5 @@
 enum CoorditAssetNames {
+    static let splashReference = "CoorditSplashReference"
     static let closetFitBottom = "CoorditClosetFitBottom"
     static let closetFitTop = "CoorditClosetFitTop"
     static let fitDetail = "CoorditFitDetail"
