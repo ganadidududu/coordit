@@ -20,8 +20,8 @@ enum CoorditClosetAddMethod: String, CaseIterable, Identifiable {
     var description: String {
         switch self {
         case .link: "상품 링크에서 사이즈 정보를 불러와요."
-        case .photo: "사이즈표와 옷 사진을 함께 분석해요."
-        case .manual: "옷 사진과 실측 사이즈를 직접 입력해요."
+        case .photo: "사이즈표 사진을 분석해요."
+        case .manual: "실측 사이즈를 직접 입력해요."
         }
     }
 
@@ -266,7 +266,7 @@ private struct CoorditClosetPhotoInputScreen: View {
 
     private var isReady: Bool {
         !draft.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        draft.sizeChartImageData != nil && draft.garmentImageData != nil
+        draft.sizeChartImageData != nil
     }
 
     var body: some View {
@@ -275,23 +275,14 @@ private struct CoorditClosetPhotoInputScreen: View {
                 CoorditClosetTitleBar(title: "PHOTO INPUT", metrics: metrics, onBack: onBack)
                 CoorditClosetBasicsCard(draft: $draft, metrics: metrics)
 
-                CoorditClosetFormCard(title: "사진 첨부", subtitle: "정확한 분석을 위해 두 장을 모두 첨부해주세요.", metrics: metrics) {
-                    HStack(spacing: metrics.value(10)) {
-                        CoorditClosetPhotoPickerSlot(
-                            title: "사이즈표",
-                            subtitle: "표 전체가 보이게",
-                            imageData: $draft.sizeChartImageData,
-                            metrics: metrics,
-                            identifier: "closet-size-chart-photo"
-                        )
-                        CoorditClosetPhotoPickerSlot(
-                            title: "옷 사진",
-                            subtitle: "옷의 형태가 보이게",
-                            imageData: $draft.garmentImageData,
-                            metrics: metrics,
-                            identifier: "closet-garment-photo"
-                        )
-                    }
+                CoorditClosetFormCard(title: "사진 첨부", subtitle: "사이즈표 전체가 보이게 첨부해주세요.", metrics: metrics) {
+                    CoorditClosetPhotoPickerSlot(
+                        title: "사이즈표",
+                        subtitle: "표 전체가 보이게",
+                        imageData: $draft.sizeChartImageData,
+                        metrics: metrics,
+                        identifier: "closet-size-chart-photo"
+                    )
                 }
 
                 CoorditClosetSubmitButton(title: "사진 분석하기", isEnabled: isReady, metrics: metrics, action: onSubmit)
@@ -301,6 +292,21 @@ private struct CoorditClosetPhotoInputScreen: View {
         }
         .scrollDismissesKeyboard(.immediately)
         .accessibilityIdentifier("coordit-screen-closet-add-photo")
+        .task {
+            injectSizeChartFixtureIfRequested()
+        }
+    }
+
+    private func injectSizeChartFixtureIfRequested() {
+#if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        guard arguments.contains("--coordit-ui-testing"),
+              arguments.contains("--coordit-test-valid-size-chart"),
+              draft.sizeChartImageData == nil,
+              let data = Data(base64Encoded: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="),
+              UIImage(data: data) != nil else { return }
+        draft.sizeChartImageData = data
+#endif
     }
 }
 
@@ -321,7 +327,6 @@ private struct CoorditClosetManualInputScreen: View {
 
     private var isReady: Bool {
         !draft.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        draft.garmentImageData != nil &&
         measurementFields.allSatisfy { !draft[keyPath: $0.1].isEmpty }
     }
 
@@ -330,17 +335,6 @@ private struct CoorditClosetManualInputScreen: View {
             VStack(spacing: metrics.value(16)) {
                 CoorditClosetTitleBar(title: "MANUAL INPUT", metrics: metrics, onBack: onBack)
                 CoorditClosetBasicsCard(draft: $draft, metrics: metrics)
-
-                CoorditClosetFormCard(title: "옷 사진", subtitle: "등록할 옷을 한 장 첨부해주세요.", metrics: metrics) {
-                    CoorditClosetPhotoPickerSlot(
-                        title: "옷 사진",
-                        subtitle: "옷의 형태가 보이게",
-                        imageData: $draft.garmentImageData,
-                        metrics: metrics,
-                        identifier: "closet-manual-garment-photo"
-                    )
-                    .frame(maxWidth: .infinity)
-                }
 
                 CoorditClosetFormCard(title: "실측 사이즈", subtitle: "단위는 cm로 입력해주세요.", metrics: metrics) {
                     LazyVGrid(
@@ -544,6 +538,7 @@ private struct CoorditClosetPhotoPickerSlot: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(identifier)
+        .accessibilityValue(imageData == nil ? "empty" : "selected")
         .onChange(of: pickerItem) { _, newItem in
             guard let newItem else { return }
             Task {

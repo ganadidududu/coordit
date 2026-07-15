@@ -54,23 +54,30 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertTrue(element("Wide Denim", in: app).waitForExistence(timeout: 5))
     }
 
-    func testClosetAddMethodShowsRequiredPhotoInputs() throws {
-        var app = launchApp(at: "closet-overview")
-        assertScreen("closet-overview", in: app)
-
-        let addGarment = app.buttons["closet-add-garment"]
-        XCTAssertTrue(addGarment.waitForExistence(timeout: 5))
-        addGarment.tap()
+    func testClosetAddInputsMatchRelocatedPhotoRequirements() throws {
+        var app = launchApp(at: "closet-add-method")
         assertScreen("closet-add-method", in: app)
 
         app.terminate()
         app = launchApp(at: "closet-add-photo")
         XCTAssertTrue(element("closet-size-chart-photo", in: app).waitForExistence(timeout: 5))
-        XCTAssertTrue(element("closet-garment-photo", in: app).waitForExistence(timeout: 5))
+        XCTAssertFalse(
+            element("closet-garment-photo", in: app).exists,
+            "Photo input must reserve garment photos for FIT DETAIL."
+        )
 
         app.terminate()
         app = launchApp(at: "closet-add-manual")
-        XCTAssertTrue(element("closet-manual-garment-photo", in: app).waitForExistence(timeout: 5))
+        XCTAssertFalse(
+            element("closet-manual-garment-photo", in: app).exists,
+            "Manual input must reserve garment photos for FIT DETAIL."
+        )
+        for index in 0..<4 {
+            XCTAssertTrue(
+                app.textFields["closet-manual-measurement-\(index)"].waitForExistence(timeout: 5),
+                "Manual input must retain measurement field \(index)."
+            )
+        }
     }
 
     func testClosetLinkAddShowsResultAndPersistsInOverview() throws {
