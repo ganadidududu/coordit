@@ -39,6 +39,21 @@ final class CoorditMyPageNestedNavigationUITests: XCTestCase {
         }
     }
 
+    func testMyPageLoginEntryOpensAccountLogin() throws {
+        let app = launchApp(at: "mypage")
+        assertScreen("mypage", in: app)
+
+        let loginEntry = app.buttons["로그인 / 회원가입"]
+        XCTAssertTrue(loginEntry.waitForExistence(timeout: 5), "Missing My Page login entry")
+        tap(loginEntry, in: app)
+
+        assertScreen("mypage-account", in: app)
+        XCTAssertTrue(element("mypage-backend-email", in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(element("mypage-backend-password", in: app).waitForExistence(timeout: 5))
+        app.terminate()
+        XCTAssertTrue(app.wait(for: .notRunning, timeout: 5))
+    }
+
     func testEditableAndConfirmationDestinationsExposeWorkingControls() throws {
         var app = launchApp(at: "mypage-profile-edit")
         completeAction("프로필 저장", expecting: "mypage-profile-saved", in: app)
