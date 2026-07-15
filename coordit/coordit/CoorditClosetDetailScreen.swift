@@ -2,7 +2,12 @@ import SwiftUI
 
 #if os(iOS)
 extension CoorditClosetFamilyView {
-    func detailScreen(metrics: CoorditResponsiveMetrics, variant: CoorditClosetCategory) -> some View {
+    func detailScreen(
+        metrics: CoorditResponsiveMetrics,
+        variant: CoorditClosetCategory,
+        item: CoorditClosetItem,
+        screenIdentifier: String
+    ) -> some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: metrics.value(20)) {
                 CoorditClosetTitleBar(title: "FIT DETAIL", metrics: metrics) {
@@ -10,16 +15,11 @@ extension CoorditClosetFamilyView {
                 }
 
                 HStack(alignment: .top, spacing: metrics.value(13)) {
-                    RoundedRectangle(cornerRadius: metrics.value(8))
-                        .fill(Color(red: 231 / 255, green: 234 / 255, blue: 241 / 255))
+                    CoorditClosetGarmentArtwork(imageData: item.imageData, metrics: metrics)
                         .frame(width: metrics.value(168), height: metrics.value(158))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: metrics.value(8))
-                                .stroke(Color(red: 214 / 255, green: 220 / 255, blue: 232 / 255), lineWidth: metrics.value(0.7))
-                        )
 
                     VStack(spacing: metrics.value(10)) {
-                        Text("Wide Denim")
+                        Text(item.name)
                             .font(CoorditTypography.gmarketBold(size: metrics.value(23)))
                             .foregroundStyle(.black)
                         Image(CoorditAssetNames.stars)
@@ -42,7 +42,7 @@ extension CoorditClosetFamilyView {
                         .background(CoorditClosetColors.card)
                         .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
 
-                    scorePanel(metrics: metrics, variant: variant)
+                    scorePanel(metrics: metrics, variant: variant, score: item.score)
                         .frame(height: metrics.value(230))
                 }
                 .padding(.top, metrics.value(6))
@@ -70,10 +70,10 @@ extension CoorditClosetFamilyView {
             .padding(.horizontal, metrics.value(27))
             .padding(.bottom, metrics.value(28))
         }
-        .accessibilityIdentifier("coordit-screen-\(variant == .top ? "closet-detail-top" : "closet-detail-bottom")")
+        .accessibilityIdentifier("coordit-screen-\(screenIdentifier)")
     }
 
-    private func scorePanel(metrics: CoorditResponsiveMetrics, variant: CoorditClosetCategory) -> some View {
+    private func scorePanel(metrics: CoorditResponsiveMetrics, variant: CoorditClosetCategory, score: Int) -> some View {
         VStack(alignment: .leading, spacing: metrics.value(8)) {
             Text("과거 기준치 기준")
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(10)))
@@ -82,7 +82,7 @@ extension CoorditClosetFamilyView {
                 .font(CoorditTypography.climate2019(size: metrics.value(22)))
                 .foregroundStyle(CoorditClosetColors.navy)
             metricsGrid(metrics: metrics, values: scoreMetrics(for: variant))
-            CoorditClosetPrimaryButton(title: "총점 |", metrics: metrics, height: 38) {}
+            CoorditClosetPrimaryButton(title: "총점 | \(score)", metrics: metrics, height: 38) {}
         }
         .padding(metrics.value(11))
         .frame(maxWidth: .infinity, alignment: .leading)

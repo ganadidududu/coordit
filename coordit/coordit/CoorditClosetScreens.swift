@@ -20,18 +20,39 @@ struct CoorditClosetItem: Identifiable {
     let score: Int
     let scoreColor: Color
     let route: CoorditFrameRoute
+    let imageData: Data?
+
+    static let seedItems = [
+        CoorditClosetItem(id: "oxford", name: "Oxford Shirt", category: .top, score: 94, scoreColor: CoorditClosetColors.blue, route: .closetDetailTop, imageData: nil),
+        CoorditClosetItem(id: "knit", name: "Relaxed Knit", category: .top, score: 88, scoreColor: CoorditClosetColors.cyan, route: .closetDetailTop, imageData: nil),
+        CoorditClosetItem(id: "denim", name: "Wide Denim", category: .bottom, score: 91, scoreColor: CoorditClosetColors.blue, route: .closetDetailBottom, imageData: nil),
+        CoorditClosetItem(id: "slacks", name: "Black Slacks", category: .bottom, score: 0, scoreColor: CoorditClosetColors.navy, route: .closetDetailBottom, imageData: nil),
+    ]
 }
 
 struct CoorditClosetFamilyView: View {
     let route: CoorditFrameRoute
     let onRouteChange: (CoorditFrameRoute) -> Void
 
-    @State private var selectedCategory: CoorditClosetCategory = .top
+    @Binding var items: [CoorditClosetItem]
+    @Binding var selectedItemID: String?
+    @Binding var draft: CoorditClosetDraft
+
+    @State var selectedCategory: CoorditClosetCategory = .top
     @State private var searchText = ""
     @State var detailVariant: CoorditClosetCategory
 
-    init(route: CoorditFrameRoute, onRouteChange: @escaping (CoorditFrameRoute) -> Void) {
+    init(
+        route: CoorditFrameRoute,
+        items: Binding<[CoorditClosetItem]>,
+        selectedItemID: Binding<String?>,
+        draft: Binding<CoorditClosetDraft>,
+        onRouteChange: @escaping (CoorditFrameRoute) -> Void
+    ) {
         self.route = route
+        _items = items
+        _selectedItemID = selectedItemID
+        _draft = draft
         self.onRouteChange = onRouteChange
         _detailVariant = State(initialValue: route == .closetDetailBottom ? .bottom : .top)
     }
@@ -40,11 +61,38 @@ struct CoorditClosetFamilyView: View {
         CoorditScreenScaffold(route: route, onRouteChange: onRouteChange, contentTop: 115) { metrics in
             switch route {
             case .closetDetailTop:
-                detailScreen(metrics: metrics, variant: detailVariant)
+                detailScreen(
+                    metrics: metrics,
+                    variant: detailVariant,
+                    item: selectedItem(for: .top),
+                    screenIdentifier: route.rawValue
+                )
                     .onAppear { detailVariant = .top }
             case .closetDetailBottom:
-                detailScreen(metrics: metrics, variant: detailVariant)
+                detailScreen(
+                    metrics: metrics,
+                    variant: detailVariant,
+                    item: selectedItem(for: .bottom),
+                    screenIdentifier: route.rawValue
+                )
                     .onAppear { detailVariant = .bottom }
+            case .closetAddMethod:
+                addMethodScreen(metrics: metrics)
+            case .closetAddLink:
+                addLinkScreen(metrics: metrics)
+            case .closetAddPhoto:
+                addPhotoScreen(metrics: metrics)
+            case .closetAddManual:
+                addManualScreen(metrics: metrics)
+            case .closetAddLoading:
+                addLoadingScreen(metrics: metrics)
+            case .closetAddResult:
+                detailScreen(
+                    metrics: metrics,
+                    variant: selectedItem?.category ?? draft.category,
+                    item: selectedItem ?? draft.previewItem,
+                    screenIdentifier: route.rawValue
+                )
             default:
                 overviewScreen(metrics: metrics)
             }
@@ -77,7 +125,10 @@ struct CoorditClosetFamilyView: View {
                 .background(CoorditClosetColors.card)
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
 
-                CoorditClosetPrimaryButton(title: "새로운 의류 추가하기", metrics: metrics, height: 39) {}
+                CoorditClosetPrimaryButton(title: "새로운 의류 추가하기", metrics: metrics, height: 39) {
+                    draft = CoorditClosetDraft()
+                    onRouteChange(.closetAddMethod)
+                }
                     .accessibilityIdentifier("closet-add-garment")
 
                 searchField(metrics: metrics)
@@ -109,12 +160,6 @@ struct CoorditClosetFamilyView: View {
     }
 
     private var filteredItems: [CoorditClosetItem] {
-        let items = [
-            CoorditClosetItem(id: "oxford", name: "Oxford Shirt", category: .top, score: 94, scoreColor: CoorditClosetColors.blue, route: .closetDetailTop),
-            CoorditClosetItem(id: "knit", name: "Relaxed Knit", category: .top, score: 88, scoreColor: CoorditClosetColors.cyan, route: .closetDetailTop),
-            CoorditClosetItem(id: "denim", name: "Wide Denim", category: .bottom, score: 91, scoreColor: CoorditClosetColors.blue, route: .closetDetailBottom),
-            CoorditClosetItem(id: "slacks", name: "Black Slacks", category: .bottom, score: 0, scoreColor: CoorditClosetColors.navy, route: .closetDetailBottom),
-        ]
         guard !searchText.isEmpty else { return items }
         return items.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
@@ -131,6 +176,7 @@ struct CoorditClosetFamilyView: View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: metrics.value(10)), GridItem(.flexible())], spacing: metrics.value(8)) {
             ForEach(filteredItems) { item in
                 CoorditClosetGarmentCard(item: item, metrics: metrics) {
+                    selectedItemID = item.id
                     onRouteChange(item.route)
                 }
             }
@@ -153,6 +199,18 @@ struct CoorditClosetFamilyView: View {
         .clipShape(Capsule())
         .shadow(color: .black.opacity(0.08), radius: metrics.value(8), y: metrics.value(3))
         .accessibilityIdentifier("closet-search-field")
+    }
+
+    var selectedItem: CoorditClosetItem? {
+        guard let selectedItemID else { return nil }
+        return items.first { $0.id == selectedItemID }
+    }
+
+    private func selectedItem(for category: CoorditClosetCategory) -> CoorditClosetItem {
+        if let selectedItem, selectedItem.category == category {
+            return selectedItem
+        }
+        return items.first { $0.category == category } ?? CoorditClosetItem.seedItems[0]
     }
 
 }

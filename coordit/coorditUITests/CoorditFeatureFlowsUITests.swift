@@ -54,6 +54,57 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertTrue(element("Wide Denim", in: app).waitForExistence(timeout: 5))
     }
 
+    func testClosetAddMethodShowsRequiredPhotoInputs() throws {
+        var app = launchApp(at: "closet-overview")
+        assertScreen("closet-overview", in: app)
+
+        let addGarment = app.buttons["closet-add-garment"]
+        XCTAssertTrue(addGarment.waitForExistence(timeout: 5))
+        addGarment.tap()
+        assertScreen("closet-add-method", in: app)
+
+        app.terminate()
+        app = launchApp(at: "closet-add-photo")
+        XCTAssertTrue(element("closet-size-chart-photo", in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(element("closet-garment-photo", in: app).waitForExistence(timeout: 5))
+
+        app.terminate()
+        app = launchApp(at: "closet-add-manual")
+        XCTAssertTrue(element("closet-manual-garment-photo", in: app).waitForExistence(timeout: 5))
+    }
+
+    func testClosetLinkAddShowsResultAndPersistsInOverview() throws {
+        let app = launchApp(at: "closet-overview")
+        assertScreen("closet-overview", in: app)
+
+        app.buttons["closet-add-garment"].tap()
+        app.buttons["closet-add-method-link"].tap()
+        assertScreen("closet-add-link", in: app)
+
+        let nameField = app.textFields["closet-garment-name"]
+        XCTAssertTrue(nameField.waitForExistence(timeout: 5))
+        nameField.tap()
+        nameField.typeText("New Shirt")
+
+        let linkField = app.textFields["closet-product-link"]
+        linkField.tap()
+        linkField.typeText("https://coordit.test/item")
+        app.swipeDown()
+
+        let submit = app.buttons["closet-add-submit"]
+        XCTAssertTrue(submit.isEnabled)
+        submit.tap()
+        assertScreen("closet-add-loading", in: app)
+        assertScreen("closet-add-result", in: app)
+        XCTAssertTrue(element("New Shirt", in: app).waitForExistence(timeout: 5))
+
+        let backToCloset = app.buttons["FIT DETAIL"]
+        XCTAssertTrue(backToCloset.waitForExistence(timeout: 5))
+        backToCloset.tap()
+        assertScreen("closet-overview", in: app)
+        XCTAssertTrue(app.buttons["New Shirt"].waitForExistence(timeout: 5))
+    }
+
     private func launchApp(at route: String) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [

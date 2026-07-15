@@ -30,6 +30,12 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
     case closetOverview = "closet-overview"
     case closetDetailTop = "closet-detail-top"
     case closetDetailBottom = "closet-detail-bottom"
+    case closetAddMethod = "closet-add-method"
+    case closetAddLink = "closet-add-link"
+    case closetAddPhoto = "closet-add-photo"
+    case closetAddManual = "closet-add-manual"
+    case closetAddLoading = "closet-add-loading"
+    case closetAddResult = "closet-add-result"
 
     var id: Self { self }
 
@@ -79,7 +85,13 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
              .myPageContact,
              .myPageBugReport,
              .closetDetailTop,
-             .closetDetailBottom:
+             .closetDetailBottom,
+             .closetAddMethod,
+             .closetAddLink,
+             .closetAddPhoto,
+             .closetAddManual,
+             .closetAddLoading,
+             .closetAddResult:
             "coordit-route-placeholder"
         }
     }
@@ -95,7 +107,15 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
              .fitLabHistoryRegister,
              .fitLabHistoryDetail:
             .fitLab
-        case .closetOverview, .closetDetailTop, .closetDetailBottom:
+        case .closetOverview,
+             .closetDetailTop,
+             .closetDetailBottom,
+             .closetAddMethod,
+             .closetAddLink,
+             .closetAddPhoto,
+             .closetAddManual,
+             .closetAddLoading,
+             .closetAddResult:
             .closet
         case .myPage,
              .myPageThreadCharge,
