@@ -21,7 +21,7 @@ struct CoorditFitLabTitleCard: View {
                     .font(.system(size: metrics.value(23), weight: .bold))
                     .foregroundStyle(Color.black.opacity(0.82))
                 Text(title)
-                    .font(CoorditTypography.climate2019(size: metrics.value(22), relativeTo: .headline))
+                    .font(CoorditTypography.gmarketBold(size: metrics.value(22), relativeTo: .headline))
                     .tracking(metrics.value(1.2))
                     .foregroundStyle(Color.black)
                 Spacer(minLength: 0)
