@@ -14,15 +14,45 @@ final class CoorditBackendSessionStore: ObservableObject {
     private let client: CoorditBackendClient
     private let tokenStore: CoorditBackendTokenStore
 
+#if DEBUG
+    private let usesAuthenticatedUITestFixture: Bool
+#endif
+
     init() {
         self.client = CoorditBackendClient(baseURL: CoorditBackendConfig.baseURL())
         self.tokenStore = CoorditBackendTokenStore()
+#if DEBUG
+        if Self.shouldUseAuthenticatedUITestFixture {
+            usesAuthenticatedUITestFixture = true
+            session = CoorditAuthSession(
+                accessToken: "",
+                refreshToken: "",
+                user: CoorditAuthUser(id: "coordit-ui-test-user", email: "ui-test@coordit.invalid")
+            )
+            profile = CoorditUserProfile(
+                id: "coordit-ui-test-user",
+                email: "ui-test@coordit.invalid",
+                displayName: "코딧 테스트 사용자",
+                gender: nil,
+                birthYear: nil,
+                createdAt: "2026-01-01T00:00:00Z",
+                updatedAt: "2026-01-01T00:00:00Z"
+            )
+        } else {
+            usesAuthenticatedUITestFixture = false
+            session = tokenStore.load()
+        }
+#else
         session = tokenStore.load()
+#endif
     }
 
     init(client: CoorditBackendClient, tokenStore: CoorditBackendTokenStore) {
         self.client = client
         self.tokenStore = tokenStore
+#if DEBUG
+        usesAuthenticatedUITestFixture = false
+#endif
         session = tokenStore.load()
     }
 
@@ -39,6 +69,11 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
     func bootstrap() async {
+#if DEBUG
+        if usesAuthenticatedUITestFixture {
+            return
+        }
+#endif
         await run {
             let health = try await client.health()
             statusText = health.ok ? "\(health.service) 연결됨" : "백엔드 응답이 불안정해요."
@@ -125,5 +160,13 @@ final class CoorditBackendSessionStore: ObservableObject {
             isWarning = true
         }
     }
+
+#if DEBUG
+    private static var shouldUseAuthenticatedUITestFixture: Bool {
+        let arguments = ProcessInfo.processInfo.arguments
+        return arguments.contains("--coordit-ui-testing")
+            && arguments.contains("--coordit-ui-testing-authenticated")
+    }
+#endif
 }
 #endif

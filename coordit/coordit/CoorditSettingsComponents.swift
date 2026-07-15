@@ -17,17 +17,23 @@ struct CoorditSettingsHeaderCard: View {
     let onBack: (() -> Void)?
 
     var body: some View {
-        HStack(spacing: metrics.value(13)) {
+        HStack(spacing: backButtonSpacing) {
             Button {
                 onBack?()
             } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: metrics.value(17), weight: .bold))
-                    .foregroundStyle(CoorditSettingsStyle.ink)
-                    .frame(width: metrics.value(28), height: metrics.value(36))
+                ZStack(alignment: .leading) {
+                    Color.clear
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: metrics.value(17), weight: .bold))
+                        .foregroundStyle(CoorditSettingsStyle.ink)
+                        .frame(width: metrics.value(28), height: metrics.value(36))
+                }
+                .frame(width: backButtonHitSize, height: backButtonHitSize, alignment: .leading)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("뒤로")
+            .accessibilityIdentifier("coordit-settings-back")
 
             Text(title)
                 .font(
@@ -46,6 +52,14 @@ struct CoorditSettingsHeaderCard: View {
         .background(CoorditSettingsStyle.panel)
         .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
         .shadow(color: .black.opacity(0.07), radius: metrics.value(12), y: metrics.value(5))
+    }
+
+    private var backButtonHitSize: CGFloat {
+        max(metrics.value(44), 44)
+    }
+
+    private var backButtonSpacing: CGFloat {
+        metrics.value(28 + 13) - backButtonHitSize
     }
 }
 
