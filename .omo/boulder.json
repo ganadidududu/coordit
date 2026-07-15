@@ -17,6 +17,14 @@
       "session_ids": ["codex:signup-oauth-onboarding"],
       "status": "completed",
       "worktree_path": "/Users/insihwan/Documents/Project/coordit/coordit-dev-signup-oauth-onboarding"
+    },
+    "gmarket-topbars-fit-detail-photo": {
+      "work_id": "gmarket-topbars-fit-detail-photo",
+      "active_plan": ".omo/plans/gmarket-topbars-fit-detail-photo.md",
+      "plan_name": "gmarket-topbars-fit-detail-photo",
+      "session_ids": ["codex:019f6387-1bd8-7c70-963b-b66bba86eb2b"],
+      "status": "completed",
+      "worktree_path": null
     }
   }
 }
