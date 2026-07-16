@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 #if os(iOS)
 struct CoorditFitLabFamilyView: View {
@@ -130,6 +133,10 @@ struct CoorditFitLabFamilyView: View {
                 #endif
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .accessibilityIdentifier(currentRoute.fitLabAccessibilityIdentifier)
+            .overlay(alignment: .topLeading) {
+                CoorditGmarketBoldFontDiagnostic()
+            }
             #if DEBUG
             .overlay(alignment: .bottom) {
                 if coordinator.fixtureName == "history-edge" {
@@ -508,6 +515,26 @@ struct CoorditFitLabFamilyView: View {
     #else
     private var fixtureRequestLedgerCount: some View { EmptyView() }
     #endif
+}
+
+private struct CoorditGmarketBoldFontDiagnostic: View {
+    var body: some View {
+#if DEBUG && canImport(UIKit)
+        if ProcessInfo.processInfo.arguments.contains("--coordit-ui-testing"),
+           ProcessInfo.processInfo.arguments.contains("--coordit-test-font-diagnostic") {
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityElement(children: .ignore)
+                .accessibilityIdentifier("coordit-gmarket-bold-font-available")
+                .accessibilityValue(
+                    UIFont(name: CoorditTypography.PostScriptName.gmarketSansBold, size: 22) == nil
+                        ? "false"
+                        : "true"
+                )
+                .allowsHitTesting(false)
+        }
+#endif
+    }
 }
 
 struct CoorditFitLabScreens: View {

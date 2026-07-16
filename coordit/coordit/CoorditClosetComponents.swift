@@ -24,7 +24,7 @@ struct CoorditClosetTitleBar: View {
                 Image(systemName: "chevron.left")
                     .font(.system(size: metrics.value(25), weight: .bold))
                 Text(title)
-                    .font(CoorditTypography.climate2019(size: metrics.value(22)))
+                    .font(CoorditTypography.gmarketBold(size: metrics.value(22)))
                     .tracking(metrics.value(1.5))
                 Spacer(minLength: 0)
             }

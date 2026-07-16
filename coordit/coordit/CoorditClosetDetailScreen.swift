@@ -1,6 +1,8 @@
 import SwiftUI
 
 #if os(iOS)
+import PhotosUI
+
 extension CoorditClosetFamilyView {
     func detailScreen(
         metrics: CoorditResponsiveMetrics,
@@ -15,8 +17,29 @@ extension CoorditClosetFamilyView {
                 }
 
                 HStack(alignment: .top, spacing: metrics.value(13)) {
-                    CoorditClosetGarmentArtwork(imageData: item.imageData, metrics: metrics)
+                    PhotosPicker(selection: $detailPhotoSelection, matching: .images) {
+                        ZStack(alignment: .bottom) {
+                            CoorditClosetGarmentArtwork(imageData: item.imageData, metrics: metrics)
+
+                            Text(item.imageData == nil ? "옷 사진 추가하기" : "변경하기")
+                                .font(CoorditTypography.gmarketBold(size: metrics.value(9)))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, metrics.value(10))
+                                .frame(height: metrics.value(24))
+                                .background(CoorditClosetColors.navy.opacity(0.82))
+                                .clipShape(Capsule())
+                                .padding(.bottom, metrics.value(8))
+                        }
                         .frame(width: metrics.value(168), height: metrics.value(158))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(item.imageData == nil ? "옷 사진 추가하기" : "옷 사진 변경하기")
+                    .accessibilityIdentifier("closet-detail-garment-photo")
+                    .accessibilityValue(item.imageData == nil ? "empty" : "selected")
+                    .onChange(of: detailPhotoSelection) { _, newItem in
+                        guard let newItem else { return }
+                        loadDetailPhoto(newItem, for: item.id)
+                    }
 
                     VStack(spacing: metrics.value(10)) {
                         Text(item.name)
@@ -33,6 +56,22 @@ extension CoorditClosetFamilyView {
                     .frame(maxWidth: .infinity)
                 }
                 .padding(.top, metrics.value(18))
+
+                #if DEBUG
+                if detailPhotoTestScenario != nil {
+                    VStack {
+                        Text("Detail photo test state")
+                            .accessibilityIdentifier("closet-detail-photo-test-state")
+                            .accessibilityValue(detailPhotoTestStates[item.id] ?? "empty")
+                        Text("Detail photo test rejection")
+                            .accessibilityIdentifier("closet-detail-photo-test-rejection")
+                            .accessibilityValue(detailPhotoTestRejections[item.id] ?? "none")
+                    }
+                    .font(.system(size: 1))
+                    .foregroundStyle(.clear)
+                    .frame(width: 1, height: 1)
+                }
+                #endif
 
                 HStack(spacing: metrics.value(9)) {
                     Image(variant == .top ? CoorditAssetNames.closetFitTop : CoorditAssetNames.closetFitBottom)
@@ -71,6 +110,14 @@ extension CoorditClosetFamilyView {
             .padding(.bottom, metrics.value(28))
         }
         .accessibilityIdentifier("coordit-screen-\(screenIdentifier)")
+        .onAppear {
+            #if DEBUG
+            runDetailPhotoTestScenario(for: item.id)
+            #endif
+        }
+        .onDisappear {
+            invalidateDetailPhotoLoad(for: item.id)
+        }
     }
 
     private func scorePanel(metrics: CoorditResponsiveMetrics, variant: CoorditClosetCategory, score: Int) -> some View {
