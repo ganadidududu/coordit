@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 #if os(iOS)
 struct CoorditFitLabFamilyView: View {
@@ -35,7 +38,30 @@ struct CoorditFitLabFamilyView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .accessibilityIdentifier(currentRoute.fitLabAccessibilityIdentifier)
+            .overlay(alignment: .topLeading) {
+                CoorditGmarketBoldFontDiagnostic()
+            }
         }
+    }
+}
+
+private struct CoorditGmarketBoldFontDiagnostic: View {
+    var body: some View {
+#if DEBUG && canImport(UIKit)
+        if ProcessInfo.processInfo.arguments.contains("--coordit-ui-testing"),
+           ProcessInfo.processInfo.arguments.contains("--coordit-test-font-diagnostic") {
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityElement(children: .ignore)
+                .accessibilityIdentifier("coordit-gmarket-bold-font-available")
+                .accessibilityValue(
+                    UIFont(name: CoorditTypography.PostScriptName.gmarketSansBold, size: 22) == nil
+                        ? "false"
+                        : "true"
+                )
+                .allowsHitTesting(false)
+        }
+#endif
     }
 }
 
