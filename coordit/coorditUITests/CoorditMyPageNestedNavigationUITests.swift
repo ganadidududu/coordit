@@ -54,6 +54,91 @@ final class CoorditMyPageNestedNavigationUITests: XCTestCase {
         XCTAssertTrue(app.wait(for: .notRunning, timeout: 5))
     }
 
+    func testAuthenticatedMyPageShowsYarnBalanceAndOpensCharge() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--coordit-ui-testing",
+            "--coordit-ui-testing-authenticated",
+            "--coordit-start-route",
+            "mypage",
+        ]
+        app.launch()
+        assertScreen("mypage", in: app)
+
+        XCTAssertTrue(
+            app.staticTexts["보유 실타래"].waitForExistence(timeout: 5),
+            "Missing authenticated yarn balance label: 보유 실타래"
+        )
+        XCTAssertTrue(
+            app.staticTexts["36 실타래"].waitForExistence(timeout: 5),
+            "Missing authenticated yarn balance value: 36 실타래"
+        )
+
+        let chargeButton = app.buttons["충전"]
+        XCTAssertTrue(chargeButton.waitForExistence(timeout: 5), "Missing authenticated yarn charge button: 충전")
+        XCTAssertFalse(element("mypage-login-entry", in: app).exists)
+        XCTAssertFalse(app.buttons["로그인 / 회원가입"].exists)
+
+        tap(chargeButton, in: app)
+        assertScreen("mypage-thread-charge", in: app)
+        app.terminate()
+        XCTAssertTrue(app.wait(for: .notRunning, timeout: 5))
+    }
+
+    func testThreadChargeControlsAreTappable() throws {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--coordit-ui-testing",
+            "--coordit-ui-testing-authenticated",
+            "--coordit-start-route",
+            "mypage-thread-charge",
+        ]
+        app.launch()
+        assertScreen("mypage-thread-charge", in: app)
+
+        for text in ["실타래 충전", "보유 실타래", "36 실타래", "5 실타래", "10 실타래", "20 실타래", "1,500원", "2,500원", "4,000원"] {
+            XCTAssertTrue(app.staticTexts[text].waitForExistence(timeout: 5), "Missing visible charge content: \(text)")
+        }
+
+        let adCTA = app.buttons["광고 보고 실타래 충전하기"]
+        XCTAssertTrue(adCTA.waitForExistence(timeout: 5), "Missing visible ad CTA")
+
+        let requiredIdentifiers = [
+            "coordit-thread-charge-title",
+            "coordit-thread-charge-balance",
+            "coordit-thread-charge-ad-cta",
+            "coordit-thread-charge-pack-5",
+            "coordit-thread-charge-pack-10",
+            "coordit-thread-charge-pack-20",
+        ]
+        for identifier in requiredIdentifiers {
+            XCTAssertTrue(
+                element(identifier, in: app).waitForExistence(timeout: 5),
+                "Missing charge accessibility identifier: \(identifier)"
+            )
+        }
+
+        let controls = [
+            "coordit-thread-charge-ad-cta",
+            "coordit-thread-charge-pack-5",
+            "coordit-thread-charge-pack-10",
+            "coordit-thread-charge-pack-20",
+        ]
+        for identifier in controls {
+            let control = element(identifier, in: app)
+            XCTAssertTrue(control.waitForExistence(timeout: 5), "Missing charge control: \(identifier)")
+            tap(control, in: app)
+            assertScreen("mypage-thread-charge", in: app)
+            XCTAssertTrue(
+                app.staticTexts["36 실타래"].waitForExistence(timeout: 5),
+                "Yarn balance changed after tapping \(identifier)"
+            )
+        }
+
+        app.terminate()
+        XCTAssertTrue(app.wait(for: .notRunning, timeout: 5))
+    }
+
     func testEditableAndConfirmationDestinationsExposeWorkingControls() throws {
         var app = launchApp(at: "mypage-profile-edit")
         completeAction("프로필 저장", expecting: "mypage-profile-saved", in: app)

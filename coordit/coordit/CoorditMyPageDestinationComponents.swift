@@ -57,7 +57,7 @@ struct CoorditSettingsPrimaryButton: View {
                 .font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .frame(height: metrics.value(48))
+                .frame(height: max(metrics.value(48), 44))
                 .background(isDanger ? CoorditSettingsStyle.danger : CoorditSettingsStyle.ink)
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
         }

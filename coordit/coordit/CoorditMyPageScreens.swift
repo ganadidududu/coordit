@@ -49,7 +49,7 @@ struct CoorditMyPageFamilyView: View {
         ) { metrics in
             ScrollView(.vertical, showsIndicators: false) {
                 routeContent(metrics: metrics)
-                    .frame(width: metrics.value(370))
+                    .frame(width: metrics.value(contentWidth))
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, metrics.value(26))
             }
@@ -120,9 +120,9 @@ struct CoorditMyPageFamilyView: View {
     private func routeContent(metrics: CoorditResponsiveMetrics) -> some View {
         switch route {
         case .myPage:
-            myPageLanding(metrics: metrics)
+            myPageLanding(metrics: metrics, contentMetrics: compactContentMetrics(for: metrics))
         case .myPageThreadCharge:
-            threadCharge(metrics: metrics)
+            threadCharge(metrics: metrics, contentMetrics: compactContentMetrics(for: metrics))
         case .myPageBody:
             bodyInfo(metrics: metrics)
         case .myPageAccount:
@@ -152,21 +152,46 @@ struct CoorditMyPageFamilyView: View {
         case .myPageBugReport:
             bugReport(metrics: metrics)
         default:
-            myPageLanding(metrics: metrics)
+            myPageLanding(metrics: metrics, contentMetrics: compactContentMetrics(for: metrics))
         }
     }
 
-    private func myPageLanding(metrics: CoorditResponsiveMetrics) -> some View {
-        VStack(spacing: metrics.value(10)) {
-            pageHeader("MY PAGE", metrics: metrics, backRoute: .main04)
-            myPageLoginEntry(metrics: metrics)
+    private var contentWidth: CGFloat {
+        route == .myPageThreadCharge
+            ? CoorditDesignTokens.ChargeMetrics.contentWidth
+            : 370
+    }
 
-            VStack(spacing: metrics.value(10)) {
+    private func isCompactVerticalLayout(_ metrics: CoorditResponsiveMetrics) -> Bool {
+        metrics.size.width <= 380 && metrics.size.height <= 700
+    }
+
+    private func compactContentMetrics(for metrics: CoorditResponsiveMetrics) -> CoorditResponsiveMetrics {
+        guard isCompactVerticalLayout(metrics) else { return metrics }
+
+        return CoorditResponsiveMetrics(
+            size: CGSize(width: metrics.size.width * 0.78, height: metrics.size.height)
+        )
+    }
+
+    private func myPageLanding(
+        metrics: CoorditResponsiveMetrics,
+        contentMetrics: CoorditResponsiveMetrics
+    ) -> some View {
+        VStack(spacing: contentMetrics.value(10)) {
+            pageHeader("MY PAGE", metrics: metrics, backRoute: .main04)
+            if backendSession.isAuthenticated {
+                myPageYarnBalanceCard(metrics: contentMetrics)
+            } else {
+                myPageLoginEntry(metrics: contentMetrics)
+            }
+
+            VStack(spacing: contentMetrics.value(10)) {
                 CoorditSettingsMenuRow(
                     title: "계정",
                     subtitle: "프로필, 이메일, 비밀번호, 로그아웃",
                     assetName: CoorditAssetNames.mypageAccount,
-                    metrics: metrics
+                    metrics: contentMetrics
                 ) {
                     onRouteChange(.myPageAccount)
                 }
@@ -175,7 +200,7 @@ struct CoorditMyPageFamilyView: View {
                     title: "내 신체 정보",
                     subtitle: "키, 몸무게, 성별, 체수, 단위",
                     assetName: CoorditAssetNames.mypageBody,
-                    metrics: metrics
+                    metrics: contentMetrics
                 ) {
                     onRouteChange(.myPageBody)
                 }
@@ -184,7 +209,7 @@ struct CoorditMyPageFamilyView: View {
                     title: "알림",
                     subtitle: "구매 후 피드백, 재확인, 리포트",
                     assetName: CoorditAssetNames.mypageNotifications,
-                    metrics: metrics
+                    metrics: contentMetrics
                 ) {
                     onRouteChange(.myPageNotifications)
                 }
@@ -193,7 +218,7 @@ struct CoorditMyPageFamilyView: View {
                     title: "개인정보/보안",
                     subtitle: "정책, 약관, 데이터 동의",
                     assetName: CoorditAssetNames.mypagePrivacy,
-                    metrics: metrics
+                    metrics: contentMetrics
                 ) {
                     onRouteChange(.myPagePrivacy)
                 }
@@ -202,13 +227,57 @@ struct CoorditMyPageFamilyView: View {
                     title: "앱 설정",
                     subtitle: "테마, 언어, 버전, 문의, 신고",
                     assetName: CoorditAssetNames.mypageSettings,
-                    metrics: metrics
+                    metrics: contentMetrics
                 ) {
                     onRouteChange(.myPageAppSettings)
                 }
             }
-            .padding(.top, metrics.value(19))
+            .padding(.top, contentMetrics.value(19))
         }
+    }
+
+    private func myPageYarnBalanceCard(metrics: CoorditResponsiveMetrics) -> some View {
+        CoorditSettingsCard(metrics: metrics) {
+            HStack(spacing: metrics.value(12)) {
+                Image(CoorditAssetNames.yarn)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: metrics.value(48), height: metrics.value(48))
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: metrics.value(4)) {
+                    Text("보유 실타래")
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
+                        .foregroundStyle(CoorditSettingsStyle.muted)
+                    Text("36 실타래")
+                        .font(CoorditTypography.gmarketBold(size: metrics.value(20), relativeTo: .title3))
+                        .foregroundStyle(CoorditSettingsStyle.ink)
+                }
+
+                Spacer(minLength: 0)
+
+                Button {
+                    onRouteChange(.myPageThreadCharge)
+                } label: {
+                    Text("충전")
+                        .font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .headline))
+                        .foregroundStyle(.white)
+                        .frame(
+                            minWidth: max(metrics.value(62), 44),
+                            minHeight: max(metrics.value(44), 44)
+                        )
+                        .background(CoorditSettingsStyle.ink)
+                        .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+                .accessibilityIdentifier("mypage-yarn-charge")
+            }
+            .padding(.horizontal, metrics.value(13))
+        }
+        .padding(.top, metrics.value(18))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("mypage-yarn-balance-card")
     }
 
     private func myPageLoginEntry(metrics: CoorditResponsiveMetrics) -> some View {
