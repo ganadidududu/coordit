@@ -49,16 +49,32 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
     func testFitLabInputSourcesAndHistoryFlow() throws {
         var app = launchApp(at: "fitlab-input")
         assertScreen("fitlab-input", in: app)
-        XCTAssertTrue(app.buttons["갤러리에서 추가"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["카메라에서 추가"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["사이즈표 수동 입력"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["상품 링크 입력"].waitForExistence(timeout: 5))
         app.terminate()
 
-        app = launchApp(at: "fitlab-result-bottom")
+        let historyNamespace = "feature-flow-\(UUID().uuidString)"
+        app = launchApp(
+            at: "fitlab-result-bottom",
+            fixture: "history-persistence",
+            extraArguments: [
+                "--coordit-fitlab-history-namespace", historyNamespace,
+                "--coordit-fitlab-history-reset",
+            ]
+        )
         assertScreen("fitlab-result-bottom", in: app)
         let addToHistory = app.buttons["히스토리에 추가"]
         XCTAssertTrue(addToHistory.waitForExistence(timeout: 5))
         addToHistory.tap()
-        assertScreen("fitlab-history-register", in: app)
+        XCTAssertTrue(element("fitlab-history-saved-confirmation", in: app).waitForExistence(timeout: 5))
+        app.buttons["FIT LAB 뒤로가기"].tap()
+        assertScreen("fitlab-input", in: app)
+        let historyCard = element("fitlab-history-card-analysis-fixture-lower", in: app)
+        XCTAssertTrue(historyCard.waitForExistence(timeout: 5))
+        historyCard.tap()
+        assertScreen("fitlab-history-detail", in: app)
+        XCTAssertEqual(element("fitlab-history-detail-analysis", in: app).label, "analysis-fixture-lower")
     }
 
     func testMyPageRowsOpenTheirFinalScreens() throws {
@@ -145,13 +161,21 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertTrue(app.buttons["New Shirt"].waitForExistence(timeout: 5))
     }
 
-    private func launchApp(at route: String) -> XCUIApplication {
+    private func launchApp(
+        at route: String,
+        fixture: String? = nil,
+        extraArguments: [String] = []
+    ) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
             "--coordit-ui-testing",
             "--coordit-start-route",
             route,
         ]
+        if let fixture {
+            app.launchArguments += ["--coordit-fitlab-fixture", fixture]
+        }
+        app.launchArguments += extraArguments
         app.launch()
         return app
     }
