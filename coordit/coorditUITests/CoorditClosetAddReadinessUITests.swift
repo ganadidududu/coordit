@@ -32,6 +32,66 @@ final class CoorditClosetAddReadinessUITests: XCTestCase {
         )
     }
 
+    func testPhotoOCRCropsChartAndRequiresChoosingOnePreservedSizeLabel() throws {
+        let app = launchApp(
+            at: "closet-add-photo",
+            additionalArguments: ["--coordit-test-ocr-crop-and-rows"]
+        )
+        assertScreen("closet-add-photo", in: app)
+
+        let cropper = element("size-chart-cropper", in: app)
+        XCTAssertTrue(cropper.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["사이즈표 부분만 맞춰주세요"].exists)
+        cropper.swipeRight(velocity: .slow)
+        cropper.swipeLeft(velocity: .slow)
+        let cropAttachment = XCTAttachment(screenshot: app.screenshot())
+        cropAttachment.name = "closet-ocr-crop-adjusted"
+        cropAttachment.lifetime = .keepAlways
+        add(cropAttachment)
+        app.buttons["표 영역 사용"].tap()
+
+        XCTAssertTrue(element("closet-ocr-size-row-W32", in: app).waitForExistence(timeout: 15))
+        XCTAssertTrue(element("closet-ocr-size-row-FREE", in: app).exists)
+        XCTAssertFalse(app.buttons["closet-add-submit"].isEnabled)
+
+        element("closet-ocr-size-row-W32", in: app).tap()
+        XCTAssertEqual(element("closet-selected-size-label", in: app).label, "W32")
+        XCTAssertTrue(app.buttons["closet-add-submit"].isEnabled)
+        element("closet-ocr-size-row-FREE", in: app).tap()
+        XCTAssertEqual(element("closet-selected-size-label", in: app).label, "FREE")
+        element("closet-ocr-size-row-W32", in: app).tap()
+        XCTAssertEqual(element("closet-selected-size-label", in: app).label, "W32")
+        for _ in 0..<2 { app.swipeUp() }
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "closet-ocr-size-row-selection"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    func testLinkExtractionFailureOffersPhotoOCRAndManualFallback() throws {
+        let app = launchApp(
+            at: "closet-add-link",
+            additionalArguments: ["--coordit-test-link-extraction-failure"]
+        )
+        assertScreen("closet-add-link", in: app)
+        app.buttons["closet-add-submit"].tap()
+
+        XCTAssertTrue(element("closet-link-extraction-error", in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["사진 OCR로 입력"].exists)
+        XCTAssertTrue(app.buttons["직접 입력"].exists)
+        app.buttons["사진 OCR로 입력"].tap()
+        assertScreen("closet-add-photo", in: app)
+    }
+
+    func testEmptyBottomGarmentsUsePantsArtworkInsteadOfTopArtwork() throws {
+        let app = launchApp(at: "closet-overview")
+        assertScreen("closet-overview", in: app)
+        app.buttons["closet-category-bottom"].tap()
+        let pantsArtwork = element("closet-placeholder-bottom", in: app)
+        XCTAssertTrue(pantsArtwork.waitForExistence(timeout: 5))
+        XCTAssertEqual(pantsArtwork.label, "하의 사진 없음")
+    }
+
     func testManualInputRequiresNameAndAllFourMeasurementsWithoutPhoto() throws {
         let app = launchApp(at: "closet-add-manual")
         assertScreen("closet-add-manual", in: app)
@@ -41,17 +101,24 @@ final class CoorditClosetAddReadinessUITests: XCTestCase {
         XCTAssertFalse(submit.isEnabled, "An empty manual form must remain disabled.")
 
         typeText("Ready Pants", into: "closet-garment-name", in: app)
-        app.swipeUp()
+        dismissKeyboard(in: app)
         XCTAssertFalse(submit.isEnabled, "A garment name without measurements must remain disabled.")
 
         for index in 0..<4 {
             let field = app.textFields["closet-manual-measurement-\(index)"]
-            XCTAssertTrue(field.waitForExistence(timeout: 5), "Missing measurement field \(index).")
-            if !field.isHittable {
+            for _ in 0..<3 where !field.exists {
                 app.swipeUp()
             }
-            XCTAssertTrue(field.isHittable, "Measurement field \(index) is not hittable.")
+            XCTAssertTrue(field.waitForExistence(timeout: 5), "Missing measurement field \(index).")
+            for _ in 0..<3 where !field.isHittable {
+                if field.frame.midY < app.frame.midY {
+                    app.swipeDown()
+                } else {
+                    app.swipeUp()
+                }
+            }
             focusAndType("\(index + 1)", into: field, in: app)
+            dismissKeyboard(in: app)
 
             let completedCount = index + 1
             XCTAssertEqual(
@@ -98,7 +165,11 @@ final class CoorditClosetAddReadinessUITests: XCTestCase {
     }
 
     private func focusAndType(_ text: String, into field: XCUIElement, in app: XCUIApplication) {
-        field.tap()
+        if field.isHittable {
+            field.tap()
+        } else {
+            field.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        }
         if !app.keyboards.firstMatch.waitForExistence(timeout: 2) {
             field.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         }
@@ -107,6 +178,25 @@ final class CoorditClosetAddReadinessUITests: XCTestCase {
             "The field must gain keyboard focus before typing."
         )
         field.typeText(text)
+    }
+
+    private func dismissKeyboard(in app: XCUIApplication) {
+        let done = app.buttons["closet-keyboard-done"]
+        if done.waitForExistence(timeout: 1) {
+            done.tap()
+        } else {
+            let returnKey = app.keyboards.buttons["return"].firstMatch
+            if returnKey.exists {
+                returnKey.tap()
+            } else {
+                app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.15)).tap()
+            }
+        }
+        let keyboardDismissed = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "exists == false"),
+            object: app.keyboards.firstMatch
+        )
+        XCTAssertEqual(XCTWaiter.wait(for: [keyboardDismissed], timeout: 2), .completed)
     }
 
     private func element(_ identifier: String, in app: XCUIApplication) -> XCUIElement {

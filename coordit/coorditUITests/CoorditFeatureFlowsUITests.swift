@@ -49,9 +49,9 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
     func testFitLabInputSourcesAndHistoryFlow() throws {
         var app = launchApp(at: "fitlab-input")
         assertScreen("fitlab-input", in: app)
-        XCTAssertTrue(app.buttons["사이즈표 수동 입력"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["상품 링크 입력"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["직접 입력하기"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["링크로 불러오기"].waitForExistence(timeout: 5))
         app.terminate()
 
         let historyNamespace = "feature-flow-\(UUID().uuidString)"
@@ -77,6 +77,35 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertEqual(element("fitlab-history-detail-analysis", in: app).label, "analysis-fixture-lower")
     }
 
+    func testFitLabInputMethodsUseTheSharedTitleBackButton() throws {
+        let app = launchApp(at: "fitlab-input")
+        assertScreen("fitlab-input", in: app)
+
+        for (method, captureName) in [
+            ("직접 입력하기", "fitlab-manual-shared-back"),
+            ("사진으로 첨부하기", "fitlab-ocr-shared-back"),
+            ("링크로 불러오기", "fitlab-url-shared-back"),
+        ] {
+            let methodButton = app.buttons[method]
+            XCTAssertTrue(methodButton.waitForExistence(timeout: 5))
+            methodButton.tap()
+
+            XCTAssertFalse(app.buttons["입력 방법 다시 선택"].exists)
+            let titleBack = app.buttons["FIT LAB 뒤로가기"]
+            XCTAssertTrue(titleBack.waitForExistence(timeout: 5))
+            let settled = expectation(description: "\(method) 화면 렌더 완료")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { settled.fulfill() }
+            wait(for: [settled], timeout: 2)
+            let capture = XCTAttachment(screenshot: app.screenshot())
+            capture.name = captureName
+            capture.lifetime = .keepAlways
+            add(capture)
+            titleBack.tap()
+
+            XCTAssertTrue(app.buttons["직접 입력하기"].waitForExistence(timeout: 5))
+        }
+    }
+
     func testHomeFitLabHistoryCardOpensDetail() throws {
         let app = launchApp(at: "main04")
         assertScreen("main04", in: app)
@@ -86,6 +115,24 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         historyCard.tap()
 
         assertScreen("fitlab-history-detail", in: app)
+    }
+
+    func testHomeReferenceSelectorChoosesExistingClosetItem() throws {
+        let app = launchApp(at: "main04")
+        assertScreen("main04", in: app)
+
+        app.buttons["옷장에서 선택"].tap()
+        let oxford = app.buttons["home-reference-item-oxford"]
+        XCTAssertTrue(oxford.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["home-reference-item-denim"].exists)
+        let sheetCapture = XCTAttachment(screenshot: app.screenshot())
+        sheetCapture.name = "home-reference-selection-sheet"
+        sheetCapture.lifetime = .keepAlways
+        add(sheetCapture)
+        oxford.tap()
+        app.buttons["home-reference-done"].tap()
+
+        XCTAssertTrue(app.buttons["다시 선택"].waitForExistence(timeout: 5))
     }
 
     func testMyPageRowsOpenTheirFinalScreens() throws {
@@ -113,12 +160,41 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         let app = launchApp(at: "closet-overview")
         assertScreen("closet-overview", in: app)
 
+        let bottomCategory = app.buttons["closet-category-bottom"]
+        XCTAssertTrue(bottomCategory.waitForExistence(timeout: 5))
+        bottomCategory.tap()
         let wideDenim = app.buttons["Wide Denim"]
         XCTAssertTrue(wideDenim.waitForExistence(timeout: 5))
+        let lowerFilterCapture = XCTAttachment(screenshot: app.screenshot())
+        lowerFilterCapture.name = "closet-lower-category-filter"
+        lowerFilterCapture.lifetime = .keepAlways
+        add(lowerFilterCapture)
         wideDenim.tap()
 
         assertScreen("closet-detail-bottom", in: app)
         XCTAssertTrue(element("Wide Denim", in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(element("closet-mannequin-bottom", in: app).exists)
+        XCTAssertFalse(element("closet-mannequin-top", in: app).exists)
+    }
+
+    func testClosetReassessmentUpdatesOnlySelectedItemWithNeutralStatus() throws {
+        let app = launchApp(at: "closet-detail-bottom")
+        assertScreen("closet-detail-bottom", in: app)
+
+        let reassess = app.buttons["closet-reevaluate"]
+        for _ in 0..<3 where !reassess.exists { app.swipeUp() }
+        XCTAssertTrue(reassess.waitForExistence(timeout: 5))
+        reassess.tap()
+
+        let status = element("closet-reassessment-status", in: app)
+        XCTAssertTrue(status.waitForExistence(timeout: 5))
+        XCTAssertEqual(status.label, "선택한 의류의 핏 스코어를 다시 계산했어요.")
+        XCTAssertTrue(app.buttons["총점 | 92"].waitForExistence(timeout: 5))
+        XCTAssertTrue(element("Wide Denim", in: app).exists)
+        let reassessmentCapture = XCTAttachment(screenshot: app.screenshot())
+        reassessmentCapture.name = "closet-reassessment-complete"
+        reassessmentCapture.lifetime = .keepAlways
+        add(reassessmentCapture)
     }
 
     func testClosetAddInputsMatchRelocatedPhotoRequirements() throws {

@@ -2,6 +2,16 @@ import Foundation
 import Combine
 
 #if os(iOS)
+struct CoorditClosetServerSnapshot {
+    let items: [CoorditClosetItem]
+    let selectedReferenceIDs: Set<String>
+}
+
+struct CoorditReferenceSyncResult {
+    let selectedIDs: Set<String>
+    let referenceIDsByItemID: [String: String]
+}
+
 @MainActor
 final class CoorditBackendSessionStore: ObservableObject {
     @Published private(set) var session: CoorditAuthSession?
@@ -121,6 +131,12 @@ final class CoorditBackendSessionStore: ObservableObject {
         }
     }
 
+    func prefillClosetProduct(from url: URL) async throws -> CoorditFitLabURLPrefillResponse {
+        guard let token = session?.accessToken else { throw CoorditFitLabError.loginRequired }
+        let api = CoorditFitLabHTTPAPI(baseURL: CoorditBackendConfig.baseURL(), accessToken: token)
+        return try await api.prefillProduct(from: CoorditFitLabURLPrefillRequest(url: url))
+    }
+
     func saveReferenceClothing(from draft: CoorditClosetDraft) async -> CoorditReferenceSaveResult? {
         guard let token = session?.accessToken else {
             statusText = "기준 옷 저장은 로그인 후 백엔드에 반영돼요."
@@ -149,6 +165,141 @@ final class CoorditBackendSessionStore: ObservableObject {
                 clothingItemId: clothingItem.id,
                 referenceClothingId: reference.id
             )
+        } catch {
+            statusText = error.localizedDescription
+            isWarning = true
+            return nil
+        }
+    }
+
+    func loadClosetSnapshot(preserving localItems: [CoorditClosetItem]) async -> CoorditClosetServerSnapshot? {
+        guard let token = session?.accessToken else { return nil }
+        #if DEBUG
+        if usesAuthenticatedUITestFixture { return nil }
+        #endif
+
+        do {
+            async let clothingRequest = client.listClothingItems(token: token)
+            async let referenceRequest = client.listReferenceClothing(token: token)
+            let (clothing, references) = try await (clothingRequest, referenceRequest)
+            let referenceByClothingID = Dictionary(
+                references.map { ($0.clothingItemId, $0) },
+                uniquingKeysWith: { first, _ in first }
+            )
+            let localByBackendID = Dictionary(
+                localItems.compactMap { item in
+                    item.backendClothingItemId.map { ($0, item) }
+                },
+                uniquingKeysWith: { first, _ in first }
+            )
+            let items = clothing.compactMap { response -> CoorditClosetItem? in
+                guard let exactCategory = CoorditFitLabCategory(rawValue: response.category) else { return nil }
+                let parent: CoorditClosetCategory = exactCategory.garmentKind == .upper ? .top : .bottom
+                let local = localByBackendID[response.id]
+                let reference = referenceByClothingID[response.id]
+                return CoorditClosetItem(
+                    id: local?.id ?? response.id,
+                    name: response.name,
+                    category: parent,
+                    exactCategory: exactCategory,
+                    score: local?.score ?? 0,
+                    scoreColor: CoorditClosetColors.navy,
+                    route: parent == .top ? .closetDetailTop : .closetDetailBottom,
+                    imageData: local?.imageData,
+                    fitDiffs: local?.fitDiffs,
+                    backendClothingItemId: response.id,
+                    backendReferenceClothingId: reference?.id
+                )
+            }
+            let selected: Set<String> = Set(items.compactMap { item -> String? in
+                guard let backendID = item.backendClothingItemId,
+                      referenceByClothingID[backendID]?.isActive == true else { return nil }
+                return item.id
+            })
+            statusText = "서버의 옷장과 기준 의류를 불러왔어요."
+            isWarning = false
+            return CoorditClosetServerSnapshot(items: items, selectedReferenceIDs: selected)
+        } catch {
+            statusText = error.localizedDescription
+            isWarning = true
+            return nil
+        }
+    }
+
+    func syncReferenceSelection(
+        items: [CoorditClosetItem],
+        selectedIDs: Set<String>
+    ) async -> CoorditReferenceSyncResult? {
+        guard let token = session?.accessToken else {
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("--coordit-ui-testing") {
+                statusText = "UI 테스트 기준 의류 선택을 저장했어요."
+                isWarning = false
+                return CoorditReferenceSyncResult(selectedIDs: selectedIDs, referenceIDsByItemID: [:])
+            }
+            #endif
+            statusText = "기준 의류 선택은 로그인 후 서버에 반영돼요."
+            isWarning = true
+            return nil
+        }
+
+        let syncableItems = items.filter {
+            $0.backendClothingItemId != nil || $0.backendReferenceClothingId != nil
+        }
+        guard !syncableItems.isEmpty else {
+            statusText = "먼저 서버에 저장된 의류를 옷장에 추가해주세요."
+            isWarning = true
+            return nil
+        }
+
+        do {
+            var referenceIDsByItemID: [String: String] = [:]
+            for item in syncableItems {
+                if selectedIDs.contains(item.id), let clothingItemID = item.backendClothingItemId {
+                    let reference = try await client.createReferenceClothing(
+                        token: token,
+                        request: CreateReferenceClothingRequest(
+                            clothingItemId: clothingItemID,
+                            nickname: item.name,
+                            category: item.exactCategory.rawValue,
+                            fitType: "regular",
+                            preferenceScore: 100,
+                            isActive: true,
+                            notes: "Selected from iOS Home"
+                        )
+                    )
+                    referenceIDsByItemID[item.id] = reference.id
+                } else if let referenceID = item.backendReferenceClothingId {
+                    _ = try await client.deactivateReferenceClothing(token: token, id: referenceID)
+                    referenceIDsByItemID[item.id] = referenceID
+                }
+            }
+            statusText = "기준 의류 선택을 저장했어요."
+            isWarning = false
+            return CoorditReferenceSyncResult(
+                selectedIDs: selectedIDs,
+                referenceIDsByItemID: referenceIDsByItemID
+            )
+        } catch {
+            statusText = error.localizedDescription
+            isWarning = true
+            return nil
+        }
+    }
+
+    func reassessClothingItem(id: String) async -> CoorditClothingFitAssessmentResponse? {
+        guard let token = session?.accessToken else {
+            statusText = "핏 스코어 재평가는 로그인이 필요해요."
+            isWarning = true
+            return nil
+        }
+
+        do {
+            let assessment = try await client.reassessClothingItem(token: token, id: id)
+            let score = Int(assessment.fitScore.rounded())
+            statusText = "선택한 의류의 핏 스코어를 \(score)점으로 다시 계산했어요."
+            isWarning = false
+            return assessment
         } catch {
             statusText = error.localizedDescription
             isWarning = true

@@ -65,7 +65,7 @@ extension CoorditClosetDraft {
 
         return CreateClothingItemRequest(
             name: trimmedName.isEmpty ? "새로운 의류" : trimmedName,
-            category: category.backendCategory,
+            category: exactCategory.rawValue,
             fitType: "regular",
             sizeLabel: nil,
             rawProductData: rawProductData
@@ -107,7 +107,7 @@ extension CoorditClosetDraft {
         CreateReferenceClothingRequest(
             clothingItemId: clothingItemId,
             nickname: trimmedName.isEmpty ? nil : trimmedName,
-            category: category.backendCategory,
+            category: exactCategory.rawValue,
             fitType: "regular",
             preferenceScore: 100,
             isActive: true,

@@ -6,7 +6,8 @@ struct CoorditFitLabSubmissionView: View {
     @ObservedObject var coordinator: CoorditFitLabCoordinator
     let requestLedger: () -> [String]
     let loadReferences: () async -> Void
-    let submit: () async -> Void
+    let manageReferences: () -> Void
+    let submit: () -> Void
 
     @State private var showsDiscardConfirmation = false
 
@@ -44,7 +45,7 @@ struct CoorditFitLabSubmissionView: View {
                 .font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))
                 .foregroundStyle(Color.black)
                 .accessibilityIdentifier("fitlab-reference-selection")
-            Text("\(coordinator.draft.category.rawValue) 카테고리와 맞는 옷만 표시돼요. 한 개 이상 선택해야 분석할 수 있어요.")
+            Text("\(coordinator.draft.garmentKind == .upper ? "상의" : "하의") 기준 의류예요. 한 개 이상 골라야 분석할 수 있어요.")
                 .font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .body))
                 .foregroundStyle(Color.black.opacity(0.66))
                 .fixedSize(horizontal: false, vertical: true)
@@ -62,6 +63,20 @@ struct CoorditFitLabSubmissionView: View {
                 }
             }
 
+            if coordinator.draft.selectedReferenceIDs.isEmpty {
+                Button(action: manageReferences) {
+                    Text("기준 의류 선택·등록하기")
+                        .font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .headline))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, minHeight: metrics.value(44))
+                        .background(CoorditFitLabPalette.ink)
+                        .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
+                }
+                .buttonStyle(.plain)
+                .disabled(coordinator.loadState == .loading)
+                .accessibilityIdentifier("fitlab-manage-references")
+            }
+
             Text("선택한 기준 옷 \(coordinator.draft.selectedReferenceIDs.count)개")
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
                 .foregroundStyle(Color.black)
@@ -73,7 +88,7 @@ struct CoorditFitLabSubmissionView: View {
             }
 
             Button {
-                Task { await submit() }
+                submit()
             } label: {
                 HStack {
                     if coordinator.loadState == .loading {
@@ -90,6 +105,12 @@ struct CoorditFitLabSubmissionView: View {
             .buttonStyle(.plain)
             .disabled(!coordinator.canSubmit || coordinator.loadState == .loading)
             .accessibilityIdentifier(coordinator.retryStep == nil ? "fitlab-submit-analysis" : "fitlab-retry-submission")
+
+            Text("다른 탭으로 이동해도 계산은 계속돼요. 완료되면 앱에서 알려드릴게요.")
+                .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
+                .foregroundStyle(Color.black.opacity(0.58))
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("fitlab-background-analysis-guide")
 
             Button("입력과 선택 버리기") {
                 showsDiscardConfirmation = true
@@ -180,7 +201,7 @@ struct CoorditFitLabSubmissionView: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("fitlab-report-fallback")
                     Button("리포트 다시 시도") {
-                        Task { await submit() }
+                        submit()
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(CoorditFitLabPalette.ink)

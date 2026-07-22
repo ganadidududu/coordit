@@ -9,17 +9,17 @@ final class CoorditFitLabUITests: XCTestCase {
     func testInputShowsThreeMethods() throws {
         let app = launchFitLab()
 
-        XCTAssertTrue(app.buttons["사이즈표 수동 입력"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].exists)
-        XCTAssertTrue(app.buttons["상품 링크 입력"].exists)
+        XCTAssertTrue(app.buttons["직접 입력하기"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].exists)
+        XCTAssertTrue(app.buttons["링크로 불러오기"].exists)
         XCTAssertFalse(app.buttons["갤러리에서 추가"].exists)
         XCTAssertFalse(app.buttons["카메라에서 추가"].exists)
     }
 
     func testFinalBlockersBlankManualAndNormalizedURLDuplicateMakeZeroWrites() throws {
         var app = launchFitLab()
-        XCTAssertTrue(app.buttons["사이즈표 수동 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 수동 입력"].tap()
+        XCTAssertTrue(app.buttons["직접 입력하기"].waitForExistence(timeout: 5))
+        app.buttons["직접 입력하기"].tap()
         fill(element("fitlab-size-label-row-0", in: app), with: "M")
         fill(element("fitlab-measurement-chest_width-row-0", in: app), with: "56")
         dismissKeyboard(in: app)
@@ -31,8 +31,8 @@ final class CoorditFitLabUITests: XCTestCase {
         app.terminate()
 
         app = launchFitLab(fixture: "url-success")
-        XCTAssertTrue(app.buttons["상품 링크 입력"].waitForExistence(timeout: 5))
-        app.buttons["상품 링크 입력"].tap()
+        XCTAssertTrue(app.buttons["링크로 불러오기"].waitForExistence(timeout: 5))
+        app.buttons["링크로 불러오기"].tap()
         fill(element("fitlab-url-field", in: app), with: "https://shop.example/products/duplicate")
         dismissKeyboard(in: app)
         element("fitlab-url-import", in: app).tap()
@@ -52,8 +52,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testFinalBlockersOCRCreatesNamedCategorizedDraftAndRoutesToSavableResult() throws {
         let app = launchFitLab(fixture: "ocr-submission-success")
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
         element("fitlab-ocr-simulator-fixture", in: app).tap()
         XCTAssertTrue(element("fitlab-ocr-review", in: app).waitForExistence(timeout: 3))
 
@@ -123,10 +123,23 @@ final class CoorditFitLabUITests: XCTestCase {
         XCTAssertFalse(report.label.contains("베스트 기준과"), "Diff synthesis is only allowed when partExplanations are absent.")
     }
 
+    func testMissingReferenceSelectionCanOpenClosetReferenceSelector() throws {
+        let app = launchFitLab(fixture: "submission-success")
+
+        XCTAssertTrue(element("fitlab-reference-selection", in: app).waitForExistence(timeout: 5))
+        let manageReferences = app.buttons["fitlab-manage-references"]
+        XCTAssertTrue(manageReferences.waitForExistence(timeout: 5))
+        manageReferences.tap()
+
+        XCTAssertTrue(app.navigationBars["기준 의류"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["home-reference-item-oxford"].exists)
+        XCTAssertTrue(app.buttons["home-reference-item-denim"].exists)
+    }
+
     func testFinalBlockersVisionRunsOffMainWithHeartbeatAndLateCancellationGuard() throws {
         let app = launchFitLab(fixture: "ocr-vision-threading")
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
         element("fitlab-ocr-production-vision-fixture", in: app).tap()
         XCTAssertTrue(element("fitlab-ocr-processing", in: app).waitForExistence(timeout: 2))
         XCTAssertTrue(waitForLabel("tick", element: element("fitlab-ocr-heartbeat-probe", in: app), timeout: 1))
@@ -173,13 +186,13 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testF2LateURLAndOCRResponsesCannotMutateExitedDraft() throws {
         let urlApp = launchFitLab(fixture: "url-late-response")
-        XCTAssertTrue(urlApp.buttons["상품 링크 입력"].waitForExistence(timeout: 5))
-        urlApp.buttons["상품 링크 입력"].tap()
+        XCTAssertTrue(urlApp.buttons["링크로 불러오기"].waitForExistence(timeout: 5))
+        urlApp.buttons["링크로 불러오기"].tap()
         fill(element("fitlab-url-field", in: urlApp), with: "https://shop.example/late")
         dismissKeyboard(in: urlApp)
         element("fitlab-url-import", in: urlApp).tap()
-        urlApp.buttons["입력 방법 다시 선택"].tap()
-        XCTAssertTrue(urlApp.buttons["사이즈표 수동 입력"].waitForExistence(timeout: 3))
+        urlApp.buttons["FIT LAB 뒤로가기"].tap()
+        XCTAssertTrue(urlApp.buttons["직접 입력하기"].waitForExistence(timeout: 3))
         Thread.sleep(forTimeInterval: 1.3)
         XCTAssertEqual(
             element("fitlab-draft-isolation-probe", in: urlApp).label,
@@ -188,12 +201,12 @@ final class CoorditFitLabUITests: XCTestCase {
         urlApp.terminate()
 
         let ocrApp = launchFitLab(fixture: "ocr-late-response")
-        XCTAssertTrue(ocrApp.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        ocrApp.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(ocrApp.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        ocrApp.buttons["사진으로 첨부하기"].tap()
         XCTAssertTrue(element("fitlab-ocr-start-late-response", in: ocrApp).waitForExistence(timeout: 3))
         element("fitlab-ocr-start-late-response", in: ocrApp).tap()
-        ocrApp.buttons["입력 방법 다시 선택"].tap()
-        XCTAssertTrue(ocrApp.buttons["사이즈표 수동 입력"].waitForExistence(timeout: 3))
+        ocrApp.buttons["FIT LAB 뒤로가기"].tap()
+        XCTAssertTrue(ocrApp.buttons["직접 입력하기"].waitForExistence(timeout: 3))
         Thread.sleep(forTimeInterval: 1.3)
         XCTAssertEqual(
             element("fitlab-draft-isolation-probe", in: ocrApp).label,
@@ -203,8 +216,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testURLPrefillRequiresReviewBeforePersistence() throws {
         let app = launchFitLab(fixture: "url-category-race")
-        XCTAssertTrue(app.buttons["상품 링크 입력"].waitForExistence(timeout: 5))
-        app.buttons["상품 링크 입력"].tap()
+        XCTAssertTrue(app.buttons["링크로 불러오기"].waitForExistence(timeout: 5))
+        app.buttons["링크로 불러오기"].tap()
 
         let urlField = element("fitlab-url-field", in: app)
         XCTAssertTrue(urlField.waitForExistence(timeout: 3))
@@ -250,8 +263,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testURLValidationAndRetry() throws {
         let app = launchFitLab(fixture: "url-server-error")
-        XCTAssertTrue(app.buttons["상품 링크 입력"].waitForExistence(timeout: 5))
-        app.buttons["상품 링크 입력"].tap()
+        XCTAssertTrue(app.buttons["링크로 불러오기"].waitForExistence(timeout: 5))
+        app.buttons["링크로 불러오기"].tap()
 
         let urlField = element("fitlab-url-field", in: app)
         XCTAssertTrue(urlField.waitForExistence(timeout: 3))
@@ -281,6 +294,7 @@ final class CoorditFitLabUITests: XCTestCase {
         XCTAssertEqual(urlField.value as? String, "https://shop.example/products/retry-shirt")
         XCTAssertTrue(app.buttons["다시 시도"].exists)
         XCTAssertTrue(app.buttons["수동 입력으로 전환"].exists)
+        XCTAssertTrue(app.buttons["사진 OCR로 전환"].exists)
         XCTAssertEqual(element("fitlab-url-request-ledger", in: app).label, "prefill=1|references=0|product=0|size=0|recommend=0|report=0")
         capture("url-server-error-preserves-input", app: app)
 
@@ -299,8 +313,8 @@ final class CoorditFitLabUITests: XCTestCase {
             "https://예시.테스트/상품",
         ] {
             let allowedApp = launchFitLab(fixture: "url-success")
-            XCTAssertTrue(allowedApp.buttons["상품 링크 입력"].waitForExistence(timeout: 5))
-            allowedApp.buttons["상품 링크 입력"].tap()
+            XCTAssertTrue(allowedApp.buttons["링크로 불러오기"].waitForExistence(timeout: 5))
+            allowedApp.buttons["링크로 불러오기"].tap()
             let allowedField = element("fitlab-url-field", in: allowedApp)
             fill(allowedField, with: allowed)
             dismissKeyboard(in: allowedApp)
@@ -312,6 +326,20 @@ final class CoorditFitLabUITests: XCTestCase {
         }
     }
 
+    func testURLExtractionFailureCanSwitchToPhotoOCR() throws {
+        let app = launchFitLab(fixture: "url-server-error")
+        XCTAssertTrue(app.buttons["링크로 불러오기"].waitForExistence(timeout: 5))
+        app.buttons["링크로 불러오기"].tap()
+        let urlField = element("fitlab-url-field", in: app)
+        replace(urlField, with: "https://shop.example/products/unreadable")
+        dismissKeyboard(in: app)
+        element("fitlab-url-import", in: app).tap()
+        XCTAssertTrue(element("fitlab-url-error", in: app).waitForExistence(timeout: 5))
+
+        element("fitlab-url-switch-to-ocr", in: app).tap()
+        XCTAssertTrue(element("fitlab-ocr-photo-library", in: app).waitForExistence(timeout: 5))
+    }
+
     func testURLReviewRemainsReachableAtAccessibilityXXXL() throws {
         let app = launchFitLab(
             fixture: "url-success",
@@ -320,8 +348,8 @@ final class CoorditFitLabUITests: XCTestCase {
                 "UICTContentSizeCategoryAccessibilityExtraExtraExtraLarge",
             ]
         )
-        XCTAssertTrue(app.buttons["상품 링크 입력"].waitForExistence(timeout: 5))
-        app.buttons["상품 링크 입력"].tap()
+        XCTAssertTrue(app.buttons["링크로 불러오기"].waitForExistence(timeout: 5))
+        app.buttons["링크로 불러오기"].tap()
         fill(element("fitlab-url-field", in: app), with: "https://shop.example/products/accessibility-shirt")
         dismissKeyboard(in: app)
         element("fitlab-url-import", in: app).tap()
@@ -445,6 +473,8 @@ final class CoorditFitLabUITests: XCTestCase {
         let upper = launchFitLab(route: "fitlab-result-top", fixture: "upper-result")
         XCTAssertEqual(element("fitlab-recommended-size", in: upper).label, "M")
         XCTAssertEqual(element("fitlab-total-score", in: upper).label, "92")
+        XCTAssertTrue(element("fitlab-mannequin-upper", in: upper).exists)
+        XCTAssertFalse(element("fitlab-mannequin-lower", in: upper).exists)
         XCTAssertEqual(
             element("fitlab-measurement-shoulder_width", in: upper).value as? String,
             "베스트 53 cm | 상품 54 cm | 차이 +1 cm | 여유"
@@ -470,6 +500,8 @@ final class CoorditFitLabUITests: XCTestCase {
         let lower = launchFitLab(route: "fitlab-result-bottom", fixture: "lower-result")
         XCTAssertEqual(element("fitlab-recommended-size", in: lower).label, "L")
         XCTAssertEqual(element("fitlab-total-score", in: lower).label, "88")
+        XCTAssertTrue(element("fitlab-mannequin-lower", in: lower).exists)
+        XCTAssertFalse(element("fitlab-mannequin-upper", in: lower).exists)
         XCTAssertEqual(
             element("fitlab-measurement-waist_width", in: lower).value as? String,
             "베스트 39 cm | 상품 40 cm | 차이 +1 cm | 여유"
@@ -679,9 +711,9 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testManualUpperAndLowerDrafts() throws {
         let app = launchFitLab()
-        XCTAssertTrue(app.buttons["사이즈표 수동 입력"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["직접 입력하기"].waitForExistence(timeout: 5))
         capture("manual-input-three-methods", app: app)
-        app.buttons["사이즈표 수동 입력"].tap()
+        app.buttons["직접 입력하기"].tap()
 
         XCTAssertTrue(element("fitlab-manual-form", in: app).waitForExistence(timeout: 3))
         XCTAssertTrue(element("fitlab-measurement-shoulder_width-row-0", in: app).exists)
@@ -736,8 +768,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testManualValidationRejectsDuplicateAndInvalidRows() throws {
         let app = launchFitLab()
-        XCTAssertTrue(app.buttons["사이즈표 수동 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 수동 입력"].tap()
+        XCTAssertTrue(app.buttons["직접 입력하기"].waitForExistence(timeout: 5))
+        app.buttons["직접 입력하기"].tap()
 
         fill(element("fitlab-size-label-row-0", in: app), with: " M ")
         fill(element("fitlab-measurement-shoulder_width-row-0", in: app), with: "45,5")
@@ -770,8 +802,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testManualDestructiveCategoryAndKindChangesRequireConfirmation() throws {
         var app = launchFitLab(fixture: "manual-selected-reference")
-        XCTAssertTrue(app.buttons["사이즈표 수동 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 수동 입력"].tap()
+        XCTAssertTrue(app.buttons["직접 입력하기"].waitForExistence(timeout: 5))
+        app.buttons["직접 입력하기"].tap()
 
         let shoulder = element("fitlab-measurement-shoulder_width-row-0", in: app)
         XCTAssertTrue(shoulder.waitForExistence(timeout: 3))
@@ -796,8 +828,8 @@ final class CoorditFitLabUITests: XCTestCase {
         app.terminate()
 
         app = launchFitLab(fixture: "manual-selected-reference")
-        XCTAssertTrue(app.buttons["사이즈표 수동 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 수동 입력"].tap()
+        XCTAssertTrue(app.buttons["직접 입력하기"].waitForExistence(timeout: 5))
+        app.buttons["직접 입력하기"].tap()
         XCTAssertEqual(element("fitlab-current-category", in: app).label, "현재 카테고리 후드")
         XCTAssertEqual(element("fitlab-measurement-shoulder_width-row-0", in: app).value as? String, "54")
 
@@ -824,8 +856,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testOCRProductionChooserHasNoFixtureControls() throws {
         let app = launchFitLab()
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
 
         XCTAssertTrue(element("fitlab-ocr-source-chooser", in: app).waitForExistence(timeout: 3))
         XCTAssertTrue(element("fitlab-ocr-photo-library", in: app).exists)
@@ -837,8 +869,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testOCRFixtureCanBeCorrectedAndConfirmed() throws {
         let app = launchFitLab(fixture: "ocr-upper")
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
 
         XCTAssertTrue(element("fitlab-ocr-source-chooser", in: app).waitForExistence(timeout: 3))
         element("fitlab-ocr-simulator-fixture", in: app).tap()
@@ -882,8 +914,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testOCRCancelDeniedAndUnparseableStates() throws {
         let app = launchFitLab(fixture: "ocr-errors")
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
 
         element("fitlab-ocr-camera", in: app).tap()
         let unavailable = element("fitlab-ocr-camera-unavailable", in: app)
@@ -925,8 +957,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testOCRProductionCameraDelegateCancellationPreservesDraft() throws {
         let app = launchFitLab(fixture: "ocr-errors")
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
         element("fitlab-ocr-simulate-unparseable", in: app).tap()
         XCTAssertTrue(element("fitlab-ocr-review", in: app).waitForExistence(timeout: 3))
         let rawTextBeforeCancellation = element("fitlab-ocr-raw-text", in: app).label
@@ -946,8 +978,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testOCRLowerFixtureMapsAliasesAndTwoRows() throws {
         let app = launchFitLab(fixture: "ocr-lower")
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
         element("fitlab-ocr-simulator-fixture", in: app).tap()
 
         XCTAssertTrue(element("fitlab-ocr-review", in: app).waitForExistence(timeout: 3))
@@ -964,8 +996,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testOCRProductionVisionRecognizesRenderedChartImage() throws {
         let app = launchFitLab(fixture: "ocr-vision-production")
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
         element("fitlab-ocr-production-vision-fixture", in: app).tap()
 
         XCTAssertTrue(element("fitlab-ocr-review", in: app).waitForExistence(timeout: 15))
@@ -986,8 +1018,8 @@ final class CoorditFitLabUITests: XCTestCase {
 
     func testOCRParserHandlesDuplicateAliasesJitterAndMalformedCells() throws {
         var app = launchFitLab(fixture: "ocr-parser-upper-adversarial")
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
         element("fitlab-ocr-simulator-fixture", in: app).tap()
         XCTAssertTrue(element("fitlab-ocr-review", in: app).waitForExistence(timeout: 3))
         XCTAssertEqual(element("fitlab-ocr-size-label-row-0", in: app).value as? String, "M")
@@ -1008,8 +1040,8 @@ final class CoorditFitLabUITests: XCTestCase {
         app.terminate()
 
         app = launchFitLab(fixture: "ocr-parser-lower-adversarial")
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
         element("fitlab-ocr-simulator-fixture", in: app).tap()
         XCTAssertTrue(element("fitlab-ocr-review", in: app).waitForExistence(timeout: 3))
         XCTAssertEqual(element("fitlab-ocr-size-label-row-0", in: app).value as? String, "30")
@@ -1025,10 +1057,25 @@ final class CoorditFitLabUITests: XCTestCase {
         capture("ocr-parser-bilingual-jittered", app: app)
     }
 
+    func testOCRParserPreservesNumericMixedAndFreeSizeLabelsAcrossEveryRow() throws {
+        let app = launchFitLab(fixture: "ocr-parser-mixed-labels")
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
+        element("fitlab-ocr-simulator-fixture", in: app).tap()
+
+        XCTAssertTrue(element("fitlab-ocr-review", in: app).waitForExistence(timeout: 3))
+        XCTAssertEqual(element("fitlab-ocr-size-label-row-0", in: app).value as? String, "85")
+        XCTAssertEqual(element("fitlab-ocr-size-label-row-1", in: app).value as? String, "W32")
+        XCTAssertEqual(element("fitlab-ocr-size-label-row-2", in: app).value as? String, "FREE")
+        XCTAssertEqual(element("fitlab-ocr-measurement-chest_width-row-0", in: app).value as? String, "50")
+        XCTAssertEqual(element("fitlab-ocr-measurement-chest_width-row-1", in: app).value as? String, "53")
+        XCTAssertEqual(element("fitlab-ocr-measurement-chest_width-row-2", in: app).value as? String, "56")
+    }
+
     func testOCRValidationRejectsDuplicateAndInvalidRows() throws {
         let app = launchFitLab(fixture: "ocr-validation-invalid")
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
         element("fitlab-ocr-simulator-fixture", in: app).tap()
         XCTAssertTrue(element("fitlab-ocr-review", in: app).waitForExistence(timeout: 3))
 
@@ -1053,8 +1100,8 @@ final class CoorditFitLabUITests: XCTestCase {
         )
         app.resetAuthorizationStatus(for: .camera)
         app.launch()
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
         element("fitlab-ocr-camera", in: app).tap()
 
         let appAlert = app.alerts.firstMatch
@@ -1088,8 +1135,8 @@ final class CoorditFitLabUITests: XCTestCase {
                 "--coordit-fitlab-accessibility-xxxl",
             ]
         )
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
         element("fitlab-ocr-simulator-fixture", in: app).tap()
         XCTAssertTrue(element("fitlab-ocr-review", in: app).waitForExistence(timeout: 3))
 
@@ -1114,8 +1161,8 @@ final class CoorditFitLabUITests: XCTestCase {
                 "--coordit-fitlab-accessibility-xxxl",
             ]
         )
-        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
-        app.buttons["사이즈표 OCR 입력"].tap()
+        XCTAssertTrue(app.buttons["사진으로 첨부하기"].waitForExistence(timeout: 5))
+        app.buttons["사진으로 첨부하기"].tap()
         tapWhenReachable("fitlab-ocr-simulate-unavailable", in: app)
         XCTAssertTrue(element("fitlab-ocr-camera-unavailable", in: app).waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["사진에서 선택"].exists)

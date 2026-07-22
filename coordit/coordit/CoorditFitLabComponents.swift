@@ -204,6 +204,13 @@ struct CoorditFitLabMannequinPanel: View {
             RoundedRectangle(cornerRadius: metrics.value(4))
                 .stroke(Color.black.opacity(0.12), lineWidth: 1)
         )
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(assetName == CoorditAssetNames.fitUpper ? "상의 핏 마네킹" : "하의 핏 마네킹")
+        .accessibilityIdentifier(
+            assetName == CoorditAssetNames.fitUpper
+                ? "fitlab-mannequin-upper"
+                : "fitlab-mannequin-lower"
+        )
     }
 
     private func anchor(for key: CoorditFitLabMeasurementKey) -> CGPoint {

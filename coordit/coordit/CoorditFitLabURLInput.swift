@@ -8,7 +8,7 @@ struct CoorditFitLabURLInputView: View {
     let requestLedger: () -> [String]
     let prefill: (URL) async throws -> CoorditFitLabURLPrefillResponse
     let loadReferences: (CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow]
-    let onClose: () -> Void
+    let onSwitchToOCR: () -> Void
     let onSwitchToManual: () -> Void
 
     @State private var stage: Stage = .entry
@@ -34,13 +34,6 @@ struct CoorditFitLabURLInputView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: metrics.value(14)) {
-                Button(action: closeFlow) {
-                    Label("입력 방법 다시 선택", systemImage: "chevron.left")
-                        .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .subheadline))
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(CoorditFitLabPalette.ink)
-
                 switch stage {
                 case .entry:
                     entry
@@ -119,12 +112,16 @@ struct CoorditFitLabURLInputView: View {
             .accessibilityIdentifier("fitlab-url-import")
 
             if errorMessage != nil {
-                HStack(spacing: metrics.value(10)) {
-                    Button("다시 시도", action: startImport)
-                        .buttonStyle(.bordered)
-                    Button("수동 입력으로 전환", action: switchToManual)
-                        .buttonStyle(.bordered)
+                VStack(spacing: metrics.value(8)) {
+                    urlFallbackButton(title: "다시 시도", isPrimary: true, action: startImport)
+
+                    HStack(spacing: metrics.value(8)) {
+                        urlFallbackButton(title: "사진 OCR로 전환", action: switchToOCR)
+                        .accessibilityIdentifier("fitlab-url-switch-to-ocr")
+                        urlFallbackButton(title: "수동 입력으로 전환", action: switchToManual)
+                    }
                 }
+                .frame(maxWidth: .infinity)
             }
         }
         .padding(metrics.value(15))
@@ -134,6 +131,29 @@ struct CoorditFitLabURLInputView: View {
             RoundedRectangle(cornerRadius: metrics.value(8), style: .continuous)
                 .stroke(Color.black.opacity(0.12), lineWidth: 0.8)
         )
+    }
+
+    private func urlFallbackButton(
+        title: String,
+        isPrimary: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(CoorditTypography.gmarketBold(size: metrics.value(11)))
+                .foregroundStyle(isPrimary ? Color.white : CoorditFitLabPalette.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.82)
+                .frame(maxWidth: .infinity)
+                .frame(height: metrics.value(40))
+                .background(isPrimary ? CoorditFitLabPalette.ink : CoorditFitLabPalette.field)
+                .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous)
+                        .stroke(CoorditFitLabPalette.ink.opacity(isPrimary ? 0 : 0.14), lineWidth: metrics.value(0.8))
+                }
+        }
+        .buttonStyle(.plain)
     }
 
     private var review: some View {
@@ -158,10 +178,13 @@ struct CoorditFitLabURLInputView: View {
 
             Picker("카테고리", selection: categoryBinding) {
                 ForEach(availableCategories) { option in
-                    Text(title(for: option)).tag(option)
+                    Text(title(for: option))
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
+                        .tag(option)
                 }
             }
             .pickerStyle(.menu)
+            .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
             .accessibilityIdentifier("fitlab-url-category-picker")
 
             HStack {
@@ -480,14 +503,14 @@ struct CoorditFitLabURLInputView: View {
         isLoading = false
     }
 
-    private func closeFlow() {
-        invalidateImport()
-        onClose()
-    }
-
     private func switchToManual() {
         invalidateImport()
         onSwitchToManual()
+    }
+
+    private func switchToOCR() {
+        invalidateImport()
+        onSwitchToOCR()
     }
 
     private func apply(_ response: CoorditFitLabURLPrefillResponse) {

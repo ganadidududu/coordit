@@ -24,6 +24,26 @@ enum CoorditFitLabCategory: String, Codable, CaseIterable, Identifiable, Sendabl
         case .pants, .jeans, .shorts, .skirt: .lower
         }
     }
+
+    var koreanTitle: String {
+        switch self {
+        case .tshirt: "티셔츠"
+        case .shirt: "셔츠"
+        case .sweatshirt: "스웨트셔츠"
+        case .hoodie: "후드"
+        case .knit: "니트"
+        case .jacket: "재킷"
+        case .coat: "코트"
+        case .pants: "팬츠"
+        case .jeans: "데님"
+        case .shorts: "쇼츠"
+        case .skirt: "스커트"
+        }
+    }
+
+    func isCompatible(with other: CoorditFitLabCategory) -> Bool {
+        garmentKind == other.garmentKind
+    }
 }
 
 enum CoorditFitLabMeasurementKey: String, Codable, CaseIterable, Identifiable, Sendable {

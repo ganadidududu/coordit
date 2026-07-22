@@ -3,8 +3,63 @@ import UIKit
 import Vision
 
 #if os(iOS)
+struct CoorditClosetOCRSizeRow: Identifiable, Equatable {
+    let id: UUID
+    var label: String
+    var measurements: [CoorditFitLabMeasurementKey: Double]
+    var extractedText: String?
+    var confidence: Double?
+
+    init(
+        id: UUID = UUID(),
+        label: String,
+        measurements: [CoorditFitLabMeasurementKey: Double],
+        extractedText: String? = nil,
+        confidence: Double? = nil
+    ) {
+        self.id = id
+        self.label = label
+        self.measurements = measurements
+        self.extractedText = extractedText
+        self.confidence = confidence
+    }
+
+    var clothingSizeRequest: ClothingSizeRequest {
+        ClothingSizeRequest(
+            sizeLabel: label,
+            rawMeasurements: [
+                "source": "ios-closet-reviewed-ocr",
+                "ocrText": extractedText ?? "",
+            ],
+            totalLength: measurements[.totalLength],
+            shoulderWidth: measurements[.shoulderWidth],
+            chestWidth: measurements[.chestWidth],
+            sleeveLength: measurements[.sleeveLength],
+            waistWidth: measurements[.waistWidth],
+            hipWidth: measurements[.hipWidth],
+            rise: measurements[.rise],
+            outseam: measurements[.outseam]
+        )
+    }
+}
+
 enum CoorditFitLabSizeExtractor {
+    static func closetRows(from imageData: Data) async throws -> [CoorditClosetOCRSizeRow] {
+        let result = try await CoorditFitLabVisionOCRService().recognizeSizeChart(imageData: imageData)
+        return result.draft.sizes.map { size in
+            CoorditClosetOCRSizeRow(
+                label: size.label,
+                measurements: size.measurements,
+                extractedText: result.rawText,
+                confidence: result.confidence
+            )
+        }
+    }
+
     static func referenceClothingSizeRequest(from draft: CoorditClosetDraft) async -> ClothingSizeRequest {
+        if let selectedRow = draft.selectedSizeRow {
+            return selectedRow.clothingSizeRequest
+        }
         guard
             draft.method == .photo,
             let imageData = draft.sizeChartImageData,
