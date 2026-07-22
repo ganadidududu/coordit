@@ -6,32 +6,33 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testSplashTapOpensMainHome() throws {
+    func testSplashSignupEntryOpensAccountLogin() throws {
         let app = launchApp(at: "splash")
         assertScreen("splash", in: app)
 
         let screenshot = XCTAttachment(screenshot: app.screenshot())
-        screenshot.name = "splash-entry-animation"
+        screenshot.name = "splash-signup-entry"
         screenshot.lifetime = .keepAlways
         add(screenshot)
 
-        let splash = element("coordit-screen-splash", in: app)
-        XCTAssertTrue(splash.waitForExistence(timeout: 5), "Missing splash screen")
-        splash.tap()
+        let signupEntry = app.buttons["splash-signup-entry"]
+        XCTAssertTrue(signupEntry.waitForExistence(timeout: 5), "Missing splash signup entry")
+        XCTAssertEqual(signupEntry.label, "로그인/회원가입")
+        signupEntry.tap()
 
-        assertScreen("main04", in: app)
+        assertScreen("mypage-account", in: app)
+        XCTAssertTrue(element("mypage-backend-email", in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(element("mypage-backend-password", in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["mypage-backend-login"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["mypage-backend-signup"].waitForExistence(timeout: 5))
     }
 
-    func testDefaultLaunchShowsSplashIntro() throws {
+    func testDefaultLaunchShowsSplashSignupEntry() throws {
         let app = XCUIApplication()
         app.launch()
 
         assertScreen("splash", in: app)
-        XCTAssertTrue(
-            app.staticTexts["당신을 위한 디지털 옷장"].waitForExistence(timeout: 5),
-            "Missing splash tagline"
-        )
-        XCTAssertFalse(app.buttons["splash-signup-entry"].exists)
+        XCTAssertTrue(app.buttons["splash-signup-entry"].waitForExistence(timeout: 5))
     }
 
     func testSplashLogoIsHorizontallyCentered() throws {
@@ -48,18 +49,32 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
     func testFitLabInputSourcesAndHistoryFlow() throws {
         var app = launchApp(at: "fitlab-input")
         assertScreen("fitlab-input", in: app)
-        XCTAssertTrue(app.buttons["갤러리에서 추가"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["카메라에서 추가"].waitForExistence(timeout: 5))
-        app.buttons["FIT LAB 뒤로가기"].tap()
-        assertScreen("main04", in: app)
+        XCTAssertTrue(app.buttons["사이즈표 수동 입력"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["사이즈표 OCR 입력"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["상품 링크 입력"].waitForExistence(timeout: 5))
         app.terminate()
 
-        app = launchApp(at: "fitlab-result-bottom")
+        let historyNamespace = "feature-flow-\(UUID().uuidString)"
+        app = launchApp(
+            at: "fitlab-result-bottom",
+            fixture: "history-persistence",
+            extraArguments: [
+                "--coordit-fitlab-history-namespace", historyNamespace,
+                "--coordit-fitlab-history-reset",
+            ]
+        )
         assertScreen("fitlab-result-bottom", in: app)
         let addToHistory = app.buttons["히스토리에 추가"]
         XCTAssertTrue(addToHistory.waitForExistence(timeout: 5))
         addToHistory.tap()
-        assertScreen("fitlab-history-register", in: app)
+        XCTAssertTrue(element("fitlab-history-saved-confirmation", in: app).waitForExistence(timeout: 5))
+        app.buttons["FIT LAB 뒤로가기"].tap()
+        assertScreen("fitlab-input", in: app)
+        let historyCard = element("fitlab-history-card-analysis-fixture-lower", in: app)
+        XCTAssertTrue(historyCard.waitForExistence(timeout: 5))
+        historyCard.tap()
+        assertScreen("fitlab-history-detail", in: app)
+        XCTAssertEqual(element("fitlab-history-detail-analysis", in: app).label, "analysis-fixture-lower")
     }
 
     func testHomeFitLabHistoryCardOpensDetail() throws {
@@ -106,23 +121,30 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertTrue(element("Wide Denim", in: app).waitForExistence(timeout: 5))
     }
 
-    func testClosetAddMethodShowsRequiredPhotoInputs() throws {
-        var app = launchApp(at: "closet-overview")
-        assertScreen("closet-overview", in: app)
-
-        let addGarment = app.buttons["closet-add-garment"]
-        XCTAssertTrue(addGarment.waitForExistence(timeout: 5))
-        addGarment.tap()
+    func testClosetAddInputsMatchRelocatedPhotoRequirements() throws {
+        var app = launchApp(at: "closet-add-method")
         assertScreen("closet-add-method", in: app)
 
         app.terminate()
         app = launchApp(at: "closet-add-photo")
         XCTAssertTrue(element("closet-size-chart-photo", in: app).waitForExistence(timeout: 5))
-        XCTAssertTrue(element("closet-garment-photo", in: app).waitForExistence(timeout: 5))
+        XCTAssertFalse(
+            element("closet-garment-photo", in: app).exists,
+            "Photo input must reserve garment photos for FIT DETAIL."
+        )
 
         app.terminate()
         app = launchApp(at: "closet-add-manual")
-        XCTAssertTrue(element("closet-manual-garment-photo", in: app).waitForExistence(timeout: 5))
+        XCTAssertFalse(
+            element("closet-manual-garment-photo", in: app).exists,
+            "Manual input must reserve garment photos for FIT DETAIL."
+        )
+        for index in 0..<4 {
+            XCTAssertTrue(
+                app.textFields["closet-manual-measurement-\(index)"].waitForExistence(timeout: 5),
+                "Manual input must retain measurement field \(index)."
+            )
+        }
     }
 
     func testClosetLinkAddShowsResultAndPersistsInOverview() throws {
@@ -157,13 +179,21 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertTrue(app.buttons["New Shirt"].waitForExistence(timeout: 5))
     }
 
-    private func launchApp(at route: String) -> XCUIApplication {
+    private func launchApp(
+        at route: String,
+        fixture: String? = nil,
+        extraArguments: [String] = []
+    ) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
             "--coordit-ui-testing",
             "--coordit-start-route",
             route,
         ]
+        if let fixture {
+            app.launchArguments += ["--coordit-fitlab-fixture", fixture]
+        }
+        app.launchArguments += extraArguments
         app.launch()
         return app
     }

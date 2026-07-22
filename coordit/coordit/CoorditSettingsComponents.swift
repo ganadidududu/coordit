@@ -17,9 +17,49 @@ struct CoorditSettingsHeaderCard: View {
     let onBack: (() -> Void)?
 
     var body: some View {
-        CoorditBackTitleCard(title: title, metrics: metrics) {
-            onBack?()
+        HStack(spacing: backButtonSpacing) {
+            Button {
+                onBack?()
+            } label: {
+                ZStack(alignment: .leading) {
+                    Color.clear
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: metrics.value(17), weight: .bold))
+                        .foregroundStyle(CoorditSettingsStyle.ink)
+                        .frame(width: metrics.value(28), height: metrics.value(36))
+                }
+                .frame(width: backButtonHitSize, height: backButtonHitSize, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("뒤로")
+            .accessibilityIdentifier("coordit-settings-back")
+
+            Text(title)
+                .font(
+                    title == "MY PAGE"
+                        ? CoorditTypography.climate2019(size: metrics.value(19), relativeTo: .headline)
+                        : CoorditTypography.climate2010(size: metrics.value(17), relativeTo: .headline)
+                )
+                .foregroundStyle(.black)
+                .lineLimit(1)
+
+            Spacer(minLength: 0)
         }
+        .padding(.horizontal, metrics.value(14))
+        .frame(height: metrics.value(62))
+        .frame(maxWidth: .infinity)
+        .background(CoorditSettingsStyle.panel)
+        .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
+        .shadow(color: .black.opacity(0.07), radius: metrics.value(12), y: metrics.value(5))
+    }
+
+    private var backButtonHitSize: CGFloat {
+        max(metrics.value(44), 44)
+    }
+
+    private var backButtonSpacing: CGFloat {
+        metrics.value(28 + 13) - backButtonHitSize
     }
 }
 

@@ -2,66 +2,124 @@ import SwiftUI
 
 #if os(iOS)
 extension CoorditMyPageFamilyView {
-    func threadCharge(metrics: CoorditResponsiveMetrics) -> some View {
-        VStack(spacing: metrics.value(18)) {
+    func threadCharge(
+        metrics: CoorditResponsiveMetrics,
+        contentMetrics: CoorditResponsiveMetrics
+    ) -> some View {
+        VStack(spacing: 0) {
             pageHeader("실타래 충전", metrics: metrics)
+                .accessibilityIdentifier("coordit-thread-charge-title")
+                .padding(.bottom, contentMetrics.value(CoorditDesignTokens.ChargeMetrics.titleToBalanceSpacing))
 
-            HStack(spacing: metrics.value(12)) {
+            HStack(spacing: contentMetrics.value(12)) {
                 Image(CoorditAssetNames.yarn)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: metrics.value(50), height: metrics.value(50))
+                    .frame(width: contentMetrics.value(50), height: contentMetrics.value(50))
 
-                VStack(alignment: .leading, spacing: metrics.value(4)) {
+                VStack(alignment: .leading, spacing: contentMetrics.value(4)) {
                     Text("보유 실타래")
-                        .font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .subheadline))
+                        .font(CoorditTypography.gmarketBold(size: contentMetrics.value(12), relativeTo: .subheadline))
                         .foregroundStyle(CoorditSettingsStyle.muted)
                     Text("36 실타래")
-                        .font(CoorditTypography.gmarketBold(size: metrics.value(29), relativeTo: .title))
+                        .font(CoorditTypography.gmarketBold(size: contentMetrics.value(29), relativeTo: .title))
                         .foregroundStyle(CoorditSettingsStyle.ink)
                 }
 
                 Spacer(minLength: 0)
             }
-            .padding(.horizontal, metrics.value(18))
-            .frame(height: metrics.value(82))
+            .padding(.horizontal, contentMetrics.value(18))
+            .frame(height: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.balanceHeight))
             .background(CoorditSettingsStyle.panel)
-            .clipShape(RoundedRectangle(cornerRadius: metrics.value(20), style: .continuous))
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.balanceRadius),
+                    style: .continuous
+                )
+            )
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("coordit-thread-charge-balance")
+            .padding(.bottom, contentMetrics.value(CoorditDesignTokens.ChargeMetrics.balanceToAdSpacing))
 
             Button(action: {}) {
-                HStack(spacing: metrics.value(16)) {
-                    Image(CoorditAssetNames.rechargePlay)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: metrics.value(45), height: metrics.value(45))
+                HStack(spacing: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adContentSpacing)) {
+                    ZStack {
+                        RoundedRectangle(
+                            cornerRadius: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.playTileRadius),
+                            style: .continuous
+                        )
+                        .fill(.white.opacity(0.14))
+
+                        Image(CoorditAssetNames.rechargePlay)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: contentMetrics.value(24), height: contentMetrics.value(24))
+                    }
+                    .frame(
+                        width: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.playTileSize),
+                        height: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.playTileSize)
+                    )
 
                     Text("광고 보고 실타래 충전하기")
-                        .font(CoorditTypography.gmarketBold(size: metrics.value(18), relativeTo: .headline))
+                        .font(CoorditTypography.gmarketBold(size: contentMetrics.value(18), relativeTo: .headline))
                         .foregroundStyle(.white)
                         .lineLimit(1)
 
                     Spacer(minLength: 0)
-                    CoorditSettingsChevron(metrics: metrics, color: .white)
+                    CoorditSettingsChevron(metrics: contentMetrics, color: .white)
                 }
-                .padding(.horizontal, metrics.value(15))
-                .frame(height: metrics.value(128))
+                .padding(.horizontal, contentMetrics.value(15))
+                .frame(height: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adHeight))
                 .background(
                     LinearGradient(
-                        colors: [CoorditSettingsStyle.ink, Color(red: 74 / 255, green: 85 / 255, blue: 132 / 255)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+                        stops: [
+                            .init(color: CoorditDesignTokens.ColorToken.chargeGradientTop, location: 0),
+                            .init(color: CoorditSettingsStyle.ink, location: 0.62),
+                            .init(color: CoorditDesignTokens.ColorToken.chargeGradientEnd, location: 1)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
                     )
                 )
-                .clipShape(RoundedRectangle(cornerRadius: metrics.value(6), style: .continuous))
-                .shadow(color: CoorditSettingsStyle.ink.opacity(0.35), radius: metrics.value(18), y: metrics.value(8))
+                .clipShape(
+                    RoundedRectangle(
+                        cornerRadius: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adRadius),
+                        style: .continuous
+                    )
+                )
+                .shadow(
+                    color: .black.opacity(0.18),
+                    radius: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adShadowRadius),
+                    y: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adShadowYOffset)
+                )
             }
             .buttonStyle(.plain)
             .accessibilityLabel("광고 보고 실타래 충전하기")
+            .accessibilityIdentifier("coordit-thread-charge-ad-cta")
+            .padding(.bottom, contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adToPackagesSpacing))
 
-            VStack(spacing: metrics.value(19)) {
-                yarnPurchaseRow(amount: "5 실타래", price: "1,500원", highlighted: false, metrics: metrics)
-                yarnPurchaseRow(amount: "10 실타래", price: "2,500원", highlighted: true, metrics: metrics)
-                yarnPurchaseRow(amount: "20 실타래", price: "4,000원", highlighted: false, metrics: metrics)
+            VStack(spacing: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.packageSpacing)) {
+                yarnPurchaseRow(
+                    amount: "5 실타래",
+                    price: "1,500원",
+                    identifier: "coordit-thread-charge-pack-5",
+                    highlighted: false,
+                    metrics: contentMetrics
+                )
+                yarnPurchaseRow(
+                    amount: "10 실타래",
+                    price: "2,500원",
+                    identifier: "coordit-thread-charge-pack-10",
+                    highlighted: true,
+                    metrics: contentMetrics
+                )
+                yarnPurchaseRow(
+                    amount: "20 실타래",
+                    price: "4,000원",
+                    identifier: "coordit-thread-charge-pack-20",
+                    highlighted: false,
+                    metrics: contentMetrics
+                )
             }
         }
     }
@@ -69,6 +127,7 @@ extension CoorditMyPageFamilyView {
     private func yarnPurchaseRow(
         amount: String,
         price: String,
+        identifier: String,
         highlighted: Bool,
         metrics: CoorditResponsiveMetrics
     ) -> some View {
@@ -77,7 +136,7 @@ extension CoorditMyPageFamilyView {
                 Image(CoorditAssetNames.yarn)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: metrics.value(46), height: metrics.value(46))
+                    .frame(width: metrics.value(54), height: metrics.value(54))
 
                 VStack(alignment: .leading, spacing: metrics.value(3)) {
                     Text(amount)
@@ -99,17 +158,29 @@ extension CoorditMyPageFamilyView {
                     .clipShape(Capsule())
             }
             .padding(.horizontal, metrics.value(16))
-            .frame(height: metrics.value(64))
+            .frame(height: metrics.value(CoorditDesignTokens.ChargeMetrics.packageHeight))
             .background(CoorditSettingsStyle.panel)
-            .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: metrics.value(CoorditDesignTokens.ChargeMetrics.packageRadius),
+                    style: .continuous
+                )
+            )
             .overlay {
-                RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous)
-                    .stroke(highlighted ? CoorditSettingsStyle.warmLine : CoorditSettingsStyle.line, lineWidth: highlighted ? 1.5 : 1)
+                RoundedRectangle(
+                    cornerRadius: metrics.value(CoorditDesignTokens.ChargeMetrics.packageRadius),
+                    style: .continuous
+                )
+                .stroke(
+                    highlighted ? CoorditSettingsStyle.warmLine : CoorditSettingsStyle.line,
+                    lineWidth: highlighted ? 2 : 1
+                )
             }
             .shadow(color: .black.opacity(0.035), radius: metrics.value(8), y: metrics.value(3))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(amount)
+        .accessibilityIdentifier(identifier)
     }
 }
 #endif

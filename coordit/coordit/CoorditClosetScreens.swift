@@ -1,6 +1,9 @@
 import SwiftUI
 
 #if os(iOS)
+import PhotosUI
+import UIKit
+
 enum CoorditClosetCategory: CaseIterable, Equatable {
     case top
     case bottom
@@ -20,7 +23,7 @@ struct CoorditClosetItem: Identifiable {
     let score: Int
     let scoreColor: Color
     let route: CoorditFrameRoute
-    let imageData: Data?
+    var imageData: Data?
     var backendClothingItemId: String? = nil
     var backendReferenceClothingId: String? = nil
 
@@ -44,6 +47,14 @@ struct CoorditClosetFamilyView: View {
     @State var selectedCategory: CoorditClosetCategory = .top
     @State private var searchText = ""
     @State var detailVariant: CoorditClosetCategory
+    @State var detailPhotoSelection: PhotosPickerItem?
+    @State var detailPhotoGenerations: [String: Int]
+
+    #if DEBUG
+    @State var detailPhotoTestStates: [String: String]
+    @State var detailPhotoTestRejections: [String: String]
+    @State var detailPhotoScenarioAppearances: [String: Int]
+    #endif
 
     init(
         route: CoorditFrameRoute,
@@ -58,6 +69,13 @@ struct CoorditClosetFamilyView: View {
         _draft = draft
         self.onRouteChange = onRouteChange
         _detailVariant = State(initialValue: route == .closetDetailBottom ? .bottom : .top)
+        _detailPhotoSelection = State(initialValue: nil)
+        _detailPhotoGenerations = State(initialValue: [:])
+        #if DEBUG
+        _detailPhotoTestStates = State(initialValue: [:])
+        _detailPhotoTestRejections = State(initialValue: [:])
+        _detailPhotoScenarioAppearances = State(initialValue: [:])
+        #endif
     }
 
     var body: some View {
@@ -105,7 +123,7 @@ struct CoorditClosetFamilyView: View {
     private func overviewScreen(metrics: CoorditResponsiveMetrics) -> some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: metrics.value(22)) {
-                CoorditClosetTitleBar(title: "CLOSET", metrics: metrics, horizontalOutset: 1) {
+                CoorditClosetTitleBar(title: "CLOSET", metrics: metrics) {
                     onRouteChange(.main04)
                 }
 
@@ -215,6 +233,174 @@ struct CoorditClosetFamilyView: View {
         }
         return items.first { $0.category == category } ?? CoorditClosetItem.seedItems[0]
     }
+
+    func loadDetailPhoto(_ pickerItem: PhotosPickerItem, for itemID: String) {
+        let generation = advanceDetailPhotoGeneration(for: itemID)
+
+        Task {
+            let data = try? await pickerItem.loadTransferable(type: Data.self)
+            guard detailPhotoGenerations[itemID] == generation else { return }
+            detailPhotoSelection = nil
+            guard let data, UIImage(data: data) != nil else { return }
+            commitDetailPhoto(data, for: itemID)
+        }
+    }
+
+    func invalidateDetailPhotoLoad(for itemID: String) {
+        _ = advanceDetailPhotoGeneration(for: itemID)
+        detailPhotoSelection = nil
+    }
+
+    private func advanceDetailPhotoGeneration(for itemID: String) -> Int {
+        let generation = (detailPhotoGenerations[itemID] ?? 0) + 1
+        detailPhotoGenerations[itemID] = generation
+        return generation
+    }
+
+    private func commitDetailPhoto(_ data: Data, for itemID: String) {
+        if let itemIndex = items.firstIndex(where: { $0.id == itemID }) {
+            items[itemIndex].imageData = data
+        } else if itemID == "closet-draft-preview" {
+            draft.garmentImageData = data
+        }
+    }
+
+    #if DEBUG
+    var detailPhotoTestScenario: String? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard arguments.contains("--coordit-ui-testing") else { return nil }
+        guard
+            let markerIndex = arguments.firstIndex(of: "--coordit-test-detail-photo-scenario"),
+            arguments.indices.contains(arguments.index(after: markerIndex))
+        else {
+            return nil
+        }
+        return arguments[arguments.index(after: markerIndex)]
+    }
+
+    func runDetailPhotoTestScenario(for itemID: String) {
+        guard let scenario = detailPhotoTestScenario else { return }
+        let appearance = (detailPhotoScenarioAppearances[itemID] ?? 0) + 1
+        detailPhotoScenarioAppearances[itemID] = appearance
+
+        switch scenario {
+        case "displayed-item-persistence":
+            guard appearance == 1 else { return }
+            startDetailPhotoTestLoad(
+                data: detailPhotoTestImageData(color: .systemBlue),
+                token: "valid-b",
+                for: itemID,
+                delayNanoseconds: 50_000_000
+            )
+        case "corrupt-and-stale":
+            if appearance == 1 {
+                applyDetailPhotoTestPayload(
+                    detailPhotoTestImageData(color: .systemRed),
+                    token: "valid-a",
+                    for: itemID,
+                    generation: advanceDetailPhotoGeneration(for: itemID)
+                )
+                startDelayedStaleDetailPhotoTestLoad(
+                    data: detailPhotoTestImageData(color: .systemRed),
+                    token: "stale-a",
+                    for: itemID,
+                    afterCommittedToken: "valid-b"
+                )
+                detailPhotoTestStates[itemID] = "\(itemID)-valid-a-delayed-pending"
+            } else if appearance == 2 {
+                applyDetailPhotoTestPayload(
+                    Data("not-an-image".utf8),
+                    token: "corrupt",
+                    for: itemID,
+                    generation: advanceDetailPhotoGeneration(for: itemID)
+                )
+                startDetailPhotoTestLoad(
+                    data: detailPhotoTestImageData(color: .systemBlue),
+                    token: "valid-b",
+                    for: itemID,
+                    delayNanoseconds: 50_000_000
+                )
+            }
+        case "draft-preview-fallback":
+            guard appearance == 1 else { return }
+            startDetailPhotoTestLoad(
+                data: detailPhotoTestImageData(color: .systemBlue),
+                token: "valid-b",
+                for: itemID,
+                delayNanoseconds: 50_000_000
+            )
+        case "real-link-add-result-item":
+            guard appearance == 1,
+                  itemID != "closet-draft-preview",
+                  items.contains(where: { $0.id == itemID }) else { return }
+            startDetailPhotoTestLoad(
+                data: detailPhotoTestImageData(color: .systemBlue),
+                token: "real-link-valid-b",
+                for: itemID,
+                delayNanoseconds: 50_000_000
+            )
+        default:
+            break
+        }
+    }
+
+    private func startDetailPhotoTestLoad(
+        data: Data,
+        token: String,
+        for itemID: String,
+        delayNanoseconds: UInt64
+    ) {
+        let generation = advanceDetailPhotoGeneration(for: itemID)
+        Task {
+            try? await Task.sleep(nanoseconds: delayNanoseconds)
+            applyDetailPhotoTestPayload(data, token: token, for: itemID, generation: generation)
+        }
+    }
+
+    private func startDelayedStaleDetailPhotoTestLoad(
+        data: Data,
+        token: String,
+        for itemID: String,
+        afterCommittedToken: String
+    ) {
+        let generation = advanceDetailPhotoGeneration(for: itemID)
+        let committedState = "\(itemID)-\(afterCommittedToken)"
+
+        Task {
+            for _ in 0..<600 {
+                if detailPhotoTestStates[itemID] == committedState {
+                    applyDetailPhotoTestPayload(data, token: token, for: itemID, generation: generation)
+                    return
+                }
+                try? await Task.sleep(nanoseconds: 100_000_000)
+            }
+            applyDetailPhotoTestPayload(data, token: token, for: itemID, generation: generation)
+        }
+    }
+
+    private func applyDetailPhotoTestPayload(
+        _ data: Data,
+        token: String,
+        for itemID: String,
+        generation: Int
+    ) {
+        guard detailPhotoGenerations[itemID] == generation else {
+            detailPhotoTestRejections[itemID] = "\(itemID)-\(token)-rejected"
+            return
+        }
+        guard UIImage(data: data) != nil else { return }
+        commitDetailPhoto(data, for: itemID)
+        detailPhotoTestStates[itemID] = "\(itemID)-\(token)"
+    }
+
+    private func detailPhotoTestImageData(color: UIColor) -> Data {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 12, height: 12))
+        return renderer.pngData { context in
+            color.setFill()
+            context.fill(CGRect(origin: .zero, size: CGSize(width: 12, height: 12)))
+        }
+    }
+    #endif
 
 }
 #endif

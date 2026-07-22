@@ -32,8 +32,24 @@ struct CoorditClosetTitleBar: View {
     }
 
     var body: some View {
-        CoorditBackTitleCard(title: title, metrics: metrics, onBack: onBack)
-            .padding(.horizontal, -metrics.value(horizontalOutset))
+        Button(action: onBack) {
+            HStack(spacing: metrics.value(18)) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: metrics.value(25), weight: .bold))
+                Text(title)
+                    .font(CoorditTypography.gmarketBold(size: metrics.value(22)))
+                    .tracking(metrics.value(1.5))
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(.black)
+            .padding(.horizontal, metrics.value(29))
+            .frame(height: metrics.value(60))
+            .background(CoorditClosetColors.card)
+            .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .padding(.horizontal, -metrics.value(horizontalOutset))
     }
 }
 
@@ -100,12 +116,10 @@ struct CoorditClosetPrimaryButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))
+                .font(CoorditTypography.climate2010(size: metrics.value(17)))
                 .foregroundStyle(.white)
-                .lineLimit(1)
-                .minimumScaleFactor(0.78)
                 .frame(maxWidth: .infinity)
-                .frame(height: metrics.value(max(height, 42)))
+                .frame(height: metrics.value(height))
                 .background(
                     LinearGradient(
                         colors: [
