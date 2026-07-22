@@ -62,6 +62,17 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         assertScreen("fitlab-history-register", in: app)
     }
 
+    func testHomeFitLabHistoryCardOpensDetail() throws {
+        let app = launchApp(at: "main04")
+        assertScreen("main04", in: app)
+
+        let historyCard = element("coordit-main04-history-card-linen-shirt", in: app)
+        XCTAssertTrue(historyCard.waitForExistence(timeout: 5))
+        historyCard.tap()
+
+        assertScreen("fitlab-history-detail", in: app)
+    }
+
     func testMyPageRowsOpenTheirFinalScreens() throws {
         let destinations = [
             ("계정", "mypage-account"),
