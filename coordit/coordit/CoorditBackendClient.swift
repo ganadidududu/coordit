@@ -68,6 +68,48 @@ struct CoorditBackendClient {
         try await send(path: "/body-measurements", method: "POST", token: token, body: request)
     }
 
+    func createClothingItem(token: String, request: CreateClothingItemRequest) async throws -> CoorditClothingItemResponse {
+        try await send(path: "/clothing-items", method: "POST", token: token, body: request)
+    }
+
+    func createClothingSize(
+        token: String,
+        clothingItemId: String,
+        request: ClothingSizeRequest
+    ) async throws -> CoorditClothingSizeResponse {
+        try await send(path: "/clothing-items/\(clothingItemId)/sizes", method: "POST", token: token, body: request)
+    }
+
+    func createReferenceClothing(
+        token: String,
+        request: CreateReferenceClothingRequest
+    ) async throws -> CoorditReferenceClothingResponse {
+        try await send(path: "/reference-clothing", method: "POST", token: token, body: request)
+    }
+
+    func listReferenceClothing(token: String, category: String) async throws -> [CoorditReferenceClothingResponse] {
+        try await send(path: "/reference-clothing/by-category/\(category)", method: "GET", token: token, body: Optional<String>.none)
+    }
+
+    func createExternalProduct(
+        token: String,
+        request: CreateExternalProductRequest
+    ) async throws -> CoorditExternalProductResponse {
+        try await send(path: "/external-products", method: "POST", token: token, body: request)
+    }
+
+    func createExternalProductSize(
+        token: String,
+        externalProductId: String,
+        request: ExternalProductSizeRequest
+    ) async throws -> CoorditExternalProductSizeResponse {
+        try await send(path: "/external-products/\(externalProductId)/sizes", method: "POST", token: token, body: request)
+    }
+
+    func recommendFit(token: String, request: FitRecommendRequest) async throws -> CoorditFitRecommendation {
+        try await send(path: "/fit/recommend", method: "POST", token: token, body: request)
+    }
+
     private func send<ResponseBody: Decodable, RequestBody: Encodable>(
         path: String,
         method: String,
@@ -124,5 +166,98 @@ struct BodyMeasurementRequest: Encodable {
         let source: String
         let inseamCm: Double?
     }
+}
+
+struct CreateClothingItemRequest: Encodable {
+    let name: String
+    let category: String
+    let fitType: String
+    let sizeLabel: String?
+    let rawProductData: [String: String]
+}
+
+struct ClothingSizeRequest: Encodable {
+    let sizeLabel: String?
+    let rawMeasurements: [String: String]
+    let totalLength: Double?
+    let shoulderWidth: Double?
+    let chestWidth: Double?
+    let sleeveLength: Double?
+    let waistWidth: Double?
+    let hipWidth: Double?
+    let rise: Double?
+    let outseam: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case sizeLabel
+        case rawMeasurements
+        case totalLength = "total_length"
+        case shoulderWidth = "shoulder_width"
+        case chestWidth = "chest_width"
+        case sleeveLength = "sleeve_length"
+        case waistWidth = "waist_width"
+        case hipWidth = "hip_width"
+        case rise
+        case outseam
+    }
+}
+
+struct CreateReferenceClothingRequest: Encodable {
+    let clothingItemId: String
+    let nickname: String?
+    let category: String
+    let fitType: String
+    let preferenceScore: Double
+    let isActive: Bool
+    let notes: String?
+}
+
+struct CreateExternalProductRequest: Encodable {
+    let productName: String
+    let brand: String?
+    let mallName: String?
+    let productUrl: String?
+    let category: String
+    let fitType: String
+    let rawProductData: [String: String]
+}
+
+struct ExternalProductSizeRequest: Encodable {
+    let sizeLabel: String
+    let rawSizeData: [String: String]
+    let parsingStatus: String
+    let measurementSource: String
+    let extractedText: String?
+    let extractionConfidence: Double?
+    let totalLength: Double?
+    let shoulderWidth: Double?
+    let chestWidth: Double?
+    let sleeveLength: Double?
+    let waistWidth: Double?
+    let hipWidth: Double?
+    let rise: Double?
+    let outseam: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case sizeLabel
+        case rawSizeData
+        case parsingStatus
+        case measurementSource
+        case extractedText
+        case extractionConfidence
+        case totalLength = "total_length"
+        case shoulderWidth = "shoulder_width"
+        case chestWidth = "chest_width"
+        case sleeveLength = "sleeve_length"
+        case waistWidth = "waist_width"
+        case hipWidth = "hip_width"
+        case rise
+        case outseam
+    }
+}
+
+struct FitRecommendRequest: Encodable {
+    let referenceClothingIds: [String]
+    let externalProductId: String
 }
 #endif

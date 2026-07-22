@@ -3,11 +3,12 @@ import SwiftUI
 #if os(iOS)
 struct CoorditFitLabScoreCard: View {
     let variant: CoorditFitLabResultVariant
+    let recommendation: CoorditFitRecommendation?
     let metrics: CoorditResponsiveMetrics
 
     var body: some View {
         VStack(alignment: .leading, spacing: metrics.value(7)) {
-            Text(variant.scoreBasis)
+            Text(recommendation.map { "추천 사이즈 \( $0.recommendedSize ) 기준" } ?? variant.scoreBasis)
                 .font(CoorditTypography.mona12(size: metrics.value(10), relativeTo: .caption))
                 .foregroundStyle(CoorditFitLabPalette.muted)
             Text("FIT SCORE")
@@ -22,12 +23,12 @@ struct CoorditFitLabScoreCard: View {
                 ],
                 spacing: metrics.value(8)
             ) {
-                ForEach(variant.metrics) { metric in
+                ForEach(recommendation?.fitLabMetrics ?? variant.metrics) { metric in
                     CoorditFitLabMetricCell(metric: metric, metrics: metrics)
                 }
             }
 
-            Text("총점 |")
+            Text("총점 | \(recommendation?.roundedFitScore ?? variant.defaultScore)")
                 .font(CoorditTypography.gmarketBold(size: metrics.value(15), relativeTo: .body))
                 .foregroundStyle(.white)
                 .padding(.horizontal, metrics.value(17))
@@ -51,6 +52,33 @@ struct CoorditFitLabScoreCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(CoorditFitLabPalette.surface)
         .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
+    }
+}
+
+private extension CoorditFitRecommendation {
+    var roundedFitScore: Int {
+        Int(fitScore.rounded())
+    }
+
+    var fitLabMetrics: [CoorditFitLabMetric] {
+        [
+            CoorditFitLabMetric(id: "shoulder", value: diff.shoulderWidth.coorditSignedCentimeters, label: "어깨"),
+            CoorditFitLabMetric(id: "chest", value: diff.chestWidth.coorditSignedCentimeters, label: "가슴"),
+            CoorditFitLabMetric(id: "length", value: (diff.totalLength ?? diff.outseam).coorditSignedCentimeters, label: diff.totalLength == nil ? "아웃심" : "총장"),
+            CoorditFitLabMetric(id: "sleeve", value: (diff.sleeveLength ?? diff.rise).coorditSignedCentimeters, label: diff.sleeveLength == nil ? "밑위" : "소매")
+        ]
+    }
+}
+
+private extension Optional where Wrapped == Double {
+    var coorditSignedCentimeters: String {
+        guard let value = self else { return "- cm" }
+        let sign = value > 0 ? "+" : ""
+        let rounded = (value * 10).rounded() / 10
+        if rounded.rounded() == rounded {
+            return "\(sign)\(Int(rounded)) cm"
+        }
+        return "\(sign)\(rounded) cm"
     }
 }
 

@@ -3,6 +3,10 @@ import SwiftUI
 #if os(iOS)
 struct CoorditSplashScreen: View {
     let onRouteChange: (CoorditFrameRoute) -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var taglineVisible = false
+    @State private var dividerProgress: CGFloat = 0
+    @State private var logoVisible = false
 
     init(onRouteChange: @escaping (CoorditFrameRoute) -> Void = { _ in }) {
         self.onRouteChange = onRouteChange
@@ -24,16 +28,20 @@ struct CoorditSplashScreen: View {
                         .foregroundStyle(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.82)
+                        .opacity(taglineVisible ? 1 : 0)
+                        .offset(y: taglineVisible ? 0 : metrics.value(12))
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("당신을 위한 디지털 옷장")
                         .accessibilityIdentifier("coordit-splash-tagline")
 
-                    Rectangle()
-                        .fill(.white.opacity(0.92))
-                        .frame(width: max(metrics.value(0.8), 0.5), height: metrics.value(100))
+                    CoorditSplashDivider(progress: dividerProgress, metrics: metrics)
                         .padding(.top, metrics.value(48))
 
                     CoorditSplashLogo(scale: metrics.scale)
                         .frame(width: metrics.value(199.032), height: metrics.value(55.574))
                         .padding(.top, metrics.value(35))
+                        .opacity(logoVisible ? 1 : 0)
+                        .scaleEffect(logoVisible ? 1 : 0.94)
                         .accessibilityIdentifier("coordit-splash-logo")
 
                     Spacer(minLength: 0)
@@ -50,40 +58,39 @@ struct CoorditSplashScreen: View {
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             .ignoresSafeArea()
-            .overlay(alignment: .bottom) {
-                Button("로그인/회원가입") {
-                    onRouteChange(.myPageAccount)
-                }
-                .font(CoorditTypography.gmarketMedium(size: metrics.value(16), relativeTo: .headline))
-                .foregroundStyle(Main01DesignTokens.Colors.chrome)
-                .frame(
-                    width: signupButtonWidth(for: geometry.size),
-                    height: signupButtonHeight(for: metrics)
-                )
-                .background(
-                    Main01DesignTokens.Colors.surface,
-                    in: RoundedRectangle(cornerRadius: metrics.value(14), style: .continuous)
-                )
-                .shadow(
-                    color: Main01DesignTokens.Colors.chrome.opacity(0.16),
-                    radius: metrics.value(16),
-                    y: metrics.value(8)
-                )
-                .buttonStyle(.plain)
-                .padding(.bottom, geometry.safeAreaInsets.bottom + metrics.value(30))
-                .accessibilityIdentifier("splash-signup-entry")
-            }
         }
         .ignoresSafeArea()
         .preferredColorScheme(.light)
+        .onAppear(perform: startEntranceAnimation)
     }
 
-    private func signupButtonWidth(for size: CGSize) -> CGFloat {
-        min(max(size.width * 0.52, 168), 228)
-    }
+    private func startEntranceAnimation() {
+        taglineVisible = false
+        dividerProgress = 0
+        logoVisible = false
 
-    private func signupButtonHeight(for metrics: CoorditResponsiveMetrics) -> CGFloat {
-        min(max(metrics.value(52), 48), 58)
+        guard !reduceMotion else {
+            taglineVisible = true
+            dividerProgress = 1
+            logoVisible = true
+            return
+        }
+
+        withAnimation(.easeOut(duration: 0.52)) {
+            taglineVisible = true
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.42) {
+            withAnimation(.easeInOut(duration: 0.86)) {
+                dividerProgress = 1
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.24) {
+            withAnimation(.easeOut(duration: 0.22)) {
+                logoVisible = true
+            }
+        }
     }
 }
 
@@ -101,6 +108,24 @@ private struct CoorditSplashBackground: View {
                 .frame(width: geometry.size.width, height: geometry.size.height)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct CoorditSplashDivider: View {
+    let progress: CGFloat
+    let metrics: CoorditResponsiveMetrics
+
+    var body: some View {
+        let lineWidth = max(metrics.value(0.8), 0.5)
+        let lineHeight = metrics.value(100)
+        let visibleHeight = max(lineWidth, lineHeight * progress)
+
+        Capsule(style: .continuous)
+            .fill(.white.opacity(0.92))
+            .frame(width: lineWidth, height: visibleHeight)
+            .frame(height: lineHeight, alignment: .top)
+            .opacity(progress > 0 ? 1 : 0)
+            .accessibilityHidden(true)
     }
 }
 

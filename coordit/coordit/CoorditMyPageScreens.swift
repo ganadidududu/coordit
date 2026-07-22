@@ -44,7 +44,7 @@ struct CoorditMyPageFamilyView: View {
         CoorditScreenScaffold(
             route: route,
             onRouteChange: onRouteChange,
-            contentTop: 119,
+            contentTop: 115,
             contentBottom: Main01DesignTokens.Metrics.navHeight + 12
         ) { metrics in
             ScrollView(.vertical, showsIndicators: false) {

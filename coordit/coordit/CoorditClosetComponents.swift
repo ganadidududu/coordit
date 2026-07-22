@@ -16,26 +16,24 @@ enum CoorditClosetColors {
 struct CoorditClosetTitleBar: View {
     let title: String
     let metrics: CoorditResponsiveMetrics
+    let horizontalOutset: CGFloat
     let onBack: () -> Void
 
+    init(
+        title: String,
+        metrics: CoorditResponsiveMetrics,
+        horizontalOutset: CGFloat = 0,
+        onBack: @escaping () -> Void
+    ) {
+        self.title = title
+        self.metrics = metrics
+        self.horizontalOutset = horizontalOutset
+        self.onBack = onBack
+    }
+
     var body: some View {
-        Button(action: onBack) {
-            HStack(spacing: metrics.value(18)) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: metrics.value(25), weight: .bold))
-                Text(title)
-                    .font(CoorditTypography.climate2019(size: metrics.value(22)))
-                    .tracking(metrics.value(1.5))
-                Spacer(minLength: 0)
-            }
-            .foregroundStyle(.black)
-            .padding(.horizontal, metrics.value(29))
-            .frame(height: metrics.value(60))
-            .background(CoorditClosetColors.card)
-            .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
+        CoorditBackTitleCard(title: title, metrics: metrics, onBack: onBack)
+            .padding(.horizontal, -metrics.value(horizontalOutset))
     }
 }
 
@@ -102,10 +100,12 @@ struct CoorditClosetPrimaryButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(CoorditTypography.climate2010(size: metrics.value(17)))
+                .font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))
                 .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
                 .frame(maxWidth: .infinity)
-                .frame(height: metrics.value(height))
+                .frame(height: metrics.value(max(height, 42)))
                 .background(
                     LinearGradient(
                         colors: [

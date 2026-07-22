@@ -119,23 +119,31 @@ extension CoorditClosetFamilyView {
     }
 
     private func submitDraft() {
-        let trimmedName = draft.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let submittedDraft = draft
+        let trimmedName = submittedDraft.trimmedName
         guard !trimmedName.isEmpty else { return }
 
         let item = CoorditClosetItem(
             id: UUID().uuidString,
             name: trimmedName,
-            category: draft.category,
-            score: draft.score,
+            category: submittedDraft.category,
+            score: submittedDraft.score,
             scoreColor: CoorditClosetColors.blue,
             route: .closetAddResult,
-            imageData: draft.garmentImageData
+            imageData: submittedDraft.garmentImageData
         )
 
         items.insert(item, at: 0)
         selectedItemID = item.id
         selectedCategory = item.category
         onRouteChange(.closetAddLoading)
+
+        Task { @MainActor in
+            guard let saved = await backendSession.saveReferenceClothing(from: submittedDraft) else { return }
+            guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
+            items[index].backendClothingItemId = saved.clothingItemId
+            items[index].backendReferenceClothingId = saved.referenceClothingId
+        }
     }
 }
 
@@ -147,7 +155,7 @@ private struct CoorditClosetAddMethodScreen: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: metrics.value(18)) {
-                CoorditClosetTitleBar(title: "ADD CLOTHES", metrics: metrics, onBack: onBack)
+                CoorditClosetTitleBar(title: "ADD CLOTHES", metrics: metrics, horizontalOutset: 7, onBack: onBack)
 
                 VStack(alignment: .leading, spacing: metrics.value(5)) {
                     Text("어떻게 추가할까요?")
@@ -226,7 +234,7 @@ private struct CoorditClosetLinkInputScreen: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: metrics.value(16)) {
-                CoorditClosetTitleBar(title: "LINK INPUT", metrics: metrics, onBack: onBack)
+                CoorditClosetTitleBar(title: "LINK INPUT", metrics: metrics, horizontalOutset: 7, onBack: onBack)
                 CoorditClosetBasicsCard(draft: $draft, metrics: metrics)
 
                 CoorditClosetFormCard(title: "상품 링크", subtitle: "사이즈 정보가 있는 상품 페이지 주소를 붙여넣어 주세요.", metrics: metrics) {
@@ -272,7 +280,7 @@ private struct CoorditClosetPhotoInputScreen: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: metrics.value(16)) {
-                CoorditClosetTitleBar(title: "PHOTO INPUT", metrics: metrics, onBack: onBack)
+                CoorditClosetTitleBar(title: "PHOTO INPUT", metrics: metrics, horizontalOutset: 7, onBack: onBack)
                 CoorditClosetBasicsCard(draft: $draft, metrics: metrics)
 
                 CoorditClosetFormCard(title: "사진 첨부", subtitle: "정확한 분석을 위해 두 장을 모두 첨부해주세요.", metrics: metrics) {
@@ -315,7 +323,7 @@ private struct CoorditClosetManualInputScreen: View {
         case .top:
             [("어깨", \.measurement1), ("가슴", \.measurement2), ("총장", \.measurement3), ("소매", \.measurement4)]
         case .bottom:
-            [("허리", \.measurement1), ("엉덩이", \.measurement2), ("허벅지", \.measurement3), ("총장", \.measurement4)]
+            [("허리", \.measurement1), ("엉덩이", \.measurement2), ("밑위", \.measurement3), ("아웃심", \.measurement4)]
         }
     }
 
@@ -328,7 +336,7 @@ private struct CoorditClosetManualInputScreen: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: metrics.value(16)) {
-                CoorditClosetTitleBar(title: "MANUAL INPUT", metrics: metrics, onBack: onBack)
+                CoorditClosetTitleBar(title: "MANUAL INPUT", metrics: metrics, horizontalOutset: 7, onBack: onBack)
                 CoorditClosetBasicsCard(draft: $draft, metrics: metrics)
 
                 CoorditClosetFormCard(title: "옷 사진", subtitle: "등록할 옷을 한 장 첨부해주세요.", metrics: metrics) {
@@ -393,7 +401,7 @@ private struct CoorditClosetAddLoadingScreen: View {
 
     var body: some View {
         VStack(spacing: metrics.value(18)) {
-            CoorditClosetTitleBar(title: "FIT CHECK", metrics: metrics, onBack: onBack)
+            CoorditClosetTitleBar(title: "FIT CHECK", metrics: metrics, horizontalOutset: 7, onBack: onBack)
 
             Spacer(minLength: metrics.value(120))
             ZStack {

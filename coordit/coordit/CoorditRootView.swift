@@ -27,7 +27,7 @@ struct CoorditRootView: View {
              .fitLabResultBottom,
              .fitLabHistoryRegister,
              .fitLabHistoryDetail:
-            CoorditFitLabFamilyView(currentRoute: route) { route = $0 }
+            CoorditFitLabFamilyView(currentRoute: route, referenceItems: closetItems) { route = $0 }
         case .myPage,
              .myPageThreadCharge,
              .myPageBody,

@@ -6,33 +6,32 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testSplashSignupEntryOpensAccountLogin() throws {
+    func testSplashTapOpensMainHome() throws {
         let app = launchApp(at: "splash")
         assertScreen("splash", in: app)
 
         let screenshot = XCTAttachment(screenshot: app.screenshot())
-        screenshot.name = "splash-signup-entry"
+        screenshot.name = "splash-entry-animation"
         screenshot.lifetime = .keepAlways
         add(screenshot)
 
-        let signupEntry = app.buttons["splash-signup-entry"]
-        XCTAssertTrue(signupEntry.waitForExistence(timeout: 5), "Missing splash signup entry")
-        XCTAssertEqual(signupEntry.label, "로그인/회원가입")
-        signupEntry.tap()
+        let splash = element("coordit-screen-splash", in: app)
+        XCTAssertTrue(splash.waitForExistence(timeout: 5), "Missing splash screen")
+        splash.tap()
 
-        assertScreen("mypage-account", in: app)
-        XCTAssertTrue(element("mypage-backend-email", in: app).waitForExistence(timeout: 5))
-        XCTAssertTrue(element("mypage-backend-password", in: app).waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["mypage-backend-login"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["mypage-backend-signup"].waitForExistence(timeout: 5))
+        assertScreen("main04", in: app)
     }
 
-    func testDefaultLaunchShowsSplashSignupEntry() throws {
+    func testDefaultLaunchShowsSplashIntro() throws {
         let app = XCUIApplication()
         app.launch()
 
         assertScreen("splash", in: app)
-        XCTAssertTrue(app.buttons["splash-signup-entry"].waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            app.staticTexts["당신을 위한 디지털 옷장"].waitForExistence(timeout: 5),
+            "Missing splash tagline"
+        )
+        XCTAssertFalse(app.buttons["splash-signup-entry"].exists)
     }
 
     func testSplashLogoIsHorizontallyCentered() throws {
@@ -51,6 +50,8 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         assertScreen("fitlab-input", in: app)
         XCTAssertTrue(app.buttons["갤러리에서 추가"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["카메라에서 추가"].waitForExistence(timeout: 5))
+        app.buttons["FIT LAB 뒤로가기"].tap()
+        assertScreen("main04", in: app)
         app.terminate()
 
         app = launchApp(at: "fitlab-result-bottom")

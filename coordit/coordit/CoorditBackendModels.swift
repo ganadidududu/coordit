@@ -60,4 +60,136 @@ struct CoorditBackendHealth: Codable, Equatable {
 struct CoorditBackendErrorResponse: Codable, Equatable {
     let message: String
 }
+
+struct CoorditClothingItemResponse: Codable, Equatable {
+    let id: String
+    let name: String
+    let category: String
+    let fitType: String
+    let sizeLabel: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case category
+        case fitType = "fit_type"
+        case sizeLabel = "size_label"
+    }
+}
+
+struct CoorditReferenceClothingResponse: Codable, Equatable {
+    let id: String
+    let clothingItemId: String
+    let category: String
+    let fitType: String
+    let preferenceScore: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case clothingItemId = "clothing_item_id"
+        case category
+        case fitType = "fit_type"
+        case preferenceScore = "preference_score"
+    }
+}
+
+struct CoorditExternalProductResponse: Codable, Equatable {
+    let id: String
+    let productName: String
+    let category: String
+    let fitType: String
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case productName = "product_name"
+        case category
+        case fitType = "fit_type"
+    }
+}
+
+struct CoorditExternalProductSizeResponse: Codable, Equatable {
+    let id: String
+    let sizeLabel: String
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case sizeLabel = "size_label"
+    }
+}
+
+struct CoorditClothingSizeResponse: Codable, Equatable {
+    let id: String
+    let sizeLabel: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case sizeLabel = "size_label"
+    }
+}
+
+struct CoorditMeasurementMap: Codable, Equatable {
+    var totalLength: Double?
+    var shoulderWidth: Double?
+    var chestWidth: Double?
+    var sleeveLength: Double?
+    var waistWidth: Double?
+    var hipWidth: Double?
+    var rise: Double?
+    var outseam: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case totalLength = "total_length"
+        case shoulderWidth = "shoulder_width"
+        case chestWidth = "chest_width"
+        case sleeveLength = "sleeve_length"
+        case waistWidth = "waist_width"
+        case hipWidth = "hip_width"
+        case rise
+        case outseam
+    }
+}
+
+struct CoorditFitRecommendation: Codable, Equatable {
+    let fitAnalysisResultId: String
+    let recommendedSize: String
+    let fitScore: Double
+    let fitLabel: String
+    let fitComment: String
+    let recommendationConfidence: String
+    let diff: CoorditMeasurementMap
+    let partExplanations: [String]
+    let partStatuses: CoorditMeasurementStatusMap?
+    let allSizeScores: [CoorditFitRecommendationSizeScore]
+    let algorithmVersion: String
+}
+
+struct CoorditMeasurementStatusMap: Codable, Equatable {
+    var totalLength: String?
+    var shoulderWidth: String?
+    var chestWidth: String?
+    var sleeveLength: String?
+    var waistWidth: String?
+    var hipWidth: String?
+    var rise: String?
+    var outseam: String?
+
+    enum CodingKeys: String, CodingKey {
+        case totalLength = "total_length"
+        case shoulderWidth = "shoulder_width"
+        case chestWidth = "chest_width"
+        case sleeveLength = "sleeve_length"
+        case waistWidth = "waist_width"
+        case hipWidth = "hip_width"
+        case rise
+        case outseam
+    }
+}
+
+struct CoorditFitRecommendationSizeScore: Codable, Equatable {
+    let externalProductSizeId: String
+    let sizeLabel: String
+    let fitScore: Double
+    let fitLabel: String
+    let recommendationConfidence: String
+}
 #endif

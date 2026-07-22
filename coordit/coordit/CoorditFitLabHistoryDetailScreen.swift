@@ -53,7 +53,7 @@ struct CoorditFitLabHistoryDetailScreen: View {
                 CoorditFitLabMannequinPanel(assetName: CoorditAssetNames.fitUpper, metrics: metrics)
                     .frame(width: metrics.value(101), height: metrics.value(189))
 
-                CoorditFitLabScoreCard(variant: .history, metrics: metrics)
+                CoorditFitLabScoreCard(variant: .history, recommendation: nil, metrics: metrics)
                     .frame(width: metrics.value(209), height: metrics.value(189))
             }
 
@@ -97,6 +97,15 @@ enum CoorditFitLabResultVariant {
             "과거 기준치 기준"
         case .top, .bottom:
             "현재 베스트 스코어 기준"
+        }
+    }
+
+    var defaultScore: Int {
+        switch self {
+        case .top:
+            94
+        case .bottom, .history:
+            91
         }
     }
 
