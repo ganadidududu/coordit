@@ -24,6 +24,8 @@ struct CoorditClosetItem: Identifiable {
     let scoreColor: Color
     let route: CoorditFrameRoute
     var imageData: Data?
+    var backendClothingItemId: String? = nil
+    var backendReferenceClothingId: String? = nil
 
     static let seedItems = [
         CoorditClosetItem(id: "oxford", name: "Oxford Shirt", category: .top, score: 94, scoreColor: CoorditClosetColors.blue, route: .closetDetailTop, imageData: nil),
@@ -41,6 +43,7 @@ struct CoorditClosetFamilyView: View {
     @Binding var selectedItemID: String?
     @Binding var draft: CoorditClosetDraft
 
+    @EnvironmentObject var backendSession: CoorditBackendSessionStore
     @State var selectedCategory: CoorditClosetCategory = .top
     @State private var searchText = ""
     @State var detailVariant: CoorditClosetCategory
