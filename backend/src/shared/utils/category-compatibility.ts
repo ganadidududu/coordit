@@ -1,20 +1,33 @@
 import type { Category } from "../types/database";
 
-const compatibleGroups: Category[][] = [
-  ["hoodie", "sweatshirt"],
-  ["pants", "jeans"],
-  ["shirt", "tshirt", "knit"],
-  ["jacket", "coat"],
-  ["shorts", "skirt"]
-];
+const UPPER_CATEGORIES = [
+  "tshirt",
+  "shirt",
+  "sweatshirt",
+  "hoodie",
+  "knit",
+  "jacket",
+  "coat"
+] as const satisfies readonly Category[];
+
+const LOWER_CATEGORIES = [
+  "pants",
+  "jeans",
+  "shorts",
+  "skirt"
+] as const satisfies readonly Category[];
+
+export const getCompatibleCategories = (category: Category): readonly Category[] =>
+  UPPER_CATEGORIES.some((candidate) => candidate === category)
+    ? UPPER_CATEGORIES
+    : LOWER_CATEGORIES;
 
 export const areCategoriesCompatible = (
   referenceCategory: Category,
   targetCategory: Category
 ): boolean => {
-  if (referenceCategory === targetCategory) return true;
-  return compatibleGroups.some(
-    (group) => group.includes(referenceCategory) && group.includes(targetCategory)
+  return getCompatibleCategories(targetCategory).some(
+    (category) => category === referenceCategory
   );
 };
 
