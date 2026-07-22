@@ -1,0 +1,98 @@
+# Coordit iOS Design System
+
+## 1. Atmosphere & Identity
+
+Coordit is a precise, calm fashion-fit tool. Its signature is deep navy chrome framing bright, lightly textured work surfaces, with expressive display type reserved for scores and primary actions while Gmarket Sans carries navigation and readable interface copy.
+
+## 2. Color
+
+The executable source of truth is `coordit/CoorditDesignTokens.swift` and `coordit/Main01DesignTokens.swift`.
+
+| Role | Swift token | Value | Usage |
+| --- | --- | --- | --- |
+| App surface | `CoorditDesignTokens.ColorToken.appBackground` | RGB 247, 248, 248 | Screen background |
+| Chrome / ink | `CoorditDesignTokens.ColorToken.ink` | RGB 0, 12, 64 | Navigation, primary actions, key text |
+| Panel | `CoorditDesignTokens.ColorToken.panel` | RGB 252, 253, 254 | Cards and title bars |
+| Field | `CoorditDesignTokens.ColorToken.field` | RGB 245, 247, 252 | FitLab controls |
+| Closet field | `CoorditDesignTokens.ColorToken.closetField` | RGB 242, 244, 248 | Closet controls |
+| Muted text | `CoorditDesignTokens.ColorToken.muted` | RGB 126, 132, 146 | Secondary copy |
+| Positive / negative | `green`, `red`, `danger` | Token-defined | Fit direction and destructive states |
+
+New shared UI must reference these tokens. Feature-specific gradients already present in the app may retain their local stops until a separate consolidation is approved.
+
+## 3. Typography
+
+All text uses `CoorditTypography`; bundled PostScript names are registered by the app.
+
+| Level | Font | Design size | Tracking | Usage |
+| --- | --- | ---: | ---: | --- |
+| Feature title | Gmarket Sans Bold | 22 pt | +1.5 pt | FitLab, Closet, and their child-page title bars |
+| Section title | Gmarket Sans Bold | 18–20 pt | 0 | Major content sections |
+| Body | Gmarket Sans Medium | 12–15 pt | 0 | Controls and explanatory copy |
+| Caption | Gmarket Sans Light/Medium | 9–12 pt | 0 | Hints and metadata |
+| Display | Climate Crisis KR | 17–23 pt | Screen-specific | Scores and primary calls to action |
+| Measurement | Mona12 | 10–17 pt | 0 | Numeric fashion measurements |
+
+Text scales through SwiftUI relative text styles. Feature titles use `.headline` as their Dynamic Type reference.
+
+## 4. Spacing & Layout
+
+- Baseline canvas: 402 pt wide, scaled by `CoorditResponsiveMetrics`.
+- Shared feature content top: 115 design pt inside `CoorditScreenScaffold`.
+- Feature horizontal inset: 16 design pt.
+- Feature title bar: 60 design pt tall, 29 design pt internal horizontal padding, 18 design pt icon-to-title spacing, 7 design pt corner radius.
+- General spacing follows 4 pt intent where practical; image-derived legacy layouts may use measured design values through `metrics.value(_:)`.
+- Bottom navigation remains owned by `CoorditScreenScaffold` and `Main01DesignTokens`.
+
+## 5. Components
+
+### Feature title bar
+
+- **Structure**: full-width plain `Button` containing a leading bold `chevron.left`, the uppercase title, and a trailing spacer.
+- **Variants**: title text and back action only; visual metrics are shared across FitLab and Closet.
+- **Spacing**: 25 pt icon, 18 pt gap, 29 pt horizontal padding, 60 pt height, 7 pt radius.
+- **States**: default and native pressed state from `Button`; no loading or disabled state.
+- **Accessibility**: the entire bar is tappable and Dynamic Type is relative to `.headline`. Feature wrappers supply stable labels: FitLab uses “{title} 뒤로가기”, while Closet retains its existing visible-title label.
+- **Motion**: none; navigation feedback is the destination screen change.
+- **Layout**: full-width cluster within the feature's 16 pt page inset.
+
+### Screen scaffold
+
+- **Structure**: shared background, top chrome/header, feature content, and bottom navigation.
+- **Variants**: selected tab follows `CoorditFrameRoute.selectedTab`.
+- **Accessibility**: each routed screen exposes a stable `coordit-screen-*` identifier.
+
+### Primary feature button
+
+- **Structure**: full-width label over the feature navy gradient.
+- **States**: default and native pressed state; feature flows separately define disabled/loading behavior where applicable.
+- **Accessibility**: visible text supplies the label and Dynamic Type remains readable.
+
+## 6. Motion & Interaction
+
+- Navigation is explicit enum state through `CoorditFrameRoute` and `onRouteChange` callbacks.
+- A root feature title bar returns to Home (`.main04`); a nested feature title bar returns to its feature root unless that screen defines a closer parent.
+- Motion must communicate state change and respect Reduce Motion. Do not add decorative animation to title bars.
+- Interactive controls retain at least a 44 pt effective touch target.
+
+## 7. Depth & Surface
+
+Strategy: mixed, following the existing iOS visual language.
+
+- The app shell uses layered navy-to-surface gradients.
+- Panels use the shared panel token with restrained radii.
+- Feature title bars use a flat panel surface without a feature-specific shadow so all feature families align.
+- Elevated calls to action may use the existing navy gradient and restrained shadow.
+
+## 8. Accessibility Constraints & Accepted Debt
+
+### Constraints
+
+- Dynamic Type must remain enabled through relative SwiftUI text styles.
+- Text and icons must preserve readable contrast against panel and chrome surfaces.
+- Interactive elements need stable accessibility labels/identifiers and at least 44 pt effective touch targets.
+- Key navigation flows must remain operable through VoiceOver-discoverable buttons.
+
+### Accepted Debt
+
+None accepted for this change. Existing feature-specific token duplication outside the shared title bar is observed but not changed by this task.

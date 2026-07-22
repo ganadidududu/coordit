@@ -60,9 +60,9 @@ struct CoorditFitLabFamilyView: View {
                     title: currentRoute == .fitLabHistoryDetail ? "FIT DETAIL" : "FIT LAB",
                     metrics: metrics
                 ) {
-                    onRouteChange(.fitLabInput)
+                    onRouteChange(currentRoute == .fitLabInput ? .main04 : .fitLabInput)
                 }
-                .padding(.horizontal, metrics.value(15))
+                .padding(.horizontal, metrics.value(16))
 
                 if shouldRenderFixtureContent {
                     fixtureContent(metrics: metrics)

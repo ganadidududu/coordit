@@ -15,26 +15,12 @@ struct CoorditFitLabTitleCard: View {
     let onBack: () -> Void
 
     var body: some View {
-        Button(action: onBack) {
-            HStack(spacing: metrics.value(15)) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: metrics.value(23), weight: .bold))
-                    .foregroundStyle(Color.black.opacity(0.82))
-                Text(title)
-                    .font(CoorditTypography.gmarketBold(size: metrics.value(22), relativeTo: .headline))
-                    .tracking(metrics.value(1.2))
-                    .foregroundStyle(Color.black)
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, metrics.value(26))
-            .frame(height: metrics.value(60))
-            .frame(maxWidth: .infinity)
-            .background(CoorditFitLabPalette.surface)
-            .clipShape(RoundedRectangle(cornerRadius: metrics.value(6)))
-            .shadow(color: .black.opacity(0.05), radius: metrics.value(10), y: metrics.value(4))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(title) 뒤로가기")
+        CoorditFeatureTitleBar(
+            title: title,
+            metrics: metrics,
+            accessibilityLabel: "\(title) 뒤로가기",
+            onBack: onBack
+        )
     }
 }
 
