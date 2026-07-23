@@ -21,7 +21,7 @@ struct CoorditFitLabFamilyView: View {
                 ) {
                     handleTitleBack()
                 }
-                .padding(.horizontal, metrics.value(15))
+                .padding(.horizontal, metrics.value(16))
 
                 if shouldRenderFixtureContent {
                     fixtureContent(metrics: metrics)

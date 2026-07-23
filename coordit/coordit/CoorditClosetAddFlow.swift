@@ -174,7 +174,7 @@ private struct CoorditClosetAddMethodScreen: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: metrics.value(18)) {
-                CoorditClosetTitleBar(title: "ADD CLOTHES", metrics: metrics, horizontalOutset: 7, onBack: onBack)
+                CoorditClosetTitleBar(title: "ADD CLOTHES", metrics: metrics, horizontalOutset: 6, onBack: onBack)
 
                 VStack(alignment: .leading, spacing: metrics.value(5)) {
                     Text("어떻게 추가할까요?")
@@ -259,7 +259,7 @@ private struct CoorditClosetLinkInputScreen: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: metrics.value(16)) {
-                CoorditClosetTitleBar(title: "LINK INPUT", metrics: metrics, horizontalOutset: 7, onBack: onBack)
+                CoorditClosetTitleBar(title: "LINK INPUT", metrics: metrics, horizontalOutset: 6, onBack: onBack)
                 CoorditClosetBasicsCard(draft: $draft, metrics: metrics)
 
                 CoorditClosetFormCard(title: "상품 링크", subtitle: "사이즈 정보가 있는 상품 페이지 주소를 붙여넣어 주세요.", metrics: metrics) {
@@ -398,7 +398,7 @@ private struct CoorditClosetPhotoInputScreen: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: metrics.value(16)) {
-                CoorditClosetTitleBar(title: "PHOTO INPUT", metrics: metrics, horizontalOutset: 7, onBack: onBack)
+                CoorditClosetTitleBar(title: "PHOTO INPUT", metrics: metrics, horizontalOutset: 6, onBack: onBack)
                 CoorditClosetBasicsCard(draft: $draft, metrics: metrics)
 
                 CoorditClosetFormCard(title: "사진 첨부", subtitle: "사진을 고른 다음 표 부분만 정확히 잘라주세요.", metrics: metrics) {
@@ -699,7 +699,7 @@ private struct CoorditClosetManualInputScreen: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: metrics.value(16)) {
-                CoorditClosetTitleBar(title: "MANUAL INPUT", metrics: metrics, horizontalOutset: 7, onBack: onBack)
+                CoorditClosetTitleBar(title: "MANUAL INPUT", metrics: metrics, horizontalOutset: 6, onBack: onBack)
                 CoorditClosetBasicsCard(draft: $draft, metrics: metrics)
 
                 CoorditClosetFormCard(title: "실측 사이즈", subtitle: "단위는 cm로 입력해주세요.", metrics: metrics) {
@@ -775,7 +775,7 @@ private struct CoorditClosetAddLoadingScreen: View {
 
     var body: some View {
         VStack(spacing: metrics.value(18)) {
-            CoorditClosetTitleBar(title: "FIT CHECK", metrics: metrics, horizontalOutset: 7, onBack: onBack)
+            CoorditClosetTitleBar(title: "FIT CHECK", metrics: metrics, horizontalOutset: 6, onBack: onBack)
 
             Spacer(minLength: metrics.value(120))
             ZStack {

@@ -32,23 +32,12 @@ struct CoorditClosetTitleBar: View {
     }
 
     var body: some View {
-        Button(action: onBack) {
-            HStack(spacing: metrics.value(18)) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: metrics.value(25), weight: .bold))
-                Text(title)
-                    .font(CoorditTypography.gmarketBold(size: metrics.value(22)))
-                    .tracking(metrics.value(1.5))
-                Spacer(minLength: 0)
-            }
-            .foregroundStyle(.black)
-            .padding(.horizontal, metrics.value(29))
-            .frame(height: metrics.value(60))
-            .background(CoorditClosetColors.card)
-            .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
+        CoorditFeatureTitleBar(
+            title: title,
+            metrics: metrics,
+            accessibilityLabel: title,
+            onBack: onBack
+        )
         .padding(.horizontal, -metrics.value(horizontalOutset))
     }
 }

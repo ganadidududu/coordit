@@ -92,6 +92,44 @@ final class CoorditFinalRouteCoverageUITests: XCTestCase {
         }
     }
 
+    func testFitLabRootBackReturnsHome() throws {
+        let app = launchApp(at: "fitlab-input")
+        assertScreen("fitlab-input", in: app)
+
+        let backButton = app.buttons["FIT LAB 뒤로가기"]
+        XCTAssertTrue(backButton.waitForExistence(timeout: 5))
+        backButton.tap()
+
+        assertScreen("main04", in: app)
+    }
+
+    func testFitLabAndClosetTitleBarsShareGeometryAcrossRoutes() throws {
+        let fitLabApp = launchApp(at: "fitlab-input")
+        let fitLabTitleBar = fitLabApp.buttons["FIT LAB 뒤로가기"]
+        XCTAssertTrue(fitLabTitleBar.waitForExistence(timeout: 5))
+        let fitLabFrame = fitLabTitleBar.frame
+        fitLabApp.terminate()
+
+        let closetRoutes = [
+            (route: "closet-overview", title: "CLOSET"),
+            (route: "closet-detail-bottom", title: "FIT DETAIL"),
+            (route: "closet-add-method", title: "ADD CLOTHES")
+        ]
+
+        for closetRoute in closetRoutes {
+            let closetApp = launchApp(at: closetRoute.route)
+            let closetScreen = closetApp.scrollViews["coordit-screen-\(closetRoute.route)"]
+            let closetTitleBar = closetScreen.buttons[closetRoute.title]
+            XCTAssertTrue(closetTitleBar.waitForExistence(timeout: 5))
+            let closetFrame = closetTitleBar.frame
+
+            XCTAssertEqual(fitLabFrame.minX, closetFrame.minX, accuracy: 0.5)
+            XCTAssertEqual(fitLabFrame.width, closetFrame.width, accuracy: 0.5)
+            XCTAssertEqual(fitLabFrame.height, closetFrame.height, accuracy: 0.5)
+            closetApp.terminate()
+        }
+    }
+
     private func launchApp(at route: String) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
