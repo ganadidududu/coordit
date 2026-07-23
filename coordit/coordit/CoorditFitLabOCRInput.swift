@@ -10,7 +10,6 @@ struct CoorditFitLabOCRInputView: View {
     @Binding var draft: CoorditFitLabDraft
     let fixtureName: String?
     let apiRequestLedger: [String]
-    let onClose: () -> Void
     let onSwitchToManual: () -> Void
 
     @Environment(\.dynamicTypeSize) private var inheritedDynamicTypeSize
@@ -21,6 +20,7 @@ struct CoorditFitLabOCRInputView: View {
     @State private var kind: CoorditFitLabGarmentKind = .upper
     @State private var category: CoorditFitLabCategory = .tshirt
     @State private var selectedPhoto: PhotosPickerItem?
+    @State private var pendingCropImage: UIImage?
     @State private var isCameraPresented = false
     @State private var message: String?
     @State private var rowErrors: [UUID: [String]] = [:]
@@ -78,9 +78,25 @@ struct CoorditFitLabOCRInputView: View {
                     returnToPriorDraft()
                     return
                 }
-                recognize(image.jpegData(compressionQuality: 0.94) ?? Data())
+                pendingCropImage = image
             }
             .ignoresSafeArea()
+        }
+        .fullScreenCover(
+            isPresented: Binding(
+                get: { pendingCropImage != nil },
+                set: { if !$0 { pendingCropImage = nil } }
+            )
+        ) {
+            if let pendingCropImage {
+                CoorditSizeChartCropView(image: pendingCropImage) {
+                    self.pendingCropImage = nil
+                    returnToPriorDraft()
+                } onConfirm: { cropped in
+                    self.pendingCropImage = nil
+                    recognize(cropped.jpegData(compressionQuality: 0.96) ?? Data())
+                }
+            }
         }
         .onChange(of: selectedPhoto) { _, item in
             guard let item else { return }
@@ -89,7 +105,12 @@ struct CoorditFitLabOCRInputView: View {
                 do {
                     let data = try await item.loadTransferable(type: Data.self) ?? Data()
                     guard !Task.isCancelled, generation == operationGeneration, phase == .processing else { return }
-                    await recognize(data, generation: generation)
+                    guard let image = UIImage(data: data) else {
+                        throw CoorditFitLabError.transport("사진을 열지 못했어요.")
+                    }
+                    invalidateOperation()
+                    phase = .chooser
+                    pendingCropImage = image
                 } catch {
                     guard !Task.isCancelled, generation == operationGeneration, phase == .processing else { return }
                     message = "사진을 읽지 못했어요. 다시 선택하거나 수동으로 입력해 주세요."
@@ -116,11 +137,6 @@ struct CoorditFitLabOCRInputView: View {
     private var chooser: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: metrics.value(14)) {
-                Button(action: cancelChooser) {
-                    Label(result == nil ? "입력 방법 다시 선택" : "이전 OCR 초안으로", systemImage: "chevron.left")
-                }
-                .buttonStyle(.plain)
-
                 Text("사이즈표 이미지 가져오기")
                     .font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))
                     .foregroundStyle(Color.black)
@@ -191,6 +207,7 @@ struct CoorditFitLabOCRInputView: View {
                 invalidateOperation()
                 returnToPriorDraft()
             }
+            .font(CoorditTypography.gmarketMedium(size: metrics.value(11)))
             .buttonStyle(.bordered)
             .accessibilityIdentifier("fitlab-ocr-cancel-processing")
         }
@@ -221,6 +238,11 @@ struct CoorditFitLabOCRInputView: View {
     private var review: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: metrics.value(14)) {
+                Text("OCR 검토")
+                    .font(.system(size: 1))
+                    .frame(width: 1, height: 1)
+                    .opacity(0.01)
+                    .accessibilityIdentifier("fitlab-ocr-review")
                 HStack {
                     Button {
                         invalidateOperation()
@@ -276,10 +298,13 @@ struct CoorditFitLabOCRInputView: View {
                         .accessibilityIdentifier("fitlab-ocr-product-name")
                     Picker("카테고리", selection: categoryBinding) {
                         ForEach(availableCategories) { option in
-                            Text(option.ocrKoreanTitle).tag(option)
+                            Text(option.ocrKoreanTitle)
+                                .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
+                                .tag(option)
                         }
                     }
                     .pickerStyle(.menu)
+                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
                     .accessibilityIdentifier("fitlab-ocr-category-picker")
                 }
                 .panelStyle()
@@ -310,7 +335,6 @@ struct CoorditFitLabOCRInputView: View {
             .padding(.bottom, metrics.value(120))
         }
         .scrollDismissesKeyboard(.interactively)
-        .accessibilityIdentifier("fitlab-ocr-review")
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
@@ -685,11 +709,6 @@ struct CoorditFitLabOCRInputView: View {
         phase = .confirmed
     }
 
-    private func cancelChooser() {
-        invalidateOperation()
-        if result != nil { phase = .review } else { onClose() }
-    }
-
     private func returnToPriorDraft() {
         phase = result == nil ? .chooser : .review
     }
@@ -735,6 +754,8 @@ struct CoorditFitLabOCRInputView: View {
             observations = upperAdversarialFixture
         } else if fixtureName == "ocr-parser-lower-adversarial" {
             observations = lowerAdversarialFixture
+        } else if fixtureName == "ocr-parser-mixed-labels" {
+            observations = mixedLabelFixture
         } else if fixtureName == "ocr-lower" {
             observations = lowerFixture
         } else {
@@ -761,6 +782,15 @@ struct CoorditFitLabOCRInputView: View {
             ["사이즈", "허리", "엉덩이", "밑위", "아웃심"],
             ["30", "39", "50", "29", "101"],
             ["32", "41", "52", "30", "103"],
+        ])
+    }
+
+    private var mixedLabelFixture: [CoorditFitLabOCRObservation] {
+        fixtureTable([
+            ["SIZE", "SHOULDER", "CHEST", "LENGTH", "SLEEVE"],
+            ["85", "41", "50", "65", "58"],
+            ["W32", "43", "53", "68", "60"],
+            ["FREE", "45", "56", "70", "61"],
         ])
     }
 
@@ -878,7 +908,7 @@ private enum CoorditFitLabRenderedOCRFixture {
 }
 #endif
 
-private struct CoorditFitLabCameraPicker: UIViewControllerRepresentable {
+struct CoorditFitLabCameraPicker: UIViewControllerRepresentable {
     let completion: (UIImage?) -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator(completion: completion) }

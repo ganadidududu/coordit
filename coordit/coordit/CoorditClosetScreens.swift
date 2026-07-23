@@ -18,18 +18,48 @@ enum CoorditClosetCategory: CaseIterable, Equatable {
 
 struct CoorditClosetItem: Identifiable {
     let id: String
-    let name: String
+    var name: String
     let category: CoorditClosetCategory
-    let score: Int
+    let exactCategory: CoorditFitLabCategory
+    var score: Int
     let scoreColor: Color
     let route: CoorditFrameRoute
     var imageData: Data?
+    var fitDiffs: CoorditMeasurementMap? = nil
+    var backendClothingItemId: String? = nil
+    var backendReferenceClothingId: String? = nil
+
+    init(
+        id: String,
+        name: String,
+        category: CoorditClosetCategory,
+        exactCategory: CoorditFitLabCategory? = nil,
+        score: Int,
+        scoreColor: Color,
+        route: CoorditFrameRoute,
+        imageData: Data?,
+        fitDiffs: CoorditMeasurementMap? = nil,
+        backendClothingItemId: String? = nil,
+        backendReferenceClothingId: String? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.category = category
+        self.exactCategory = exactCategory ?? (category == .top ? .shirt : .pants)
+        self.score = score
+        self.scoreColor = scoreColor
+        self.route = route
+        self.imageData = imageData
+        self.fitDiffs = fitDiffs
+        self.backendClothingItemId = backendClothingItemId
+        self.backendReferenceClothingId = backendReferenceClothingId
+    }
 
     static let seedItems = [
-        CoorditClosetItem(id: "oxford", name: "Oxford Shirt", category: .top, score: 94, scoreColor: CoorditClosetColors.blue, route: .closetDetailTop, imageData: nil),
-        CoorditClosetItem(id: "knit", name: "Relaxed Knit", category: .top, score: 88, scoreColor: CoorditClosetColors.cyan, route: .closetDetailTop, imageData: nil),
-        CoorditClosetItem(id: "denim", name: "Wide Denim", category: .bottom, score: 91, scoreColor: CoorditClosetColors.blue, route: .closetDetailBottom, imageData: nil),
-        CoorditClosetItem(id: "slacks", name: "Black Slacks", category: .bottom, score: 0, scoreColor: CoorditClosetColors.navy, route: .closetDetailBottom, imageData: nil),
+        CoorditClosetItem(id: "oxford", name: "Oxford Shirt", category: .top, exactCategory: .shirt, score: 94, scoreColor: CoorditClosetColors.blue, route: .closetDetailTop, imageData: nil),
+        CoorditClosetItem(id: "knit", name: "Relaxed Knit", category: .top, exactCategory: .knit, score: 88, scoreColor: CoorditClosetColors.cyan, route: .closetDetailTop, imageData: nil),
+        CoorditClosetItem(id: "denim", name: "Wide Denim", category: .bottom, exactCategory: .jeans, score: 91, scoreColor: CoorditClosetColors.blue, route: .closetDetailBottom, imageData: nil),
+        CoorditClosetItem(id: "slacks", name: "Black Slacks", category: .bottom, exactCategory: .pants, score: 0, scoreColor: CoorditClosetColors.navy, route: .closetDetailBottom, imageData: nil),
     ]
 }
 
@@ -41,11 +71,17 @@ struct CoorditClosetFamilyView: View {
     @Binding var selectedItemID: String?
     @Binding var draft: CoorditClosetDraft
 
+    @EnvironmentObject var backendSession: CoorditBackendSessionStore
     @State var selectedCategory: CoorditClosetCategory = .top
     @State private var searchText = ""
+    @State private var selectedExactCategory: CoorditFitLabCategory?
     @State var detailVariant: CoorditClosetCategory
     @State var detailPhotoSelection: PhotosPickerItem?
     @State var detailPhotoGenerations: [String: Int]
+    @State var reassessingItemID: String?
+    @State var reassessmentMessage: String?
+    @State var isRenamingDetailItem: Bool
+    @State var pendingDetailName: String
 
     #if DEBUG
     @State var detailPhotoTestStates: [String: String]
@@ -68,6 +104,10 @@ struct CoorditClosetFamilyView: View {
         _detailVariant = State(initialValue: route == .closetDetailBottom ? .bottom : .top)
         _detailPhotoSelection = State(initialValue: nil)
         _detailPhotoGenerations = State(initialValue: [:])
+        _reassessingItemID = State(initialValue: nil)
+        _reassessmentMessage = State(initialValue: nil)
+        _isRenamingDetailItem = State(initialValue: false)
+        _pendingDetailName = State(initialValue: "")
         #if DEBUG
         _detailPhotoTestStates = State(initialValue: [:])
         _detailPhotoTestRejections = State(initialValue: [:])
@@ -136,14 +176,16 @@ struct CoorditClosetFamilyView: View {
                     }
                     CoorditClosetSegment(selected: selectedCategory, metrics: metrics) {
                         selectedCategory = $0
+                        selectedExactCategory = nil
                     }
+                    exactCategoryFilter(metrics: metrics)
                     metricsGrid(metrics: metrics, values: overviewMetrics)
                 }
                 .padding(metrics.value(14))
                 .background(CoorditClosetColors.card)
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
 
-                CoorditClosetPrimaryButton(title: "새로운 의류 추가하기", metrics: metrics, height: 39) {
+                CoorditSolidPrimaryButton(title: "보유 의류 추가하기", metrics: metrics) {
                     draft = CoorditClosetDraft()
                     onRouteChange(.closetAddMethod)
                 }
@@ -178,8 +220,41 @@ struct CoorditClosetFamilyView: View {
     }
 
     private var filteredItems: [CoorditClosetItem] {
-        guard !searchText.isEmpty else { return items }
-        return items.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        items.filter { item in
+            item.category == selectedCategory
+                && (selectedExactCategory == nil || item.exactCategory == selectedExactCategory)
+                && (searchText.isEmpty || item.name.localizedCaseInsensitiveContains(searchText))
+        }
+    }
+
+    private func exactCategoryFilter(metrics: CoorditResponsiveMetrics) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: metrics.value(7)) {
+                categoryChip(title: "전체", category: nil, metrics: metrics)
+                ForEach(CoorditFitLabCategory.allCases.filter {
+                    $0.garmentKind == (selectedCategory == .top ? .upper : .lower)
+                }) { category in
+                    categoryChip(title: category.koreanTitle, category: category, metrics: metrics)
+                }
+            }
+        }
+        .accessibilityIdentifier("closet-exact-category-filter")
+    }
+
+    private func categoryChip(
+        title: String,
+        category: CoorditFitLabCategory?,
+        metrics: CoorditResponsiveMetrics
+    ) -> some View {
+        let isSelected = selectedExactCategory == category
+        return Button(title) { selectedExactCategory = category }
+            .font(CoorditTypography.gmarketMedium(size: metrics.value(10)))
+            .foregroundStyle(isSelected ? .white : CoorditClosetColors.navy)
+            .padding(.horizontal, metrics.value(10))
+            .frame(height: metrics.value(28))
+            .background(isSelected ? CoorditClosetColors.navy : CoorditClosetColors.field)
+            .clipShape(Capsule())
+            .buttonStyle(.plain)
     }
 
     func metricsGrid(metrics: CoorditResponsiveMetrics, values: [(String, String, Color)]) -> some View {
@@ -259,6 +334,21 @@ struct CoorditClosetFamilyView: View {
             items[itemIndex].imageData = data
         } else if itemID == "closet-draft-preview" {
             draft.garmentImageData = data
+        }
+    }
+
+    func beginDetailRename(_ item: CoorditClosetItem) {
+        pendingDetailName = item.name
+        isRenamingDetailItem = true
+    }
+
+    func commitDetailName(for itemID: String) {
+        let name = pendingDetailName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        if let itemIndex = items.firstIndex(where: { $0.id == itemID }) {
+            items[itemIndex].name = name
+        } else if itemID == "closet-draft-preview" {
+            draft.name = name
         }
     }
 

@@ -1,9 +1,17 @@
 import SwiftUI
 
 #if os(iOS)
+enum CoorditFitLabInputDestination: Equatable {
+    case sources
+    case manual
+    case ocr
+    case url
+}
+
 struct CoorditFitLabInputScreen: View {
     let metrics: CoorditResponsiveMetrics
     @Binding var draft: CoorditFitLabDraft
+    @Binding var destination: CoorditFitLabInputDestination
     let fixtureName: String?
     let apiRequestLedger: [String]
     let urlRequestLedger: () -> [String]
@@ -13,11 +21,10 @@ struct CoorditFitLabInputScreen: View {
     let historyRecoveryNotice: String?
     let onOpenHistory: (CoorditFitLabHistorySnapshot) -> Void
 
-    @State private var destination: Destination = .sources
-
     init(
         metrics: CoorditResponsiveMetrics,
         draft: Binding<CoorditFitLabDraft>,
+        destination: Binding<CoorditFitLabInputDestination>,
         fixtureName: String? = nil,
         apiRequestLedger: [String] = [],
         urlRequestLedger: @escaping () -> [String] = { [] },
@@ -33,6 +40,7 @@ struct CoorditFitLabInputScreen: View {
     ) {
         self.metrics = metrics
         _draft = draft
+        _destination = destination
         self.fixtureName = fixtureName
         self.apiRequestLedger = apiRequestLedger
         self.urlRequestLedger = urlRequestLedger
@@ -49,16 +57,13 @@ struct CoorditFitLabInputScreen: View {
             case .sources:
                 sourceSelection
             case .manual:
-                CoorditFitLabManualDraftView(metrics: metrics, draft: $draft) {
-                    destination = .sources
-                }
+                CoorditFitLabManualDraftView(metrics: metrics, draft: $draft)
             case .ocr:
                 CoorditFitLabOCRInputView(
                     metrics: metrics,
                     draft: $draft,
                     fixtureName: fixtureName,
                     apiRequestLedger: apiRequestLedger,
-                    onClose: { destination = .sources },
                     onSwitchToManual: {
                         draft.source = .manual
                         destination = .manual
@@ -71,7 +76,10 @@ struct CoorditFitLabInputScreen: View {
                     requestLedger: urlRequestLedger,
                     prefill: urlPrefill,
                     loadReferences: urlReferences,
-                    onClose: { destination = .sources },
+                    onSwitchToOCR: {
+                        draft.source = .ocr
+                        destination = .ocr
+                    },
                     onSwitchToManual: {
                         draft.source = .manual
                         destination = .manual
@@ -99,16 +107,16 @@ struct CoorditFitLabInputScreen: View {
                     spacing: metrics.value(10)
                 ) {
                     sourceCard(
-                        title: "사이즈표 수동 입력",
-                        subtitle: "표를 직접 작성",
-                        symbol: "tablecells",
-                        identifier: "fitlab-source-manual"
+                        title: "링크로 불러오기",
+                        subtitle: "링크에서 베타 추출",
+                        symbol: "link",
+                        identifier: "fitlab-source-url"
                     ) {
-                        draft.source = .manual
-                        destination = .manual
+                        draft.source = .url
+                        destination = .url
                     }
                     sourceCard(
-                        title: "사이즈표 OCR 입력",
+                        title: "사진으로 첨부하기",
                         subtitle: "캡처를 읽고 수정",
                         symbol: "viewfinder",
                         identifier: "fitlab-source-ocr"
@@ -117,13 +125,13 @@ struct CoorditFitLabInputScreen: View {
                         destination = .ocr
                     }
                     sourceCard(
-                        title: "상품 링크 입력",
-                        subtitle: "링크에서 베타 추출",
-                        symbol: "link",
-                        identifier: "fitlab-source-url"
+                        title: "직접 입력하기",
+                        subtitle: "표를 직접 작성",
+                        symbol: "tablecells",
+                        identifier: "fitlab-source-manual"
                     ) {
-                        draft.source = .url
-                        destination = .url
+                        draft.source = .manual
+                        destination = .manual
                     }
                 }
                 .padding(metrics.value(10))
@@ -280,18 +288,11 @@ struct CoorditFitLabInputScreen: View {
         .accessibilityIdentifier(identifier)
     }
 
-    private enum Destination: Equatable {
-        case sources
-        case manual
-        case ocr
-        case url
-    }
 }
 
 private struct CoorditFitLabManualDraftView: View {
     let metrics: CoorditResponsiveMetrics
     @Binding var draft: CoorditFitLabDraft
-    let onClose: () -> Void
 
     @State private var kind: CoorditFitLabGarmentKind
     @State private var category: CoorditFitLabCategory
@@ -307,12 +308,10 @@ private struct CoorditFitLabManualDraftView: View {
 
     init(
         metrics: CoorditResponsiveMetrics,
-        draft: Binding<CoorditFitLabDraft>,
-        onClose: @escaping () -> Void
+        draft: Binding<CoorditFitLabDraft>
     ) {
         self.metrics = metrics
         _draft = draft
-        self.onClose = onClose
         let current = draft.wrappedValue
         _kind = State(initialValue: current.garmentKind)
         _category = State(initialValue: current.category)
@@ -340,13 +339,6 @@ private struct CoorditFitLabManualDraftView: View {
     private var form: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: metrics.value(14)) {
-                Button(action: onClose) {
-                    Label("입력 방법 다시 선택", systemImage: "chevron.left")
-                        .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .subheadline))
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(CoorditFitLabPalette.ink)
-
                 section(title: "1. 의류 구분") {
                     Picker("상의 또는 하의", selection: kindBinding) {
                         Text("상의")
@@ -363,10 +355,13 @@ private struct CoorditFitLabManualDraftView: View {
                 section(title: "2. 카테고리와 상품") {
                     Picker("카테고리", selection: categoryBinding) {
                         ForEach(availableCategories) { option in
-                            Text(option.koreanTitle).tag(option)
+                            Text(option.koreanTitle)
+                                .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
+                                .tag(option)
                         }
                     }
                     .pickerStyle(.menu)
+                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityIdentifier("fitlab-category-picker")
 
@@ -783,24 +778,6 @@ private extension CoorditFitLabGarmentKind {
         switch self {
         case .upper: "상의"
         case .lower: "하의"
-        }
-    }
-}
-
-private extension CoorditFitLabCategory {
-    var koreanTitle: String {
-        switch self {
-        case .tshirt: "티셔츠"
-        case .shirt: "셔츠"
-        case .sweatshirt: "스웨트셔츠"
-        case .hoodie: "후드"
-        case .knit: "니트"
-        case .jacket: "재킷"
-        case .coat: "코트"
-        case .pants: "팬츠"
-        case .jeans: "데님"
-        case .shorts: "쇼츠"
-        case .skirt: "스커트"
         }
     }
 }

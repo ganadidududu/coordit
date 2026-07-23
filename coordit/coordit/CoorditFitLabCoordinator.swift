@@ -2,6 +2,13 @@ import Foundation
 import Combine
 
 #if os(iOS)
+enum CoorditFitLabAnalysisState: Equatable {
+    case idle
+    case running
+    case completed(CoorditFrameRoute)
+    case failed(String)
+}
+
 @MainActor
 final class CoorditFitLabCoordinator: ObservableObject {
     @Published var draft: CoorditFitLabDraft
@@ -21,6 +28,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
     @Published private(set) var loadState: CoorditFitLabLoadState = .idle
     @Published private(set) var screen: CoorditFitLabScreen
     @Published private(set) var reportNeedsRetry = false
+    @Published private(set) var analysisState: CoorditFitLabAnalysisState = .idle
 
     let userID: String?
     let fixtureName: String?
@@ -30,6 +38,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
     private(set) var fixtureAPI: CoorditFitLabFixtureAPI?
     #endif
     private var operationGeneration = 0
+    private var submissionTask: Task<Void, Never>?
     private var historyGeneration = 0
     private var historyMutationTask: Task<Bool, Never>?
     private var historyMutationGeneration = 0
@@ -67,7 +76,74 @@ final class CoorditFitLabCoordinator: ObservableObject {
             }
             seed(route: route, fixture: configuration.name)
         }
+        let launchArguments = ProcessInfo.processInfo.arguments
+        if launchArguments.contains("--coordit-test-analysis-running") {
+            analysisState = .running
+        } else if launchArguments.contains("--coordit-test-analysis-completed") {
+            analysisState = .completed(.fitLabResultTop)
+        }
         #endif
+    }
+
+    static func makeAppScoped(route: CoorditFrameRoute) -> CoorditFitLabCoordinator {
+        let configuration = CoorditFitLabFixtureConfiguration.launch()
+        #if DEBUG
+        if configuration.name != nil {
+            if configuration.resetsHistory, let directory = configuration.historyRootDirectory {
+                CoorditFitLabHistoryFixtureResetRegistry.resetOnce(directory)
+            }
+            let historyStore: any CoorditFitLabHistoryStoring
+            if let directory = configuration.historyRootDirectory {
+                historyStore = CoorditFitLabFileHistoryStore(rootDirectory: directory)
+            } else {
+                historyStore = CoorditFitLabFixtureHistoryStore()
+            }
+            return CoorditFitLabCoordinator(
+                route: route,
+                configuration: configuration,
+                api: CoorditFitLabFixtureAPI(fixtureName: configuration.name),
+                historyStore: historyStore
+            )
+        }
+        #endif
+        return CoorditFitLabCoordinator(
+            route: route,
+            configuration: configuration,
+            historyStore: CoorditFitLabFileHistoryStore()
+        )
+    }
+
+    var isAnalysisRunning: Bool { submissionTask != nil }
+
+    func startSubmission(
+        using overrideAPI: (any CoorditFitLabAPI)? = nil,
+        authenticatedUserID: String? = nil
+    ) {
+        guard submissionTask == nil, loadState != .loading else { return }
+        analysisState = .running
+        submissionTask = Task { [weak self] in
+            guard let self else { return }
+            await self.submit(using: overrideAPI, authenticatedUserID: authenticatedUserID)
+            self.finishBackgroundSubmission()
+        }
+    }
+
+    private func finishBackgroundSubmission() {
+        submissionTask = nil
+        if submissionStep == .complete, recommendation != nil, report != nil {
+            analysisState = .completed(
+                draft.garmentKind == .upper ? .fitLabResultTop : .fitLabResultBottom
+            )
+        } else if let error {
+            analysisState = .failed(error.errorDescription ?? "핏 분석을 완료하지 못했어요.")
+        } else {
+            analysisState = .idle
+        }
+    }
+
+    func dismissAnalysisNotice() {
+        guard !isAnalysisRunning else { return }
+        analysisState = .idle
     }
 
     var fixtureAccessibilityIdentifier: String {
@@ -128,7 +204,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
             let loadedReferences = try await selectedAPI.compatibleReferences(category: requestedCategory)
             guard generation == operationGeneration, !Task.isCancelled else { return }
             references = loadedReferences.filter {
-                $0.category == requestedCategory && $0.isActive
+                $0.category.isCompatible(with: requestedCategory) && $0.isActive
             }
             draft.selectedReferenceIDs.formIntersection(Set(references.map(\.id)))
             submissionStep = .idle
@@ -151,13 +227,15 @@ final class CoorditFitLabCoordinator: ObservableObject {
 
     var canSubmit: Bool {
         guard draft.isSourceConfirmed, !draft.sizes.isEmpty else { return false }
-        let compatibleIDs = Set(references.filter { $0.category == draft.category && $0.isActive }.map(\.id))
+        let compatibleIDs = Set(references.filter {
+            $0.category.isCompatible(with: draft.category) && $0.isActive
+        }.map(\.id))
         return !draft.selectedReferenceIDs.isEmpty && draft.selectedReferenceIDs.isSubset(of: compatibleIDs)
     }
 
     func toggleReference(_ reference: CoorditFitLabReferenceRow) {
         guard loadState != .loading,
-              reference.category == draft.category,
+              reference.category.isCompatible(with: draft.category),
               reference.isActive,
               references.contains(where: { $0.id == reference.id })
         else { return }
@@ -191,7 +269,9 @@ final class CoorditFitLabCoordinator: ObservableObject {
             fail(.invalidDraft("사이즈표를 먼저 확인해 주세요."), at: .idle)
             return
         }
-        let compatibleIDs = Set(references.filter { $0.category == draft.category && $0.isActive }.map(\.id))
+        let compatibleIDs = Set(references.filter {
+            $0.category.isCompatible(with: draft.category) && $0.isActive
+        }.map(\.id))
         guard !draft.selectedReferenceIDs.isEmpty,
               draft.selectedReferenceIDs.isSubset(of: compatibleIDs)
         else {
@@ -280,6 +360,8 @@ final class CoorditFitLabCoordinator: ObservableObject {
     }
 
     func discardAndRestart() {
+        submissionTask?.cancel()
+        submissionTask = nil
         operationGeneration += 1
         checkpoint = CoorditFitLabSubmissionCheckpoint()
         createdProductID = nil
@@ -295,14 +377,18 @@ final class CoorditFitLabCoordinator: ObservableObject {
         error = nil
         retryStep = nil
         screen = .input
+        analysisState = .idle
     }
 
     func cancelSubmission() {
+        submissionTask?.cancel()
+        submissionTask = nil
         operationGeneration += 1
         submissionStep = .idle
         loadState = .idle
         error = nil
         retryStep = nil
+        analysisState = .idle
     }
 
     private var productRequest: CoorditFitLabProductRequest {

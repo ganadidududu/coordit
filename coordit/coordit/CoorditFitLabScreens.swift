@@ -7,51 +7,10 @@ import UIKit
 struct CoorditFitLabFamilyView: View {
     let currentRoute: CoorditFrameRoute
     let onRouteChange: (CoorditFrameRoute) -> Void
+    let onManageReferences: () -> Void
     @EnvironmentObject private var backendSession: CoorditBackendSessionStore
-    @StateObject private var coordinator: CoorditFitLabCoordinator
-
-    init(currentRoute: CoorditFrameRoute, onRouteChange: @escaping (CoorditFrameRoute) -> Void) {
-        self.currentRoute = currentRoute
-        self.onRouteChange = onRouteChange
-        let configuration = CoorditFitLabFixtureConfiguration.launch()
-        #if DEBUG
-        if configuration.name != nil {
-            if configuration.resetsHistory, let historyRootDirectory = configuration.historyRootDirectory {
-                CoorditFitLabHistoryFixtureResetRegistry.resetOnce(historyRootDirectory)
-            }
-            let historyStore: any CoorditFitLabHistoryStoring
-            if let historyRootDirectory = configuration.historyRootDirectory {
-                historyStore = CoorditFitLabFileHistoryStore(rootDirectory: historyRootDirectory)
-            } else {
-                historyStore = CoorditFitLabFixtureHistoryStore()
-            }
-            _coordinator = StateObject(
-                wrappedValue: CoorditFitLabCoordinator(
-                    route: currentRoute,
-                    configuration: configuration,
-                    api: CoorditFitLabFixtureAPI(fixtureName: configuration.name),
-                    historyStore: historyStore
-                )
-            )
-        } else {
-            _coordinator = StateObject(
-                wrappedValue: CoorditFitLabCoordinator(
-                    route: currentRoute,
-                    configuration: configuration,
-                    historyStore: CoorditFitLabFileHistoryStore()
-                )
-            )
-        }
-        #else
-        _coordinator = StateObject(
-            wrappedValue: CoorditFitLabCoordinator(
-                route: currentRoute,
-                configuration: .production,
-                historyStore: CoorditFitLabFileHistoryStore()
-            )
-        )
-        #endif
-    }
+    @ObservedObject var coordinator: CoorditFitLabCoordinator
+    @State private var inputDestination: CoorditFitLabInputDestination = .sources
 
     var body: some View {
         CoorditScreenScaffold(route: currentRoute, onRouteChange: onRouteChange, contentTop: 115) { metrics in
@@ -60,7 +19,7 @@ struct CoorditFitLabFamilyView: View {
                     title: currentRoute == .fitLabHistoryDetail ? "FIT DETAIL" : "FIT LAB",
                     metrics: metrics
                 ) {
-                    onRouteChange(currentRoute == .fitLabInput ? .main04 : .fitLabInput)
+                    handleTitleBack()
                 }
                 .padding(.horizontal, metrics.value(16))
 
@@ -146,6 +105,12 @@ struct CoorditFitLabFamilyView: View {
             #endif
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .onChange(of: coordinator.analysisState) { _, state in
+            if case .completed(let destination) = state,
+               currentRoute == .fitLabInput {
+                onRouteChange(destination)
+            }
+        }
         #if DEBUG
         .overlay(alignment: .topLeading) {
             debugProbeOverlay
@@ -218,12 +183,14 @@ struct CoorditFitLabFamilyView: View {
                 coordinator: coordinator,
                 requestLedger: { fixtureAPIRequestLedger },
                 loadReferences: loadSubmissionReferences,
+                manageReferences: onManageReferences,
                 submit: submitAnalysis
             )
         } else {
             CoorditFitLabInputScreen(
                 metrics: metrics,
                 draft: $coordinator.draft,
+                destination: $inputDestination,
                 fixtureName: coordinator.fixtureName,
                 apiRequestLedger: fixtureAPIRequestLedger,
                 urlRequestLedger: { fixtureAPIRequestLedger },
@@ -236,6 +203,16 @@ struct CoorditFitLabFamilyView: View {
                     onRouteChange(.fitLabHistoryDetail)
                 }
             )
+        }
+    }
+
+    private func handleTitleBack() {
+        if currentRoute == .fitLabInput, inputDestination != .sources {
+            inputDestination = .sources
+        } else if currentRoute == .fitLabInput {
+            onRouteChange(.main04)
+        } else {
+            onRouteChange(.fitLabInput)
         }
     }
 
@@ -398,31 +375,22 @@ struct CoorditFitLabFamilyView: View {
         await coordinator.loadCompatibleReferences(using: api, authenticatedUserID: session.user.id)
     }
 
-    private func submitAnalysis() async {
+    private func submitAnalysis() {
         #if DEBUG
         if coordinator.fixtureName != nil {
-            await coordinator.submit()
-            routeToCompletedResultIfNeeded()
+            coordinator.startSubmission()
             return
         }
         #endif
         guard let session = backendSession.session else {
-            await coordinator.submit(authenticatedUserID: nil)
+            coordinator.startSubmission(authenticatedUserID: nil)
             return
         }
         let api = CoorditFitLabHTTPAPI(
             baseURL: CoorditBackendConfig.baseURL(),
             accessToken: session.accessToken
         )
-        await coordinator.submit(using: api, authenticatedUserID: session.user.id)
-        routeToCompletedResultIfNeeded()
-    }
-
-    private func routeToCompletedResultIfNeeded() {
-        guard coordinator.submissionStep == .complete,
-              coordinator.recommendation != nil,
-              coordinator.report != nil else { return }
-        onRouteChange(coordinator.draft.garmentKind == .upper ? .fitLabResultTop : .fitLabResultBottom)
+        coordinator.startSubmission(using: api, authenticatedUserID: session.user.id)
     }
 
     @ViewBuilder
@@ -440,7 +408,7 @@ struct CoorditFitLabFamilyView: View {
                     .foregroundStyle(.secondary)
                     .accessibilityIdentifier("fitlab-history-empty")
                 Button("핏 분석 시작") {
-                    Task { await coordinator.submit() }
+                    coordinator.startSubmission()
                 }
                 .buttonStyle(.borderedProminent)
                 fixtureRequestLedgerCount
@@ -540,9 +508,15 @@ private struct CoorditGmarketBoldFontDiagnostic: View {
 struct CoorditFitLabScreens: View {
     let currentRoute: CoorditFrameRoute
     let onRouteChange: (CoorditFrameRoute) -> Void
+    @ObservedObject var coordinator: CoorditFitLabCoordinator
 
     var body: some View {
-        CoorditFitLabFamilyView(currentRoute: currentRoute, onRouteChange: onRouteChange)
+        CoorditFitLabFamilyView(
+            currentRoute: currentRoute,
+            onRouteChange: onRouteChange,
+            onManageReferences: {},
+            coordinator: coordinator
+        )
     }
 }
 

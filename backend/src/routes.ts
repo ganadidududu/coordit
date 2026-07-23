@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { reassessClothingItemFit } from "./modules/clothing-items/fit-reassessment.controller";
 import { signup, login } from "./modules/auth/auth.controller";
 import { completeOnboardingController } from "./modules/auth/auth-onboarding.controller";
 import { createBodyMeasurement, listBodyMeasurements } from "./modules/body-measurements/body-measurements.controller";
@@ -80,6 +81,7 @@ routes.post("/clothing-items/:id/sizes", createClothingSize);
 routes.get("/clothing-items/:id/sizes", listClothingSizes);
 routes.patch("/clothing-sizes/:id", updateClothingSize);
 routes.delete("/clothing-sizes/:id", deleteClothingSize);
+routes.post("/clothing-items/:id/fit-reassessment", reassessClothingItemFit);
 
 routes.post("/reference-clothing", createReferenceClothing);
 routes.get("/reference-clothing", listReferenceClothing);

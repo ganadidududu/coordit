@@ -17,43 +17,43 @@ extension CoorditClosetFamilyView {
                 }
 
                 HStack(alignment: .top, spacing: metrics.value(13)) {
-                    PhotosPicker(selection: $detailPhotoSelection, matching: .images) {
-                        ZStack(alignment: .bottom) {
-                            CoorditClosetGarmentArtwork(imageData: item.imageData, metrics: metrics)
+                    CoorditClosetGarmentArtwork(imageData: item.imageData, category: item.category, metrics: metrics)
+                        .frame(width: metrics.value(126), height: metrics.value(168))
+                        .clipped()
+                        .accessibilityHidden(true)
 
-                            Text(item.imageData == nil ? "옷 사진 추가하기" : "변경하기")
-                                .font(CoorditTypography.gmarketBold(size: metrics.value(9)))
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, metrics.value(10))
-                                .frame(height: metrics.value(24))
-                                .background(CoorditClosetColors.navy.opacity(0.82))
-                                .clipShape(Capsule())
-                                .padding(.bottom, metrics.value(8))
-                        }
-                        .frame(width: metrics.value(168), height: metrics.value(158))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(item.imageData == nil ? "옷 사진 추가하기" : "옷 사진 변경하기")
-                    .accessibilityIdentifier("closet-detail-garment-photo")
-                    .accessibilityValue(item.imageData == nil ? "empty" : "selected")
-                    .onChange(of: detailPhotoSelection) { _, newItem in
-                        guard let newItem else { return }
-                        loadDetailPhoto(newItem, for: item.id)
-                    }
-
-                    VStack(spacing: metrics.value(10)) {
+                    VStack(alignment: .leading, spacing: metrics.value(8)) {
                         Text(item.name)
-                            .font(CoorditTypography.gmarketBold(size: metrics.value(23)))
+                            .font(CoorditTypography.gmarketBold(size: metrics.value(19)))
                             .foregroundStyle(.black)
-                        Image(CoorditAssetNames.stars)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: metrics.value(143), height: metrics.value(31))
-                            .accessibilityHidden(true)
-                        detailAction("메모 추가하기", metrics: metrics) {}
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.82)
+                            .frame(maxWidth: .infinity, minHeight: metrics.value(45), alignment: .topLeading)
+
+                        detailAction("옷 이름 수정하기", metrics: metrics) {
+                            beginDetailRename(item)
+                        }
+                        .accessibilityIdentifier("closet-detail-rename")
+
+                        PhotosPicker(selection: $detailPhotoSelection, matching: .images) {
+                            detailActionLabel(
+                                item.imageData == nil ? "옷 사진 추가하기" : "옷 사진 수정하기",
+                                metrics: metrics
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(item.imageData == nil ? "옷 사진 추가하기" : "옷 사진 수정하기")
+                        .accessibilityIdentifier("closet-detail-garment-photo")
+                        .accessibilityValue(item.imageData == nil ? "empty" : "selected")
+                        .onChange(of: detailPhotoSelection) { _, newItem in
+                            guard let newItem else { return }
+                            loadDetailPhoto(newItem, for: item.id)
+                        }
+
                         detailAction("내 옷장에서 삭제하기", metrics: metrics) {}
                     }
                     .frame(maxWidth: .infinity)
+                    .frame(height: metrics.value(168), alignment: .top)
                 }
                 .padding(.top, metrics.value(18))
 
@@ -74,14 +74,20 @@ extension CoorditClosetFamilyView {
                 #endif
 
                 HStack(spacing: metrics.value(9)) {
-                    Image(variant == .top ? CoorditAssetNames.closetFitTop : CoorditAssetNames.closetFitBottom)
+                    Image(variant == .top ? CoorditAssetNames.fitUpper : CoorditAssetNames.fitLower)
                         .resizable()
                         .scaledToFit()
                         .frame(width: metrics.value(111), height: metrics.value(230))
                         .background(CoorditClosetColors.card)
                         .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
+                        .accessibilityLabel(variant == .top ? "상의 핏 마네킹" : "하의 핏 마네킹")
+                        .accessibilityIdentifier(
+                            variant == .top
+                                ? "closet-mannequin-top"
+                                : "closet-mannequin-bottom"
+                        )
 
-                    scorePanel(metrics: metrics, variant: variant, score: item.score)
+                    scorePanel(metrics: metrics, item: item)
                         .frame(height: metrics.value(230))
                 }
                 .padding(.top, metrics.value(6))
@@ -100,11 +106,19 @@ extension CoorditClosetFamilyView {
                 .padding(.top, metrics.value(1))
 
                 CoorditClosetPrimaryButton(title: "현재 기준치로 재평가", metrics: metrics, height: 39) {
-                    detailVariant = variant == .top ? .bottom : .top
-                    onRouteChange(variant == .top ? .closetDetailBottom : .closetDetailTop)
+                    Task { await reassessSelectedItem(item) }
                 }
                 .accessibilityIdentifier("closet-reevaluate")
+                .disabled(reassessingItemID == item.id)
                 .padding(.top, metrics.value(2))
+
+                if let reassessmentMessage {
+                    Text(reassessmentMessage)
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(10)))
+                        .foregroundStyle(CoorditClosetColors.navy)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .accessibilityIdentifier("closet-reassessment-status")
+                }
             }
             .padding(.horizontal, metrics.value(27))
             .padding(.bottom, metrics.value(28))
@@ -118,9 +132,17 @@ extension CoorditClosetFamilyView {
         .onDisappear {
             invalidateDetailPhotoLoad(for: item.id)
         }
+        .alert("옷 이름 수정하기", isPresented: $isRenamingDetailItem) {
+            TextField("옷 이름", text: $pendingDetailName)
+            Button("취소", role: .cancel) {}
+            Button("저장") { commitDetailName(for: item.id) }
+                .disabled(pendingDetailName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        } message: {
+            Text("옷장에 표시할 이름을 입력해 주세요.")
+        }
     }
 
-    private func scorePanel(metrics: CoorditResponsiveMetrics, variant: CoorditClosetCategory, score: Int) -> some View {
+    private func scorePanel(metrics: CoorditResponsiveMetrics, item: CoorditClosetItem) -> some View {
         VStack(alignment: .leading, spacing: metrics.value(8)) {
             Text("과거 기준치 기준")
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(10)))
@@ -128,8 +150,8 @@ extension CoorditClosetFamilyView {
             Text("FIT SCORE")
                 .font(CoorditTypography.climate2019(size: metrics.value(22)))
                 .foregroundStyle(CoorditClosetColors.navy)
-            metricsGrid(metrics: metrics, values: scoreMetrics(for: variant))
-            CoorditClosetPrimaryButton(title: "총점 | \(score)", metrics: metrics, height: 38) {}
+            metricsGrid(metrics: metrics, values: scoreMetrics(for: item))
+            CoorditClosetPrimaryButton(title: "총점 | \(item.score)", metrics: metrics, height: 38) {}
         }
         .padding(metrics.value(11))
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -137,29 +159,91 @@ extension CoorditClosetFamilyView {
         .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
     }
 
-    private func scoreMetrics(for variant: CoorditClosetCategory) -> [(String, String, Color)] {
-        let signedColors: [Color] = variant == .top
-            ? [CoorditClosetColors.navy, CoorditClosetColors.navy, CoorditClosetColors.navy, CoorditClosetColors.navy]
-            : [CoorditClosetColors.green, CoorditClosetColors.red, CoorditClosetColors.red, CoorditClosetColors.green]
-        return [
-            ("+1 cm", "어깨", signedColors[0]),
-            ("-5 cm", "가슴", signedColors[1]),
-            ("-3 cm", "총장", signedColors[2]),
-            ("+0.5 cm", "소매", signedColors[3]),
-        ]
+    private func scoreMetrics(for item: CoorditClosetItem) -> [(String, String, Color)] {
+        let diffs = item.fitDiffs
+        let values: [(Double?, String)] = item.category == .top
+            ? [
+                (diffs?.shoulderWidth, "어깨"),
+                (diffs?.chestWidth, "가슴"),
+                (diffs?.totalLength, "총장"),
+                (diffs?.sleeveLength, "소매"),
+            ]
+            : [
+                (diffs?.waistWidth, "허리"),
+                (diffs?.hipWidth, "엉덩이"),
+                (diffs?.rise, "밑위"),
+                (diffs?.outseam, "총장"),
+            ]
+        return values.map { value, label in
+            (formattedDifference(value), label, CoorditClosetColors.navy)
+        }
     }
+
+    private func formattedDifference(_ value: Double?) -> String {
+        guard let value else { return "—" }
+        let prefix = value > 0 ? "+" : ""
+        return "\(prefix)\(value.formatted(.number.precision(.fractionLength(0...1)))) cm"
+    }
+
+    private func reassessSelectedItem(_ item: CoorditClosetItem) async {
+        reassessingItemID = item.id
+        reassessmentMessage = "선택한 의류의 핏 스코어를 계산하고 있어요."
+        defer { reassessingItemID = nil }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--coordit-ui-testing"),
+           item.backendClothingItemId == nil {
+            guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
+            items[index].score = item.score == 92 ? 91 : 92
+            items[index].fitDiffs = fixtureDiffs(for: item.category)
+            reassessmentMessage = "선택한 의류의 핏 스코어를 다시 계산했어요."
+            return
+        }
+        #endif
+
+        guard let clothingItemID = item.backendClothingItemId else {
+            reassessmentMessage = "서버에 저장된 의류만 재평가할 수 있어요."
+            return
+        }
+        guard let assessment = await backendSession.reassessClothingItem(id: clothingItemID) else {
+            reassessmentMessage = backendSession.statusText
+            return
+        }
+        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
+        items[index].score = Int(assessment.fitScore.rounded())
+        items[index].fitDiffs = assessment.diffs
+        reassessmentMessage = "선택한 의류의 핏 스코어를 다시 계산했어요."
+    }
+
+    #if DEBUG
+    private func fixtureDiffs(for category: CoorditClosetCategory) -> CoorditMeasurementMap {
+        category == .top
+            ? CoorditMeasurementMap(
+                totalLength: -3, shoulderWidth: 1, chestWidth: -5, sleeveLength: 0.5,
+                waistWidth: nil, hipWidth: nil, rise: nil, outseam: nil
+            )
+            : CoorditMeasurementMap(
+                totalLength: nil, shoulderWidth: nil, chestWidth: nil, sleeveLength: nil,
+                waistWidth: 0.5, hipWidth: -2, rise: 1, outseam: -3
+            )
+    }
+    #endif
 
     private func detailAction(_ title: String, metrics: CoorditResponsiveMetrics, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
-                .font(CoorditTypography.gmarketMedium(size: metrics.value(10)))
-                .foregroundStyle(title == "내 옷장에서 삭제하기" ? .black : CoorditClosetColors.navy.opacity(0.5))
-                .frame(maxWidth: .infinity)
-                .frame(height: metrics.value(33))
-                .background(CoorditClosetColors.card)
-                .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
+            detailActionLabel(title, metrics: metrics)
         }
         .buttonStyle(.plain)
+    }
+
+    private func detailActionLabel(_ title: String, metrics: CoorditResponsiveMetrics) -> some View {
+        Text(title)
+            .font(CoorditTypography.gmarketMedium(size: metrics.value(10)))
+            .foregroundStyle(.black)
+            .frame(maxWidth: .infinity)
+            .frame(height: metrics.value(33))
+            .background(CoorditClosetColors.card)
+            .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
     }
 
     private func detailInfoButton(metrics: CoorditResponsiveMetrics) -> some View {
