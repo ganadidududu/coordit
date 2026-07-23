@@ -1,6 +1,7 @@
 import { supabase } from "../../config/supabase";
 import type { Category, FitType, ReferenceClothingRow } from "../../shared/types/database";
 import { createHttpError } from "../../shared/utils/http-error";
+import { getCompatibleCategories } from "../../shared/utils/category-compatibility";
 
 export interface ReferenceClothingDto {
   clothing_item_id: string;
@@ -44,7 +45,7 @@ export const selectReferenceClothingByCategory = async (
     .from("reference_clothing")
     .select("*")
     .eq("user_id", userId)
-    .eq("category", category)
+    .in("category", [...getCompatibleCategories(category)])
     .eq("is_active", true)
     .order("preference_score", { ascending: false })
     .returns<ReferenceClothingRow[]>();

@@ -4,8 +4,21 @@ import SwiftUI
 #if os(iOS)
 struct CoorditMain04Screen: View {
     let onRouteChange: (CoorditFrameRoute) -> Void
+    @Binding var closetItems: [CoorditClosetItem]
+    @Binding var selectedReferenceIDs: Set<String>
+    let onReferenceCommit: (Set<String>) -> Void
+    @State private var showsReferenceSelection = false
+    @EnvironmentObject private var backendSession: CoorditBackendSessionStore
 
-    init(onRouteChange: @escaping (CoorditFrameRoute) -> Void = { _ in }) {
+    init(
+        closetItems: Binding<[CoorditClosetItem]>,
+        selectedReferenceIDs: Binding<Set<String>>,
+        onReferenceCommit: @escaping (Set<String>) -> Void,
+        onRouteChange: @escaping (CoorditFrameRoute) -> Void = { _ in }
+    ) {
+        _closetItems = closetItems
+        _selectedReferenceIDs = selectedReferenceIDs
+        self.onReferenceCommit = onReferenceCommit
         self.onRouteChange = onRouteChange
     }
 
@@ -16,7 +29,20 @@ struct CoorditMain04Screen: View {
 
                 CoorditFitLabHistoryCard(metrics: metrics, onRouteChange: onRouteChange)
 
-                Spacer(minLength: 0)
+                CoorditHomeReferenceCard(
+                    items: closetItems,
+                    selectedIDs: selectedReferenceIDs,
+                    metrics: metrics,
+                    onSelect: { showsReferenceSelection = true }
+                )
+
+                if backendSession.isWarning {
+                    Text(backendSession.statusText)
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(9.5)))
+                        .foregroundStyle(CoorditDesignTokens.ColorToken.danger)
+                        .frame(width: metrics.value(361), alignment: .leading)
+                        .accessibilityIdentifier("home-reference-sync-status")
+                }
 
                 CoorditClosetEntryCard(metrics: metrics) {
                     onRouteChange(.closetOverview)
@@ -24,6 +50,16 @@ struct CoorditMain04Screen: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .accessibilityIdentifier("coordit-screen-main04")
+        }
+        .sheet(isPresented: $showsReferenceSelection) {
+            CoorditHomeReferenceSelectionSheet(
+                items: closetItems,
+                initialSelection: selectedReferenceIDs,
+                onCommit: { selection in
+                    onReferenceCommit(selection)
+                },
+                onAddGarment: { onRouteChange(.closetAddMethod) }
+            )
         }
     }
 }
@@ -195,7 +231,7 @@ private struct CoorditFashionMagazineIssue {
             kicker: "TREND NOW",
             status: "2026 S/S",
             title: "레드 포인트, 포엣 코어, 가벼운 로맨틱 무드",
-            body: "강한 한 끗보다 작은 포인트가 쉬운 시즌. 키링, 셔츠, 얇은 레이어부터 시작.",
+            body: "작은 포인트가 쉬운 시즌. 키링, 셔츠, 얇은 레이어로 시작.",
             tags: ["RED", "POET CORE", "LAYER"],
             tint: Main01DesignTokens.Colors.rgb(177, 51, 68)
         ),
@@ -252,33 +288,9 @@ private struct CoorditFitLabHistoryCard: View {
             .padding(.top, metrics.value(14))
             .padding(.horizontal, metrics.value(16))
 
-            Button {
+            CoorditSolidPrimaryButton(title: "새로운 옷 찾기", metrics: metrics) {
                 onRouteChange(.fitLabInput)
-            } label: {
-                ZStack {
-                    LinearGradient(
-                        stops: [
-                            .init(color: Main01DesignTokens.Colors.rgb(3, 14, 68), location: 0.0),
-                            .init(color: Main01DesignTokens.Colors.rgb(21, 33, 85), location: 0.56),
-                            .init(color: Main01DesignTokens.Colors.rgb(173, 179, 201), location: 1.0),
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-
-                    Text("새로운 옷 찾기")
-                        .font(CoorditTypography.climate2010(size: metrics.value(8.6), relativeTo: .caption2))
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                }
-                .frame(height: metrics.value(24))
-                .clipShape(RoundedRectangle(cornerRadius: metrics.value(2.5), style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: metrics.value(2.5), style: .continuous)
-                        .stroke(.white.opacity(0.22), lineWidth: metrics.value(0.7))
-                )
             }
-            .buttonStyle(.plain)
             .padding(.top, metrics.value(5))
             .padding(.horizontal, metrics.value(16))
             .accessibilityIdentifier("coordit-main04-new-fit-button")

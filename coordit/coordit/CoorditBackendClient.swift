@@ -72,6 +72,10 @@ struct CoorditBackendClient {
         try await send(path: "/clothing-items", method: "POST", token: token, body: request)
     }
 
+    func listClothingItems(token: String) async throws -> [CoorditClothingItemResponse] {
+        try await send(path: "/clothing-items", method: "GET", token: token, body: Optional<String>.none)
+    }
+
     func createClothingSize(
         token: String,
         clothingItemId: String,
@@ -89,6 +93,18 @@ struct CoorditBackendClient {
 
     func listReferenceClothing(token: String, category: String) async throws -> [CoorditReferenceClothingResponse] {
         try await send(path: "/reference-clothing/by-category/\(category)", method: "GET", token: token, body: Optional<String>.none)
+    }
+
+    func listReferenceClothing(token: String) async throws -> [CoorditReferenceClothingResponse] {
+        try await send(path: "/reference-clothing", method: "GET", token: token, body: Optional<String>.none)
+    }
+
+    func deactivateReferenceClothing(token: String, id: String) async throws -> CoorditReferenceClothingResponse {
+        try await send(path: "/reference-clothing/\(id)/deactivate", method: "PATCH", token: token, body: Optional<String>.none)
+    }
+
+    func reassessClothingItem(token: String, id: String) async throws -> CoorditClothingFitAssessmentResponse {
+        try await send(path: "/clothing-items/\(id)/fit-reassessment", method: "POST", token: token, body: Optional<String>.none)
     }
 
     func createExternalProduct(

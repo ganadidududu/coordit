@@ -81,6 +81,7 @@ struct CoorditClosetSegment: View {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("closet-category-\(category == .top ? "top" : "bottom")")
     }
 }
 
@@ -138,6 +139,26 @@ struct CoorditClosetPrimaryButton: View {
     }
 }
 
+struct CoorditSolidPrimaryButton: View {
+    let title: String
+    let metrics: CoorditResponsiveMetrics
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(CoorditTypography.gmarketBold(size: metrics.value(11.5)))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+                .frame(height: metrics.value(36))
+                .background(CoorditDesignTokens.ColorToken.ink)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct CoorditClosetGarmentCard: View {
     let item: CoorditClosetItem
     let metrics: CoorditResponsiveMetrics
@@ -146,10 +167,10 @@ struct CoorditClosetGarmentCard: View {
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: metrics.value(3)) {
-                CoorditClosetGarmentArtwork(imageData: item.imageData, metrics: metrics)
-                    .frame(height: metrics.value(42))
+                CoorditClosetGarmentArtwork(imageData: item.imageData, category: item.category, metrics: metrics)
+                    .aspectRatio(3 / 4, contentMode: .fit)
                 HStack(alignment: .firstTextBaseline, spacing: metrics.value(6)) {
-                    Text(item.category.title)
+                    Text(item.exactCategory.koreanTitle)
                         .font(CoorditTypography.gmarketMedium(size: metrics.value(6)))
                         .foregroundStyle(item.category == .top ? CoorditClosetColors.blue : .white)
                         .padding(.horizontal, metrics.value(6))
@@ -183,34 +204,64 @@ struct CoorditClosetGarmentCard: View {
 
 struct CoorditClosetGarmentArtwork: View {
     let imageData: Data?
+    let category: CoorditClosetCategory
     let metrics: CoorditResponsiveMetrics
 
     var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    Color(red: 226 / 255, green: 230 / 255, blue: 238 / 255),
-                    Color(red: 239 / 255, green: 242 / 255, blue: 247 / 255),
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+        GeometryReader { proxy in
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        Color(red: 226 / 255, green: 230 / 255, blue: 238 / 255),
+                        Color(red: 239 / 255, green: 242 / 255, blue: 247 / 255),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
 
-            if let imageData, let image = UIImage(data: imageData) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                Image(systemName: "tshirt")
-                    .font(.system(size: metrics.value(22), weight: .medium))
-                    .foregroundStyle(CoorditClosetColors.navy.opacity(0.18))
+                if let imageData, let image = UIImage(data: imageData) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .clipped()
+                } else if category == .top {
+                    Image(systemName: "tshirt")
+                        .font(.system(size: metrics.value(22), weight: .medium))
+                        .foregroundStyle(CoorditClosetColors.navy.opacity(0.18))
+                } else {
+                    CoorditPantsPlaceholderShape()
+                        .fill(CoorditClosetColors.navy.opacity(0.18))
+                        .frame(width: metrics.value(24), height: metrics.value(28))
+                }
             }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .clipped()
         }
+        .aspectRatio(3 / 4, contentMode: .fit)
+        .clipped()
         .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
         .overlay(
             RoundedRectangle(cornerRadius: metrics.value(8))
                 .stroke(Color(red: 213 / 255, green: 219 / 255, blue: 231 / 255), lineWidth: metrics.value(0.7))
         )
+        .accessibilityLabel(category == .top ? "상의 사진 없음" : "하의 사진 없음")
+        .accessibilityIdentifier("closet-placeholder-\(category == .top ? "top" : "bottom")")
+    }
+}
+
+private struct CoorditPantsPlaceholderShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX + rect.width * 0.08, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX - rect.width * 0.08, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.midX + rect.width * 0.08, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.height * 0.43))
+        path.addLine(to: CGPoint(x: rect.midX - rect.width * 0.08, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.closeSubpath()
+        return path
     }
 }
 #endif

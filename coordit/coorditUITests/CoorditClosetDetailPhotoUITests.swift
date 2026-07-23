@@ -30,13 +30,20 @@ final class CoorditClosetDetailPhotoUITests: XCTestCase {
         waitForTestState("denim-valid-b", in: app)
         XCTAssertEqual(photo.value as? String, "selected")
         XCTAssertEqual(testState(in: app), "denim-valid-b")
-
         app.buttons["FIT DETAIL"].tap()
         assertScreen("closet-overview", in: app)
+        app.buttons["closet-category-bottom"].tap()
         app.buttons["Wide Denim"].tap()
         assertScreen("closet-detail-bottom", in: app)
         XCTAssertEqual(element("closet-detail-garment-photo", in: app).value as? String, "selected")
         XCTAssertEqual(testState(in: app), "denim-valid-b")
+        let settled = expectation(description: "detail view finished rendering")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { settled.fulfill() }
+        wait(for: [settled], timeout: 2)
+        let photoCapture = XCTAttachment(screenshot: app.screenshot())
+        photoCapture.name = "closet-detail-photo-clipping"
+        photoCapture.lifetime = .keepAlways
+        add(photoCapture)
     }
 
     func testDetailPhotoScenarioPreservesLatestValidImageAgainstCorruptAndStaleLoads() throws {

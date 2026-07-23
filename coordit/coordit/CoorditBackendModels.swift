@@ -83,6 +83,7 @@ struct CoorditReferenceClothingResponse: Codable, Equatable {
     let category: String
     let fitType: String
     let preferenceScore: Double?
+    let isActive: Bool
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -90,6 +91,23 @@ struct CoorditReferenceClothingResponse: Codable, Equatable {
         case category
         case fitType = "fit_type"
         case preferenceScore = "preference_score"
+        case isActive = "is_active"
+    }
+}
+
+struct CoorditClothingFitAssessmentResponse: Codable, Equatable {
+    let fitScore: Double
+    let fitLabel: String
+    let fitComment: String
+    let diffs: CoorditMeasurementMap
+    let partStatuses: CoorditMeasurementStatusMap?
+
+    enum CodingKeys: String, CodingKey {
+        case fitScore = "fit_score"
+        case fitLabel = "fit_label"
+        case fitComment = "fit_comment"
+        case diffs
+        case partStatuses = "part_statuses"
     }
 }
 
