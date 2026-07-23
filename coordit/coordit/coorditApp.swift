@@ -13,6 +13,9 @@ struct coorditApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(backendSession)
+                .onOpenURL { url in
+                    _ = CoorditGoogleSignIn.handle(url)
+                }
         }
     }
 }

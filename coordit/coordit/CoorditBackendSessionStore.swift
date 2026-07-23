@@ -106,6 +106,13 @@ final class CoorditBackendSessionStore: ObservableObject {
         }
     }
 
+    func loginWithGoogle() async {
+        await authenticate {
+            let idToken = try await CoorditGoogleSignIn.signInIDToken()
+            return try await client.loginWithGoogle(idToken: idToken)
+        }
+    }
+
     func logout() {
         tokenStore.delete()
         session = nil

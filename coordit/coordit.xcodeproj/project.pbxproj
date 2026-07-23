@@ -16,14 +16,31 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXBuildFile section */
+		42E5BCC88BBF47AB93ABDB85 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = D90D5318A0D046F19E4B2413 /* GoogleSignIn */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		E1ED09032FFCE8A70048FDDE /* coordit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = coordit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1ED09112FFCF0010048FDDE /* coorditUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = coorditUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		21E78E5AE55D4BB085EBF442 /* Exceptions for "coordit" folder in "coordit" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E1ED09022FFCE8A70048FDDE /* coordit */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E1ED09052FFCE8A70048FDDE /* coordit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				21E78E5AE55D4BB085EBF442 /* Exceptions for "coordit" folder in "coordit" target */,
+			);
 			path = coordit;
 			sourceTree = "<group>";
 		};
@@ -39,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				42E5BCC88BBF47AB93ABDB85 /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +108,7 @@
 			);
 			name = coordit;
 			packageProductDependencies = (
+				D90D5318A0D046F19E4B2413 /* GoogleSignIn */,
 			);
 			productName = coordit;
 			productReference = E1ED09032FFCE8A70048FDDE /* coordit.app */;
@@ -146,6 +165,9 @@
 			);
 			mainGroup = E1ED08FA2FFCE8A70048FDDE;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				563B6A6CC5434884A3F5C97F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E1ED09042FFCE8A70048FDDE /* Products */;
 			projectDirPath = "";
@@ -327,14 +349,12 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 87V7WR9QND;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "사이즈표를 촬영해 기기에서 수치를 인식하기 위해 카메라를 사용합니다.";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Coordit uses the camera to add Fit Lab photos.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Coordit uses the photo library to add Fit Lab photos.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				GOOGLE_IOS_CLIENT_ID = "";
+				GOOGLE_REVERSED_CLIENT_ID = "";
+				GOOGLE_WEB_CLIENT_ID = "";
+				INFOPLIST_FILE = coordit/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -362,14 +382,12 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 87V7WR9QND;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "사이즈표를 촬영해 기기에서 수치를 인식하기 위해 카메라를 사용합니다.";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Coordit uses the camera to add Fit Lab photos.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Coordit uses the photo library to add Fit Lab photos.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				GOOGLE_IOS_CLIENT_ID = "";
+				GOOGLE_REVERSED_CLIENT_ID = "";
+				GOOGLE_WEB_CLIENT_ID = "";
+				INFOPLIST_FILE = coordit/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -463,6 +481,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		563B6A6CC5434884A3F5C97F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D90D5318A0D046F19E4B2413 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 563B6A6CC5434884A3F5C97F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E1ED08FB2FFCE8A70048FDDE /* Project object */;
 }
