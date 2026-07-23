@@ -52,6 +52,10 @@ struct CoorditBackendClient {
         try await send(path: "/auth/signup", method: "POST", token: nil, body: AuthRequest(email: email, password: password))
     }
 
+    func loginWithGoogle(idToken: String) async throws -> CoorditAuthSession {
+        try await send(path: "/auth/google", method: "POST", token: nil, body: GoogleAuthRequest(idToken: idToken))
+    }
+
     func me(token: String) async throws -> CoorditUserProfile {
         try await send(path: "/users/me", method: "GET", token: token, body: Optional<String>.none)
     }
@@ -165,6 +169,10 @@ struct CoorditBackendClient {
 private struct AuthRequest: Encodable {
     let email: String
     let password: String
+}
+
+private struct GoogleAuthRequest: Encodable {
+    let idToken: String
 }
 
 private struct UpdateProfileRequest: Encodable {

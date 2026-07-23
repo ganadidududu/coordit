@@ -44,6 +44,18 @@ extension CoorditMyPageFamilyView {
                     isSecure: true
                 )
 
+                CoorditSettingsGoogleButton(
+                    identifier: "mypage-backend-google-login",
+                    metrics: metrics,
+                    isEnabled: !backendSession.isWorking
+                ) {
+                    Task {
+                        await backendSession.loginWithGoogle()
+                        syncBackendProfile()
+                        syncBackendBodyMeasurement()
+                    }
+                }
+
                 HStack(spacing: metrics.value(10)) {
                     CoorditSettingsPrimaryButton(
                         title: "로그인",
@@ -87,6 +99,51 @@ extension CoorditMyPageFamilyView {
 
     private var canSubmitBackendAuth: Bool {
         backendEmail.contains("@") && backendPassword.count >= 6 && !backendSession.isWorking
+    }
+}
+
+private struct CoorditSettingsGoogleButton: View {
+    let identifier: String
+    let metrics: CoorditResponsiveMetrics
+    var isEnabled = true
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: metrics.value(10)) {
+                Text("G")
+                    .font(.system(size: metrics.value(15), weight: .bold, design: .rounded))
+                    .foregroundStyle(CoorditSettingsStyle.ink)
+                    .frame(width: metrics.value(24), height: metrics.value(24))
+                    .background(.white)
+                    .clipShape(Circle())
+                    .overlay {
+                        Circle()
+                            .stroke(CoorditSettingsStyle.line, lineWidth: 1)
+                    }
+
+                Text("Google로 계속하기")
+                    .font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))
+                    .foregroundStyle(CoorditSettingsStyle.ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.82)
+
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, metrics.value(14))
+            .frame(maxWidth: .infinity)
+            .frame(height: max(metrics.value(48), 44))
+            .background(.white)
+            .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous)
+                    .stroke(CoorditSettingsStyle.line, lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
+        .opacity(isEnabled ? 1 : 0.42)
+        .accessibilityIdentifier(identifier)
     }
 }
 #endif

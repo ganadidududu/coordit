@@ -46,6 +46,13 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertEqual(logoCenter, screenCenter, accuracy: 6)
     }
 
+    func testMyPageAccountShowsGoogleLoginButton() throws {
+        let app = launchApp(at: "mypage-account")
+        assertScreen("mypage-account", in: app)
+
+        XCTAssertTrue(app.buttons["mypage-backend-google-login"].waitForExistence(timeout: 5))
+    }
+
     func testFitLabInputSourcesAndHistoryFlow() throws {
         var app = launchApp(at: "fitlab-input")
         assertScreen("fitlab-input", in: app)

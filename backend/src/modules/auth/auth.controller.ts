@@ -1,6 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
 import { asRequiredString } from "../../shared/utils/request";
-import { loginWithEmail, signupWithEmail } from "./auth.service";
+import { loginWithEmail, loginWithGoogleIdToken, signupWithEmail, type AuthResponse } from "./auth.service";
+
+type GoogleLoginControllerDependencies = {
+  readonly loginWithGoogleIdToken: (idToken: string) => Promise<AuthResponse>;
+};
 
 export const signup = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -21,3 +25,16 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     next(error);
   }
 };
+
+export const createGoogleLoginController = (
+  dependencies: GoogleLoginControllerDependencies
+) => async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const idToken = asRequiredString(req.body.idToken, "idToken");
+    res.json(await dependencies.loginWithGoogleIdToken(idToken));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const loginWithGoogle = createGoogleLoginController({ loginWithGoogleIdToken });
