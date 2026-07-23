@@ -118,7 +118,8 @@ final class CoorditFinalRouteCoverageUITests: XCTestCase {
 
         for closetRoute in closetRoutes {
             let closetApp = launchApp(at: closetRoute.route)
-            let closetTitleBar = closetApp.buttons[closetRoute.title]
+            let closetScreen = closetApp.scrollViews["coordit-screen-\(closetRoute.route)"]
+            let closetTitleBar = closetScreen.buttons[closetRoute.title]
             XCTAssertTrue(closetTitleBar.waitForExistence(timeout: 5))
             let closetFrame = closetTitleBar.frame
 

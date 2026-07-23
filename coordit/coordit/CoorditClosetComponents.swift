@@ -16,7 +16,20 @@ enum CoorditClosetColors {
 struct CoorditClosetTitleBar: View {
     let title: String
     let metrics: CoorditResponsiveMetrics
+    let horizontalOutset: CGFloat
     let onBack: () -> Void
+
+    init(
+        title: String,
+        metrics: CoorditResponsiveMetrics,
+        horizontalOutset: CGFloat = 0,
+        onBack: @escaping () -> Void
+    ) {
+        self.title = title
+        self.metrics = metrics
+        self.horizontalOutset = horizontalOutset
+        self.onBack = onBack
+    }
 
     var body: some View {
         CoorditFeatureTitleBar(
@@ -25,6 +38,7 @@ struct CoorditClosetTitleBar: View {
             accessibilityLabel: title,
             onBack: onBack
         )
+        .padding(.horizontal, -metrics.value(horizontalOutset))
     }
 }
 

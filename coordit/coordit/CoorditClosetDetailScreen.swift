@@ -12,7 +12,7 @@ extension CoorditClosetFamilyView {
     ) -> some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: metrics.value(20)) {
-                CoorditClosetTitleBar(title: "FIT DETAIL", metrics: metrics) {
+                CoorditClosetTitleBar(title: "FIT DETAIL", metrics: metrics, horizontalOutset: 11) {
                     onRouteChange(.closetOverview)
                 }
 
