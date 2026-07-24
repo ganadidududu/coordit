@@ -129,7 +129,7 @@ where Option: CaseIterable & Hashable & RawRepresentable & Identifiable,
                         .background(selection == option ? CoorditSettingsStyle.ink : Color.clear)
                         .clipShape(Capsule())
                 }
-                .buttonStyle(.plain)
+                .coorditPressFeedback()
             }
         }
         .padding(metrics.value(2))

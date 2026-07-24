@@ -352,7 +352,7 @@ private struct CoorditFitLabHistoryCard: View {
                                     .accessibilityIdentifier("coordit-main04-history-card-\(item.id)")
                                     .accessibilityLabel("\(item.name), \(item.sizeSummary), \(item.score)점, 핏랩 히스토리")
                             }
-                            .buttonStyle(.plain)
+                            .coorditPressFeedback()
                             .accessibilityElement(children: .ignore)
                             .accessibilityIdentifier("coordit-main04-history-card-\(item.id)")
                             .accessibilityLabel("\(item.name), \(item.sizeSummary), \(item.score)점, 핏랩 히스토리")
@@ -467,7 +467,7 @@ private struct CoorditClosetEntryCard: View {
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(10), style: .continuous))
             .shadow(color: .black.opacity(0.035), radius: metrics.value(9), y: metrics.value(3))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .padding(.bottom, metrics.value(7))
         .accessibilityIdentifier("coordit-main04-closet-button")
     }

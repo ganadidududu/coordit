@@ -76,7 +76,12 @@ struct CoorditSettingsMenuRow: View {
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(11), style: .continuous))
             .shadow(color: .black.opacity(0.05), radius: metrics.value(10), y: metrics.value(4))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback(
+            cornerRadius: metrics.value(11),
+            pressedScale: 0.94,
+            pressedOpacity: 0.82,
+            overlayOpacity: 0.24
+        )
         .accessibilityLabel(title)
     }
 }
@@ -137,7 +142,12 @@ struct CoorditSettingsDetailRow<Trailing: View>: View {
                 Button(action: action) {
                     rowContent
                 }
-                .buttonStyle(.plain)
+                .coorditPressFeedback(
+                    cornerRadius: metrics.value(7),
+                    pressedScale: 0.95,
+                    pressedOpacity: 0.84,
+                    overlayOpacity: 0.22
+                )
                 .accessibilityLabel(title)
             } else {
                 rowContent
@@ -238,7 +248,7 @@ struct CoorditSettingsToggle: View {
             .background(isOn ? CoorditSettingsStyle.ink : Color(red: 210 / 255, green: 216 / 255, blue: 225 / 255))
             .clipShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityLabel(label)
         .accessibilityValue(isOn ? "켜짐" : "꺼짐")
     }

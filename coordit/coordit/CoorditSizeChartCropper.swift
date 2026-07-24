@@ -123,7 +123,7 @@ struct CoorditSizeChartCropView: View {
                         }
                         .contentShape(Rectangle())
                 }
-                    .buttonStyle(.plain)
+                    .coorditPressFeedback()
                     .position(position(for: corner, in: rect))
                     .simultaneousGesture(resizeGesture(corner, in: imageRect))
                     .accessibilityLabel("자르기 영역 \(corner.accessibilityName) 조절")

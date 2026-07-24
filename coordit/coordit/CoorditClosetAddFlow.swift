@@ -225,7 +225,7 @@ private struct CoorditClosetAddMethodScreen: View {
                             )
                             .shadow(color: .black.opacity(0.06), radius: metrics.value(8), y: metrics.value(3))
                         }
-                        .buttonStyle(.plain)
+                        .coorditPressFeedback()
                         .accessibilityIdentifier("closet-add-method-\(method.rawValue)")
                     }
                 }
@@ -564,7 +564,7 @@ private struct CoorditClosetPhotoInputScreen: View {
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
             .overlay(RoundedRectangle(cornerRadius: metrics.value(8)).stroke(isSelected ? CoorditClosetColors.navy : .clear, lineWidth: 1.2))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityIdentifier("closet-ocr-size-row-\(row.label)")
     }
 
@@ -979,7 +979,7 @@ private struct CoorditClosetPhotoPickerSlot: View {
                     .foregroundStyle(CoorditClosetColors.navy.opacity(0.2))
             )
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityIdentifier(identifier)
         .accessibilityValue(imageData == nil ? "empty" : "selected")
         .onChange(of: pickerItem) { _, newItem in

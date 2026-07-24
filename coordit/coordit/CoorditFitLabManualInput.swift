@@ -233,7 +233,7 @@ struct CoorditFitLabInputScreen: View {
             .background(CoorditFitLabPalette.surface)
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(snapshot.product.name), 추천 \(snapshot.recommendation.recommendedSize), \(snapshot.recommendation.fitScore.formatted(.number.precision(.fractionLength(0...1))))점")
         .accessibilityIdentifier("fitlab-history-card-\(snapshot.analysisID)")
@@ -283,7 +283,7 @@ struct CoorditFitLabInputScreen: View {
             )
             .shadow(color: .black.opacity(0.12), radius: metrics.value(7), y: metrics.value(3))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityLabel(title)
         .accessibilityIdentifier(identifier)
     }
@@ -431,7 +431,7 @@ private struct CoorditFitLabManualDraftView: View {
                         .background(CoorditFitLabPalette.ink)
                         .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
                 }
-                .buttonStyle(.plain)
+                .coorditPressFeedback()
                 .accessibilityIdentifier("fitlab-manual-continue")
             }
             .padding(.horizontal, metrics.value(33))

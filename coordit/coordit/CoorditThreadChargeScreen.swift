@@ -93,7 +93,7 @@ extension CoorditMyPageFamilyView {
                     y: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adShadowYOffset)
                 )
             }
-            .buttonStyle(.plain)
+            .coorditPressFeedback()
             .accessibilityLabel("광고 보고 실타래 충전하기")
             .accessibilityIdentifier("coordit-thread-charge-ad-cta")
             .padding(.bottom, contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adToPackagesSpacing))
@@ -178,7 +178,7 @@ extension CoorditMyPageFamilyView {
             }
             .shadow(color: .black.opacity(0.035), radius: metrics.value(8), y: metrics.value(3))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityLabel(amount)
         .accessibilityIdentifier(identifier)
     }

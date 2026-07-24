@@ -56,7 +56,7 @@ struct CoorditLiquidGlassBottomNavigation: View {
             .frame(maxWidth: .infinity, minHeight: 50 * scale)
             .contentShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .glassEffect(
             isSelected
                 ? .regular.tint(.white.opacity(0.18)).interactive()

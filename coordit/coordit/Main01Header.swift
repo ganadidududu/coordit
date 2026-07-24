@@ -30,7 +30,7 @@ struct Main01Header: View {
             Button(action: onProfileTap) {
                 headerIcon(assetName: "FigmaTopMy", label: "My")
             }
-            .buttonStyle(.plain)
+            .coorditPressFeedback()
             .accessibilityLabel("My")
         } else {
             headerIcon(assetName: "FigmaTopMy", label: "My")

@@ -24,7 +24,7 @@ struct CoorditFeatureTitleBar: View {
             .background(CoorditDesignTokens.ColorToken.panel)
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityLabel(accessibilityLabel)
     }
 }
