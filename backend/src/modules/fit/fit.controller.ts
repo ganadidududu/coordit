@@ -7,6 +7,13 @@ import {
   recommendFit,
   recommendFitBatch
 } from "./fit.service";
+import { z } from "zod";
+import {
+  CLOSET_GARMENT_KINDS,
+  getClosetReferenceProfile
+} from "./reference-profile.service";
+
+const closetGarmentKindSchema = z.enum(CLOSET_GARMENT_KINDS);
 
 export const recommendFitController = async (
   req: AuthenticatedRequest,
@@ -75,6 +82,23 @@ export const getFitAnalysisResultController = async (
 ) => {
   try {
     res.json(await getFitAnalysisResult(requireUser(req).id, asRequiredString(req.params.id, "id")));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getClosetReferenceProfileController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const parsed = closetGarmentKindSchema.safeParse(req.params.garmentKind);
+    if (!parsed.success) {
+      res.status(400).json({ message: "garmentKind must be upper or lower" });
+      return;
+    }
+    res.json(await getClosetReferenceProfile(requireUser(req).id, parsed.data));
   } catch (error) {
     next(error);
   }
