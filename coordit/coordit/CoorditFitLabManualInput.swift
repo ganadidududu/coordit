@@ -401,9 +401,15 @@ private struct CoorditFitLabManualDraftView: View {
                         globalError = nil
                     } label: {
                         Label("사이즈 행 추가", systemImage: "plus.circle.fill")
-                            .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(
+                        CoorditContentActionButtonStyle(
+                            prominence: .secondary,
+                            height: metrics.value(48),
+                            cornerRadius: metrics.value(7),
+                            fontSize: metrics.value(13)
+                        )
+                    )
                     .accessibilityIdentifier("fitlab-add-size-row")
 
                     if let globalError {
@@ -459,7 +465,14 @@ private struct CoorditFitLabManualDraftView: View {
                     .foregroundStyle(Color.black.opacity(0.65))
                     .fixedSize(horizontal: false, vertical: true)
                 Button("사이즈표 다시 편집") { isReviewing = false }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(
+                        CoorditContentActionButtonStyle(
+                            prominence: .secondary,
+                            height: metrics.value(48),
+                            cornerRadius: metrics.value(7),
+                            fontSize: metrics.value(13)
+                        )
+                    )
                     .accessibilityIdentifier("fitlab-manual-edit")
                 CoorditFitLabPrimaryButton(
                     title: "기준 옷 선택으로",

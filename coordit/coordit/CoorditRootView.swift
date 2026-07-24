@@ -32,6 +32,11 @@ struct CoorditRootView: View {
             CoorditMain04Screen(
                 closetItems: $closetItems,
                 selectedReferenceIDs: $selectedReferenceIDs,
+                fitLabHistory: fitLabCoordinator.savedHistory,
+                onOpenFitLabHistory: { snapshot in
+                    fitLabCoordinator.selectHistory(snapshot)
+                    route = .fitLabHistoryDetail
+                },
                 onReferenceCommit: { selection in
                     Task {
                         guard let result = await backendSession.syncReferenceSelection(
@@ -44,6 +49,7 @@ struct CoorditRootView: View {
                             }
                         }
                         selectedReferenceIDs = result.selectedIDs
+                        await backendSession.refreshReferenceFitProfiles()
                     }
                 }
             ) { route = $0 }
@@ -89,7 +95,8 @@ struct CoorditRootView: View {
                 route: route,
                 items: $closetItems,
                 selectedItemID: $selectedClosetItemID,
-                draft: $closetDraft
+                draft: $closetDraft,
+                selectedReferenceIDs: $selectedReferenceIDs
             ) { route = $0 }
                 }
             }
@@ -107,6 +114,9 @@ struct CoorditRootView: View {
             guard let snapshot = await backendSession.loadClosetSnapshot(preserving: closetItems) else { return }
             closetItems = snapshot.items
             selectedReferenceIDs = snapshot.selectedReferenceIDs
+        }
+        .task(id: fitLabHistoryUserID) {
+            await fitLabCoordinator.prepareHistory(userID: fitLabHistoryUserID)
         }
         .onChange(of: closetItems.compactMap(\.backendReferenceClothingId)) { oldIDs, newIDs in
             let addedReferenceIDs = Set(newIDs).subtracting(oldIDs)
@@ -129,6 +139,15 @@ struct CoorditRootView: View {
         }
     }
 
+    private var fitLabHistoryUserID: String? {
+        #if DEBUG
+        if fitLabCoordinator.fixtureName != nil {
+            return fitLabCoordinator.userID
+        }
+        #endif
+        return backendSession.session?.user.id
+    }
+
     private func syncFitLabReferenceSelection(_ selection: Set<String>) {
         Task {
             guard let result = await backendSession.syncReferenceSelection(
@@ -141,6 +160,7 @@ struct CoorditRootView: View {
                 }
             }
             selectedReferenceIDs = result.selectedIDs
+            await backendSession.refreshReferenceFitProfiles()
 
             #if DEBUG
             if fitLabCoordinator.fixtureName != nil {

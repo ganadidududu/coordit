@@ -414,6 +414,19 @@ Reference Clothing API는 사용자가 잘 맞는 옷을 추천 기준으로 지
 | 주요 반환값 | 카테고리 기준 의류 목록 |
 | 사용 화면 | Fit Lab |
 
+### 상의/하의 베스트 핏 프로필 조회
+
+| 항목 | 내용 |
+| --- | --- |
+| 기능명 | 클로젯 베스트 핏 프로필 |
+| 목적 | 활성 기준 의류 한 개 또는 여러 개를 Fit Score Engine으로 종합한 100점 핏 실측값을 가져온다. |
+| Endpoint | `GET /fit/reference-profile/:garmentKind` |
+| 필수 입력 | `garmentKind` (`upper` 또는 `lower`) |
+| 주요 반환값 | `referenceCount`, `measurements`, `sampleCounts`, `strategy` |
+| 사용 화면 | Closet |
+
+클로젯 화면은 진입 시, 기준 의류 설정 변경 시, 그리고 화면이 활성화된 동안 주기적으로 이 값을 다시 불러온다. 기준 의류가 없으면 `referenceCount`는 `0`, `measurements`는 빈 객체이며 임의의 목업 수치를 대신 표시하지 않는다.
+
 ### 기준 의류 상세 조회
 
 | 항목 | 내용 |

@@ -95,4 +95,48 @@ enum CoorditDesignTokens {
         static let adShadowYOffset: CGFloat = 9
     }
 }
+
+enum CoorditContentActionProminence {
+    case primary
+    case secondary
+}
+
+struct CoorditContentActionButtonStyle: ButtonStyle {
+    let prominence: CoorditContentActionProminence
+    let height: CGFloat
+    let cornerRadius: CGFloat
+    let fontSize: CGFloat
+
+    @Environment(\.isEnabled) private var isEnabled
+
+    init(
+        prominence: CoorditContentActionProminence,
+        height: CGFloat = 48,
+        cornerRadius: CGFloat = 7,
+        fontSize: CGFloat = 13
+    ) {
+        self.prominence = prominence
+        self.height = height
+        self.cornerRadius = cornerRadius
+        self.fontSize = fontSize
+    }
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(CoorditTypography.gmarketBold(size: fontSize, relativeTo: .headline))
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .foregroundStyle(prominence == .primary ? Color.white : CoorditDesignTokens.ColorToken.ink)
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, minHeight: height)
+            .background(
+                prominence == .primary
+                    ? CoorditDesignTokens.ColorToken.ink
+                    : CoorditDesignTokens.ColorToken.placeholder
+            )
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .opacity(isEnabled ? (configuration.isPressed ? 0.76 : 1) : 0.38)
+            .contentShape(Rectangle())
+    }
+}
 #endif

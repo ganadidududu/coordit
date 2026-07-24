@@ -162,8 +162,14 @@ struct CoorditFitLabOCRInputView: View {
                     Text("시뮬레이터 검증")
                         .font(.caption.weight(.semibold))
                     Button("결정적 OCR 표 불러오기") { loadFixture() }
-                        .buttonStyle(.borderedProminent)
-                        .tint(CoorditFitLabPalette.ink)
+                        .buttonStyle(
+                            CoorditContentActionButtonStyle(
+                                prominence: .primary,
+                                height: metrics.value(48),
+                                cornerRadius: metrics.value(7),
+                                fontSize: metrics.value(13)
+                            )
+                        )
                         .accessibilityIdentifier("fitlab-ocr-simulator-fixture")
                     if fixtureName == "ocr-late-response" {
                         Button("지연 OCR 시작") { loadDelayedFixture() }
@@ -171,8 +177,14 @@ struct CoorditFitLabOCRInputView: View {
                     }
                     if fixtureName == "ocr-vision-production" || fixtureName == "ocr-vision-threading" {
                         Button("렌더링 표를 실제 Vision으로 읽기") { loadRenderedVisionFixture() }
-                            .buttonStyle(.borderedProminent)
-                            .tint(CoorditFitLabPalette.ink)
+                            .buttonStyle(
+                                CoorditContentActionButtonStyle(
+                                    prominence: .primary,
+                                    height: metrics.value(48),
+                                    cornerRadius: metrics.value(7),
+                                    fontSize: metrics.value(13)
+                                )
+                            )
                             .accessibilityIdentifier("fitlab-ocr-production-vision-fixture")
                     }
                     if fixtureName == "ocr-errors" {
@@ -207,8 +219,14 @@ struct CoorditFitLabOCRInputView: View {
                 invalidateOperation()
                 returnToPriorDraft()
             }
-            .font(CoorditTypography.gmarketMedium(size: metrics.value(11)))
-            .buttonStyle(.bordered)
+            .buttonStyle(
+                CoorditContentActionButtonStyle(
+                    prominence: .secondary,
+                    height: metrics.value(48),
+                    cornerRadius: metrics.value(7),
+                    fontSize: metrics.value(13)
+                )
+            )
             .accessibilityIdentifier("fitlab-ocr-cancel-processing")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

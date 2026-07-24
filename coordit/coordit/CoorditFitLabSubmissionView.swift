@@ -115,7 +115,14 @@ struct CoorditFitLabSubmissionView: View {
             Button("입력과 선택 버리기") {
                 showsDiscardConfirmation = true
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(
+                CoorditContentActionButtonStyle(
+                    prominence: .secondary,
+                    height: metrics.value(48),
+                    cornerRadius: metrics.value(7),
+                    fontSize: metrics.value(13)
+                )
+            )
             .disabled(coordinator.loadState == .loading)
             .accessibilityIdentifier("fitlab-discard-submission")
         }
@@ -137,7 +144,7 @@ struct CoorditFitLabSubmissionView: View {
                 VStack(alignment: .leading, spacing: metrics.value(3)) {
                     Text(reference.nickname ?? "기준 옷")
                         .font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .body))
-                    Text("\(reference.fitType) · 선호도 \(reference.preferenceScore.formatted(.number.precision(.fractionLength(0...1))))")
+                    Text(reference.fitType)
                         .font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .caption))
                 }
                 Spacer()
@@ -203,8 +210,14 @@ struct CoorditFitLabSubmissionView: View {
                     Button("리포트 다시 시도") {
                         submit()
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(CoorditFitLabPalette.ink)
+                    .buttonStyle(
+                        CoorditContentActionButtonStyle(
+                            prominence: .primary,
+                            height: metrics.value(48),
+                            cornerRadius: metrics.value(7),
+                            fontSize: metrics.value(13)
+                        )
+                    )
                     .disabled(coordinator.loadState == .loading)
                 }
                 .padding(metrics.value(12))
@@ -215,7 +228,14 @@ struct CoorditFitLabSubmissionView: View {
             Button("입력과 선택 버리기") {
                 showsDiscardConfirmation = true
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(
+                CoorditContentActionButtonStyle(
+                    prominence: .secondary,
+                    height: metrics.value(48),
+                    cornerRadius: metrics.value(7),
+                    fontSize: metrics.value(13)
+                )
+            )
             .disabled(coordinator.loadState == .loading)
             .accessibilityIdentifier("fitlab-discard-submission")
         }

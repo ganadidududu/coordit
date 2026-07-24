@@ -29,6 +29,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
     @Published private(set) var screen: CoorditFitLabScreen
     @Published private(set) var reportNeedsRetry = false
     @Published private(set) var analysisState: CoorditFitLabAnalysisState = .idle
+    @Published private(set) var isAnalysisNoticeVisible = false
 
     let userID: String?
     let fixtureName: String?
@@ -77,10 +78,21 @@ final class CoorditFitLabCoordinator: ObservableObject {
             seed(route: route, fixture: configuration.name)
         }
         let launchArguments = ProcessInfo.processInfo.arguments
-        if launchArguments.contains("--coordit-test-analysis-running") {
+        if launchArguments.contains("--coordit-test-analysis-running-then-completed") {
             analysisState = .running
+            isAnalysisNoticeVisible = true
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(4))
+                guard !Task.isCancelled else { return }
+                self?.analysisState = .completed(.fitLabResultTop)
+                self?.isAnalysisNoticeVisible = true
+            }
+        } else if launchArguments.contains("--coordit-test-analysis-running") {
+            analysisState = .running
+            isAnalysisNoticeVisible = true
         } else if launchArguments.contains("--coordit-test-analysis-completed") {
             analysisState = .completed(.fitLabResultTop)
+            isAnalysisNoticeVisible = true
         }
         #endif
     }
@@ -121,6 +133,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
     ) {
         guard submissionTask == nil, loadState != .loading else { return }
         analysisState = .running
+        isAnalysisNoticeVisible = true
         submissionTask = Task { [weak self] in
             guard let self else { return }
             await self.submit(using: overrideAPI, authenticatedUserID: authenticatedUserID)
@@ -134,16 +147,18 @@ final class CoorditFitLabCoordinator: ObservableObject {
             analysisState = .completed(
                 draft.garmentKind == .upper ? .fitLabResultTop : .fitLabResultBottom
             )
+            isAnalysisNoticeVisible = true
         } else if let error {
             analysisState = .failed(error.errorDescription ?? "핏 분석을 완료하지 못했어요.")
+            isAnalysisNoticeVisible = true
         } else {
             analysisState = .idle
+            isAnalysisNoticeVisible = false
         }
     }
 
     func dismissAnalysisNotice() {
-        guard !isAnalysisRunning else { return }
-        analysisState = .idle
+        isAnalysisNoticeVisible = false
     }
 
     var fixtureAccessibilityIdentifier: String {
@@ -378,6 +393,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
         retryStep = nil
         screen = .input
         analysisState = .idle
+        isAnalysisNoticeVisible = false
     }
 
     func cancelSubmission() {
@@ -389,6 +405,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
         error = nil
         retryStep = nil
         analysisState = .idle
+        isAnalysisNoticeVisible = false
     }
 
     private var productRequest: CoorditFitLabProductRequest {
