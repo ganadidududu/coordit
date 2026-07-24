@@ -21,7 +21,7 @@ extension CoorditMyPageFamilyView {
                     }
                     .font(CoorditTypography.gmarketBold(size: metrics.value(10), relativeTo: .caption))
                     .foregroundStyle(CoorditSettingsStyle.ink)
-                    .buttonStyle(.plain)
+                    .coorditPressFeedback()
 
                     CoorditSettingsTextField(
                         title: "이름",

@@ -72,7 +72,7 @@ struct CoorditFitLabSubmissionView: View {
                         .background(CoorditFitLabPalette.ink)
                         .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
                 }
-                .buttonStyle(.plain)
+                .coorditPressFeedback()
                 .disabled(coordinator.loadState == .loading)
                 .accessibilityIdentifier("fitlab-manage-references")
             }
@@ -102,7 +102,7 @@ struct CoorditFitLabSubmissionView: View {
                 .background(coordinator.canSubmit ? CoorditFitLabPalette.ink : Color.black.opacity(0.28))
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
             }
-            .buttonStyle(.plain)
+            .coorditPressFeedback()
             .disabled(!coordinator.canSubmit || coordinator.loadState == .loading)
             .accessibilityIdentifier(coordinator.retryStep == nil ? "fitlab-submit-analysis" : "fitlab-retry-submission")
 
@@ -154,7 +154,7 @@ struct CoorditFitLabSubmissionView: View {
             .background(selected ? CoorditFitLabPalette.empty : CoorditFitLabPalette.field)
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .disabled(coordinator.loadState == .loading)
         .accessibilityIdentifier("fitlab-reference-\(reference.id)")
         .accessibilityValue(selected ? "선택됨" : "선택 안 됨")

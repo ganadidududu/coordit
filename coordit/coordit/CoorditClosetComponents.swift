@@ -69,7 +69,7 @@ struct CoorditClosetSegment: View {
                 .background(selected == category ? CoorditClosetColors.navy : .white.opacity(0.65))
                 .clipShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityIdentifier("closet-category-\(category == .top ? "top" : "bottom")")
     }
 }
@@ -113,7 +113,7 @@ struct CoorditClosetPrimaryButton: View {
                 .background(CoorditClosetColors.navy)
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
     }
 }
 
@@ -133,7 +133,7 @@ struct CoorditSolidPrimaryButton: View {
                 .background(CoorditDesignTokens.ColorToken.ink)
                 .clipShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
     }
 }
 
@@ -175,7 +175,7 @@ struct CoorditClosetGarmentCard: View {
             .background(CoorditClosetColors.card)
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityIdentifier(item.name)
     }
 }

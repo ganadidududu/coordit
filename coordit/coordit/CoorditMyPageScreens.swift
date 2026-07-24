@@ -269,7 +269,7 @@ struct CoorditMyPageFamilyView: View {
                         .background(CoorditSettingsStyle.ink)
                         .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
                 }
-                .buttonStyle(.plain)
+                .coorditPressFeedback()
                 .contentShape(Rectangle())
                 .accessibilityIdentifier("mypage-yarn-charge")
             }

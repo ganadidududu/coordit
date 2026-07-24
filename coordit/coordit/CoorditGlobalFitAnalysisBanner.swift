@@ -47,7 +47,7 @@ struct CoorditGlobalFitAnalysisBanner: View {
                             Image(systemName: "chevron.right")
                         }
                     }
-                    .buttonStyle(.plain)
+                    .coorditPressFeedback()
                     .accessibilityIdentifier("global-fit-analysis-completed")
                 case .failed(let message):
                     Button(action: onOpenFitLab) {
@@ -65,7 +65,7 @@ struct CoorditGlobalFitAnalysisBanner: View {
                             Spacer(minLength: 0)
                         }
                     }
-                    .buttonStyle(.plain)
+                    .coorditPressFeedback()
                     .accessibilityIdentifier("global-fit-analysis-failed")
                 }
             }

@@ -36,7 +36,7 @@ struct CoorditHomeReferenceCard: View {
                     .frame(height: metrics.value(36))
                     .background(CoorditHomeReferencePalette.ink)
                     .clipShape(Capsule())
-                    .buttonStyle(.plain)
+                    .coorditPressFeedback()
                     .accessibilityIdentifier("home-reference-select")
             }
 
@@ -124,6 +124,7 @@ struct CoorditHomeReferenceSelectionSheet: View {
                         .frame(maxWidth: .infinity, minHeight: CoorditDesignTokens.HomeReferenceMetrics.actionHeight)
                         .background(CoorditDesignTokens.ColorToken.panel)
                         .clipShape(RoundedRectangle(cornerRadius: CoorditDesignTokens.HomeReferenceMetrics.actionRadius))
+                        .coorditPressFeedback()
                     }
                 }
                 .padding(CoorditDesignTokens.HomeReferenceMetrics.sheetPadding)
@@ -200,7 +201,7 @@ struct CoorditHomeReferenceSelectionSheet: View {
             .background(selected ? CoorditDesignTokens.ColorToken.closetField : Color.clear)
             .clipShape(RoundedRectangle(cornerRadius: CoorditDesignTokens.HomeReferenceMetrics.rowRadius))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityIdentifier("home-reference-item-\(item.id)")
     }
 
@@ -220,6 +221,7 @@ struct CoorditHomeReferenceSelectionSheet: View {
             .frame(height: CoorditDesignTokens.HomeReferenceMetrics.actionHeight)
             .background(CoorditHomeReferencePalette.ink)
             .clipShape(RoundedRectangle(cornerRadius: CoorditDesignTokens.HomeReferenceMetrics.actionRadius))
+            .coorditPressFeedback()
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, CoorditDesignTokens.HomeReferenceMetrics.emptyPanelVerticalPadding)

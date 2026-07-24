@@ -148,12 +148,13 @@ struct CoorditFitLabOCRInputView: View {
                 PhotosPicker(selection: $selectedPhoto, matching: .images) {
                     sourceButton(title: "사진에서 선택", symbol: "photo.on.rectangle")
                 }
+                .coorditPressFeedback()
                 .accessibilityIdentifier("fitlab-ocr-photo-library")
 
                 Button(action: requestCamera) {
                     sourceButton(title: "카메라로 촬영", symbol: "camera")
                 }
-                .buttonStyle(.plain)
+                .coorditPressFeedback()
                 .accessibilityIdentifier("fitlab-ocr-camera")
 
                 #if DEBUG
@@ -268,7 +269,7 @@ struct CoorditFitLabOCRInputView: View {
                     } label: {
                         compactActionLabel(title: "다시 캡처", symbol: "arrow.counterclockwise")
                     }
-                        .buttonStyle(.plain)
+                        .coorditPressFeedback()
                         .accessibilityIdentifier("fitlab-ocr-recapture")
                     Spacer()
                     Text("저장 전 확인 필요")
@@ -344,7 +345,7 @@ struct CoorditFitLabOCRInputView: View {
                 } label: {
                     compactActionLabel(title: "사이즈 행 추가", symbol: "plus.circle")
                 }
-                .buttonStyle(.plain)
+                .coorditPressFeedback()
 
                 CoorditFitLabPrimaryButton(title: "수정한 사이즈표 확인", metrics: metrics, action: confirm)
                     .accessibilityIdentifier("fitlab-ocr-confirm")
@@ -380,7 +381,7 @@ struct CoorditFitLabOCRInputView: View {
                 Button { phase = .review } label: {
                     compactActionLabel(title: "다시 편집", symbol: "pencil")
                 }
-                .buttonStyle(.plain)
+                .coorditPressFeedback()
                 CoorditFitLabPrimaryButton(title: "기준 옷 선택으로", metrics: metrics) {
                     draft.isSourceConfirmed = true
                 }
@@ -406,14 +407,15 @@ struct CoorditFitLabOCRInputView: View {
                 PhotosPicker(selection: $selectedPhoto, matching: .images) {
                     prominentActionLabel(title: "사진에서 선택", symbol: "photo")
                 }
+                .coorditPressFeedback()
                 Button(action: switchToManual) {
                     compactActionLabel(title: "수동 입력으로 전환", symbol: "square.and.pencil")
                 }
-                .buttonStyle(.plain)
+                .coorditPressFeedback()
                 Button { phase = .chooser } label: {
                     compactActionLabel(title: "다른 방법 보기", symbol: "arrow.left")
                 }
-                .buttonStyle(.plain)
+                .coorditPressFeedback()
                 .accessibilityIdentifier("fitlab-ocr-reopen-chooser")
             }
             .panelStyle()

@@ -288,7 +288,7 @@ struct CoorditClosetFamilyView: View {
             .frame(height: metrics.value(28))
             .background(isSelected ? CoorditClosetColors.navy : CoorditClosetColors.field)
             .clipShape(Capsule())
-            .buttonStyle(.plain)
+            .coorditPressFeedback()
     }
 
     private func bestFitMetricsGrid(metrics: CoorditResponsiveMetrics) -> some View {

@@ -135,8 +135,15 @@ struct CoorditContentActionButtonStyle: ButtonStyle {
                     : CoorditDesignTokens.ColorToken.placeholder
             )
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .opacity(isEnabled ? (configuration.isPressed ? 0.76 : 1) : 0.38)
-            .contentShape(Rectangle())
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(isEnabled && configuration.isPressed ? Color.black.opacity(0.16) : Color.clear)
+                    .allowsHitTesting(false)
+            }
+            .scaleEffect(isEnabled && configuration.isPressed ? 0.965 : 1)
+            .opacity(isEnabled ? (configuration.isPressed ? 0.88 : 1) : 0.38)
+            .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .animation(.linear(duration: 0.035), value: configuration.isPressed)
     }
 }
 #endif

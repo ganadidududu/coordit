@@ -41,7 +41,7 @@ extension CoorditClosetFamilyView {
                                 metrics: metrics
                             )
                         }
-                        .buttonStyle(.plain)
+                        .coorditPressFeedback()
                         .accessibilityLabel(item.imageData == nil ? "옷 사진 추가하기" : "옷 사진 수정하기")
                         .accessibilityIdentifier("closet-detail-garment-photo")
                         .accessibilityValue(item.imageData == nil ? "empty" : "selected")
@@ -261,7 +261,7 @@ extension CoorditClosetFamilyView {
         Button(action: action) {
             detailActionLabel(title, metrics: metrics)
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
     }
 
     private func detailActionLabel(_ title: String, metrics: CoorditResponsiveMetrics) -> some View {
@@ -281,6 +281,7 @@ extension CoorditClosetFamilyView {
             .frame(width: metrics.value(96), height: metrics.value(32))
             .background(CoorditClosetColors.navy)
             .clipShape(Capsule())
+            .coorditPressFeedback()
     }
 }
 #endif

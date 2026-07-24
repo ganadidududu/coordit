@@ -107,7 +107,7 @@ struct CoorditFitLabURLInputView: View {
                 .background(CoorditFitLabPalette.ink)
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
             }
-            .buttonStyle(.plain)
+            .coorditPressFeedback()
             .disabled(isLoading)
             .accessibilityIdentifier("fitlab-url-import")
 
@@ -153,7 +153,7 @@ struct CoorditFitLabURLInputView: View {
                         .stroke(CoorditFitLabPalette.ink.opacity(isPrimary ? 0 : 0.14), lineWidth: metrics.value(0.8))
                 }
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
     }
 
     private var review: some View {
@@ -277,7 +277,7 @@ struct CoorditFitLabURLInputView: View {
                     .background(CoorditFitLabPalette.ink)
                     .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
             }
-            .buttonStyle(.plain)
+            .coorditPressFeedback()
             .accessibilityIdentifier("fitlab-url-confirm")
 
             #if DEBUG

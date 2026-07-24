@@ -61,7 +61,12 @@ struct CoorditSettingsPrimaryButton: View {
                 .background(isDanger ? CoorditSettingsStyle.danger : CoorditSettingsStyle.ink)
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback(
+            cornerRadius: metrics.value(7),
+            pressedScale: 0.95,
+            pressedOpacity: 0.84,
+            overlayOpacity: 0.22
+        )
         .disabled(!isEnabled)
         .opacity(isEnabled ? 1 : 0.42)
         .accessibilityIdentifier(identifier)
@@ -155,7 +160,7 @@ struct CoorditSettingsConfirmationToggle: View {
             .background(CoorditSettingsStyle.panel)
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityLabel(title)
         .accessibilityValue(isOn ? "확인함" : "확인 안 함")
     }

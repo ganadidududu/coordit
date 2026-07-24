@@ -140,7 +140,7 @@ private struct CoorditSettingsGoogleButton: View {
                     .stroke(CoorditSettingsStyle.line, lineWidth: 1)
             }
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .disabled(!isEnabled)
         .opacity(isEnabled ? 1 : 0.42)
         .accessibilityIdentifier(identifier)

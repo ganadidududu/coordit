@@ -75,7 +75,7 @@ struct CoorditFitLabSourceButton: View {
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
                 .shadow(color: .black.opacity(0.12), radius: metrics.value(9), y: metrics.value(4))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
     }
 }
 
@@ -347,7 +347,7 @@ struct CoorditFitLabDescriptionCard: View {
                         .background(CoorditFitLabPalette.ink)
                         .clipShape(Capsule())
                 }
-                .buttonStyle(.plain)
+                .coorditPressFeedback()
             }
         }
         .padding(.horizontal, metrics.value(18))

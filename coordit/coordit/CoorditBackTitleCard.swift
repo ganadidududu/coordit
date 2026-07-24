@@ -29,9 +29,47 @@ struct CoorditBackTitleCard: View {
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(6), style: .continuous))
             .shadow(color: .black.opacity(0.05), radius: metrics.value(10), y: metrics.value(4))
         }
-        .buttonStyle(.plain)
+        .coorditPressFeedback()
         .accessibilityIdentifier(title)
         .accessibilityLabel("\(title) 뒤로가기")
+    }
+}
+
+struct CoorditPressFeedbackButtonStyle: ButtonStyle {
+    var cornerRadius: CGFloat = 10
+    var pressedScale: CGFloat = 0.965
+    var pressedOpacity: Double = 0.88
+    var overlayOpacity: Double = 0.16
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(configuration.isPressed ? Color.black.opacity(overlayOpacity) : Color.clear)
+                    .allowsHitTesting(false)
+            }
+            .scaleEffect(configuration.isPressed ? pressedScale : 1)
+            .opacity(configuration.isPressed ? pressedOpacity : 1)
+            .animation(.linear(duration: 0.035), value: configuration.isPressed)
+    }
+}
+
+extension View {
+    func coorditPressFeedback(
+        cornerRadius: CGFloat = 10,
+        pressedScale: CGFloat = 0.965,
+        pressedOpacity: Double = 0.88,
+        overlayOpacity: Double = 0.16
+    ) -> some View {
+        buttonStyle(
+            CoorditPressFeedbackButtonStyle(
+                cornerRadius: cornerRadius,
+                pressedScale: pressedScale,
+                pressedOpacity: pressedOpacity,
+                overlayOpacity: overlayOpacity
+            )
+        )
     }
 }
 #endif
