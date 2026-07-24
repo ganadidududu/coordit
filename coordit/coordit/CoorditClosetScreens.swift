@@ -70,6 +70,7 @@ struct CoorditClosetFamilyView: View {
     @Binding var items: [CoorditClosetItem]
     @Binding var selectedItemID: String?
     @Binding var draft: CoorditClosetDraft
+    @Binding var selectedReferenceIDs: Set<String>
 
     @EnvironmentObject var backendSession: CoorditBackendSessionStore
     @State var selectedCategory: CoorditClosetCategory = .top
@@ -80,6 +81,7 @@ struct CoorditClosetFamilyView: View {
     @State var detailPhotoGenerations: [String: Int]
     @State var reassessingItemID: String?
     @State var reassessmentMessage: String?
+    @State var engineScoredItemIDs: Set<String>
     @State var isRenamingDetailItem: Bool
     @State var pendingDetailName: String
 
@@ -94,18 +96,21 @@ struct CoorditClosetFamilyView: View {
         items: Binding<[CoorditClosetItem]>,
         selectedItemID: Binding<String?>,
         draft: Binding<CoorditClosetDraft>,
+        selectedReferenceIDs: Binding<Set<String>>,
         onRouteChange: @escaping (CoorditFrameRoute) -> Void
     ) {
         self.route = route
         _items = items
         _selectedItemID = selectedItemID
         _draft = draft
+        _selectedReferenceIDs = selectedReferenceIDs
         self.onRouteChange = onRouteChange
         _detailVariant = State(initialValue: route == .closetDetailBottom ? .bottom : .top)
         _detailPhotoSelection = State(initialValue: nil)
         _detailPhotoGenerations = State(initialValue: [:])
         _reassessingItemID = State(initialValue: nil)
         _reassessmentMessage = State(initialValue: nil)
+        _engineScoredItemIDs = State(initialValue: [])
         _isRenamingDetailItem = State(initialValue: false)
         _pendingDetailName = State(initialValue: "")
         #if DEBUG
@@ -155,6 +160,19 @@ struct CoorditClosetFamilyView: View {
                 overviewScreen(metrics: metrics)
             }
         }
+        .task(id: referenceProfileRefreshKey) {
+            await backendSession.refreshReferenceFitProfiles()
+            while !Task.isCancelled {
+                do {
+                    try await Task.sleep(for: .seconds(30))
+                } catch is CancellationError {
+                    return
+                } catch {
+                    return
+                }
+                await backendSession.refreshReferenceFitProfiles()
+            }
+        }
     }
 
     private func overviewScreen(metrics: CoorditResponsiveMetrics) -> some View {
@@ -166,9 +184,10 @@ struct CoorditClosetFamilyView: View {
 
                 VStack(alignment: .leading, spacing: metrics.value(12)) {
                     VStack(alignment: .leading, spacing: metrics.value(4)) {
-                        Text("현재 베스트 스코어 기준")
+                        Text("\(activeReferenceProfile?.referenceCount ?? 0)개 기준 의류로 계산")
                             .font(CoorditTypography.mona12(size: metrics.value(11)))
                             .foregroundStyle(CoorditClosetColors.navy.opacity(0.48))
+                            .accessibilityIdentifier("closet-best-fit-reference-count")
                         Text("100점 핏 사이즈")
                             .font(CoorditTypography.climate2010(size: metrics.value(21)))
                             .foregroundStyle(CoorditClosetColors.navy)
@@ -179,7 +198,7 @@ struct CoorditClosetFamilyView: View {
                         selectedExactCategory = nil
                     }
                     exactCategoryFilter(metrics: metrics)
-                    metricsGrid(metrics: metrics, values: overviewMetrics)
+                    bestFitMetricsGrid(metrics: metrics)
                 }
                 .padding(metrics.value(14))
                 .background(CoorditClosetColors.card)
@@ -200,23 +219,38 @@ struct CoorditClosetFamilyView: View {
         .accessibilityIdentifier("coordit-screen-closet-overview")
     }
 
-    private var overviewMetrics: [(String, String, Color)] {
+    private var activeReferenceProfile: CoorditReferenceFitProfileResponse? {
+        backendSession.referenceFitProfile(for: selectedCategory)
+    }
+
+    private var referenceProfileRefreshKey: String {
+        selectedReferenceIDs.sorted().joined(separator: ",")
+    }
+
+    private var overviewMetrics: [(key: String, value: String, label: String, color: Color)] {
+        let measurements = activeReferenceProfile?.measurements
         switch selectedCategory {
         case .top:
-            [
-                ("45.0 cm", "어깨", CoorditClosetColors.navy),
-                ("104.0 cm", "가슴", CoorditClosetColors.navy),
-                ("70.5 cm", "총장", CoorditClosetColors.navy),
-                ("61.0 cm", "소매", CoorditClosetColors.navy),
+            return [
+                ("shoulder_width", formattedMeasurement(measurements?.shoulderWidth), "어깨", CoorditClosetColors.navy),
+                ("chest_width", formattedMeasurement(measurements?.chestWidth), "가슴단면", CoorditClosetColors.navy),
+                ("total_length", formattedMeasurement(measurements?.totalLength), "총장", CoorditClosetColors.navy),
+                ("sleeve_length", formattedMeasurement(measurements?.sleeveLength), "소매", CoorditClosetColors.navy),
             ]
         case .bottom:
-            [
-                ("76.0 cm", "허리", CoorditClosetColors.navy),
-                ("101.5 cm", "엉덩이", CoorditClosetColors.navy),
-                ("54.0 cm", "허벅지", CoorditClosetColors.navy),
-                ("102.0 cm", "총장", CoorditClosetColors.navy),
+            return [
+                ("waist_width", formattedMeasurement(measurements?.waistWidth), "허리단면", CoorditClosetColors.navy),
+                ("hip_width", formattedMeasurement(measurements?.hipWidth), "엉덩이단면", CoorditClosetColors.navy),
+                ("rise", formattedMeasurement(measurements?.rise), "밑위", CoorditClosetColors.navy),
+                ("outseam", formattedMeasurement(measurements?.outseam), "총장", CoorditClosetColors.navy),
             ]
         }
+    }
+
+    private func formattedMeasurement(_ value: Double?) -> String {
+        guard let value, value.isFinite else { return "-" }
+        let number = value.formatted(.number.precision(.fractionLength(0...2)))
+        return "\(number) cm"
     }
 
     private var filteredItems: [CoorditClosetItem] {
@@ -257,10 +291,32 @@ struct CoorditClosetFamilyView: View {
             .buttonStyle(.plain)
     }
 
+    private func bestFitMetricsGrid(metrics: CoorditResponsiveMetrics) -> some View {
+        let values = overviewMetrics
+        return LazyVGrid(columns: [GridItem(.flexible(), spacing: metrics.value(8)), GridItem(.flexible())], spacing: metrics.value(8)) {
+            ForEach(values.indices, id: \.self) { index in
+                CoorditClosetMetricTile(
+                    value: values[index].value,
+                    label: values[index].label,
+                    color: values[index].color,
+                    metrics: metrics
+                )
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(values[index].label), \(values[index].value)")
+                .accessibilityIdentifier("closet-best-fit-\(values[index].key)")
+            }
+        }
+    }
+
     func metricsGrid(metrics: CoorditResponsiveMetrics, values: [(String, String, Color)]) -> some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: metrics.value(8)), GridItem(.flexible())], spacing: metrics.value(8)) {
             ForEach(values.indices, id: \.self) { index in
-                CoorditClosetMetricTile(value: values[index].0, label: values[index].1, color: values[index].2, metrics: metrics)
+                CoorditClosetMetricTile(
+                    value: values[index].0,
+                    label: values[index].1,
+                    color: values[index].2,
+                    metrics: metrics
+                )
             }
         }
     }

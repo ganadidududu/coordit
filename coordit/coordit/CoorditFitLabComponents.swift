@@ -28,38 +28,17 @@ struct CoorditFitLabPrimaryButton: View {
     let title: String
     let metrics: CoorditResponsiveMetrics
     let action: () -> Void
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(primaryButtonFont)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.white)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.vertical, metrics.value(10))
-                .frame(maxWidth: .infinity, minHeight: metrics.value(36))
-                .background(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 49 / 255, green: 69 / 255, blue: 146 / 255),
-                            CoorditFitLabPalette.ink
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
+        Button(title, action: action)
+            .buttonStyle(
+                CoorditContentActionButtonStyle(
+                    prominence: .primary,
+                    height: metrics.value(48),
+                    cornerRadius: metrics.value(7),
+                    fontSize: metrics.value(15)
                 )
-                .clipShape(RoundedRectangle(cornerRadius: metrics.value(6)))
-                .shadow(color: CoorditFitLabPalette.ink.opacity(0.3), radius: metrics.value(6), y: metrics.value(2))
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var primaryButtonFont: Font {
-        if dynamicTypeSize.isAccessibilitySize {
-            return CoorditTypography.gmarketBold(size: metrics.value(15), relativeTo: .headline)
-        }
-        return CoorditTypography.climate2010(size: metrics.value(15), relativeTo: .headline)
+            )
     }
 }
 

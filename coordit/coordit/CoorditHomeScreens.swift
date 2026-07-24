@@ -6,6 +6,8 @@ struct CoorditMain04Screen: View {
     let onRouteChange: (CoorditFrameRoute) -> Void
     @Binding var closetItems: [CoorditClosetItem]
     @Binding var selectedReferenceIDs: Set<String>
+    let fitLabHistory: [CoorditFitLabHistorySnapshot]
+    let onOpenFitLabHistory: (CoorditFitLabHistorySnapshot) -> Void
     let onReferenceCommit: (Set<String>) -> Void
     @State private var showsReferenceSelection = false
     @EnvironmentObject private var backendSession: CoorditBackendSessionStore
@@ -13,11 +15,15 @@ struct CoorditMain04Screen: View {
     init(
         closetItems: Binding<[CoorditClosetItem]>,
         selectedReferenceIDs: Binding<Set<String>>,
+        fitLabHistory: [CoorditFitLabHistorySnapshot] = [],
+        onOpenFitLabHistory: @escaping (CoorditFitLabHistorySnapshot) -> Void = { _ in },
         onReferenceCommit: @escaping (Set<String>) -> Void,
         onRouteChange: @escaping (CoorditFrameRoute) -> Void = { _ in }
     ) {
         _closetItems = closetItems
         _selectedReferenceIDs = selectedReferenceIDs
+        self.fitLabHistory = fitLabHistory
+        self.onOpenFitLabHistory = onOpenFitLabHistory
         self.onReferenceCommit = onReferenceCommit
         self.onRouteChange = onRouteChange
     }
@@ -27,7 +33,12 @@ struct CoorditMain04Screen: View {
             VStack(spacing: metrics.value(16)) {
                 CoorditBannerCard(metrics: metrics)
 
-                CoorditFitLabHistoryCard(metrics: metrics, onRouteChange: onRouteChange)
+                CoorditFitLabHistoryCard(
+                    history: fitLabHistory,
+                    metrics: metrics,
+                    onOpenHistory: onOpenFitLabHistory,
+                    onRouteChange: onRouteChange
+                )
 
                 CoorditHomeReferenceCard(
                     items: closetItems,
@@ -239,36 +250,44 @@ private struct CoorditFashionMagazineIssue {
 }
 
 private struct CoorditHomeFitLabHistoryItem: Identifiable {
+    let snapshot: CoorditFitLabHistorySnapshot
     let id: String
     let name: String
     let category: String
     let sizeSummary: String
     let score: String
     let tint: Color
+
+    init(snapshot: CoorditFitLabHistorySnapshot) {
+        self.snapshot = snapshot
+        self.id = snapshot.analysisID
+        self.name = snapshot.product.name
+        self.category = snapshot.garmentKind == .upper ? "TOP" : "BOTTOM"
+        self.sizeSummary = "\(snapshot.recommendation.recommendedSize) 추천"
+        self.score = snapshot.recommendation.fitScore.formatted(
+            .number.precision(.fractionLength(0))
+        )
+        self.tint = snapshot.garmentKind == .upper
+            ? Main01DesignTokens.Colors.rgb(54, 93, 168)
+            : Main01DesignTokens.Colors.rgb(24, 132, 120)
+    }
 }
 
-private let coorditHomeFitLabHistoryItems: [CoorditHomeFitLabHistoryItem] = [
-    CoorditHomeFitLabHistoryItem(
-        id: "linen-shirt",
-        name: "린넨 셔츠",
-        category: "TOP",
-        sizeSummary: "M 추천",
-        score: "94",
-        tint: Main01DesignTokens.Colors.rgb(54, 93, 168)
-    ),
-    CoorditHomeFitLabHistoryItem(
-        id: "wide-denim",
-        name: "와이드 데님",
-        category: "BOTTOM",
-        sizeSummary: "L 추천",
-        score: "91",
-        tint: Main01DesignTokens.Colors.rgb(24, 132, 120)
-    ),
-]
-
 private struct CoorditFitLabHistoryCard: View {
+    let history: [CoorditFitLabHistorySnapshot]
     let metrics: CoorditResponsiveMetrics
+    let onOpenHistory: (CoorditFitLabHistorySnapshot) -> Void
     let onRouteChange: (CoorditFrameRoute) -> Void
+
+    private var recentItems: [CoorditHomeFitLabHistoryItem] {
+        history
+            .sorted {
+                if $0.savedAt == $1.savedAt { return $0.analysisID > $1.analysisID }
+                return $0.savedAt > $1.savedAt
+            }
+            .prefix(2)
+            .map { CoorditHomeFitLabHistoryItem(snapshot: $0) }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -303,25 +322,42 @@ private struct CoorditFitLabHistoryCard: View {
                     .lineLimit(1)
 
                 Spacer(minLength: 0)
+
+                Text("최근 저장 2개")
+                    .font(CoorditTypography.gmarketMedium(size: metrics.value(8.2), relativeTo: .caption2))
+                    .foregroundStyle(.black.opacity(0.48))
+                    .lineLimit(1)
             }
             .padding(.top, metrics.value(7))
             .padding(.leading, metrics.value(16))
             .padding(.trailing, metrics.value(16))
 
-            HStack(spacing: metrics.value(8)) {
-                ForEach(coorditHomeFitLabHistoryItems) { item in
-                    Button {
-                        onRouteChange(.fitLabHistoryDetail)
-                    } label: {
-                        CoorditFitLabHistoryPreviewCard(item: item, metrics: metrics)
+            Group {
+                if recentItems.isEmpty {
+                    Text("저장한 핏 리포트가 아직 없어요")
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
+                        .foregroundStyle(.black.opacity(0.55))
+                        .frame(maxWidth: .infinity, minHeight: metrics.value(54))
+                        .background(Color.black.opacity(0.035))
+                        .clipShape(RoundedRectangle(cornerRadius: metrics.value(6), style: .continuous))
+                        .accessibilityIdentifier("coordit-main04-history-empty")
+                } else {
+                    HStack(spacing: metrics.value(8)) {
+                        ForEach(recentItems) { item in
+                            Button {
+                                onOpenHistory(item.snapshot)
+                            } label: {
+                                CoorditFitLabHistoryPreviewCard(item: item, metrics: metrics)
+                                    .accessibilityElement(children: .ignore)
+                                    .accessibilityIdentifier("coordit-main04-history-card-\(item.id)")
+                                    .accessibilityLabel("\(item.name), \(item.sizeSummary), \(item.score)점, 핏랩 히스토리")
+                            }
+                            .buttonStyle(.plain)
                             .accessibilityElement(children: .ignore)
                             .accessibilityIdentifier("coordit-main04-history-card-\(item.id)")
-                            .accessibilityLabel("\(item.name) 과거 핏랩 히스토리")
+                            .accessibilityLabel("\(item.name), \(item.sizeSummary), \(item.score)점, 핏랩 히스토리")
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityIdentifier("coordit-main04-history-card-\(item.id)")
-                    .accessibilityLabel("\(item.name) 과거 핏랩 히스토리")
                 }
             }
             .padding(.top, metrics.value(6))

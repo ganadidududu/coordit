@@ -111,6 +111,18 @@ struct CoorditBackendClient {
         try await send(path: "/clothing-items/\(id)/fit-reassessment", method: "POST", token: token, body: Optional<String>.none)
     }
 
+    func referenceFitProfile(
+        token: String,
+        garmentKind: String
+    ) async throws -> CoorditReferenceFitProfileResponse {
+        try await send(
+            path: "/fit/reference-profile/\(garmentKind)",
+            method: "GET",
+            token: token,
+            body: Optional<String>.none
+        )
+    }
+
     func createExternalProduct(
         token: String,
         request: CreateExternalProductRequest

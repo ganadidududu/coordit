@@ -167,6 +167,14 @@ struct CoorditMeasurementMap: Codable, Equatable {
     }
 }
 
+struct CoorditReferenceFitProfileResponse: Codable, Equatable {
+    let garmentKind: String
+    let referenceCount: Int
+    let measurements: CoorditMeasurementMap
+    let sampleCounts: [String: Int]
+    let strategy: String
+}
+
 struct CoorditFitRecommendation: Codable, Equatable {
     let fitAnalysisResultId: String
     let recommendedSize: String

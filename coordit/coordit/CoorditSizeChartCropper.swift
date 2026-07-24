@@ -65,19 +65,18 @@ struct CoorditSizeChartCropView: View {
                 .accessibilityIdentifier("size-chart-cropper")
 
                 HStack(spacing: 10) {
-                    Button(action: onCancel) {
-                        Text("취소")
-                            .font(CoorditTypography.gmarketMedium(size: 13))
-                    }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
-                    Button(action: confirm) {
-                        Text("표 영역 사용")
-                            .font(CoorditTypography.gmarketBold(size: 13))
-                    }
-                        .buttonStyle(.borderedProminent)
-                        .tint(CoorditDesignTokens.ColorToken.ink)
-                        .frame(maxWidth: .infinity)
+                    Button("취소", action: onCancel)
+                        .buttonStyle(
+                            CoorditContentActionButtonStyle(
+                                prominence: .secondary
+                            )
+                        )
+                    Button("표 영역 사용", action: confirm)
+                        .buttonStyle(
+                            CoorditContentActionButtonStyle(
+                                prominence: .primary
+                            )
+                        )
                 }
                 .padding(.horizontal, 22)
                 .padding(.bottom, 12)

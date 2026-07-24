@@ -17,6 +17,7 @@ final class CoorditBackendSessionStore: ObservableObject {
     @Published private(set) var session: CoorditAuthSession?
     @Published private(set) var profile: CoorditUserProfile?
     @Published private(set) var latestBodyMeasurement: CoorditBodyMeasurement?
+    @Published private(set) var referenceFitProfiles: [String: CoorditReferenceFitProfileResponse] = [:]
     @Published private(set) var statusText = "백엔드 연결 확인 전"
     @Published private(set) var isWorking = false
     @Published private(set) var isWarning = false
@@ -118,6 +119,7 @@ final class CoorditBackendSessionStore: ObservableObject {
         session = nil
         profile = nil
         latestBodyMeasurement = nil
+        referenceFitProfiles = [:]
         statusText = "이 기기에서 로그아웃했어요."
         isWarning = false
     }
@@ -311,6 +313,77 @@ final class CoorditBackendSessionStore: ObservableObject {
             statusText = error.localizedDescription
             isWarning = true
             return nil
+        }
+    }
+
+    func referenceFitProfile(for category: CoorditClosetCategory) -> CoorditReferenceFitProfileResponse? {
+        referenceFitProfiles[category == .top ? "upper" : "lower"]
+    }
+
+    func refreshReferenceFitProfiles() async {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--coordit-test-reference-fit-profiles") {
+            let upper = CoorditReferenceFitProfileResponse(
+                garmentKind: "upper",
+                referenceCount: 2,
+                measurements: CoorditMeasurementMap(
+                    totalLength: 70.5,
+                    shoulderWidth: 46.25,
+                    chestWidth: 54,
+                    sleeveLength: 62,
+                    waistWidth: nil,
+                    hipWidth: nil,
+                    rise: nil,
+                    outseam: nil
+                ),
+                sampleCounts: [
+                    "shoulder_width": 2,
+                    "chest_width": 2,
+                    "total_length": 2,
+                    "sleeve_length": 2,
+                ],
+                strategy: "weighted_huber_profile_v1"
+            )
+            let lower = CoorditReferenceFitProfileResponse(
+                garmentKind: "lower",
+                referenceCount: 2,
+                measurements: CoorditMeasurementMap(
+                    totalLength: nil,
+                    shoulderWidth: nil,
+                    chestWidth: nil,
+                    sleeveLength: nil,
+                    waistWidth: 39,
+                    hipWidth: 51.25,
+                    rise: 29.5,
+                    outseam: 102
+                ),
+                sampleCounts: [
+                    "waist_width": 2,
+                    "hip_width": 2,
+                    "rise": 2,
+                    "outseam": 2,
+                ],
+                strategy: "weighted_huber_profile_v1"
+            )
+            referenceFitProfiles = ["upper": upper, "lower": lower]
+            return
+        }
+        #endif
+
+        guard let token = session?.accessToken else {
+            referenceFitProfiles = [:]
+            return
+        }
+        do {
+            async let upper = client.referenceFitProfile(token: token, garmentKind: "upper")
+            async let lower = client.referenceFitProfile(token: token, garmentKind: "lower")
+            let profiles = try await [upper, lower]
+            referenceFitProfiles = Dictionary(
+                uniqueKeysWithValues: profiles.map { ($0.garmentKind, $0) }
+            )
+        } catch {
+            statusText = error.localizedDescription
+            isWarning = true
         }
     }
 

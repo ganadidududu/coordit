@@ -2,7 +2,7 @@
 
 ## 1. Atmosphere & Identity
 
-Coordit is a precise, calm fashion-fit tool. Its signature is deep navy chrome framing bright, lightly textured work surfaces, with expressive display type reserved for scores and primary actions while Gmarket Sans carries navigation and readable interface copy.
+Coordit is a precise, calm fashion-fit tool. Its signature is deep navy chrome framing bright, lightly textured work surfaces. Gmarket Sans carries navigation, readable interface copy, and primary actions; expressive display type is reserved for non-interactive branding, selected data-display moments, and the Home `MY CLOSET` branded entry.
 
 ## 2. Color
 
@@ -30,7 +30,7 @@ All text uses `CoorditTypography`; bundled PostScript names are registered by th
 | Section title | Gmarket Sans Bold | 18–20 pt | 0 | Major content sections |
 | Body | Gmarket Sans Medium | 12–15 pt | 0 | Controls and explanatory copy |
 | Caption | Gmarket Sans Light/Medium | 9–12 pt | 0 | Hints and metadata |
-| Display | Climate Crisis KR | 17–23 pt | Screen-specific | Scores and primary calls to action |
+| Display | Climate Crisis KR | 17–23 pt | Screen-specific | Non-interactive branding, section labels, and selected data displays |
 | Measurement | Mona12 | 10–17 pt | 0 | Numeric fashion measurements |
 
 Text scales through SwiftUI relative text styles. Feature titles use `.headline` as their Dynamic Type reference.
@@ -64,9 +64,47 @@ Text scales through SwiftUI relative text styles. Feature titles use `.headline`
 
 ### Primary feature button
 
-- **Structure**: full-width label over the feature navy gradient.
+- **Structure**: full-width Gmarket Sans Bold label over the shared solid ink surface. Existing feature-specific height, width, and corner radius remain unchanged.
 - **States**: default and native pressed state; feature flows separately define disabled/loading behavior where applicable.
 - **Accessibility**: visible text supplies the label and Dynamic Type remains readable.
+- **Styling**: no Climate Crisis type, gradient fill, or decorative shadow. This applies to FitLab primary actions and Closet primary actions including the total-score action.
+
+### Home Closet branded entry
+
+- **Structure**: left-aligned `MY CLOSET` Climate Crisis label on the original pale vertical gradient.
+- **Geometry**: fixed 361 × 43 design-pt frame, 10 pt corner radius, 12 pt leading label inset, and the original restrained shadow.
+- **Scope**: this is a Home feature-entry brand surface, not part of the solid primary-action button family.
+
+### Content action buttons
+
+- **Structure**: Gmarket Sans Bold label on either the solid ink primary surface or the solid placeholder secondary surface.
+- **Geometry**: 48 pt minimum height and 7 pt corner radius. Buttons sharing one horizontal row divide the available width equally; vertically adjacent decision buttons both occupy the full content width.
+- **States**: primary, secondary, pressed, and disabled. Pressed feedback uses opacity only; disabled actions remain visible at reduced opacity.
+- **Accessibility**: labels may wrap to two lines, retain a 48 pt touch target, and scale relative to `.headline`.
+- **Scope**: replaces content-area `.bordered` and `.borderedProminent` controls. Native alert, sheet-toolbar, keyboard-toolbar, and other system-owned controls retain platform styling.
+
+### Global fit analysis notice
+
+- **Structure**: top-aligned overlay banner over the current route, using the shared ink surface and `GlobalNoticeMetrics`.
+- **States**: running, completed, and failed; hiding a running notice does not cancel its background analysis.
+- **Interaction**: every state can be dismissed with an upward swipe or the named accessibility action. A completed report opens when tapped.
+- **Lifecycle**: starting analysis shows the running notice. Completion or failure always presents a new notice even if the running notice was dismissed.
+- **Motion**: an upward drag tracks the finger and dismissal exits toward the top with opacity; Reduce Motion uses opacity only.
+- **Accessibility**: each state retains a stable identifier and announces that an upward swipe dismisses the notice.
+
+### Fit report decision actions
+
+- **Structure**: the result closes with a primary `히스토리에 추가` action, a secondary `확인하기` action, and an explicit persistence guide.
+- **States**: before saving, the guide states that `확인하기` returns to FitLab without saving. After saving, the guide states that the report is available from FitLab and Home history.
+- **Interaction**: saving persists the full report snapshot; confirming never writes history and returns to the FitLab input.
+- **Accessibility**: both actions use stable identifiers and retain at least a 44 pt touch target.
+
+### Home fit history preview
+
+- **Structure**: the Home FitLab card renders at most the two most recently saved report snapshots.
+- **States**: an empty state replaces sample content when no report has been saved.
+- **Interaction**: selecting a preview opens that exact snapshot in the FitLab history detail screen.
+- **Data**: Home and FitLab read the same app-scoped history coordinator; previews are never hard-coded samples.
 
 ## 6. Motion & Interaction
 
@@ -74,6 +112,7 @@ Text scales through SwiftUI relative text styles. Feature titles use `.headline`
 - A root feature title bar returns to Home (`.main04`); a nested feature title bar returns to its feature root unless that screen defines a closer parent.
 - Motion must communicate state change and respect Reduce Motion. Do not add decorative animation to title bars.
 - Interactive controls retain at least a 44 pt effective touch target.
+- Adjacent content actions use matching heights and alignment; an `HStack` gives each sibling the same flexible width.
 
 ## 7. Depth & Surface
 
@@ -82,7 +121,7 @@ Strategy: mixed, following the existing iOS visual language.
 - The app shell uses layered navy-to-surface gradients.
 - Panels use the shared panel token with restrained radii.
 - Feature title bars use a flat panel surface without a feature-specific shadow so all feature families align.
-- Elevated calls to action may use the existing navy gradient and restrained shadow.
+- Primary calls to action use the solid ink token without a decorative shadow. Gradients remain available for chrome, imagery, and non-primary feature surfaces.
 
 ## 8. Accessibility Constraints & Accepted Debt
 

@@ -106,23 +106,12 @@ struct CoorditClosetPrimaryButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(CoorditTypography.climate2010(size: metrics.value(17)))
+                .font(CoorditTypography.gmarketBold(size: metrics.value(17), relativeTo: .headline))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: metrics.value(height))
-                .background(
-                    LinearGradient(
-                        colors: [
-                            CoorditClosetColors.navy,
-                            Color(red: 47 / 255, green: 66 / 255, blue: 142 / 255),
-                            CoorditClosetColors.navy,
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+                .background(CoorditClosetColors.navy)
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
-                .shadow(color: CoorditClosetColors.navy.opacity(0.35), radius: metrics.value(6), y: metrics.value(2))
         }
         .buttonStyle(.plain)
     }

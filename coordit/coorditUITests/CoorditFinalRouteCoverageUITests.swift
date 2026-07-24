@@ -103,7 +103,7 @@ final class CoorditFinalRouteCoverageUITests: XCTestCase {
         assertScreen("main04", in: app)
     }
 
-    func testFitLabAndClosetTitleBarsShareGeometryAcrossRoutes() throws {
+    func testFeatureTitleBarsShareGeometryAndMyPageBackReturnsHome() throws {
         let fitLabApp = launchApp(at: "fitlab-input")
         let fitLabTitleBar = fitLabApp.buttons["FIT LAB 뒤로가기"]
         XCTAssertTrue(fitLabTitleBar.waitForExistence(timeout: 5))
@@ -128,6 +128,18 @@ final class CoorditFinalRouteCoverageUITests: XCTestCase {
             XCTAssertEqual(fitLabFrame.height, closetFrame.height, accuracy: 0.5)
             closetApp.terminate()
         }
+
+        let myPageApp = launchApp(at: "mypage")
+        let myPageTitleBar = myPageApp.buttons["coordit-settings-back"]
+        XCTAssertTrue(myPageTitleBar.waitForExistence(timeout: 5))
+        let myPageFrame = myPageTitleBar.frame
+
+        XCTAssertEqual(fitLabFrame.minX, myPageFrame.minX, accuracy: 0.5)
+        XCTAssertEqual(fitLabFrame.width, myPageFrame.width, accuracy: 0.5)
+        XCTAssertEqual(fitLabFrame.height, myPageFrame.height, accuracy: 0.5)
+
+        myPageTitleBar.tap()
+        assertScreen("main04", in: myPageApp)
     }
 
     private func launchApp(at route: String) -> XCUIApplication {

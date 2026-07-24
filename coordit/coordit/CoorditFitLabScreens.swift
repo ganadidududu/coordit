@@ -120,7 +120,9 @@ struct CoorditFitLabFamilyView: View {
             coordinator.synchronize(route: route)
         }
         .task(id: effectiveHistoryUserID) {
-            await coordinator.prepareHistory(userID: effectiveHistoryUserID)
+            if coordinator.activeHistoryUserID != effectiveHistoryUserID {
+                await coordinator.prepareHistory(userID: effectiveHistoryUserID)
+            }
         }
     }
 
@@ -256,8 +258,14 @@ struct CoorditFitLabFamilyView: View {
                     description: Text("저장된 분석이 아직 없어요. 핏 랩에서 분석을 만든 뒤 저장해 주세요.")
                 )
                 Button("핏 랩으로 돌아가기") { onRouteChange(.fitLabInput) }
-                    .buttonStyle(.borderedProminent)
-                    .tint(CoorditFitLabPalette.ink)
+                    .buttonStyle(
+                        CoorditContentActionButtonStyle(
+                            prominence: .primary,
+                            height: metrics.value(48),
+                            cornerRadius: metrics.value(7),
+                            fontSize: metrics.value(13)
+                        )
+                    )
                     .accessibilityIdentifier("fitlab-history-empty-recovery")
             }
         }
@@ -410,7 +418,14 @@ struct CoorditFitLabFamilyView: View {
                 Button("핏 분석 시작") {
                     coordinator.startSubmission()
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(
+                    CoorditContentActionButtonStyle(
+                        prominence: .primary,
+                        height: metrics.value(48),
+                        cornerRadius: metrics.value(7),
+                        fontSize: metrics.value(13)
+                    )
+                )
                 fixtureRequestLedgerCount
             case .loading:
                 ProgressView()
@@ -602,8 +617,14 @@ private struct CoorditFitLabResultScreen: View {
                             isRetryingReport = false
                         }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(CoorditFitLabPalette.ink)
+                    .buttonStyle(
+                        CoorditContentActionButtonStyle(
+                            prominence: .primary,
+                            height: metrics.value(48),
+                            cornerRadius: metrics.value(7),
+                            fontSize: metrics.value(13)
+                        )
+                    )
                     .disabled(isRetryingReport)
                     .accessibilityIdentifier("fitlab-retry-report")
                 }
@@ -627,6 +648,30 @@ private struct CoorditFitLabResultScreen: View {
                         .foregroundStyle(Color.black.opacity(0.7))
                         .accessibilityIdentifier("fitlab-history-saved-confirmation")
                 }
+
+                Button("확인하기") {
+                    onRouteChange(.fitLabInput)
+                }
+                .buttonStyle(
+                    CoorditContentActionButtonStyle(
+                        prominence: .secondary,
+                        height: metrics.value(48),
+                        cornerRadius: metrics.value(7),
+                        fontSize: metrics.value(14)
+                    )
+                )
+                .accessibilityIdentifier("fitlab-confirm-report")
+
+                Text(
+                    didSave || isSaved
+                        ? "저장한 리포트는 핏랩과 홈의 최근 히스토리에서 다시 확인할 수 있어요."
+                        : "확인하기를 누르면 이 리포트는 저장되지 않고 핏랩으로 돌아가요."
+                )
+                .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
+                .foregroundStyle(Color.black.opacity(0.62))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("fitlab-confirm-report-guide")
 
                 #if DEBUG
                 if let recommendation {

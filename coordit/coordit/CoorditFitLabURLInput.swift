@@ -250,9 +250,15 @@ struct CoorditFitLabURLInputView: View {
                 rows.append(EditableRow())
             } label: {
                 Label("사이즈 행 추가", systemImage: "plus.circle.fill")
-                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(
+                CoorditContentActionButtonStyle(
+                    prominence: .secondary,
+                    height: metrics.value(48),
+                    cornerRadius: metrics.value(7),
+                    fontSize: metrics.value(13)
+                )
+            )
             .accessibilityIdentifier("fitlab-url-add-size-row")
 
             if let validationMessage {
@@ -317,7 +323,14 @@ struct CoorditFitLabURLInputView: View {
                 .foregroundStyle(Color.black.opacity(0.65))
                 .fixedSize(horizontal: false, vertical: true)
             Button("가져온 값 다시 편집") { stage = .review }
-                .buttonStyle(.bordered)
+                .buttonStyle(
+                    CoorditContentActionButtonStyle(
+                        prominence: .secondary,
+                        height: metrics.value(48),
+                        cornerRadius: metrics.value(7),
+                        fontSize: metrics.value(13)
+                    )
+                )
             CoorditFitLabPrimaryButton(title: "기준 옷 선택으로", metrics: metrics) {
                 draft.isSourceConfirmed = true
             }

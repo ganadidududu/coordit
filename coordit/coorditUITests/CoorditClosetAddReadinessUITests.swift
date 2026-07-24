@@ -92,6 +92,26 @@ final class CoorditClosetAddReadinessUITests: XCTestCase {
         XCTAssertEqual(pantsArtwork.label, "하의 사진 없음")
     }
 
+    func testClosetBestFitMetricsUseEngineProfilesForUpperAndLowerReferences() throws {
+        let app = launchApp(
+            at: "closet-overview",
+            additionalArguments: ["--coordit-test-reference-fit-profiles"]
+        )
+        assertScreen("closet-overview", in: app)
+
+        XCTAssertEqual(element("closet-best-fit-shoulder_width", in: app).label, "어깨, 46.25 cm")
+        XCTAssertEqual(element("closet-best-fit-chest_width", in: app).label, "가슴단면, 54 cm")
+        XCTAssertEqual(element("closet-best-fit-total_length", in: app).label, "총장, 70.5 cm")
+        XCTAssertEqual(element("closet-best-fit-sleeve_length", in: app).label, "소매, 62 cm")
+
+        app.buttons["closet-category-bottom"].tap()
+
+        XCTAssertEqual(element("closet-best-fit-waist_width", in: app).label, "허리단면, 39 cm")
+        XCTAssertEqual(element("closet-best-fit-hip_width", in: app).label, "엉덩이단면, 51.25 cm")
+        XCTAssertEqual(element("closet-best-fit-rise", in: app).label, "밑위, 29.5 cm")
+        XCTAssertEqual(element("closet-best-fit-outseam", in: app).label, "총장, 102 cm")
+    }
+
     func testManualInputRequiresNameAndAllFourMeasurementsWithoutPhoto() throws {
         let app = launchApp(at: "closet-add-manual")
         assertScreen("closet-add-manual", in: app)

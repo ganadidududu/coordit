@@ -285,12 +285,23 @@ private struct CoorditClosetLinkInputScreen: View {
                     CoorditClosetFormCard(title: "링크에서 표를 찾지 못했어요", subtitle: extractionError, metrics: metrics) {
                         HStack(spacing: metrics.value(8)) {
                             Button("사진 OCR로 입력", action: onSwitchToPhoto)
-                                .font(CoorditTypography.gmarketMedium(size: metrics.value(10)))
-                                .buttonStyle(.borderedProminent)
-                                .tint(CoorditClosetColors.navy)
+                                .buttonStyle(
+                                    CoorditContentActionButtonStyle(
+                                        prominence: .primary,
+                                        height: metrics.value(48),
+                                        cornerRadius: metrics.value(7),
+                                        fontSize: metrics.value(12)
+                                    )
+                                )
                             Button("직접 입력", action: onSwitchToManual)
-                                .font(CoorditTypography.gmarketMedium(size: metrics.value(10)))
-                                .buttonStyle(.bordered)
+                                .buttonStyle(
+                                    CoorditContentActionButtonStyle(
+                                        prominence: .secondary,
+                                        height: metrics.value(48),
+                                        cornerRadius: metrics.value(7),
+                                        fontSize: metrics.value(12)
+                                    )
+                                )
                         }
                     }
                     .accessibilityIdentifier("closet-link-extraction-error")
@@ -413,10 +424,15 @@ private struct CoorditClosetPhotoInputScreen: View {
                         )
                         Button(action: requestCamera) {
                             Label("카메라로 촬영", systemImage: "camera")
-                                .font(CoorditTypography.gmarketBold(size: metrics.value(11)))
-                                .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.bordered)
+                        .buttonStyle(
+                            CoorditContentActionButtonStyle(
+                                prominence: .secondary,
+                                height: metrics.value(48),
+                                cornerRadius: metrics.value(7),
+                                fontSize: metrics.value(12)
+                            )
+                        )
                         .accessibilityIdentifier("closet-size-chart-camera")
                     }
                 }
@@ -434,8 +450,14 @@ private struct CoorditClosetPhotoInputScreen: View {
                                 .font(CoorditTypography.gmarketMedium(size: metrics.value(10)))
                                 .foregroundStyle(CoorditClosetColors.navy.opacity(0.58))
                             Button("직접 입력으로 전환", action: onSwitchToManual)
-                                .font(CoorditTypography.gmarketMedium(size: metrics.value(10)))
-                                .buttonStyle(.bordered)
+                                .buttonStyle(
+                                    CoorditContentActionButtonStyle(
+                                        prominence: .secondary,
+                                        height: metrics.value(48),
+                                        cornerRadius: metrics.value(7),
+                                        fontSize: metrics.value(12)
+                                    )
+                                )
                         }
                     }
                 }
@@ -452,9 +474,14 @@ private struct CoorditClosetPhotoInputScreen: View {
                             }
                         }
                         Button("OCR 값이 다르면 직접 입력", action: onSwitchToManual)
-                            .font(CoorditTypography.gmarketMedium(size: metrics.value(10)))
-                            .buttonStyle(.bordered)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .buttonStyle(
+                                CoorditContentActionButtonStyle(
+                                    prominence: .secondary,
+                                    height: metrics.value(48),
+                                    cornerRadius: metrics.value(7),
+                                    fontSize: metrics.value(12)
+                                )
+                            )
                     }
                 }
 

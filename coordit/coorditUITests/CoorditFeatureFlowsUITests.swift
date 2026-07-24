@@ -84,6 +84,32 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertEqual(element("fitlab-history-detail-analysis", in: app).label, "analysis-fixture-lower")
     }
 
+    func testFitLabReferenceRowsDoNotShowPreferenceCopy() throws {
+        let app = launchApp(at: "fitlab-input", fixture: "submission-success")
+        let reference = element("fitlab-reference-reference-fixture-hoodie", in: app)
+
+        XCTAssertTrue(reference.waitForExistence(timeout: 5))
+        XCTAssertFalse(reference.label.contains("선호도"))
+        XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "선호도")).firstMatch.exists)
+    }
+
+    func testFitAnalysisNoticesSwipeAwayAndCompletionReturns() throws {
+        let app = launchApp(
+            at: "main04",
+            extraArguments: ["--coordit-test-analysis-running-then-completed"]
+        )
+        let runningNotice = element("global-fit-analysis-running", in: app)
+
+        XCTAssertTrue(runningNotice.waitForExistence(timeout: 5))
+        runningNotice.swipeUp()
+        waitForDisappearance(runningNotice)
+
+        let completedNotice = element("global-fit-analysis-completed", in: app)
+        XCTAssertTrue(completedNotice.waitForExistence(timeout: 8))
+        completedNotice.swipeUp()
+        waitForDisappearance(completedNotice)
+    }
+
     func testFitLabInputMethodsUseTheSharedTitleBackButton() throws {
         let app = launchApp(at: "fitlab-input")
         assertScreen("fitlab-input", in: app)
@@ -113,15 +139,71 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         }
     }
 
-    func testHomeFitLabHistoryCardOpensDetail() throws {
-        let app = launchApp(at: "main04")
+    func testFitLabConfirmExplainsThatReportWillNotBeSaved() throws {
+        let historyNamespace = "feature-confirm-\(UUID().uuidString)"
+        var app = launchApp(
+            at: "fitlab-result-top",
+            fixture: "history-persistence",
+            extraArguments: [
+                "--coordit-fitlab-history-namespace", historyNamespace,
+                "--coordit-fitlab-history-reset",
+            ]
+        )
+
+        let guide = element("fitlab-confirm-report-guide", in: app)
+        XCTAssertTrue(guide.waitForExistence(timeout: 5))
+        XCTAssertTrue(guide.label.contains("저장되지 않고"))
+        element("fitlab-confirm-report", in: app).tap()
+        assertScreen("fitlab-input", in: app)
+        XCTAssertTrue(element("fitlab-history-empty", in: app).waitForExistence(timeout: 5))
+        app.terminate()
+
+        app = launchApp(
+            at: "main04",
+            fixture: "history-persistence",
+            extraArguments: ["--coordit-fitlab-history-namespace", historyNamespace]
+        )
+        XCTAssertTrue(app.staticTexts["저장한 핏 리포트가 아직 없어요"].waitForExistence(timeout: 5))
+    }
+
+    func testHomeShowsTwoSavedFitReportsAndOpensExactDetail() throws {
+        let historyNamespace = "feature-home-history-\(UUID().uuidString)"
+        let historyArguments = ["--coordit-fitlab-history-namespace", historyNamespace]
+
+        var app = launchApp(
+            at: "fitlab-result-top",
+            fixture: "history-persistence",
+            extraArguments: historyArguments + ["--coordit-fitlab-history-reset"]
+        )
+        element("fitlab-add-history", in: app).tap()
+        XCTAssertTrue(element("fitlab-history-saved-confirmation", in: app).waitForExistence(timeout: 5))
+        app.terminate()
+
+        app = launchApp(
+            at: "fitlab-result-bottom",
+            fixture: "history-persistence",
+            extraArguments: historyArguments
+        )
+        element("fitlab-add-history", in: app).tap()
+        XCTAssertTrue(element("fitlab-history-saved-confirmation", in: app).waitForExistence(timeout: 5))
+        app.terminate()
+
+        app = launchApp(
+            at: "main04",
+            fixture: "history-persistence",
+            extraArguments: historyArguments
+        )
         assertScreen("main04", in: app)
 
-        let historyCard = element("coordit-main04-history-card-linen-shirt", in: app)
-        XCTAssertTrue(historyCard.waitForExistence(timeout: 5))
-        historyCard.tap()
+        let latestCard = element("coordit-main04-history-card-analysis-fixture-lower", in: app)
+        let previousCard = element("coordit-main04-history-card-analysis-fixture-upper", in: app)
+        XCTAssertTrue(latestCard.waitForExistence(timeout: 5))
+        XCTAssertTrue(previousCard.waitForExistence(timeout: 5))
+        XCTAssertLessThan(latestCard.frame.minX, previousCard.frame.minX)
 
+        latestCard.tap()
         assertScreen("fitlab-history-detail", in: app)
+        XCTAssertEqual(element("fitlab-history-detail-analysis", in: app).label, "analysis-fixture-lower")
     }
 
     func testHomeReferenceSelectorChoosesExistingClosetItem() throws {
@@ -202,6 +284,25 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         reassessmentCapture.name = "closet-reassessment-complete"
         reassessmentCapture.lifetime = .keepAlways
         add(reassessmentCapture)
+    }
+
+    func testClosetDetailAutomaticallyLoadsEngineScoreForUpperAndLower() throws {
+        for (route, expectedScore) in [
+            ("closet-detail-top", "총점 | 89"),
+            ("closet-detail-bottom", "총점 | 92"),
+        ] {
+            let app = launchApp(at: route)
+            assertScreen(route, in: app)
+
+            let totalScore = element("closet-detail-total-score", in: app)
+            XCTAssertTrue(totalScore.waitForExistence(timeout: 5))
+            let loaded = XCTNSPredicateExpectation(
+                predicate: NSPredicate(format: "label == %@", expectedScore),
+                object: totalScore
+            )
+            XCTAssertEqual(XCTWaiter.wait(for: [loaded], timeout: 5), .completed)
+            app.terminate()
+        }
     }
 
     func testClosetAddInputsMatchRelocatedPhotoRequirements() throws {
@@ -297,6 +398,24 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
 
     private func element(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+    }
+
+    private func waitForDisappearance(
+        _ element: XCUIElement,
+        timeout: TimeInterval = 3,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let expectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "exists == false"),
+            object: element
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [expectation], timeout: timeout),
+            .completed,
+            file: file,
+            line: line
+        )
     }
 
     private func whiteLogoCenter(in image: UIImage) throws -> CGFloat {
