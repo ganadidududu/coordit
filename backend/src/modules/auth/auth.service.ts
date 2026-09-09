@@ -60,8 +60,16 @@ export const loginWithEmail = async (
 
 export const loginWithGoogleIdToken = async (
   idToken: string,
-  guest: GuestUpgradeSession | null = null
-): Promise<AuthResponse> => loginWithSocialIdToken({ provider: "google", idToken }, guest);
+  nonce: string
+): Promise<AuthResponse> => {
+  const { data, error } = await supabaseAuth.auth.signInWithIdToken({
+    provider: "google",
+    token: idToken,
+    nonce
+  });
+  if (error || !data.user) throw createHttpError(401, error?.message ?? "Google login failed");
+  return toAuthResponse(data.user, data.session);
+};
 
 export const loginWithAppleIdToken = async (
   idToken: string,
@@ -100,65 +108,12 @@ const signInMember = async (credential: SocialIdToken): Promise<AuthResponse> =>
   return toAuthResponse(data.user, data.session);
 };
 
-const linkGuestIdentity = async (
-  credential: SocialIdToken,
-  guest: GuestUpgradeSession
-): Promise<GuestIdentityLinkResult> => {
-  const guestAuth = createSupabaseAuthClient();
-  const { data: guestData, error: guestError } = await guestAuth.auth.setSession({
-    access_token: guest.accessToken,
-    refresh_token: guest.refreshToken,
+export const refreshAuthSession = async (refreshToken: string): Promise<AuthResponse> => {
+  const { data, error } = await supabaseAuth.auth.refreshSession({
+    refresh_token: refreshToken
   });
-  if (
-    guestError
-    || !guestData.user
-    || guestData.user.id !== guest.userId
-    || guestData.user.is_anonymous !== true
-  ) {
-    throw createHttpError(401, guestError?.message ?? "Guest session is invalid");
-  }
-
-  const { data, error } = credential.provider === "google"
-    ? await guestAuth.auth.linkIdentity({ provider: "google", token: credential.idToken })
-    : await guestAuth.auth.linkIdentity({
-        provider: "apple",
-        token: credential.idToken,
-        nonce: credential.nonce,
-      });
-  if (error?.code === "identity_already_exists") return { kind: "identity_exists" };
   if (error || !data.user) {
-    throw createHttpError(401, error?.message ?? "Social identity could not be linked");
+    throw createHttpError(401, error?.message ?? "Session refresh failed");
   }
-  return { kind: "linked", session: await toAuthResponse(data.user, data.session) };
+  return toAuthResponse(data.user, data.session);
 };
-
-const loginWithSocialIdToken = async (
-  credential: SocialIdToken,
-  guest: GuestUpgradeSession | null
-): Promise<AuthResponse> => authenticateOrUpgradeGuest(guest, {
-  linkGuestIdentity: async (activeGuest) => linkGuestIdentity(credential, activeGuest),
-  signInMember: async () => signInMember(credential),
-  mergeGuestData: async (guestUserId, memberUserId) => {
-    const { error } = await supabase.rpc("merge_guest_account", {
-      p_guest_user_id: guestUserId,
-      p_member_user_id: memberUserId,
-    });
-    if (error) throw createHttpError(500, error.message);
-  },
-  deleteGuestAuthUser: async (guestUserId) => {
-    try {
-      const { error } = await supabaseAdmin.auth.admin.deleteUser(guestUserId);
-      if (error) {
-        console.warn("Guest auth cleanup failed after account merge", {
-          guestUserId,
-          reason: error.message,
-        });
-      }
-    } catch (error) {
-      console.warn("Guest auth cleanup failed after account merge", {
-        guestUserId,
-        reason: error instanceof Error ? error.message : "Unknown cleanup failure",
-      });
-    }
-  },
-});

@@ -73,6 +73,27 @@ enum CoorditBackendClientError: LocalizedError {
             message
         }
     }
+
+    var invalidatesSession: Bool {
+        guard case let .server(statusCode, _) = self else { return false }
+        return statusCode == 401 || statusCode == 403
+    }
+}
+
+struct CoorditMonetizationReadiness: Codable, Equatable {
+    let rewardedAdsEnabled: Bool
+    let iapEnabled: Bool
+}
+
+enum CoorditAppleIapSettlementStatus: String, Codable, Equatable {
+    case credited
+    case alreadyCredited = "already_credited"
+}
+
+struct CoorditAppleIapSettlement: Equatable {
+    let availableThreads: Int
+    let status: CoorditAppleIapSettlementStatus
+    let httpStatusCode: Int
 }
 
 struct CoorditBackendClient {
@@ -83,20 +104,12 @@ struct CoorditBackendClient {
         try await send(path: "/health", method: "GET", token: nil, body: Optional<String>.none)
     }
 
-    func login(email: String, password: String) async throws -> CoorditAuthSession {
-        try await send(path: "/auth/login", method: "POST", token: nil, body: AuthRequest(email: email, password: password))
-    }
-
-    func signup(email: String, password: String) async throws -> CoorditAuthSession {
-        try await send(path: "/auth/signup", method: "POST", token: nil, body: AuthRequest(email: email, password: password))
-    }
-
-    func createGuestSession() async throws -> CoorditAuthSession {
+    func loginWithGoogle(idToken: String, nonce: String) async throws -> CoorditAuthSession {
         try await send(
-            path: "/auth/guest",
+            path: "/auth/google",
             method: "POST",
             token: nil,
-            body: Optional<String>.none
+            body: GoogleAuthRequest(idToken: idToken, nonce: nonce)
         )
     }
 
@@ -150,8 +163,28 @@ struct CoorditBackendClient {
         )
     }
 
+    func refreshSession(refreshToken: String) async throws -> CoorditAuthSession {
+        try await send(
+            path: "/auth/refresh",
+            method: "POST",
+            token: nil,
+            body: RefreshAuthRequest(refreshToken: refreshToken)
+        )
+    }
+
     func me(token: String) async throws -> CoorditUserProfile {
         try await send(path: "/users/me", method: "GET", token: token, body: Optional<String>.none)
+    }
+
+    func onboardingStatus(token: String) async throws -> CoorditOnboardingStatus {
+        try await send(path: "/auth/onboarding/status", method: "GET", token: token, body: Optional<String>.none)
+    }
+
+    func completeOnboarding(
+        token: String,
+        request: CoorditOnboardingRequest
+    ) async throws -> CoorditOnboardingCompletion {
+        try await send(path: "/auth/onboarding", method: "POST", token: token, body: request)
     }
 
     func updateMe(token: String, displayName: String) async throws -> CoorditUserProfile {
@@ -172,6 +205,66 @@ struct CoorditBackendClient {
 
     func threadBalance(token: String) async throws -> CoorditThreadBalanceResponse {
         try await send(path: "/thread-wallet/balance", method: "GET", token: token, body: Optional<String>.none)
+    }
+
+    func monetizationReadiness(token: String) async throws -> CoorditMonetizationReadiness {
+        try await send(
+            path: "/thread-wallet/monetization-readiness",
+            method: "GET",
+            token: token,
+            body: Optional<String>.none
+        )
+    }
+
+    func verifyAppleIapPurchase(
+        token: String,
+        signedTransaction: String
+    ) async throws -> CoorditAppleIapSettlement {
+        let trimmedTransaction = signedTransaction.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedTransaction.isEmpty else {
+            throw CoorditBackendClientError.server(
+                statusCode: 400,
+                message: "구매 정보를 확인할 수 없어요."
+            )
+        }
+
+        var request = URLRequest(url: baseURL.appending(path: "/thread-wallet/iap/verify"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONEncoder().encode(
+            CoorditAppleIapVerificationRequest(signedTransaction: trimmedTransaction)
+        )
+
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw CoorditBackendClientError.invalidResponse
+        }
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            let apiError = try? JSONDecoder().decode(CoorditBackendErrorResponse.self, from: data)
+            throw CoorditBackendClientError.server(
+                statusCode: httpResponse.statusCode,
+                message: apiError?.message ?? "백엔드 요청에 실패했어요."
+            )
+        }
+
+        let payload = try JSONDecoder().decode(CoorditAppleIapVerificationResponse.self, from: data)
+        let isExpectedSettlement =
+            (httpResponse.statusCode == 201 && payload.status == .credited)
+            || (httpResponse.statusCode == 200 && payload.status == .alreadyCredited)
+        guard isExpectedSettlement else {
+            throw CoorditBackendClientError.invalidResponse
+        }
+        return CoorditAppleIapSettlement(
+            availableThreads: payload.availableThreads,
+            status: payload.status,
+            httpStatusCode: httpResponse.statusCode
+        )
+    }
+
+    func createThreadRewardAttempt(token: String) async throws -> CoorditThreadRewardAttempt {
+        try await send(path: "/thread-wallet/reward-attempts", method: "POST", token: token, body: Optional<String>.none)
     }
 
     func createClothingItem(token: String, request: CreateClothingItemRequest) async throws -> CoorditClothingItemResponse {
@@ -240,16 +333,24 @@ struct CoorditBackendClient {
         try await send(path: "/reference-clothing/\(id)/deactivate", method: "PATCH", token: token, body: Optional<String>.none)
     }
 
-    func reassessClothingItem(token: String, id: String) async throws -> CoorditClothingFitAssessmentResponse {
-        try await send(path: "/clothing-items/\(id)/fit-reassessment", method: "POST", token: token, body: Optional<String>.none)
-    }
-
     func referenceFitProfile(
         token: String,
         garmentKind: String
     ) async throws -> CoorditReferenceFitProfileResponse {
         try await send(
             path: "/fit/reference-profile/\(garmentKind)",
+            method: "GET",
+            token: token,
+            body: Optional<String>.none
+        )
+    }
+
+    func closetFitComparison(
+        token: String,
+        clothingItemId: String
+    ) async throws -> CoorditClosetFitComparisonResponse {
+        try await send(
+            path: "/fit/closet-items/\(clothingItemId)/comparison",
             method: "GET",
             token: token,
             body: Optional<String>.none
@@ -332,18 +433,9 @@ struct CoorditBackendClient {
     }
 }
 
-private struct AuthRequest: Encodable {
-    let email: String
-    let password: String
-}
-
-private struct RefreshSessionRequest: Encodable {
-    let refreshToken: String
-}
-
 private struct GoogleAuthRequest: Encodable {
     let idToken: String
-    let guestRefreshToken: String?
+    let nonce: String
 }
 
 private struct AppleAuthRequest: Encodable {
@@ -356,20 +448,36 @@ private struct GuestWelcomeRequest: Encodable {
     let deviceToken: String
 }
 
+private struct RefreshAuthRequest: Encodable {
+    let refreshToken: String
+}
+
 private struct UpdateProfileRequest: Encodable {
     let displayName: String
 }
 
+private struct CoorditAppleIapVerificationRequest: Encodable {
+    let signedTransaction: String
+}
+
+private struct CoorditAppleIapVerificationResponse: Decodable {
+    let availableThreads: Int
+    let status: CoorditAppleIapSettlementStatus
+}
+
+struct CoorditThreadRewardAttempt: Decodable {
+    let attemptId: String
+    let expiresAt: String
+    let status: String
+}
+
 struct BodyMeasurementRequest: Encodable {
-    let shoulderWidth: Double?
-    let chestCircumference: Double?
-    let waistCircumference: Double?
-    let hipCircumference: Double?
+    let heightCm: Double?
+    let weightKg: Double?
     let rawData: RawData
 
     struct RawData: Encodable {
         let source: String
-        let inseamCm: Double?
     }
 }
 

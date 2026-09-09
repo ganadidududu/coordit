@@ -5,16 +5,14 @@ import {
   loginWithAppleIdToken,
   loginWithEmail,
   loginWithGoogleIdToken,
+  refreshAuthSession,
   signupWithEmail,
   type AuthResponse
 } from "./auth.service";
 import type { GuestUpgradeSession } from "./social-auth-upgrade.service";
 
 type GoogleLoginControllerDependencies = {
-  readonly loginWithGoogleIdToken: (
-    idToken: string,
-    guest: GuestUpgradeSession | null
-  ) => Promise<AuthResponse>;
+  readonly loginWithGoogleIdToken: (idToken: string, nonce: string) => Promise<AuthResponse>;
 };
 
 type AppleLoginControllerDependencies = {
@@ -45,7 +43,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
     const email = asRequiredString(req.body.email, "email");
     const password = asRequiredString(req.body.password, "password");
     res.status(201).json(await signupWithEmail(email, password));
-  } catch (error) {
+  } catch (error) { // no-excuse-ok: catch -- Express forwards boundary errors centrally.
     next(error);
   }
 };
@@ -55,7 +53,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const email = asRequiredString(req.body.email, "email");
     const password = asRequiredString(req.body.password, "password");
     res.json(await loginWithEmail(email, password));
-  } catch (error) {
+  } catch (error) { // no-excuse-ok: catch -- Express forwards boundary errors centrally.
     next(error);
   }
 };
@@ -65,8 +63,9 @@ export const createGoogleLoginController = (
 ) => async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const idToken = asRequiredString(req.body.idToken, "idToken");
-    res.json(await dependencies.loginWithGoogleIdToken(idToken, await guestUpgradeSession(req)));
-  } catch (error) {
+    const nonce = asRequiredString(req.body.nonce, "nonce");
+    res.json(await dependencies.loginWithGoogleIdToken(idToken, nonce));
+  } catch (error) { // no-excuse-ok: catch -- Express forwards boundary errors centrally.
     next(error);
   }
 };
@@ -79,14 +78,19 @@ export const createAppleLoginController = (
   try {
     const idToken = asRequiredString(req.body.idToken, "idToken");
     const nonce = asRequiredString(req.body.nonce, "nonce");
-    res.json(await dependencies.loginWithAppleIdToken(
-      idToken,
-      nonce,
-      await guestUpgradeSession(req)
-    ));
-  } catch (error) {
+    res.json(await dependencies.loginWithAppleIdToken(idToken, nonce));
+  } catch (error) { // no-excuse-ok: catch -- Express forwards boundary errors centrally.
     next(error);
   }
 };
 
 export const loginWithApple = createAppleLoginController({ loginWithAppleIdToken });
+
+export const refreshSession = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const refreshToken = asRequiredString(req.body.refreshToken, "refreshToken");
+    res.json(await refreshAuthSession(refreshToken));
+  } catch (error) { // no-excuse-ok: catch -- Express forwards boundary errors centrally.
+    next(error);
+  }
+};

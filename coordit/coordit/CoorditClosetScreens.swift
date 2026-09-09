@@ -89,7 +89,26 @@ struct CoorditClosetItem: Identifiable {
     }
 
     static let seedItems = [
-        CoorditClosetItem(id: "oxford", name: "Oxford Shirt", category: .top, exactCategory: .shirt, score: 94, scoreColor: CoorditClosetColors.blue, route: .closetDetailTop, imageData: nil),
+        CoorditClosetItem(
+            id: "oxford",
+            name: "Oxford Shirt",
+            category: .top,
+            exactCategory: .shirt,
+            score: 94,
+            scoreColor: CoorditClosetColors.blue,
+            route: .closetDetailTop,
+            imageData: nil,
+            fitDiffs: CoorditMeasurementMap(
+                totalLength: 1.5,
+                shoulderWidth: -1,
+                chestWidth: 2,
+                sleeveLength: -0.5,
+                waistWidth: nil,
+                hipWidth: nil,
+                rise: nil,
+                outseam: nil
+            )
+        ),
         CoorditClosetItem(id: "knit", name: "Relaxed Knit", category: .top, exactCategory: .knit, score: 88, scoreColor: CoorditClosetColors.cyan, route: .closetDetailTop, imageData: nil),
         CoorditClosetItem(
             id: "denim",
@@ -100,6 +119,16 @@ struct CoorditClosetItem: Identifiable {
             scoreColor: CoorditClosetColors.blue,
             route: .closetDetailBottom,
             imageData: nil,
+            fitDiffs: CoorditMeasurementMap(
+                totalLength: nil,
+                shoulderWidth: nil,
+                chestWidth: nil,
+                sleeveLength: nil,
+                waistWidth: -3,
+                hipWidth: 1,
+                rise: -0.5,
+                outseam: 2
+            ),
             sizeChart: CoorditClosetSizeChart(
                 sizeLabel: "M",
                 measurements: CoorditMeasurementMap(
@@ -121,6 +150,7 @@ struct CoorditClosetItem: Identifiable {
 struct CoorditClosetFamilyView: View {
     let route: CoorditFrameRoute
     let onRouteChange: (CoorditFrameRoute) -> Void
+    let onSavedItem: (CoorditClosetItem) async -> CoorditFrameRoute?
 
     @Binding var items: [CoorditClosetItem]
     @Binding var selectedItemID: String?
@@ -135,13 +165,11 @@ struct CoorditClosetFamilyView: View {
     @State var detailVariant: CoorditClosetCategory
     @State var detailPhotoSelection: PhotosPickerItem?
     @State var detailPhotoGenerations: [String: Int]
-    @State var reassessingItemID: String?
-    @State var reassessmentMessage: String?
-    @State var engineScoredItemIDs: Set<String>
     @State var isRenamingDetailItem: Bool
     @State var pendingDetailName: String
     @State var showsDeleteConfirmation: Bool
     @State var isDeletingDetailItem: Bool
+    @State var detailFitComparison: CoorditClosetFitComparisonResponse?
 
     #if DEBUG
     @State var detailPhotoTestStates: [String: String]
@@ -156,6 +184,7 @@ struct CoorditClosetFamilyView: View {
         draft: Binding<CoorditClosetDraft>,
         selectedReferenceIDs: Binding<Set<String>>,
         addSaveState: Binding<CoorditClosetAddSaveState>,
+        onSavedItem: @escaping (CoorditClosetItem) async -> CoorditFrameRoute?,
         onRouteChange: @escaping (CoorditFrameRoute) -> Void
     ) {
         self.route = route
@@ -164,17 +193,16 @@ struct CoorditClosetFamilyView: View {
         _draft = draft
         _selectedReferenceIDs = selectedReferenceIDs
         _addSaveState = addSaveState
+        self.onSavedItem = onSavedItem
         self.onRouteChange = onRouteChange
         _detailVariant = State(initialValue: route == .closetDetailBottom ? .bottom : .top)
         _detailPhotoSelection = State(initialValue: nil)
         _detailPhotoGenerations = State(initialValue: [:])
-        _reassessingItemID = State(initialValue: nil)
-        _reassessmentMessage = State(initialValue: nil)
-        _engineScoredItemIDs = State(initialValue: [])
         _isRenamingDetailItem = State(initialValue: false)
         _pendingDetailName = State(initialValue: "")
         _showsDeleteConfirmation = State(initialValue: false)
         _isDeletingDetailItem = State(initialValue: false)
+        _detailFitComparison = State(initialValue: nil)
         #if DEBUG
         _detailPhotoTestStates = State(initialValue: [:])
         _detailPhotoTestRejections = State(initialValue: [:])

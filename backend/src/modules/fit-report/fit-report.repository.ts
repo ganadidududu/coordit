@@ -43,7 +43,7 @@ export const loadFitResult = async (
 export const loadPersistedFitReport = async (
   userId: string,
   fitAnalysisResultId: string
-): Promise<GenerateFitReportResult | null> => {
+): Promise<Omit<GenerateFitReportResult, "availableThreads"> | null> => {
   const fitResult = await loadFitResult(userId, fitAnalysisResultId);
   const stored = readStoredFitReport(fitResult.result_details);
   if (!stored) return null;

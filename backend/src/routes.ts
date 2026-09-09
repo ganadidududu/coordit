@@ -1,12 +1,8 @@
 import { Router } from "express";
-import { reassessClothingItemFit } from "./modules/clothing-items/fit-reassessment.controller";
-import { signup, login, loginWithApple, loginWithGoogle } from "./modules/auth/auth.controller";
-import { refreshSessionController } from "./modules/auth/auth-refresh.controller";
+import { env } from "./config/env";
+import { loginWithApple, loginWithGoogle, refreshSession } from "./modules/auth/auth.controller";
 import { completeOnboardingController } from "./modules/auth/auth-onboarding.controller";
-import {
-  guestSessionController,
-  guestWelcomeController,
-} from "./modules/auth/guest-auth.controller";
+import { getOnboardingStatus } from "./modules/auth/auth-onboarding-status.controller";
 import { createBodyMeasurement, listBodyMeasurements } from "./modules/body-measurements/body-measurements.controller";
 import {
   createClothingItem,
@@ -37,6 +33,7 @@ import {
 } from "./modules/external-product-sizes/external-product-sizes.controller";
 import { createFeedback, listFeedback } from "./modules/feedback/feedback.controller";
 import {
+  getClosetItemFitComparisonController,
   getClosetReferenceProfileController,
   getFitAnalysisResultController,
   recentFitAnalysisResultsController,
@@ -58,33 +55,55 @@ import {
   markRecommendationPurchased
 } from "./modules/recommendation-logs/recommendation-logs.controller";
 import { deleteMe, getMe, updateMe } from "./modules/users/users.controller";
-import { getThreadBalanceController } from "./modules/thread-wallet/thread-wallet.controller";
+import {
+  appleIapPurchaseController,
+  getMonetizationReadinessController,
+  getThreadBalanceController
+} from "./modules/thread-wallet/thread-wallet.controller";
+import { appleAppStoreNotificationController } from "./modules/thread-wallet/apple-app-store-notification.controller";
+import {
+  createRewardAttemptController,
+  getRewardAttemptController,
+  receiveRewardedSSVController
+} from "./modules/admob-reward/admob-reward.controller";
 import {
   generateStylingController,
   listSavedStylingController,
   saveStylingLookController,
 } from "./modules/styling/styling.controller";
 import { authMiddleware } from "./middleware/auth.middleware";
+import { onboardingMiddleware } from "./middleware/onboarding.middleware";
 import { previewProductImportController } from "./modules/product-import/product-import.controller";
 
 export const routes = Router();
 
-routes.post("/auth/signup", signup);
-routes.post("/auth/login", login);
 routes.post("/auth/google", loginWithGoogle);
 routes.post("/auth/apple", loginWithApple);
-routes.post("/auth/guest", guestSessionController);
-routes.post("/auth/refresh", refreshSessionController);
+routes.post("/auth/refresh", refreshSession);
+
+// AdMob signs these callbacks itself, so this must stay before authMiddleware.
+routes.get("/webhooks/admob/rewarded", receiveRewardedSSVController);
+// Apple signs the V2 envelope and nested transaction, so this must stay before authMiddleware.
+routes.post("/webhooks/apple/app-store-notifications", appleAppStoreNotificationController);
 
 routes.use(authMiddleware);
 
 routes.post("/auth/onboarding", completeOnboardingController);
-routes.post("/auth/guest/welcome", guestWelcomeController);
+routes.get("/auth/onboarding/status", getOnboardingStatus);
 
 routes.get("/users/me", getMe);
 routes.patch("/users/me", updateMe);
 routes.delete("/users/me", deleteMe);
+
+routes.use(onboardingMiddleware);
+
 routes.get("/thread-wallet/balance", getThreadBalanceController);
+routes.get("/thread-wallet/monetization-readiness", getMonetizationReadinessController);
+routes.post("/thread-wallet/reward-attempts", createRewardAttemptController);
+routes.get("/thread-wallet/reward-attempts/:id", getRewardAttemptController);
+if (env.appleIapEnabled) {
+  routes.post("/thread-wallet/iap/verify", appleIapPurchaseController);
+}
 routes.post("/body-measurements", createBodyMeasurement);
 routes.get("/body-measurements", listBodyMeasurements);
 
@@ -98,8 +117,6 @@ routes.post("/clothing-items/:id/sizes", createClothingSize);
 routes.get("/clothing-items/:id/sizes", listClothingSizes);
 routes.patch("/clothing-sizes/:id", updateClothingSize);
 routes.delete("/clothing-sizes/:id", deleteClothingSize);
-routes.post("/clothing-items/:id/fit-reassessment", reassessClothingItemFit);
-
 routes.post("/reference-clothing", createReferenceClothing);
 routes.get("/reference-clothing", listReferenceClothing);
 routes.get("/reference-clothing/by-category/:category", getReferenceClothingByCategory);
@@ -120,6 +137,7 @@ routes.delete("/external-product-sizes/:id", deleteExternalProductSize);
 
 routes.post("/fit/recommend", recommendFitController);
 routes.post("/fit/recommend/batch", recommendFitBatchController);
+routes.get("/fit/closet-items/:id/comparison", getClosetItemFitComparisonController);
 routes.get("/fit/reference-profile/:garmentKind", getClosetReferenceProfileController);
 routes.get("/fit-analysis-results/recent", recentFitAnalysisResultsController);
 routes.get("/fit-analysis-results", recentFitAnalysisResultsController);

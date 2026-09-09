@@ -13,6 +13,7 @@ struct CoorditFitLabFamilyView: View {
     @Binding var threadBalance: Int
     @Binding var sharedImportURL: URL?
     let onInsufficientThread: () -> Void
+    let onOpenThreadRecharge: () -> Void
     @State private var inputDestination: CoorditFitLabInputDestination = .sources
     @State private var inputNavigationDirection: CoorditNavigationDirection = .forward
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -128,6 +129,7 @@ struct CoorditFitLabFamilyView: View {
             && !fixture.hasPrefix("submission-")
             && fixture != "upper-result"
             && fixture != "lower-result"
+            && fixture != "size-score-numeric-labels"
             && fixture != "long-report"
             && fixture != "saved-history"
             && !fixture.hasPrefix("history-")
@@ -235,6 +237,8 @@ struct CoorditFitLabFamilyView: View {
                 sharedImportURL: sharedImportURL,
                 savedHistory: coordinator.savedHistory,
                 historyRecoveryNotice: coordinator.historyRecoveryNotice,
+                threadBalance: threadBalance,
+                onThreadRecharge: onOpenThreadRecharge,
                 onOpenHistory: { snapshot in
                     coordinator.selectHistory(snapshot)
                     onRouteChange(.fitLabHistoryDetail)
@@ -386,7 +390,8 @@ struct CoorditFitLabFamilyView: View {
                 Button("테스트 추천 응답 재개") { coordinator.fixtureAPI?.releaseRecommendation() }
                     .accessibilityIdentifier("fitlab-test-release-recommendation")
             }
-        } else if coordinator.fixtureName == "submission-report-race" {
+        } else if coordinator.fixtureName == "submission-report-race"
+                    || coordinator.fixtureName == "submission-report-insufficient-thread" {
             HStack {
                 Button("테스트 제출 폐기") { coordinator.discardAndRestart() }
                     .accessibilityIdentifier("fitlab-test-force-discard")
@@ -666,7 +671,8 @@ struct CoorditFitLabScreens: View {
             coordinator: coordinator,
             threadBalance: $threadBalance,
             sharedImportURL: .constant(nil),
-            onInsufficientThread: { onRouteChange(.myPageThreadCharge) }
+            onInsufficientThread: { onRouteChange(.myPageThreadCharge) },
+            onOpenThreadRecharge: { onRouteChange(.myPageThreadCharge) }
         )
     }
 }
@@ -688,6 +694,14 @@ private struct CoorditFitLabLoadingScreen: View {
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
                 .foregroundStyle(CoorditFitLabPalette.muted)
                 .multilineTextAlignment(.center)
+
+            if coordinator.submissionStep == .generatingReport {
+                Text("상세 리포트 1개 생성에 실타래 1개가 사용돼요.")
+                    .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
+                    .foregroundStyle(CoorditFitLabPalette.muted)
+                    .multilineTextAlignment(.center)
+                    .accessibilityIdentifier("fitlab-report-thread-cost-notice")
+            }
 
             if let error = coordinator.error {
                 VStack(spacing: metrics.value(10)) {

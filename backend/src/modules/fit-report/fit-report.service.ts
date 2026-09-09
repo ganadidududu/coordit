@@ -1,7 +1,13 @@
 import { z } from "zod";
 import { env } from "../../config/env";
+import { consumeFitReportThread, getThreadBalance } from "../thread-wallet/thread-wallet.service";
 import { buildFitReportInput } from "./fit-report.builder";
 import { buildFallbackFitReport } from "./fit-report.fallback";
+import {
+  classifyFitReportFallback,
+  FitReportFallbackError,
+  logFitReportFallback
+} from "./fit-report.fallback-observability";
 import { buildFitReportPrompt, FIT_REPORT_PROMPT_VERSION } from "./fit-report.prompt";
 import { loadFitResult, loadPersistedFitReport, persistFitReport } from "./fit-report.repository";
 import {
@@ -82,15 +88,11 @@ const fitReportResponseFormat = {
   }
 } as const;
 
-class OpenRouterResponseError extends Error {
-  readonly name = "OpenRouterResponseError";
-}
-
 export { buildFallbackFitReport } from "./fit-report.fallback";
 
 const callOpenRouter = async (prompt: string, modelName: string): Promise<FitReportJson> => {
   if (!env.openRouterApiKey) {
-    throw new OpenRouterResponseError("OpenRouter is not configured");
+    throw new FitReportFallbackError("not_configured");
   }
 
   const response = await fetch(openRouterChatCompletionsUrl, {
@@ -115,42 +117,92 @@ const callOpenRouter = async (prompt: string, modelName: string): Promise<FitRep
   });
 
   if (!response.ok) {
-    throw new OpenRouterResponseError(`OpenRouter HTTP ${response.status}`);
+    throw new FitReportFallbackError("http_error");
   }
 
-  const completion = openRouterCompletionSchema.parse(await response.json());
+  const completionResult = openRouterCompletionSchema.safeParse(await response.json());
+  if (!completionResult.success) {
+    throw new FitReportFallbackError("completion_invalid");
+  }
+  const completion = completionResult.data;
   const firstChoice = completion.choices[0];
   if (!firstChoice) {
-    throw new OpenRouterResponseError("OpenRouter response was missing a choice");
+    throw new FitReportFallbackError("completion_invalid");
   }
-  return fitReportJsonSchema.parse(JSON.parse(firstChoice.message.content));
+  let reportCandidate: unknown;
+  try {
+    reportCandidate = JSON.parse(firstChoice.message.content);
+  } catch {
+    throw new FitReportFallbackError("report_invalid");
+  }
+  const reportResult = fitReportJsonSchema.safeParse(reportCandidate);
+  if (!reportResult.success) {
+    throw new FitReportFallbackError("report_invalid");
+  }
+  return reportResult.data;
 };
 
 export const generateFitReport = async (
   userId: string,
   fitAnalysisResultId: string,
-  options: GenerateFitReportOptions = {}
+  options: GenerateFitReportOptions & { idempotencyKey: string }
 ): Promise<GenerateFitReportResult> => {
   if (!options.includeDebug) {
     const persisted = await loadPersistedFitReport(userId, fitAnalysisResultId);
-    if (persisted) return persisted;
+    if (persisted) {
+      return {
+        ...persisted,
+        availableThreads: await getThreadBalance(userId)
+      };
+    }
   }
 
   const reportInput = await buildFitReportInput(userId, fitAnalysisResultId, options);
   const prompt = buildFitReportPrompt(reportInput);
   const modelName = env.openRouterModel;
+  const threadConsumption = await consumeFitReportThread(
+    userId,
+    options.idempotencyKey,
+    fitAnalysisResultId
+  );
+  const fallbackReport = buildFallbackFitReport(reportInput);
+
+  if (threadConsumption.status === "already_consumed") {
+    if (!options.includeDebug) {
+      const persisted = await loadPersistedFitReport(userId, fitAnalysisResultId);
+      if (persisted) {
+        return {
+          ...persisted,
+          availableThreads: threadConsumption.availableThreads
+        };
+      }
+    }
+    return {
+      availableThreads: threadConsumption.availableThreads,
+      fitAnalysisResultId,
+      source: "fallback",
+      modelName,
+      promptVersion: FIT_REPORT_PROMPT_VERSION,
+      report: fallbackReport,
+      chartData: reportInput.chartData,
+      ...(options.includeDebug ? { reportInput, prompt } : {})
+    };
+  }
 
   let generated: GenerateFitReportResult;
   try {
     const generatedReport = await callOpenRouter(prompt, modelName);
-    const fallbackReport = buildFallbackFitReport(reportInput);
     const report = sanitizeGeneratedReport(
       generatedReport,
       reportInput,
       fallbackReport
     );
     const coreNarrativeAccepted = hasAcceptedCoreNarrative(generatedReport, reportInput);
+    if (!coreNarrativeAccepted) {
+      logFitReportFallback("narrative_rejected", modelName);
+    }
     generated = {
+      availableThreads: threadConsumption.availableThreads,
       fitAnalysisResultId,
       source: coreNarrativeAccepted ? "openrouter" : "fallback",
       modelName,
@@ -159,13 +211,15 @@ export const generateFitReport = async (
       chartData: reportInput.chartData,
       ...(options.includeDebug ? { reportInput, prompt } : {})
     };
-  } catch {
+  } catch (error: unknown) {
+    logFitReportFallback(classifyFitReportFallback(error), modelName);
     generated = {
+      availableThreads: threadConsumption.availableThreads,
       fitAnalysisResultId,
       source: "fallback",
       modelName,
       promptVersion: FIT_REPORT_PROMPT_VERSION,
-      report: buildFallbackFitReport(reportInput),
+      report: fallbackReport,
       chartData: reportInput.chartData,
       ...(options.includeDebug ? { reportInput, prompt } : {})
     };

@@ -13,20 +13,60 @@ struct CoorditReferenceSyncResult {
     let referenceIDsByItemID: [String: String]
 }
 
+enum CoorditMonetizationReadinessState: Equatable {
+    case notLoaded
+    case loading
+    case available(CoorditMonetizationReadiness)
+    case unavailable
+
+    var readiness: CoorditMonetizationReadiness? {
+        guard case let .available(readiness) = self else { return nil }
+        return readiness
+    }
+
+    var rewardedAdsEnabled: Bool {
+        readiness?.rewardedAdsEnabled == true
+    }
+
+    var iapEnabled: Bool {
+        readiness?.iapEnabled == true
+    }
+
+    var message: String? {
+        switch self {
+        case .notLoaded, .loading:
+            "충전 기능을 확인하고 있어요."
+        case .unavailable:
+            "충전 기능을 확인할 수 없어요. 다시 시도해 주세요."
+        case let .available(readiness):
+            if !readiness.rewardedAdsEnabled && !readiness.iapEnabled {
+                "충전 기능은 아직 준비 중이에요."
+            } else if !readiness.rewardedAdsEnabled {
+                "광고 충전은 아직 준비 중이에요."
+            } else if !readiness.iapEnabled {
+                "패키지 구매는 아직 준비 중이에요."
+            } else {
+                nil
+            }
+        }
+    }
+}
+
 @MainActor
 final class CoorditBackendSessionStore: ObservableObject {
     @Published private(set) var session: CoorditAuthSession?
     @Published private(set) var profile: CoorditUserProfile?
     @Published private(set) var latestBodyMeasurement: CoorditBodyMeasurement?
+    @Published private(set) var onboardingComplete = false
     @Published private(set) var referenceFitProfiles: [String: CoorditReferenceFitProfileResponse] = [:]
     @Published private(set) var statusText = "백엔드 연결 확인 전"
     @Published private(set) var isWorking = false
     @Published private(set) var isWarning = false
+    @Published private(set) var monetizationReadinessState: CoorditMonetizationReadinessState = .notLoaded
 
     private let client: CoorditBackendClient
     private let tokenStore: CoorditBackendTokenStore
-    private var refreshTask: Task<CoorditAuthSession, Error>?
-    private var scheduledRefreshTask: Task<Void, Never>?
+    private var monetizationReadinessRequestID = UUID()
 
 #if DEBUG
     private let usesAuthenticatedUITestFixture: Bool
@@ -36,28 +76,34 @@ final class CoorditBackendSessionStore: ObservableObject {
         self.client = CoorditBackendClient(baseURL: CoorditBackendConfig.baseURL())
         self.tokenStore = CoorditBackendTokenStore()
 #if DEBUG
+        Self.configurePersistedSessionFixture(in: tokenStore)
         if Self.shouldUseAuthenticatedUITestFixture {
             usesAuthenticatedUITestFixture = true
             session = CoorditAuthSession(
                 accessToken: Self.uiTestingAccessToken ?? "",
                 refreshToken: "",
-                user: CoorditAuthUser(id: "coordit-ui-test-user", email: "ui-test@coordit.invalid")
+                user: CoorditAuthUser(id: Self.uiTestingUserID, email: "ui-test@coordit.invalid")
             )
             profile = CoorditUserProfile(
-                id: "coordit-ui-test-user",
+                id: Self.uiTestingUserID,
                 email: "ui-test@coordit.invalid",
                 displayName: "코딧 테스트 사용자",
                 gender: nil,
+                birthDate: nil,
                 birthYear: nil,
                 createdAt: "2026-01-01T00:00:00Z",
                 updatedAt: "2026-01-01T00:00:00Z"
             )
+            onboardingComplete = !ProcessInfo.processInfo.arguments.contains("--coordit-ui-testing-onboarding-incomplete")
+            statusText = "테스트 계정으로 로그인됨"
         } else {
             usesAuthenticatedUITestFixture = false
             session = tokenStore.load()
+            onboardingComplete = session.map(Self.cachedOnboardingComplete) ?? false
         }
 #else
         session = tokenStore.load()
+        onboardingComplete = session.map(Self.cachedOnboardingComplete) ?? false
 #endif
         scheduleRefreshIfPossible()
     }
@@ -69,28 +115,23 @@ final class CoorditBackendSessionStore: ObservableObject {
         usesAuthenticatedUITestFixture = false
 #endif
         session = tokenStore.load()
-        scheduleRefreshIfPossible()
+        onboardingComplete = session.map(Self.cachedOnboardingComplete) ?? false
     }
 
     var isAuthenticated: Bool {
         session != nil
     }
 
-    var isMember: Bool {
-        session?.user.isAnonymous == false
+    var canUseProduct: Bool {
+        isAuthenticated && onboardingComplete
     }
 
-    var shouldAutomaticallyAuthenticateAppleForUITest: Bool {
-#if DEBUG
-        Self.shouldSimulateAppleAuthenticationWithHydrationFailure
-#else
-        false
-#endif
+    var canUseRewardedAds: Bool {
+        monetizationReadinessState.rewardedAdsEnabled
     }
 
-    func clearStatus() {
-        statusText = ""
-        isWarning = false
+    var canUseInAppPurchases: Bool {
+        monetizationReadinessState.iapEnabled
     }
 
     var emailText: String {
@@ -213,22 +254,48 @@ final class CoorditBackendSessionStore: ObservableObject {
 
     func bootstrap() async {
 #if DEBUG
-        if usesAuthenticatedUITestFixture {
+        if usesAuthenticatedUITestFixture || Self.shouldUseStalledAppleAuthenticationFixture {
             return
         }
 #endif
         await run {
+            try await refreshPersistedSession()
             let health = try await client.health()
             statusText = health.ok ? "\(health.service) 연결됨" : "백엔드 응답이 불안정해요."
             isWarning = !health.ok
             if session != nil {
                 try await refreshAccount()
+                try await refreshOnboardingStatus()
             }
         }
     }
 
+    private func refreshPersistedSession() async throws {
+        guard let currentSession = session, !currentSession.refreshToken.isEmpty else { return }
+        do {
+            let refreshedSession = try await client.refreshSession(
+                refreshToken: currentSession.refreshToken
+            )
+            try tokenStore.save(refreshedSession)
+            session = refreshedSession
+        } catch let error as CoorditBackendClientError where error.invalidatesSession {
+            if let userID = session?.user.id {
+                Self.clearCachedOnboardingComplete(for: userID)
+            }
+            tokenStore.delete()
+            session = nil
+            profile = nil
+            latestBodyMeasurement = nil
+            onboardingComplete = false
+            throw error
+        }
+    }
+
     func fetchThreadBalance() async -> Int? {
-        guard session != nil else { return nil }
+        #if DEBUG
+        if usesAuthenticatedUITestFixture { return Self.uiTestingThreadBalance ?? 0 }
+        #endif
+        guard let token = session?.accessToken else { return nil }
         do {
             return try await authenticatedValue { token in
                 try await client.threadBalance(token: token).availableThreads
@@ -240,45 +307,147 @@ final class CoorditBackendSessionStore: ObservableObject {
         }
     }
 
-    func login(email: String, password: String) async {
-        await authenticate {
-            try await client.login(email: email, password: password)
+    @discardableResult
+    func refreshMonetizationReadiness() async -> CoorditMonetizationReadiness? {
+        let requestID = UUID()
+        monetizationReadinessRequestID = requestID
+        monetizationReadinessState = .loading
+
+#if DEBUG
+        if usesAuthenticatedUITestFixture {
+            let readiness = Self.uiTestingMonetizationReadiness
+            guard requestID == monetizationReadinessRequestID else { return nil }
+            switch readiness {
+            case .enabled:
+                let result = CoorditMonetizationReadiness(rewardedAdsEnabled: true, iapEnabled: true)
+                monetizationReadinessState = .available(result)
+                return result
+            case .disabled:
+                let result = CoorditMonetizationReadiness(rewardedAdsEnabled: false, iapEnabled: false)
+                monetizationReadinessState = .available(result)
+                return result
+            case .unavailable:
+                monetizationReadinessState = .unavailable
+                return nil
+            }
+        }
+#endif
+
+        guard let token = session?.accessToken else {
+            monetizationReadinessState = .unavailable
+            return nil
+        }
+
+        do {
+            let readiness = try await client.monetizationReadiness(token: token)
+            guard requestID == monetizationReadinessRequestID else { return nil }
+            monetizationReadinessState = .available(readiness)
+            return readiness
+        } catch {
+            guard requestID == monetizationReadinessRequestID else { return nil }
+            statusText = error.localizedDescription
+            isWarning = true
+            monetizationReadinessState = .unavailable
+            return nil
         }
     }
 
-    func signup(email: String, password: String) async {
-        await authenticate {
-            try await client.signup(email: email, password: password)
+    func createThreadRewardAttempt() async throws -> CoorditThreadRewardAttempt {
+        guard let token = session?.accessToken else {
+            throw CoorditBackendClientError.server(statusCode: 401, message: "로그인 후 광고 보상을 받을 수 있어요.")
         }
+        return try await client.createThreadRewardAttempt(token: token)
     }
 
+    func settleAppleIapPurchase(
+        signedTransaction: String
+    ) async throws -> CoorditAppleIapSettlement {
+#if DEBUG
+        if usesAuthenticatedUITestFixture,
+           let scenario = CoorditThreadPurchaseFixtureScenario.launch()
+        {
+            switch scenario {
+            case .credited:
+                return CoorditAppleIapSettlement(
+                    availableThreads: (Self.uiTestingThreadBalance ?? 0) + 10,
+                    status: .credited,
+                    httpStatusCode: 201
+                )
+            case .alreadyCredited:
+                return CoorditAppleIapSettlement(
+                    availableThreads: Self.uiTestingThreadBalance ?? 0,
+                    status: .alreadyCredited,
+                    httpStatusCode: 200
+                )
+            case .cancelled, .pending, .unverified:
+                throw CoorditThreadPurchaseError.invalidTransaction
+            case .backendError:
+                throw CoorditBackendClientError.server(
+                    statusCode: 503,
+                    message: "결제 서버에 연결할 수 없어요."
+                )
+            }
+        }
+#endif
+        guard let token = session?.accessToken else {
+            throw CoorditBackendClientError.server(
+                statusCode: 401,
+                message: "로그인 후 실타래를 구매할 수 있어요."
+            )
+        }
+        return try await client.verifyAppleIapPurchase(
+            token: token,
+            signedTransaction: signedTransaction
+        )
+    }
+
+    func fetchThreadBalanceAfterPurchase() async throws -> Int {
+#if DEBUG
+        if usesAuthenticatedUITestFixture,
+           let scenario = CoorditThreadPurchaseFixtureScenario.launch()
+        {
+            switch scenario {
+            case .credited:
+                return (Self.uiTestingThreadBalance ?? 0) + 10
+            case .alreadyCredited, .cancelled, .pending, .unverified, .backendError:
+                return Self.uiTestingThreadBalance ?? 0
+            }
+        }
+#endif
+        guard let token = session?.accessToken else {
+            throw CoorditBackendClientError.server(
+                statusCode: 401,
+                message: "로그인 후 실타래 잔액을 확인할 수 있어요."
+            )
+        }
+        return try await client.threadBalance(token: token).availableThreads
+    }
     func loginWithGoogle() async {
         let guestSession = session?.user.isAnonymous == true ? session : nil
         await authenticate {
-            let idToken = try await CoorditGoogleSignIn.signInIDToken()
+            let credential = try await CoorditGoogleSignIn.signInCredential()
             return try await client.loginWithGoogle(
-                idToken: idToken,
-                guestSession: guestSession
+                idToken: credential.idToken,
+                nonce: credential.nonce
             )
         }
     }
 
     func loginWithApple() async {
-#if DEBUG
-        if Self.shouldSimulateAppleAuthenticationWithHydrationFailure {
-            await authenticate {
-                CoorditAuthSession(
-                    accessToken: "coordit-ui-test-apple-access-token",
-                    refreshToken: "coordit-ui-test-apple-refresh-token",
-                    user: CoorditAuthUser(
-                        id: "coordit-ui-test-apple-user",
-                        email: "apple-ui-test@coordit.invalid"
-                    )
+        #if DEBUG
+        if Self.shouldUseStalledAppleAuthenticationFixture {
+            session = CoorditAuthSession(
+                accessToken: "stalled-apple-ui-test-access-token",
+                refreshToken: "stalled-apple-ui-test-refresh-token",
+                user: CoorditAuthUser(
+                    id: "00000000-0000-4000-8000-000000000003",
+                    email: "stalled-apple-ui-test@coordit.invalid"
                 )
-            }
+            )
+            try? await Task.sleep(nanoseconds: 30_000_000_000)
             return
         }
-#endif
+        #endif
         await authenticate {
             let credential = try await CoorditAppleSignIn.signInCredential()
             return try await client.loginWithApple(
@@ -304,12 +473,17 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
     func logout() {
-        cancelRefreshWork()
+        monetizationReadinessRequestID = UUID()
+        if let userID = session?.user.id {
+            Self.clearCachedOnboardingComplete(for: userID)
+        }
         tokenStore.delete()
         session = nil
         profile = nil
         latestBodyMeasurement = nil
+        onboardingComplete = false
         referenceFitProfiles = [:]
+        monetizationReadinessState = .notLoaded
         statusText = "이 기기에서 로그아웃했어요."
         isWarning = false
     }
@@ -324,15 +498,18 @@ final class CoorditBackendSessionStore: ObservableObject {
         isWorking = true
         defer { isWorking = false }
         do {
-            try await authenticatedValue { token in
-                try await client.deleteAccount(token: token)
+            try await client.deleteAccount(token: token)
+            if let userID = session?.user.id {
+                Self.clearCachedOnboardingComplete(for: userID)
             }
-            cancelRefreshWork()
             tokenStore.delete()
             session = nil
             profile = nil
             latestBodyMeasurement = nil
+            onboardingComplete = false
             referenceFitProfiles = [:]
+            monetizationReadinessRequestID = UUID()
+            monetizationReadinessState = .notLoaded
             statusText = "계정과 저장된 데이터를 삭제했어요."
             isWarning = false
             return true
@@ -351,12 +528,52 @@ final class CoorditBackendSessionStore: ObservableObject {
         }
     }
 
-    func saveBodyMeasurement(_ request: BodyMeasurementRequest) async {
+    func saveBodyMeasurement(_ request: BodyMeasurementRequest) async -> Bool {
+#if DEBUG
+        if usesAuthenticatedUITestFixture {
+            latestBodyMeasurement = CoorditBodyMeasurement(
+                id: "coordit-ui-test-body-measurement",
+                heightCm: request.heightCm,
+                weightKg: request.weightKg,
+                shoulderWidth: nil,
+                chestCircumference: nil,
+                waistCircumference: nil,
+                hipCircumference: nil,
+                outseam: nil,
+                createdAt: "2026-01-01T00:00:00Z"
+            )
+            statusText = "키와 몸무게를 백엔드에 저장했어요."
+            isWarning = false
+            return true
+        }
+#endif
         await runAuthenticated { token in
             latestBodyMeasurement = try await client.createBodyMeasurement(token: token, request: request)
-            statusText = "신체 치수를 백엔드에 저장했어요."
+            statusText = "키와 몸무게를 백엔드에 저장했어요."
             isWarning = false
         }
+        return !isWarning
+    }
+
+    func completeOnboarding(_ request: CoorditOnboardingRequest) async -> Bool {
+        guard let token = session?.accessToken else {
+            statusText = "초기 설정은 로그인 후 저장할 수 있어요."
+            isWarning = true
+            return false
+        }
+
+        var completed = false
+        await run {
+            let completion = try await client.completeOnboarding(token: token, request: request)
+            profile = completion.user
+            onboardingComplete = completion.onboardingComplete
+            cacheOnboardingComplete(completion.onboardingComplete)
+            latestBodyMeasurement = try await client.listBodyMeasurements(token: token).first
+            statusText = "나만의 핏 프로필을 저장했어요."
+            isWarning = false
+            completed = completion.onboardingComplete
+        }
+        return completed
     }
 
     func prefillClosetProduct(
@@ -383,7 +600,22 @@ final class CoorditBackendSessionStore: ObservableObject {
         from draft: CoorditClosetDraft,
         idempotencyKey: String
     ) async -> CoorditClothingSaveResult? {
-        guard session != nil else {
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--coordit-test-closet-save-success") {
+            let clothingSizeRequest = await CoorditFitLabSizeExtractor.referenceClothingSizeRequest(from: draft)
+            try? await Task.sleep(for: .milliseconds(250))
+            statusText = "UI 테스트 보유 의류를 저장했어요."
+            isWarning = false
+            return CoorditClothingSaveResult(
+                clothingItemId: "closet-save-success-fixture",
+                sizeChart: CoorditClosetSizeChart(
+                    sizeLabel: clothingSizeRequest.sizeLabel,
+                    measurements: clothingSizeRequest.measurements
+                )
+            )
+        }
+#endif
+        guard let token = session?.accessToken else {
             statusText = "보유 의류 저장은 로그인 후 백엔드에 반영돼요."
             isWarning = true
             return nil
@@ -515,7 +747,22 @@ final class CoorditBackendSessionStore: ObservableObject {
             if ProcessInfo.processInfo.arguments.contains("--coordit-ui-testing") {
                 statusText = "UI 테스트 기준 의류 선택을 저장했어요."
                 isWarning = false
-                return CoorditReferenceSyncResult(selectedIDs: selectedIDs, referenceIDsByItemID: [:])
+                let isFitLabReferenceRegistration = ProcessInfo.processInfo.arguments.contains(
+                    "--coordit-test-fitlab-reference-registration"
+                )
+                let referenceIDsByItemID: [String: String] = Dictionary(
+                    uniqueKeysWithValues: items.compactMap { item in
+                        guard isFitLabReferenceRegistration,
+                              selectedIDs.contains(item.id),
+                              item.backendClothingItemId == "closet-save-success-fixture"
+                        else { return nil }
+                        return (item.id, "reference-fixture-\(item.exactCategory.rawValue)")
+                    }
+                )
+                return CoorditReferenceSyncResult(
+                    selectedIDs: selectedIDs,
+                    referenceIDsByItemID: referenceIDsByItemID
+                )
             }
             #endif
             statusText = "기준 의류 선택은 로그인 후 서버에 반영돼요."
@@ -571,30 +818,26 @@ final class CoorditBackendSessionStore: ObservableObject {
         }
     }
 
-    func reassessClothingItem(id: String) async -> CoorditClothingFitAssessmentResponse? {
-        guard session != nil else {
-            statusText = "핏 스코어 재평가는 로그인이 필요해요."
-            isWarning = true
-            return nil
-        }
+    func referenceFitProfile(for category: CoorditClosetCategory) -> CoorditReferenceFitProfileResponse? {
+        referenceFitProfiles[category == .top ? "upper" : "lower"]
+    }
+
+    func closetFitComparison(clothingItemID: String) async -> CoorditClosetFitComparisonResponse? {
+        guard let token = session?.accessToken else { return nil }
+        #if DEBUG
+        if usesAuthenticatedUITestFixture { return nil }
+        #endif
 
         do {
-            let assessment = try await authenticatedValue { token in
-                try await client.reassessClothingItem(token: token, id: id)
-            }
-            let score = CoorditFitLabResultMeasurement.score(assessment.fitScore)
-            statusText = "선택한 의류의 핏 스코어를 \(score)점으로 다시 계산했어요."
-            isWarning = false
-            return assessment
+            return try await client.closetFitComparison(
+                token: token,
+                clothingItemId: clothingItemID
+            )
         } catch {
             statusText = error.localizedDescription
             isWarning = true
             return nil
         }
-    }
-
-    func referenceFitProfile(for category: CoorditClosetCategory) -> CoorditReferenceFitProfileResponse? {
-        referenceFitProfiles[category == .top ? "upper" : "lower"]
     }
 
     func refreshReferenceFitProfiles() async {
@@ -745,8 +988,11 @@ final class CoorditBackendSessionStore: ObservableObject {
     private func authenticate(_ action: () async throws -> CoorditAuthSession) async {
         await run {
             let nextSession = try await action()
-            try persistSession(nextSession)
-            statusText = "백엔드 로그인 완료"
+            try tokenStore.save(nextSession)
+            session = nextSession
+            try await refreshAccount()
+            try await refreshOnboardingStatus()
+            statusText = onboardingComplete ? "백엔드 로그인 완료" : "초기 설정을 완료해 주세요."
             isWarning = false
             Task { await refreshAccountAfterAuthentication(nextSession) }
         }
@@ -781,6 +1027,33 @@ final class CoorditBackendSessionStore: ObservableObject {
         guard session?.user.id == activeSession.user.id else { return }
         profile = nextProfile
         latestBodyMeasurement = nextBodyMeasurement
+    }
+
+    private func refreshOnboardingStatus() async throws {
+        guard let token = session?.accessToken else {
+            onboardingComplete = false
+            return
+        }
+        let refreshedStatus = try await client.onboardingStatus(token: token).onboardingComplete
+        onboardingComplete = refreshedStatus
+        cacheOnboardingComplete(refreshedStatus)
+    }
+
+    private func cacheOnboardingComplete(_ isComplete: Bool) {
+        guard let userID = session?.user.id else { return }
+        UserDefaults.standard.set(isComplete, forKey: Self.onboardingCacheKey(for: userID))
+    }
+
+    private static func cachedOnboardingComplete(for session: CoorditAuthSession) -> Bool {
+        UserDefaults.standard.bool(forKey: onboardingCacheKey(for: session.user.id))
+    }
+
+    private static func clearCachedOnboardingComplete(for userID: String) {
+        UserDefaults.standard.removeObject(forKey: onboardingCacheKey(for: userID))
+    }
+
+    private static func onboardingCacheKey(for userID: String) -> String {
+        "coordit.onboarding-complete.\(userID)"
     }
 
     private func runAuthenticated(_ action: (String) async throws -> Void) async {
@@ -966,10 +1239,45 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
 #if DEBUG
+    private enum UITestingMonetizationReadiness {
+        case enabled
+        case disabled
+        case unavailable
+    }
+
     private static var shouldUseAuthenticatedUITestFixture: Bool {
         let arguments = ProcessInfo.processInfo.arguments
         return arguments.contains("--coordit-ui-testing")
             && arguments.contains("--coordit-ui-testing-authenticated")
+    }
+
+    private static var shouldUseStalledAppleAuthenticationFixture: Bool {
+        let arguments = ProcessInfo.processInfo.arguments
+        return arguments.contains("--coordit-ui-testing")
+            && arguments.contains("--coordit-ui-testing-stalled-apple-auth-success")
+    }
+
+    private static func configurePersistedSessionFixture(in tokenStore: CoorditBackendTokenStore) {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard arguments.contains("--coordit-ui-testing") else { return }
+        if arguments.contains("--coordit-ui-testing-clear-persisted-session") {
+            if let userID = tokenStore.load()?.user.id {
+                clearCachedOnboardingComplete(for: userID)
+            }
+            tokenStore.delete()
+        }
+        if arguments.contains("--coordit-ui-testing-seed-persisted-session") {
+            let fixture = CoorditAuthSession(
+                accessToken: "expired-ui-test-access-token",
+                refreshToken: "persisted-ui-test-refresh-token",
+                user: CoorditAuthUser(
+                    id: "00000000-0000-4000-8000-000000000002",
+                    email: "persisted-ui-test@coordit.invalid"
+                )
+            )
+            try? tokenStore.save(fixture)
+            UserDefaults.standard.set(true, forKey: onboardingCacheKey(for: fixture.user.id))
+        }
     }
 
     private static var uiTestingAccessToken: String? {
@@ -983,18 +1291,46 @@ final class CoorditBackendSessionStore: ObservableObject {
         return arguments[arguments.index(after: markerIndex)]
     }
 
-    private static var shouldSimulateAppleAuthenticationWithHydrationFailure: Bool {
-        ProcessInfo.processInfo.arguments.contains(
-            "--coordit-test-apple-auth-success-hydration-failure"
-        )
+    private static var uiTestingUserID: String {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard
+            let markerIndex = arguments.firstIndex(of: "--coordit-ui-testing-user-id"),
+            arguments.indices.contains(arguments.index(after: markerIndex))
+        else {
+            return "00000000-0000-4000-8000-000000000001"
+        }
+        return arguments[arguments.index(after: markerIndex)]
     }
 
-    private static var shouldSimulateGuestBootstrap: Bool {
-        ProcessInfo.processInfo.arguments.contains("--coordit-test-guest-bootstrap")
+    private static var uiTestingThreadBalance: Int? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard
+            let markerIndex = arguments.firstIndex(of: "--coordit-thread-balance"),
+            arguments.indices.contains(arguments.index(after: markerIndex)),
+            let balance = Int(arguments[arguments.index(after: markerIndex)])
+        else {
+            return nil
+        }
+        return max(0, balance)
     }
 
-    private static var shouldSimulateGuestBootstrapFailure: Bool {
-        ProcessInfo.processInfo.arguments.contains("--coordit-test-guest-bootstrap-failure")
+    private static var uiTestingMonetizationReadiness: UITestingMonetizationReadiness {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard
+            let markerIndex = arguments.firstIndex(of: "--coordit-monetization-readiness"),
+            arguments.indices.contains(arguments.index(after: markerIndex))
+        else {
+            return .unavailable
+        }
+
+        switch arguments[arguments.index(after: markerIndex)].lowercased() {
+        case "true", "enabled":
+            return .enabled
+        case "false", "disabled":
+            return .disabled
+        default:
+            return .unavailable
+        }
     }
 #endif
 }

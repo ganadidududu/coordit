@@ -1,22 +1,24 @@
-FROM node:22-slim AS build
+FROM mcr.microsoft.com/playwright:v1.62.0-noble AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm ci
 
 COPY tsconfig.json ./
 COPY src ./src
-RUN npm run build && npm prune --omit=dev
+RUN npm run build
 
-FROM node:22-slim AS runtime
+FROM mcr.microsoft.com/playwright:v1.62.0-noble
 
-ENV NODE_ENV=production
 WORKDIR /app
+ENV NODE_ENV=production
 
-COPY --from=build /app/package.json /app/package-lock.json ./
-COPY --from=build /app/node_modules ./node_modules
-RUN npx playwright install --with-deps chromium
+COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
 COPY --from=build /app/dist ./dist
 
-CMD ["npm", "start"]
+USER pwuser
+EXPOSE 8080
+CMD ["node", "dist/server.js"]
