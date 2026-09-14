@@ -12,7 +12,11 @@ import {
 import type { GuestUpgradeSession } from "./social-auth-upgrade.service";
 
 type GoogleLoginControllerDependencies = {
-  readonly loginWithGoogleIdToken: (idToken: string, nonce: string) => Promise<AuthResponse>;
+  readonly loginWithGoogleIdToken: (
+    idToken: string,
+    nonce: string,
+    guest: GuestUpgradeSession | null
+  ) => Promise<AuthResponse>;
 };
 
 type AppleLoginControllerDependencies = {
@@ -64,7 +68,7 @@ export const createGoogleLoginController = (
   try {
     const idToken = asRequiredString(req.body.idToken, "idToken");
     const nonce = asRequiredString(req.body.nonce, "nonce");
-    res.json(await dependencies.loginWithGoogleIdToken(idToken, nonce));
+    res.json(await dependencies.loginWithGoogleIdToken(idToken, nonce, await guestUpgradeSession(req)));
   } catch (error) { // no-excuse-ok: catch -- Express forwards boundary errors centrally.
     next(error);
   }
@@ -78,7 +82,7 @@ export const createAppleLoginController = (
   try {
     const idToken = asRequiredString(req.body.idToken, "idToken");
     const nonce = asRequiredString(req.body.nonce, "nonce");
-    res.json(await dependencies.loginWithAppleIdToken(idToken, nonce));
+    res.json(await dependencies.loginWithAppleIdToken(idToken, nonce, await guestUpgradeSession(req)));
   } catch (error) { // no-excuse-ok: catch -- Express forwards boundary errors centrally.
     next(error);
   }

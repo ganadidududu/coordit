@@ -19,13 +19,16 @@ const createRepository = (overrides: Partial<OnboardingStatusRepository> = {}): 
   ...overrides
 });
 
-const loadStatusCheck = async (): Promise<typeof import("./auth-onboarding-status.service").isOnboardingCompleteWithRepository> => {
+const loadStatusChecks = async () => {
   const module = await import("./auth-onboarding-status.service");
-  return module.isOnboardingCompleteWithRepository;
+  return {
+    isOnboardingComplete: module.isOnboardingCompleteWithRepository,
+    canUseProduct: module.canUseProductWithRepository
+  };
 };
 
 const run = async (): Promise<void> => {
-  const isOnboardingComplete = await loadStatusCheck();
+  const { isOnboardingComplete, canUseProduct } = await loadStatusChecks();
   assert.equal(await isOnboardingComplete(createRepository(), "user-1"), true);
   assert.equal(
     await isOnboardingComplete(createRepository({ findUserConsents: async () => [] }), "user-1"),
@@ -34,6 +37,21 @@ const run = async (): Promise<void> => {
   await assert.rejects(
     () => isOnboardingComplete(createRepository({ findLatestRequiredConsentVersions: async () => [consentVersions[0]] }), "user-1"),
     (error: unknown) => error instanceof Error && "statusCode" in error && error.statusCode === 500
+  );
+  assert.equal(
+    await canUseProduct({ ...createRepository(), isGuestUser: async () => true }, "guest-1"),
+    true
+  );
+  assert.equal(
+    await canUseProduct({ ...createRepository(), isGuestUser: async () => false }, "member-1"),
+    true
+  );
+  assert.equal(
+    await canUseProduct({
+      ...createRepository({ findUserConsents: async () => [] }),
+      isGuestUser: async () => false
+    }, "incomplete-member"),
+    false
   );
   console.log("auth onboarding status tests passed");
 };
