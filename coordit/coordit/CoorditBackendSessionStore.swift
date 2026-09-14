@@ -67,6 +67,8 @@ final class CoorditBackendSessionStore: ObservableObject {
     private let client: CoorditBackendClient
     private let tokenStore: CoorditBackendTokenStore
     private var monetizationReadinessRequestID = UUID()
+    private var refreshTask: Task<CoorditAuthSession, Error>?
+    private var scheduledRefreshTask: Task<Void, Never>?
 
 #if DEBUG
     private let usesAuthenticatedUITestFixture: Bool
@@ -122,8 +124,25 @@ final class CoorditBackendSessionStore: ObservableObject {
         session != nil
     }
 
+    var isMember: Bool {
+        session?.user.isAnonymous == false
+    }
+
+    var shouldAutomaticallyAuthenticateAppleForUITest: Bool {
+#if DEBUG
+        Self.shouldSimulateAppleAuthenticationWithHydrationFailure
+#else
+        false
+#endif
+    }
+
+    func clearStatus() {
+        statusText = ""
+        isWarning = false
+    }
+
     var canUseProduct: Bool {
-        isAuthenticated && onboardingComplete
+        isAuthenticated && (session?.user.isAnonymous == true || onboardingComplete)
     }
 
     var canUseRewardedAds: Bool {
@@ -254,19 +273,32 @@ final class CoorditBackendSessionStore: ObservableObject {
 
     func bootstrap() async {
 #if DEBUG
-        if usesAuthenticatedUITestFixture || Self.shouldUseStalledAppleAuthenticationFixture {
+        if usesAuthenticatedUITestFixture
+            || Self.shouldUseStalledAppleAuthenticationFixture
+            || Self.shouldSimulateGuestBootstrap
+        {
             return
         }
 #endif
-        await run {
+        let startingUserID = session?.user.id
+        do {
             try await refreshPersistedSession()
             let health = try await client.health()
+            guard session?.user.id == startingUserID else { return }
             statusText = health.ok ? "\(health.service) 연결됨" : "백엔드 응답이 불안정해요."
             isWarning = !health.ok
             if session != nil {
                 try await refreshAccount()
-                try await refreshOnboardingStatus()
+                if session?.user.isAnonymous == true {
+                    onboardingComplete = false
+                } else {
+                    try await refreshOnboardingStatus()
+                }
             }
+        } catch {
+            guard session?.user.id == startingUserID else { return }
+            statusText = error.localizedDescription
+            isWarning = true
         }
     }
 
@@ -295,7 +327,7 @@ final class CoorditBackendSessionStore: ObservableObject {
         #if DEBUG
         if usesAuthenticatedUITestFixture { return Self.uiTestingThreadBalance ?? 0 }
         #endif
-        guard let token = session?.accessToken else { return nil }
+        guard session != nil else { return nil }
         do {
             return try await authenticatedValue { token in
                 try await client.threadBalance(token: token).availableThreads
@@ -333,13 +365,15 @@ final class CoorditBackendSessionStore: ObservableObject {
         }
 #endif
 
-        guard let token = session?.accessToken else {
+        guard session != nil else {
             monetizationReadinessState = .unavailable
             return nil
         }
 
         do {
-            let readiness = try await client.monetizationReadiness(token: token)
+            let readiness = try await authenticatedValue { token in
+                try await client.monetizationReadiness(token: token)
+            }
             guard requestID == monetizationReadinessRequestID else { return nil }
             monetizationReadinessState = .available(readiness)
             return readiness
@@ -353,10 +387,12 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
     func createThreadRewardAttempt() async throws -> CoorditThreadRewardAttempt {
-        guard let token = session?.accessToken else {
+        guard session != nil else {
             throw CoorditBackendClientError.server(statusCode: 401, message: "로그인 후 광고 보상을 받을 수 있어요.")
         }
-        return try await client.createThreadRewardAttempt(token: token)
+        return try await authenticatedValue { token in
+            try await client.createThreadRewardAttempt(token: token)
+        }
     }
 
     func settleAppleIapPurchase(
@@ -422,19 +458,46 @@ final class CoorditBackendSessionStore: ObservableObject {
         }
         return try await client.threadBalance(token: token).availableThreads
     }
+
+    func login(email: String, password: String) async {
+        await authenticate {
+            try await client.login(email: email, password: password)
+        }
+    }
+
+    func signup(email: String, password: String) async {
+        await authenticate {
+            try await client.signup(email: email, password: password)
+        }
+    }
+
     func loginWithGoogle() async {
         let guestSession = session?.user.isAnonymous == true ? session : nil
         await authenticate {
             let credential = try await CoorditGoogleSignIn.signInCredential()
             return try await client.loginWithGoogle(
                 idToken: credential.idToken,
-                nonce: credential.nonce
+                nonce: credential.nonce,
+                guestSession: guestSession
             )
         }
     }
 
     func loginWithApple() async {
         #if DEBUG
+        if Self.shouldSimulateAppleAuthenticationWithHydrationFailure {
+            await authenticate {
+                CoorditAuthSession(
+                    accessToken: "coordit-ui-test-apple-access-token",
+                    refreshToken: "coordit-ui-test-apple-refresh-token",
+                    user: CoorditAuthUser(
+                        id: "coordit-ui-test-apple-user",
+                        email: "apple-ui-test@coordit.invalid"
+                    )
+                )
+            }
+            return
+        }
         if Self.shouldUseStalledAppleAuthenticationFixture {
             session = CoorditAuthSession(
                 accessToken: "stalled-apple-ui-test-access-token",
@@ -498,7 +561,9 @@ final class CoorditBackendSessionStore: ObservableObject {
         isWorking = true
         defer { isWorking = false }
         do {
-            try await client.deleteAccount(token: token)
+            try await authenticatedValue { token in
+                try await client.deleteAccount(token: token)
+            }
             if let userID = session?.user.id {
                 Self.clearCachedOnboardingComplete(for: userID)
             }
@@ -615,7 +680,7 @@ final class CoorditBackendSessionStore: ObservableObject {
             )
         }
 #endif
-        guard let token = session?.accessToken else {
+        guard session != nil else {
             statusText = "보유 의류 저장은 로그인 후 백엔드에 반영돼요."
             isWarning = true
             return nil
@@ -1255,6 +1320,20 @@ final class CoorditBackendSessionStore: ObservableObject {
         let arguments = ProcessInfo.processInfo.arguments
         return arguments.contains("--coordit-ui-testing")
             && arguments.contains("--coordit-ui-testing-stalled-apple-auth-success")
+    }
+
+    private static var shouldSimulateAppleAuthenticationWithHydrationFailure: Bool {
+        ProcessInfo.processInfo.arguments.contains(
+            "--coordit-test-apple-auth-success-hydration-failure"
+        )
+    }
+
+    private static var shouldSimulateGuestBootstrap: Bool {
+        ProcessInfo.processInfo.arguments.contains("--coordit-test-guest-bootstrap")
+    }
+
+    private static var shouldSimulateGuestBootstrapFailure: Bool {
+        ProcessInfo.processInfo.arguments.contains("--coordit-test-guest-bootstrap-failure")
     }
 
     private static func configurePersistedSessionFixture(in tokenStore: CoorditBackendTokenStore) {

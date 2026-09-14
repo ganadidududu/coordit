@@ -265,7 +265,7 @@ final class ShareViewController: UIViewController {
         return []
     }
 
-    private static func urls(from extensionItem: NSExtensionItem) -> [URL] {
+    nonisolated private static func urls(from extensionItem: NSExtensionItem) -> [URL] {
         let textCandidates = [
             extensionItem.attributedTitle?.string,
             extensionItem.attributedContentText?.string
@@ -287,7 +287,7 @@ final class ShareViewController: UIViewController {
             ?? uniqueURLs.first
     }
 
-    private static func urls(in value: String) -> [URL] {
+    nonisolated private static func urls(in value: String) -> [URL] {
         let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
         let range = NSRange(value.startIndex..<value.endIndex, in: value)
         return detector?
@@ -340,7 +340,7 @@ private enum CoorditShareImportBridge {
 }
 
 private extension URL {
-    var isHTTPOrHTTPSProductURL: Bool {
+    nonisolated var isHTTPOrHTTPSProductURL: Bool {
         guard let scheme = scheme?.lowercased(),
               scheme == "http" || scheme == "https",
               host(percentEncoded: false) != nil
@@ -348,13 +348,13 @@ private extension URL {
         return user == nil && password == nil
     }
 
-    var isMusinsaProductURL: Bool {
+    nonisolated var isMusinsaProductURL: Bool {
         guard let host = host(percentEncoded: false)?.lowercased() else { return false }
         return (host == "musinsa.com" || host.hasSuffix(".musinsa.com"))
             && path.contains("/products/")
     }
 
-    var isMusinsaOneLinkURL: Bool {
+    nonisolated var isMusinsaOneLinkURL: Bool {
         host(percentEncoded: false)?.lowercased().contains("musinsa.onelink.me") == true
     }
 }

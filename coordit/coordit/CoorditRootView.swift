@@ -188,7 +188,7 @@ struct CoorditRootView: View {
         }
         .task(id: backendSession.session?.user.id) {
             await backendSession.bootstrap()
-            if backendSession.isAuthenticated, !backendSession.onboardingComplete {
+            if backendSession.isAuthenticated, !backendSession.canUseProduct {
                 return
             }
             guard canShowSelectedRoute else {
@@ -242,6 +242,25 @@ struct CoorditRootView: View {
                 initialSelection: selectedReferenceIDs,
                 onCommit: syncFitLabReferenceSelection,
                 onAddGarment: startFitLabReferenceRegistration
+            )
+        }
+        .sheet(isPresented: $showsAuthenticationEntry) {
+            CoorditSplashAuthenticationSheet(
+                onAuthenticated: {
+                    showsAuthenticationEntry = false
+                    if backendSession.onboardingComplete {
+                        CoorditWelcomeLaunchState.markWelcomeCompleted()
+                        navigate(to: .main04)
+                    } else {
+                        showsOnboarding = true
+                    }
+                },
+                onGuestAuthenticated: { balance in
+                    threadBalance = balance
+                    CoorditWelcomeLaunchState.markWelcomeCompleted()
+                    showsAuthenticationEntry = false
+                    navigate(to: .main04)
+                }
             )
         }
         .fullScreenCover(isPresented: $showsOnboarding) {
@@ -410,31 +429,18 @@ struct CoorditRootView: View {
         CoorditWelcomeLaunchState.splashPresentation(isAuthenticated: backendSession.isAuthenticated)
     }
 
-    @ViewBuilder
     private var splashScreen: some View {
-        if showsAuthenticationEntry {
-            CoorditAuthenticationEntryView {
-                showsAuthenticationEntry = false
-                if backendSession.onboardingComplete {
-                    CoorditWelcomeLaunchState.markWelcomeCompleted()
-                    navigate(to: .main04)
-                } else {
-                    showsOnboarding = true
+        CoorditSplashScreen(
+            presentation: splashPresentation,
+            onRouteChange: { nextRoute in
+                guard backendSession.canUseProduct else {
+                    presentOnboardingIfNeeded()
+                    return
                 }
-            }
-        } else {
-            CoorditSplashScreen(
-                presentation: splashPresentation,
-                onRouteChange: { nextRoute in
-                    guard backendSession.onboardingComplete else {
-                        presentOnboardingIfNeeded()
-                        return
-                    }
-                    navigate(to: nextRoute)
-                },
-                onAuthenticationRequested: { showsAuthenticationEntry = true }
-            )
-        }
+                navigate(to: nextRoute)
+            },
+            onAuthenticationRequested: { showsAuthenticationEntry = true }
+        )
     }
 
     private var canShowSelectedRoute: Bool {
@@ -447,7 +453,7 @@ struct CoorditRootView: View {
     }
 
     private func presentOnboardingIfNeeded() {
-        guard backendSession.isAuthenticated, !backendSession.onboardingComplete else { return }
+        guard backendSession.isMember, !backendSession.onboardingComplete else { return }
         showsOnboarding = true
     }
 

@@ -56,8 +56,6 @@ final class CoorditTabUITests: XCTestCase {
             "mypage-body-measurements",
             "mypage-privacy-policy",
             "mypage-terms",
-            "mypage-contact",
-            "mypage-bug-report",
             "closet-detail-top",
             "closet-detail-bottom",
         ]

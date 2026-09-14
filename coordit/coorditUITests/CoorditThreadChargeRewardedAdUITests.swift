@@ -106,12 +106,9 @@ final class CoorditThreadChargeRewardedAdUITests: XCTestCase {
     func testSignedOutUserCannotPrepareRewardedAd() throws {
         let app = launchChargeScreen(authenticated: false, scenario: "credited")
         let adCTA = app.buttons["coordit-thread-charge-ad-cta"]
-        XCTAssertTrue(adCTA.waitForExistence(timeout: 5), "Missing rewarded-ad CTA")
-        XCTAssertFalse(adCTA.isEnabled, "Signed-out users cannot prepare or present an ad")
-        XCTAssertTrue(
-            app.staticTexts["광고 보상은 로그인 후 받을 수 있어요."]
-                .waitForExistence(timeout: 5),
-            "Signed-out state must explain why the ad is unavailable"
+        XCTAssertFalse(
+            adCTA.waitForExistence(timeout: 1),
+            "Signed-out users must not see an unavailable rewarded-ad CTA"
         )
         let receipt = waitForReceipt(containing: "prepare-blocked:signed-out", in: app)
         XCTAssertFalse(receipt.contains("attempt-created:"))

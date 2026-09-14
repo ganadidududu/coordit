@@ -175,6 +175,15 @@ final class CoorditRewardedAdService: NSObject, ObservableObject, FullScreenCont
         }
     }
 
+    var isChargeControlVisible: Bool {
+        switch status {
+        case .ready, .presenting, .awaitingServerSettlement, .settled, .failed:
+            true
+        case .idle, .disabled, .readinessUnavailable, .loading, .requiresLogin:
+            false
+        }
+    }
+
     func prepare(
         walletSession liveWalletSession: CoorditRewardedWalletSession,
         currentBalance: Int

@@ -105,6 +105,9 @@ final class CoorditMyPageNestedNavigationUITests: XCTestCase {
     }
 
     func testMusinsaShareSheetCanSendProductToCoordit() throws {
+        guard ProcessInfo.processInfo.environment["COORDIT_RUN_MUSINSA_APP_TEST"] == "1" else {
+            throw XCTSkip("Set COORDIT_RUN_MUSINSA_APP_TEST=1 on a simulator with Musinsa installed.")
+        }
         let musinsa = XCUIApplication(bundleIdentifier: "com.grab.musinsa")
         musinsa.terminate()
         musinsa.launch()
@@ -182,22 +185,34 @@ final class CoorditMyPageNestedNavigationUITests: XCTestCase {
             "--coordit-ui-testing-authenticated",
             "--coordit-thread-balance",
             "36",
+            "--coordit-storekit-fixture",
+            "credited",
+            "--coordit-monetization-readiness",
+            "false",
             "--coordit-start-route",
             "mypage-thread-charge",
         ]
         app.launch()
         assertScreen("mypage-thread-charge", in: app)
 
-        for text in ["실타래 충전", "보유 실타래", "36 실타래", "5 실타래", "10 실타래", "20 실타래", "1,500원", "2,500원", "4,000원"] {
+        for text in ["실타래 충전", "보유 실타래", "36 실타래", "5 실타래", "10 실타래", "20 실타래"] {
             XCTAssertTrue(app.staticTexts[text].waitForExistence(timeout: 5), "Missing visible charge content: \(text)")
+        }
+        for identifier in [
+            "coordit-thread-charge-pack-5-price",
+            "coordit-thread-charge-pack-10-price",
+            "coordit-thread-charge-pack-20-price",
+        ] {
+            let priceLabel = app.staticTexts[identifier]
+            XCTAssertTrue(priceLabel.waitForExistence(timeout: 5), "Missing price label: \(identifier)")
+            XCTAssertEqual(priceLabel.label, "—")
         }
 
         let adCTA = app.buttons["광고 보고 실타래 충전하기"]
-        XCTAssertTrue(adCTA.waitForExistence(timeout: 5), "Missing visible ad CTA")
+        XCTAssertFalse(adCTA.exists, "Unavailable rewarded ads must stay hidden")
 
         let requiredIdentifiers = [
             "coordit-thread-charge-balance",
-            "coordit-thread-charge-ad-cta",
             "coordit-thread-charge-pack-5",
             "coordit-thread-charge-pack-10",
             "coordit-thread-charge-pack-20",
@@ -210,7 +225,6 @@ final class CoorditMyPageNestedNavigationUITests: XCTestCase {
         }
 
         let controls = [
-            "coordit-thread-charge-ad-cta",
             "coordit-thread-charge-pack-5",
             "coordit-thread-charge-pack-10",
             "coordit-thread-charge-pack-20",

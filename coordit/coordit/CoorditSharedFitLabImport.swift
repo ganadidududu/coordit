@@ -131,7 +131,7 @@ enum CoorditSharedFitLabImport {
 }
 
 extension URL {
-    var isHTTPOrHTTPSProductURL: Bool {
+    nonisolated var isHTTPOrHTTPSProductURL: Bool {
         guard let scheme = scheme?.lowercased(),
               scheme == "http" || scheme == "https",
               host(percentEncoded: false) != nil

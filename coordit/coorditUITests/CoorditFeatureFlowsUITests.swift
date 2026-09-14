@@ -28,10 +28,20 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertTrue(element("coordit-splash-auth-sheet", in: app).waitForExistence(timeout: 5))
         let googleLogin = element("splash-auth-google", in: app)
         let appleLogin = element("splash-auth-apple", in: app)
+        let guestLogin = element("splash-auth-guest", in: app)
+        let emailLogin = element("splash-auth-email", in: app)
         XCTAssertTrue(googleLogin.waitForExistence(timeout: 3))
         XCTAssertTrue(googleLogin.isHittable)
         XCTAssertTrue(appleLogin.waitForExistence(timeout: 3))
         XCTAssertTrue(appleLogin.isHittable)
+        XCTAssertTrue(guestLogin.waitForExistence(timeout: 3))
+        XCTAssertTrue(guestLogin.isHittable)
+        XCTAssertTrue(emailLogin.waitForExistence(timeout: 3))
+        XCTAssertTrue(emailLogin.isHittable)
+        let authScreenshot = XCTAttachment(screenshot: app.screenshot())
+        authScreenshot.name = "authentication-sheet-all-methods"
+        authScreenshot.lifetime = .keepAlways
+        add(authScreenshot)
         XCTAssertFalse(element("coordit-auth-backend-status", in: app).exists)
         let emailPasswordNotice = app.staticTexts
             .matching(NSPredicate(format: "label CONTAINS %@", "이메일과 비밀번호"))
@@ -39,23 +49,19 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertFalse(emailPasswordNotice.exists)
     }
 
-    func testAppleSignupSessionTransitionDismissesLoginBeforeProviderTaskFinishes() throws {
+    func testAppleSignupSessionTransitionSurvivesAccountHydrationFailure() throws {
         let app = launchApp(
             at: "splash",
             extraArguments: [
                 "--coordit-welcome-state", "fresh",
-                "--coordit-ui-testing-stalled-apple-auth-success",
+                "--coordit-test-apple-auth-success-hydration-failure",
             ]
         )
 
         app.buttons["splash-signup-entry"].tap()
-        let appleLogin = app.buttons["splash-auth-apple"]
-        XCTAssertTrue(appleLogin.waitForExistence(timeout: 5))
-        appleLogin.tap()
-
         XCTAssertTrue(
-            element("coordit-splash-tap-hint", in: app).waitForExistence(timeout: 5),
-            "A successful Apple session must dismiss the login entry even if post-auth work is still finishing."
+            element("coordit-onboarding-title", in: app).waitForExistence(timeout: 5),
+            "A successful Apple session must continue to onboarding even if account hydration fails."
         )
         XCTAssertFalse(element("coordit-splash-auth-sheet", in: app).exists)
     }
@@ -101,7 +107,10 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
 
         let restored = launchApp(
             at: "splash",
-            extraArguments: ["--coordit-api-base-url", "http://127.0.0.1:45678"]
+            extraArguments: [
+                "--coordit-test-guest-bootstrap",
+                "--coordit-api-base-url", "http://127.0.0.1:45678",
+            ]
         )
         XCTAssertTrue(element("coordit-splash-tap-hint", in: restored).waitForExistence(timeout: 5))
         XCTAssertFalse(restored.buttons["splash-signup-entry"].exists)
@@ -124,8 +133,44 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertTrue(element("coordit-splash-auth-sheet", in: app).waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["splash-auth-google"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["splash-auth-apple"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["splash-auth-guest"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["splash-auth-email"].waitForExistence(timeout: 3))
         XCTAssertFalse(element("coordit-screen-main04", in: app).exists)
         XCTAssertFalse(element("coordit-thread-charge-balance", in: app).exists)
+    }
+
+    func testGuestStartGrantsThreeThreadsAndSurvivesColdRelaunch() throws {
+        addTeardownBlock {
+            let cleanup = self.launchApp(
+                at: "splash",
+                extraArguments: ["--coordit-ui-testing-clear-persisted-session"]
+            )
+            cleanup.terminate()
+        }
+
+        let started = launchApp(
+            at: "splash",
+            extraArguments: [
+                "--coordit-ui-testing-clear-persisted-session",
+                "--coordit-test-guest-bootstrap",
+                "--coordit-welcome-state", "fresh",
+            ]
+        )
+        started.buttons["splash-signup-entry"].tap()
+        let guest = started.buttons["splash-auth-guest"]
+        XCTAssertTrue(guest.waitForExistence(timeout: 5))
+        guest.tap()
+        assertScreen("main04", in: started)
+        started.terminate()
+
+        let restored = launchApp(
+            at: "splash",
+            extraArguments: ["--coordit-api-base-url", "http://127.0.0.1:45678"]
+        )
+        XCTAssertTrue(element("coordit-splash-tap-hint", in: restored).waitForExistence(timeout: 5))
+        XCTAssertFalse(restored.buttons["splash-signup-entry"].exists)
+        element("coordit-screen-splash", in: restored).tap()
+        assertScreen("main04", in: restored)
     }
 
     func testUnauthenticatedThreadChargeRouteCannotRevealThreadBalance() throws {

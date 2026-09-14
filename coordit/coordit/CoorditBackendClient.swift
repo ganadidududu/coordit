@@ -104,26 +104,36 @@ struct CoorditBackendClient {
         try await send(path: "/health", method: "GET", token: nil, body: Optional<String>.none)
     }
 
-    func loginWithGoogle(idToken: String, nonce: String) async throws -> CoorditAuthSession {
+    func login(email: String, password: String) async throws -> CoorditAuthSession {
         try await send(
-            path: "/auth/google",
+            path: "/auth/login",
             method: "POST",
             token: nil,
-            body: GoogleAuthRequest(idToken: idToken, nonce: nonce)
+            body: AuthRequest(email: email, password: password)
         )
     }
 
-    func refreshSession(refreshToken: String) async throws -> CoorditAuthRefreshResponse {
+    func signup(email: String, password: String) async throws -> CoorditAuthSession {
         try await send(
-            path: "/auth/refresh",
+            path: "/auth/signup",
             method: "POST",
             token: nil,
-            body: RefreshSessionRequest(refreshToken: refreshToken)
+            body: AuthRequest(email: email, password: password)
+        )
+    }
+
+    func createGuestSession() async throws -> CoorditAuthSession {
+        try await send(
+            path: "/auth/guest",
+            method: "POST",
+            token: nil,
+            body: Optional<String>.none
         )
     }
 
     func loginWithGoogle(
         idToken: String,
+        nonce: String,
         guestSession: CoorditAuthSession?
     ) async throws -> CoorditAuthSession {
         try await send(
@@ -132,6 +142,7 @@ struct CoorditBackendClient {
             token: guestSession?.accessToken,
             body: GoogleAuthRequest(
                 idToken: idToken,
+                nonce: nonce,
                 guestRefreshToken: guestSession?.refreshToken
             )
         )
@@ -436,6 +447,12 @@ struct CoorditBackendClient {
 private struct GoogleAuthRequest: Encodable {
     let idToken: String
     let nonce: String
+    let guestRefreshToken: String?
+}
+
+private struct AuthRequest: Encodable {
+    let email: String
+    let password: String
 }
 
 private struct AppleAuthRequest: Encodable {
