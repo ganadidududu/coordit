@@ -209,6 +209,14 @@ final class CoorditRewardedAdService: NSObject, ObservableObject, FullScreenCont
             return
         }
 
+        if fixtureScenario == nil {
+            guard await CoorditAdPrivacyService.shared.refreshConsent() else {
+                status = .failed("광고 개인정보 확인이 필요해요. 설정에서 다시 시도해 주세요.")
+                recordFixtureEvent("load-blocked:privacy")
+                return
+            }
+        }
+
         let generation = UUID()
         prepareGeneration = generation
         settledBalance = nil

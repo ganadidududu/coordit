@@ -182,5 +182,8 @@ describe("GET /health", () => {
     expect(body).toContain("word-break: keep-all");
     expect(body).toContain('<span class="nowrap">FIT LAB</span>');
     expect(body).toContain('<span class="nowrap">요청할 수 있습니다</span>');
+    expect(body).toContain("비개인화 보상형 광고");
+    expect(body).toContain("맞춤형 광고와 앱 추적 권한을 사용하지 않습니다");
+    expect(body).toContain("광고 개인정보 설정");
   });
 });

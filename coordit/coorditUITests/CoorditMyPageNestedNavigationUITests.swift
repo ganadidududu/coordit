@@ -68,6 +68,16 @@ final class CoorditMyPageNestedNavigationUITests: XCTestCase {
         XCTAssertLessThan(firstRow.frame.minY - header.frame.maxY, 40)
     }
 
+    func testPrivacyScreenExposesAdvertisingPrivacyOptions() throws {
+        let app = launchApp(at: "mypage-privacy")
+        assertScreen("mypage-privacy", in: app)
+
+        XCTAssertTrue(
+            app.buttons["광고 개인정보 설정"].waitForExistence(timeout: 5),
+            "Users must be able to revisit advertising privacy choices"
+        )
+    }
+
     func testSharedFitLabLaunchURLRoutesToURLInput() throws {
         let sharedURL = "https://www.musinsa.com/products/6252903"
         let app = XCUIApplication()
