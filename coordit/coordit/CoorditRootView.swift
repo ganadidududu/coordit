@@ -265,10 +265,18 @@ struct CoorditRootView: View {
         }
         .fullScreenCover(isPresented: $showsOnboarding) {
             CoorditOnboardingView {
+                guard backendSession.canUseProduct else {
+                    showsOnboarding = false
+                    return true
+                }
+                guard let balance = await backendSession.fetchThreadBalance() else {
+                    return false
+                }
+                threadBalance = balance
                 showsOnboarding = false
-                guard backendSession.canUseProduct else { return }
                 CoorditWelcomeLaunchState.markWelcomeCompleted()
                 navigate(to: .main04)
+                return true
             }
         }
     }

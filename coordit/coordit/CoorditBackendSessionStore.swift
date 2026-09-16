@@ -325,6 +325,12 @@ final class CoorditBackendSessionStore: ObservableObject {
 
     func fetchThreadBalance() async -> Int? {
         #if DEBUG
+        if Self.shouldSimulateThreadBalanceFailure {
+            statusText = "실타래 잔액을 확인하지 못했어요. 다시 시도해 주세요."
+            isWarning = true
+            return nil
+        }
+        if let serverBalance = Self.uiTestingServerThreadBalance { return serverBalance }
         if usesAuthenticatedUITestFixture { return Self.uiTestingThreadBalance ?? 0 }
         #endif
         guard session != nil else { return nil }
@@ -621,6 +627,15 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
     func completeOnboarding(_ request: CoorditOnboardingRequest) async -> Bool {
+#if DEBUG
+        if usesAuthenticatedUITestFixture && Self.shouldSimulateOnboardingCompletion {
+            onboardingComplete = true
+            cacheOnboardingComplete(true)
+            statusText = "나만의 핏 프로필을 저장했어요."
+            isWarning = false
+            return true
+        }
+#endif
         guard let token = session?.accessToken else {
             statusText = "초기 설정은 로그인 후 저장할 수 있어요."
             isWarning = true
@@ -1336,6 +1351,14 @@ final class CoorditBackendSessionStore: ObservableObject {
         ProcessInfo.processInfo.arguments.contains("--coordit-test-guest-bootstrap-failure")
     }
 
+    private static var shouldSimulateOnboardingCompletion: Bool {
+        ProcessInfo.processInfo.arguments.contains("--coordit-test-onboarding-completion-success")
+    }
+
+    private static var shouldSimulateThreadBalanceFailure: Bool {
+        ProcessInfo.processInfo.arguments.contains("--coordit-test-thread-balance-failure")
+    }
+
     private static func configurePersistedSessionFixture(in tokenStore: CoorditBackendTokenStore) {
         let arguments = ProcessInfo.processInfo.arguments
         guard arguments.contains("--coordit-ui-testing") else { return }
@@ -1385,6 +1408,18 @@ final class CoorditBackendSessionStore: ObservableObject {
         let arguments = ProcessInfo.processInfo.arguments
         guard
             let markerIndex = arguments.firstIndex(of: "--coordit-thread-balance"),
+            arguments.indices.contains(arguments.index(after: markerIndex)),
+            let balance = Int(arguments[arguments.index(after: markerIndex)])
+        else {
+            return nil
+        }
+        return max(0, balance)
+    }
+
+    private static var uiTestingServerThreadBalance: Int? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard
+            let markerIndex = arguments.firstIndex(of: "--coordit-server-thread-balance"),
             arguments.indices.contains(arguments.index(after: markerIndex)),
             let balance = Int(arguments[arguments.index(after: markerIndex)])
         else {
