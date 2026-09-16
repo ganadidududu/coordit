@@ -25,6 +25,12 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "coordit-backend" });
 });
 
+app.get("/app-ads.txt", (_req, res) => {
+  res.type("text/plain").send(
+    "google.com, pub-7471774017488090, DIRECT, f08c47fec0942fa0\n"
+  );
+});
+
 app.get("/support", (_req, res) => {
   res.type("html").send(supportPageHtml);
 });

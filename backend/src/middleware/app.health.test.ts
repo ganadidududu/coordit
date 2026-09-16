@@ -119,6 +119,21 @@ describe("GET /health", () => {
     });
   });
 
+  it("serves the authorized AdMob seller record without authentication", async () => {
+    // Given: the backend app is listening without an authenticated user.
+    runningServer = await startApp();
+
+    // When: AdMob requests the app-ads.txt file from the published developer host.
+    const response = await fetch(`http://127.0.0.1:${runningServer.port}/app-ads.txt`);
+
+    // Then: the public plain-text contract exposes the exact authorized seller record.
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/plain; charset=utf-8");
+    await expect(response.text()).resolves.toBe(
+      "google.com, pub-7471774017488090, DIRECT, f08c47fec0942fa0\n"
+    );
+  });
+
   it("serves the public support page without authentication", async () => {
     // Given: the backend app is listening without an authenticated user.
     runningServer = await startApp();
