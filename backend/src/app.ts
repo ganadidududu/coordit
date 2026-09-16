@@ -31,6 +31,10 @@ app.get("/app-ads.txt", (_req, res) => {
   );
 });
 
+app.get("/robots.txt", (_req, res) => {
+  res.type("text/plain").send("User-agent: *\nAllow: /app-ads.txt\n");
+});
+
 app.get("/support", (_req, res) => {
   res.type("html").send(supportPageHtml);
 });

@@ -134,6 +134,21 @@ describe("GET /health", () => {
     );
   });
 
+  it("allows ad crawlers to discover the seller record", async () => {
+    // Given: an ad crawler visits the published developer host without authentication.
+    runningServer = await startApp();
+
+    // When: the crawler requests the standard robots policy before app-ads.txt.
+    const response = await fetch(`http://127.0.0.1:${runningServer.port}/robots.txt`);
+
+    // Then: the public policy explicitly permits discovery of the seller record.
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/plain; charset=utf-8");
+    await expect(response.text()).resolves.toBe(
+      "User-agent: *\nAllow: /app-ads.txt\n"
+    );
+  });
+
   it("serves the public support page without authentication", async () => {
     // Given: the backend app is listening without an authenticated user.
     runningServer = await startApp();
