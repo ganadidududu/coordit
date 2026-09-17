@@ -1,0 +1,242 @@
+package com.inseong.coordit.ui.app
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.inseong.coordit.auth.GoogleCredential
+import com.inseong.coordit.auth.SignInUnavailable
+import com.inseong.coordit.auth.WelcomeStore
+import com.inseong.coordit.data.model.*
+import com.inseong.coordit.data.repository.SessionRepository
+import com.inseong.coordit.data.home.HomeRepository
+import com.inseong.coordit.ui.home.HomeUiState
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import retrofit2.HttpException
+
+enum class AppStage { Restoring, Welcome, Authentication, LoadingAccount, AccountRecovery, Onboarding, ReturningWelcome, Home }
+data class AppState(
+    val stage: AppStage = AppStage.Restoring,
+    val busy: Boolean = false,
+    val error: String? = null,
+    val profile: UserProfile? = null,
+    val body: BodyMeasurement? = null,
+    val threadBalance: Int = 0,
+    val settingsMessage: String? = null,
+    val home: HomeUiState = HomeUiState(),
+)
+
+class AppViewModel(
+    private val session: SessionRepository,
+    private val welcome: WelcomeStore,
+    private val homeRepository: HomeRepository,
+) : ViewModel() {
+    private val mutableState = MutableStateFlow(AppState())
+    val state = mutableState.asStateFlow()
+    private var accountWork: Job? = null
+    private var homeWork: Job? = null
+    private var generation = 0L
+    private var providerAttempt = 0L
+
+    init { restore() }
+
+    fun restore() {
+        accountWork?.cancel()
+        mutableState.value = AppState()
+        accountWork = viewModelScope.launch {
+            try {
+                val restored = session.restore()
+                if (restored == null) signedOut() else loadAccount(returning = true)
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                if (error is HttpException && error.code() in setOf(400, 401, 403)) signedOut()
+                else mutableState.value = AppState(stage = AppStage.AccountRecovery, error = "로그인 상태를 복원하지 못했어요.\n연결을 확인하고 다시 시도해 주세요.")
+            }
+        }
+    }
+    private fun signedOut() {
+        mutableState.value = AppState(stage = if (welcome.hasCompleted()) AppStage.Authentication else AppStage.Welcome)
+    }
+    fun openAuthentication() { mutableState.update { it.copy(stage = AppStage.Authentication, error = null) } }
+    fun backToWelcome() {
+        if (!state.value.busy) mutableState.update { it.copy(stage = AppStage.Welcome, error = null) }
+    }
+    fun beginGoogle(): Long? {
+        if (state.value.busy || state.value.stage != AppStage.Authentication) return null
+        mutableState.update { it.copy(busy = true, error = null) }
+        return ++providerAttempt
+    }
+    fun googleCanceled(attempt: Long) {
+        if (attempt == providerAttempt) { providerAttempt++; mutableState.update { it.copy(busy = false) } }
+    }
+    fun googleFailed(attempt: Long, error: Exception) {
+        if (attempt == providerAttempt) { providerAttempt++; mutableState.update { it.copy(busy = false, error = userError(error)) } }
+    }
+    fun googleCredential(attempt: Long, credential: GoogleCredential) {
+        if (attempt != providerAttempt || !state.value.busy || state.value.stage != AppStage.Authentication) return
+        providerAttempt++
+        accountWork = viewModelScope.launch {
+            try {
+                session.loginGoogle(credential.idToken, credential.rawNonce)
+                // Dismiss authentication as soon as the session is safely persisted.
+                mutableState.update { it.copy(stage = AppStage.LoadingAccount, busy = false, error = null) }
+                loadAccount(returning = false)
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                val stage = if (session.session.value == null) AppStage.Authentication else AppStage.AccountRecovery
+                mutableState.update { it.copy(stage = stage, busy = false, error = userError(error)) }
+            }
+        }
+    }
+    fun appleUnavailable() {
+        if (!state.value.busy) mutableState.update { it.copy(error = "Android에서는 Apple 로그인을 아직 사용할 수 없어요. Google 계정으로 계속해 주세요.") }
+    }
+    fun retryAccount() {
+        if (session.session.value == null) { restore(); return }
+        mutableState.update { it.copy(stage = AppStage.LoadingAccount, error = null) }
+        accountWork = viewModelScope.launch {
+            try { loadAccount(returning = false) }
+            catch (error: Exception) {
+                if (error is CancellationException) throw error
+                mutableState.update { it.copy(stage = AppStage.AccountRecovery, error = userError(error)) }
+            }
+        }
+    }
+    private suspend fun loadAccount(returning: Boolean) {
+        val status = session.loadOnboardingStatus()
+        val profile = optional { session.loadProfile() }
+        val body = optional { session.loadBodyMeasurements().firstOrNull() }
+        mutableState.update {
+            it.copy(profile = profile, body = body, error = null, busy = false,
+                stage = if (!status.onboardingComplete) AppStage.Onboarding else if (returning) AppStage.ReturningWelcome else AppStage.Home)
+        }
+        if (status.onboardingComplete) {
+            welcome.markCompleted()
+            refreshHome()
+        }
+    }
+    fun completeOnboarding(request: OnboardingRequest) {
+        if (state.value.busy || state.value.stage != AppStage.Onboarding) return
+        mutableState.update { it.copy(busy = true, error = null) }
+        accountWork = viewModelScope.launch {
+            try {
+                val result = session.completeOnboarding(request)
+                check(result.onboardingComplete) { "Onboarding incomplete" }
+                welcome.markCompleted()
+                mutableState.update { it.copy(stage = AppStage.Home, busy = false, profile = result.user, error = null) }
+                refreshHome()
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                mutableState.update { it.copy(busy = false, error = userError(error)) }
+            }
+        }
+    }
+    fun enterHome() {
+        if (state.value.stage == AppStage.ReturningWelcome) mutableState.update { it.copy(stage = AppStage.Home) }
+    }
+    fun refreshHome() = updateHome(null)
+    fun refreshMyPage() {
+        if (state.value.busy || session.session.value == null) return
+        mutableState.update { it.copy(busy = true, error = null, settingsMessage = null) }
+        accountWork = viewModelScope.launch {
+            try {
+                val profile = session.loadProfile()
+                val body = optional { session.loadBodyMeasurements().firstOrNull() }
+                val balance = optional { session.loadThreadBalance().availableThreads } ?: state.value.threadBalance
+                mutableState.update { it.copy(profile = profile, body = body, threadBalance = balance, busy = false) }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                mutableState.update { it.copy(busy = false, error = userError(error)) }
+            }
+        }
+    }
+    fun saveProfile(displayName: String) {
+        if (state.value.busy || displayName.trim().isEmpty()) return
+        mutableState.update { it.copy(busy = true, error = null, settingsMessage = null) }
+        accountWork = viewModelScope.launch {
+            try {
+                val profile = session.updateProfile(displayName)
+                mutableState.update { it.copy(profile = profile, busy = false, settingsMessage = "프로필을 저장했어요.") }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                mutableState.update { it.copy(busy = false, error = userError(error)) }
+            }
+        }
+    }
+    fun saveBody(heightCm: Double, weightKg: Double) {
+        if (state.value.busy || heightCm !in 80.0..250.0 || weightKg !in 20.0..300.0) return
+        mutableState.update { it.copy(busy = true, error = null, settingsMessage = null) }
+        accountWork = viewModelScope.launch {
+            try {
+                val body = session.createBodyMeasurement(heightCm, weightKg)
+                mutableState.update { it.copy(body = body, busy = false, settingsMessage = "신체 정보를 저장했어요.") }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                mutableState.update { it.copy(busy = false, error = userError(error)) }
+            }
+        }
+    }
+    fun clearSettingsMessage() { mutableState.update { it.copy(error = null, settingsMessage = null) } }
+    fun saveReferences(ids: Set<String>) = updateHome(ids)
+    private fun updateHome(ids: Set<String>?) {
+        val token = session.session.value?.accessToken ?: return
+        if (state.value.home.saving) return
+        homeWork?.cancel()
+        val current = generation
+        mutableState.update { it.copy(home = it.home.copy(loading = ids == null, saving = ids != null, error = null)) }
+        homeWork = viewModelScope.launch {
+            try {
+                val snapshot = if (ids == null) homeRepository.load(token) else homeRepository.saveSelection(token, ids)
+                if (generation == current) mutableState.update { it.copy(home = HomeUiState(snapshot = snapshot)) }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                if (generation == current) mutableState.update { it.copy(home = it.home.copy(loading = false, saving = false, error = userError(error))) }
+            }
+        }
+    }
+    fun logout(clearProvider: suspend () -> Unit = {}) {
+        accountWork?.cancel(); homeWork?.cancel(); generation++; providerAttempt++
+        mutableState.update { it.copy(busy = true, error = null) }
+        accountWork = viewModelScope.launch {
+            try {
+                session.logout()
+                signedOut()
+                try { clearProvider() } catch (error: Exception) { if (error is CancellationException) throw error }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                mutableState.update { it.copy(busy = false, error = "로그아웃하지 못했어요. 다시 시도해 주세요.") }
+            }
+        }
+    }
+    fun deleteAccount(clearProvider: suspend () -> Unit = {}) {
+        if (state.value.busy) return
+        accountWork?.cancel(); homeWork?.cancel(); generation++; providerAttempt++
+        mutableState.update { it.copy(busy = true, error = null, settingsMessage = null) }
+        accountWork = viewModelScope.launch {
+            try {
+                session.deleteAccount()
+                signedOut()
+                try { clearProvider() } catch (error: Exception) { if (error is CancellationException) throw error }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                mutableState.update { it.copy(busy = false, error = userError(error)) }
+            }
+        }
+    }
+    private suspend fun <T> optional(block: suspend () -> T): T? = try { block() }
+    catch (error: Exception) { if (error is CancellationException) throw error; null }
+}
+
+internal fun userError(error: Exception): String = when (error) {
+    is SignInUnavailable -> error.message ?: "로그인할 수 없어요. 다시 시도해 주세요."
+    is HttpException -> when (error.code()) {
+        401, 403 -> "로그인 정보를 확인할 수 없어요. 다시 로그인해 주세요."
+        400, 422 -> "입력 정보를 확인해 주세요."
+        429 -> "요청이 많아요. 잠시 후 다시 시도해 주세요."
+        else -> "서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요."
+    }
+    else -> "처리하지 못했어요.\n연결을 확인하고 다시 시도해 주세요."
+}
