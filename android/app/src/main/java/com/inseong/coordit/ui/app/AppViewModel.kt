@@ -1,5 +1,6 @@
 package com.inseong.coordit.ui.app
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.inseong.coordit.auth.GoogleCredential
@@ -9,8 +10,12 @@ import com.inseong.coordit.data.model.*
 import com.inseong.coordit.data.repository.SessionRepository
 import com.inseong.coordit.data.home.HomeRepository
 import com.inseong.coordit.ui.home.HomeUiState
+import com.inseong.coordit.ui.threadcharge.DisabledRewardedAdGateway
+import com.inseong.coordit.ui.threadcharge.RewardedAdCallbacks
+import com.inseong.coordit.ui.threadcharge.RewardedAdGateway
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +23,13 @@ import kotlinx.coroutines.flow.update
 import retrofit2.HttpException
 
 enum class AppStage { Restoring, Welcome, Authentication, LoadingAccount, AccountRecovery, Onboarding, ReturningWelcome, Home }
+enum class ThreadChargeStatus { Idle, LoadingAd, Ready, Presenting, AwaitingSettlement, Failed, Disabled }
+data class ThreadChargeState(
+    val status: ThreadChargeStatus = ThreadChargeStatus.Idle,
+    val message: String? = null,
+) {
+    val canWatchAd: Boolean get() = status == ThreadChargeStatus.Ready
+}
 data class AppState(
     val stage: AppStage = AppStage.Restoring,
     val busy: Boolean = false,
@@ -25,6 +37,7 @@ data class AppState(
     val profile: UserProfile? = null,
     val body: BodyMeasurement? = null,
     val threadBalance: Int = 0,
+    val threadCharge: ThreadChargeState = ThreadChargeState(),
     val settingsMessage: String? = null,
     val home: HomeUiState = HomeUiState(),
 )
@@ -33,6 +46,7 @@ class AppViewModel(
     private val session: SessionRepository,
     private val welcome: WelcomeStore,
     private val homeRepository: HomeRepository,
+    private val rewardedAds: RewardedAdGateway = DisabledRewardedAdGateway,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(AppState())
     val state = mutableState.asStateFlow()
@@ -40,6 +54,10 @@ class AppViewModel(
     private var homeWork: Job? = null
     private var generation = 0L
     private var providerAttempt = 0L
+    private var rewardWork: Job? = null
+    private var rewardAttemptToken = 0L
+    private var rewardBalanceBefore = 0
+    private var rewardEarned = false
 
     init { restore() }
 
@@ -180,6 +198,84 @@ class AppViewModel(
         }
     }
     fun clearSettingsMessage() { mutableState.update { it.copy(error = null, settingsMessage = null) } }
+    fun openThreadCharge() {
+        when (state.value.threadCharge.status) {
+            ThreadChargeStatus.LoadingAd, ThreadChargeStatus.Ready, ThreadChargeStatus.Presenting, ThreadChargeStatus.AwaitingSettlement -> return
+            else -> prepareRewardedAd()
+        }
+    }
+    fun retryRewardedAd() = prepareRewardedAd()
+    fun showRewardedAd(activity: Activity) {
+        if (!state.value.threadCharge.canWatchAd) return
+        rewardBalanceBefore = state.value.threadBalance
+        rewardEarned = false
+        mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.Presenting, "광고를 표시하고 있어요.")) }
+        rewardedAds.show(activity)
+    }
+    private fun prepareRewardedAd(message: String = "광고를 준비하고 있어요.") {
+        rewardWork?.cancel()
+        if (session.session.value == null) {
+            mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.Failed, "광고 보상은 로그인 후 받을 수 있어요.")) }
+            return
+        }
+        if (!rewardedAds.isAvailable) {
+            mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.Disabled, "광고 보상은 현재 준비 중이에요.")) }
+            return
+        }
+        val token = ++rewardAttemptToken
+        mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.LoadingAd, message)) }
+        rewardWork = viewModelScope.launch {
+            try {
+                val attempt = session.createThreadRewardAttempt()
+                if (token != rewardAttemptToken) return@launch
+                rewardedAds.prepare(attempt.attemptId, rewardedAdCallbacks(token))
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                if (token == rewardAttemptToken) rewardFailed("광고를 준비하지 못했어요. 잠시 후 다시 시도해 주세요.")
+            }
+        }
+    }
+    private fun rewardedAdCallbacks(token: Long) = RewardedAdCallbacks(
+        onReady = {
+            if (token == rewardAttemptToken) mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.Ready)) }
+        },
+        onRewarded = {
+            if (token == rewardAttemptToken) {
+                rewardEarned = true
+                mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.AwaitingSettlement, "실타래 지급을 확인하고 있어요.")) }
+                settleReward(token)
+            }
+        },
+        onDismissed = { earnedReward ->
+            if (token == rewardAttemptToken && !earnedReward && !rewardEarned) {
+                rewardFailed("광고를 끝까지 시청한 뒤 다시 시도해 주세요.")
+            }
+        },
+        onFailure = {
+            if (token == rewardAttemptToken) rewardFailed(it)
+        },
+    )
+    private fun settleReward(token: Long) {
+        rewardWork?.cancel()
+        rewardWork = viewModelScope.launch {
+            repeat(8) {
+                delay(2_000)
+                val updatedBalance = try { session.loadThreadBalance().availableThreads }
+                catch (error: Exception) { if (error is CancellationException) throw error; null }
+                if (token != rewardAttemptToken) return@launch
+                if (updatedBalance != null && updatedBalance > rewardBalanceBefore) {
+                    mutableState.update { it.copy(threadBalance = updatedBalance) }
+                    prepareRewardedAd("실타래가 충전됐어요. 다음 광고를 준비하고 있어요.")
+                    return@launch
+                }
+            }
+            if (token == rewardAttemptToken) rewardFailed("실타래 지급 확인이 지연되고 있어요. 잠시 뒤 다시 시도해 주세요.")
+        }
+    }
+    private fun rewardFailed(message: String) {
+        rewardedAds.clear()
+        mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.Failed, message)) }
+    }
     fun saveReferences(ids: Set<String>) = updateHome(ids)
     private fun updateHome(ids: Set<String>?) {
         val token = session.session.value?.accessToken ?: return
@@ -198,7 +294,7 @@ class AppViewModel(
         }
     }
     fun logout(clearProvider: suspend () -> Unit = {}) {
-        accountWork?.cancel(); homeWork?.cancel(); generation++; providerAttempt++
+        accountWork?.cancel(); homeWork?.cancel(); rewardWork?.cancel(); rewardedAds.clear(); generation++; providerAttempt++; rewardAttemptToken++
         mutableState.update { it.copy(busy = true, error = null) }
         accountWork = viewModelScope.launch {
             try {
@@ -213,7 +309,7 @@ class AppViewModel(
     }
     fun deleteAccount(clearProvider: suspend () -> Unit = {}) {
         if (state.value.busy) return
-        accountWork?.cancel(); homeWork?.cancel(); generation++; providerAttempt++
+        accountWork?.cancel(); homeWork?.cancel(); rewardWork?.cancel(); rewardedAds.clear(); generation++; providerAttempt++; rewardAttemptToken++
         mutableState.update { it.copy(busy = true, error = null, settingsMessage = null) }
         accountWork = viewModelScope.launch {
             try {

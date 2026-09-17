@@ -89,12 +89,13 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
         }
     }
     if (accountVisible) {
-        MyPageScreen(state.profile, state.body, state.threadBalance, state.busy, state.error, state.settingsMessage,
+        MyPageScreen(state.profile, state.body, state.threadBalance, state.threadCharge, state.busy, state.error, state.settingsMessage,
             onBack = { accountVisible = false },
             onHome = { accountVisible = false; nav.navigate(AppStage.Home.name) { popUpTo(AppStage.Home.name); launchSingleTop = true }; model.refreshHome() },
             onCloset = { accountVisible = false; closetModel?.load(); nav.navigate("Closet") { popUpTo(AppStage.Home.name) } },
             onFitLab = { accountVisible = false; fitLabModel?.open(); nav.navigate("FitLab") { popUpTo(AppStage.Home.name) } },
-            onRefresh = model::refreshMyPage, onSaveProfile = model::saveProfile, onSaveBody = model::saveBody,
+            onRefresh = model::refreshMyPage, onOpenThreadCharge = model::openThreadCharge, onShowRewardedAd = model::showRewardedAd, onRetryRewardedAd = model::retryRewardedAd,
+            onSaveProfile = model::saveProfile, onSaveBody = model::saveBody,
             onLogout = onLogout, onDeleteAccount = onDeleteAccount, onClearMessage = model::clearSettingsMessage)
     }
     unavailableFeature?.let { feature ->

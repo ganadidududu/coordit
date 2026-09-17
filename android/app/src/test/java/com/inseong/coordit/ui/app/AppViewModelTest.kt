@@ -7,6 +7,8 @@ import com.inseong.coordit.data.local.SessionStore
 import com.inseong.coordit.data.model.*
 import com.inseong.coordit.data.remote.CoorditApi
 import com.inseong.coordit.data.repository.SessionRepository
+import com.inseong.coordit.ui.threadcharge.RewardedAdCallbacks
+import com.inseong.coordit.ui.threadcharge.RewardedAdGateway
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,7 +30,7 @@ class AppViewModelTest {
     private val welcome = MemoryWelcomeStore()
     private val homeApi = FakeHomeApi()
     private val session = SessionRepository(api, store)
-    private fun model() = AppViewModel(session, welcome, HomeRepository(homeApi))
+    private fun model(rewardedAds: RewardedAdGateway = TestRewardedAdGateway()) = AppViewModel(session, welcome, HomeRepository(homeApi), rewardedAds)
 
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun teardown() { Dispatchers.resetMain() }
@@ -139,6 +141,24 @@ class AppViewModelTest {
         assertNull(model.state.value.error)
         assertEquals(1, homeApi.loadCalls)
         assertEquals(onboardingRequest, api.submitted)
+    }
+
+    @Test fun rewardedAdOnlyUpdatesBalanceAfterServerSettlement() = runTest {
+        store.value = savedSession
+        val rewardedAds = TestRewardedAdGateway()
+        api.rewardBalance = 1
+        val model = model(rewardedAds)
+        runCurrent()
+        model.openThreadCharge()
+        runCurrent()
+        assertEquals(ThreadChargeStatus.Ready, model.state.value.threadCharge.status)
+        rewardedAds.reward()
+        assertEquals(ThreadChargeStatus.AwaitingSettlement, model.state.value.threadCharge.status)
+        advanceTimeBy(2_000)
+        runCurrent()
+        assertEquals(1, model.state.value.threadBalance)
+        assertEquals(ThreadChargeStatus.Ready, model.state.value.threadCharge.status)
+        assertEquals(2, api.rewardAttempts)
     }
 
     @Test fun incompleteSubmissionResponseDoesNotUnlockHome() = runTest {
@@ -308,6 +328,8 @@ class AppViewModelTest {
         var profileCalls = 0
         var googleCalls = 0
         var submitted: OnboardingRequest? = null
+        var rewardBalance = 0
+        var rewardAttempts = 0
         override suspend fun refresh(request: RefreshAuthRequest) = refreshResult()
         override suspend fun loginGoogle(request: SocialAuthRequest): AuthSession { googleCalls++; return savedSession }
         override suspend fun loginApple(request: SocialAuthRequest): AuthSession = error("Unexpected Apple request")
@@ -321,8 +343,23 @@ class AppViewModelTest {
         }
         override suspend fun bodyMeasurements(authorization: String) = listOf(BodyMeasurement(id = "body", heightCm = 170.0))
         override suspend fun createBodyMeasurement(authorization: String, request: BodyMeasurementRequest) = BodyMeasurement("body-new", request.heightCm, request.weightKg)
-        override suspend fun threadBalance(authorization: String) = ThreadBalanceResponse(0)
+        override suspend fun threadBalance(authorization: String) = ThreadBalanceResponse(rewardBalance)
+        override suspend fun createThreadRewardAttempt(authorization: String): ThreadRewardAttempt {
+            rewardAttempts++
+            return ThreadRewardAttempt("attempt-$rewardAttempts", "2026-09-17T00:10:00Z", "pending")
+        }
         override suspend fun health() = BackendHealth(true, "test")
+    }
+    private class TestRewardedAdGateway : RewardedAdGateway {
+        private var callbacks: RewardedAdCallbacks? = null
+        override val isAvailable = true
+        override fun prepare(customData: String, callbacks: RewardedAdCallbacks) {
+            this.callbacks = callbacks
+            callbacks.onReady()
+        }
+        override fun show(activity: android.app.Activity) = Unit
+        override fun clear() { callbacks = null }
+        fun reward() { requireNotNull(callbacks).onRewarded() }
     }
     private class FakeHomeApi : HomeApi {
         var loadCalls = 0

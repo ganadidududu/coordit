@@ -21,4 +21,5 @@ interface CoorditApi {
     @GET("body-measurements") suspend fun bodyMeasurements(@Header("Authorization") authorization: String): List<BodyMeasurement>
     @POST("body-measurements") suspend fun createBodyMeasurement(@Header("Authorization") authorization: String, @Body request: BodyMeasurementRequest): BodyMeasurement
     @GET("thread-wallet/balance") suspend fun threadBalance(@Header("Authorization") authorization: String): ThreadBalanceResponse
+    @POST("thread-wallet/reward-attempts") suspend fun createThreadRewardAttempt(@Header("Authorization") authorization: String): ThreadRewardAttempt
 }

@@ -45,6 +45,7 @@ class SessionRepository(private val api: CoorditApi, private val store: SessionS
     suspend fun loadOnboardingStatus(): OnboardingStatus = api.onboardingStatus(authorization())
     suspend fun completeOnboarding(request: OnboardingRequest): OnboardingCompletion = api.completeOnboarding(authorization(), request)
     suspend fun loadThreadBalance(): ThreadBalanceResponse = api.threadBalance(authorization())
+    suspend fun createThreadRewardAttempt(): ThreadRewardAttempt = api.createThreadRewardAttempt(authorization())
     suspend fun loadBodyMeasurements(): List<BodyMeasurement> = api.bodyMeasurements(authorization())
     suspend fun createBodyMeasurement(heightCm: Double, weightKg: Double): BodyMeasurement =
         api.createBodyMeasurement(authorization(), BodyMeasurementRequest(heightCm, weightKg))

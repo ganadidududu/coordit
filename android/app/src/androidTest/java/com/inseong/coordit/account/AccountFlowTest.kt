@@ -111,6 +111,7 @@ class AccountFlowTest {
         override suspend fun bodyMeasurements(authorization: String) = emptyList<BodyMeasurement>()
         override suspend fun createBodyMeasurement(authorization: String, request: BodyMeasurementRequest) = BodyMeasurement("body", request.heightCm, request.weightKg)
         override suspend fun threadBalance(authorization: String) = ThreadBalanceResponse(0)
+        override suspend fun createThreadRewardAttempt(authorization: String) = ThreadRewardAttempt("attempt", "2026-09-17T00:10:00Z", "pending")
     }
     private class EmptyHome : HomeApi {
         override suspend fun clothing(authorization: String) = emptyList<HomeClothingResponse>()

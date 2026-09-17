@@ -5,6 +5,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.inseong.coordit.data.model.BodyMeasurement
 import com.inseong.coordit.data.model.UserProfile
 import com.inseong.coordit.preview.AccountPreviewActivity
+import com.inseong.coordit.ui.app.ThreadChargeState
+import com.inseong.coordit.ui.app.ThreadChargeStatus
 import com.inseong.coordit.ui.mypage.MyPageScreen
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -22,14 +24,16 @@ class MyPageFlowTest {
         compose.setContent {
             MyPageScreen(
                 profile = UserProfile("user", "coordit@example.com", "코디터", "female", "1998-04-12"),
-                body = BodyMeasurement("body", 165.5, 54.2), threadBalance = 7, busy = false,
+                body = BodyMeasurement("body", 165.5, 54.2), threadBalance = 7,
+                threadCharge = ThreadChargeState(ThreadChargeStatus.Ready), busy = false,
                 error = null, message = null, onBack = {}, onHome = {}, onCloset = {}, onFitLab = {}, onRefresh = {},
+                onOpenThreadCharge = {}, onShowRewardedAd = {}, onRetryRewardedAd = {},
                 onSaveProfile = { savedName = it }, onSaveBody = { h, w -> savedBody = h to w },
                 onLogout = { loggedOut = true }, onDeleteAccount = { deleted = true }, onClearMessage = {},
             )
         }
         capture("01-root")
-        click("thread-charge"); compose.onNodeWithText("Google Play 결제 연결을 준비하고 있어요. 현재 잔액은 7개예요.").assertExists(); capture("02-charge"); compose.onNodeWithText("확인").performClick()
+        click("thread-charge"); compose.onNodeWithTag("thread-charge-rewarded-ad").assertExists(); compose.onNodeWithTag("thread-charge-purchase-notice").assertExists(); capture("02-charge"); click("mypage-back")
 
         click("mypage-settings"); capture("13-settings"); click("mypage-back")
 

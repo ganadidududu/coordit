@@ -1,7 +1,9 @@
 package com.inseong.coordit.ui.mypage
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -12,6 +14,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -23,6 +26,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -41,6 +45,8 @@ import com.inseong.coordit.BuildConfig
 import com.inseong.coordit.R
 import com.inseong.coordit.data.model.BodyMeasurement
 import com.inseong.coordit.data.model.UserProfile
+import com.inseong.coordit.ui.app.ThreadChargeState
+import com.inseong.coordit.ui.app.ThreadChargeStatus
 import com.inseong.coordit.ui.components.*
 import com.inseong.coordit.ui.theme.*
 import java.text.DecimalFormat
@@ -48,22 +54,31 @@ import java.text.DecimalFormat
 private enum class Page(val title: String) {
     Root("MY PAGE"), Account("계정"), Profile("프로필 수정"), Password("비밀번호 변경"), Logout("로그아웃"),
     Delete("회원탈퇴"), Body("내 신체 정보"), BodyEdit("신체 정보 수정"), Notifications("알림"),
-    Privacy("개인정보/보안"), Policy("개인정보 처리방침"), Terms("서비스 이용약관"), Settings("앱 설정")
+    Privacy("개인정보/보안"), Policy("개인정보 처리방침"), Terms("서비스 이용약관"), Settings("앱 설정"),
+    ThreadCharge("실타래 충전")
 }
 
 @Composable
 fun MyPageScreen(
-    profile: UserProfile?, body: BodyMeasurement?, threadBalance: Int, busy: Boolean,
+    profile: UserProfile?, body: BodyMeasurement?, threadBalance: Int, threadCharge: ThreadChargeState, busy: Boolean,
     error: String?, message: String?, onBack: () -> Unit, onHome: () -> Unit,
     onCloset: () -> Unit, onFitLab: () -> Unit, onRefresh: () -> Unit,
+    onOpenThreadCharge: () -> Unit, onShowRewardedAd: (Activity) -> Unit, onRetryRewardedAd: () -> Unit,
     onSaveProfile: (String) -> Unit, onSaveBody: (Double, Double) -> Unit,
     onLogout: () -> Unit, onDeleteAccount: () -> Unit, onClearMessage: () -> Unit,
 ) {
     var page by rememberSaveable { mutableStateOf(Page.Root) }
-    var chargeNotice by rememberSaveable { mutableStateOf(false) }
+    val contentScroll = rememberScrollState()
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
-    LaunchedEffect(page) { focusManager.clearFocus(force = true); keyboard?.hide() }
+    LaunchedEffect(page) {
+        focusManager.clearFocus(force = true)
+        keyboard?.hide()
+        contentScroll.scrollTo(0)
+    }
+    LaunchedEffect(threadCharge.status) {
+        if (page == Page.ThreadCharge) contentScroll.scrollTo(0)
+    }
     val leave = { if (page == Page.Root) onBack() else { page = parent(page); onClearMessage() } }
     BackHandler(enabled = !busy, onBack = leave)
     BoxWithConstraints(Modifier.fillMaxSize().testTag("mypage-screen")) {
@@ -71,10 +86,14 @@ fun MyPageScreen(
         SharedAppBackground(scale)
         Column(Modifier.fillMaxSize().padding(top = (78 * scale).dp, bottom = (84 * scale).dp), horizontalAlignment = Alignment.CenterHorizontally) {
             BackTitleCard(page.title, scale, leave, Modifier.testTag("mypage-back"))
-            key(page) { Column(Modifier.widthIn(max = (372 * scale).dp).fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())
+            key(page) { Column(Modifier.widthIn(max = (372 * scale).dp).fillMaxWidth().weight(1f).verticalScroll(contentScroll)
                 .padding(horizontal = (1 * scale).dp, vertical = (13 * scale).dp), verticalArrangement = Arrangement.spacedBy((12 * scale).dp)) {
                 when (page) {
-                    Page.Root -> RootPage(scale, profile, threadBalance, onRefresh, { chargeNotice = true }) { page = it }
+                    Page.Root -> RootPage(scale, profile, threadBalance, onRefresh, {
+                        page = Page.ThreadCharge
+                        onOpenThreadCharge()
+                    }) { page = it }
+                    Page.ThreadCharge -> ThreadChargePage(scale, threadBalance, threadCharge, onShowRewardedAd, onRetryRewardedAd)
                     Page.Account -> AccountPage(scale, profile) { page = it }
                     Page.Profile -> ProfilePage(scale, profile, busy, onSaveProfile)
                     Page.Password -> InfoPage(scale, "소셜 로그인 계정", "Google 계정으로 로그인하고 있어 별도의 비밀번호를 사용하지 않아요. 비밀번호는 Google 계정에서 변경할 수 있어요.")
@@ -97,7 +116,6 @@ fun MyPageScreen(
         CoorditBottomNavigation(null, scale, { tab -> when (tab) {
             CoorditTab.Home -> onHome(); CoorditTab.FitLab -> onFitLab(); CoorditTab.Closet -> onCloset()
         } }, Modifier.align(Alignment.BottomCenter))
-        if (chargeNotice) CoorditDialog("실타래 충전", "Google Play 결제 연결을 준비하고 있어요. 현재 잔액은 ${threadBalance}개예요.", { chargeNotice = false })
     }
 }
 
@@ -131,6 +149,94 @@ private fun parent(page: Page) = when (page) {
         Menu(Page.Privacy, "개인정보/보안", "정책, 약관, 데이터 동의", R.drawable.coordit_mypage_privacy),
         Menu(Page.Settings, "앱 설정", "알림, 버전, 문의", R.drawable.coordit_mypage_settings),
     ), open)
+}
+
+@Composable
+private fun ThreadChargePage(
+    scale: Float,
+    balance: Int,
+    charge: ThreadChargeState,
+    showRewardedAd: (Activity) -> Unit,
+    retryRewardedAd: () -> Unit,
+) {
+    val activity = LocalContext.current.findActivity()
+    Box(
+        Modifier.fillMaxWidth().background(AppColors.panel, RoundedCornerShape((10 * scale).dp))
+            .padding(horizontal = (18 * scale).dp, vertical = (18 * scale).dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size((54 * scale).dp).background(AppColors.settingsValue, CircleShape), contentAlignment = Alignment.Center) {
+                Image(painterResource(R.drawable.coordit_yarn), null, Modifier.size((48 * scale).dp))
+            }
+            Spacer(Modifier.width((12 * scale).dp))
+            Column(verticalArrangement = Arrangement.spacedBy((4 * scale).dp)) {
+                CoorditText("보유 실타래", CoorditTypography.gmarketBold(12 * scale).copy(color = AppColors.muted))
+                CoorditText("${balance} 실타래", CoorditTypography.gmarketBold(29 * scale))
+            }
+        }
+    }
+    Pressable(
+        onClick = { activity?.let(showRewardedAd) },
+        enabled = charge.canWatchAd && activity != null,
+        cornerRadius = 10 * scale,
+        modifier = Modifier.fillMaxWidth().testTag("thread-charge-rewarded-ad"),
+    ) {
+        Row(
+            Modifier.fillMaxWidth().height((70 * scale).dp)
+                .background(Brush.verticalGradient(listOf(AppColors.chargeGradientTop, AppColors.ink, AppColors.chargeGradientEnd)))
+                .padding(horizontal = (15 * scale).dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(Modifier.size((40 * scale).dp).background(Color.White.copy(alpha = .14f), RoundedCornerShape((8 * scale).dp)), contentAlignment = Alignment.Center) {
+                Image(painterResource(R.drawable.coordit_recharge_play), null, Modifier.size((24 * scale).dp))
+            }
+            Spacer(Modifier.width((12 * scale).dp))
+            CoorditText("광고 보고 실타래 충전하기", CoorditTypography.gmarketBold(16 * scale).copy(color = Color.White), Modifier.weight(1f))
+            CoorditText("›", CoorditTypography.gmarketBold(26 * scale).copy(color = Color.White))
+        }
+    }
+    charge.message?.let { status ->
+        CoorditText(status, CoorditTypography.gmarketMedium(10 * scale).copy(color = AppColors.muted), Modifier.fillMaxWidth().testTag("thread-charge-status"))
+    }
+    if (charge.status == ThreadChargeStatus.Failed) {
+        CoorditButton("광고 다시 준비하기", retryRewardedAd, modifier = Modifier.testTag("thread-charge-retry"), secondary = true)
+    }
+    CoorditText("패키지 구매는 출시 준비 중이에요.", CoorditTypography.gmarketMedium(10 * scale).copy(color = AppColors.muted), Modifier.fillMaxWidth().testTag("thread-charge-purchase-notice"))
+    listOf(
+        "5 실타래" to "1,500원",
+        "10 실타래" to "2,500원",
+        "20 실타래" to "4,000원",
+    ).forEachIndexed { index, (amount, price) ->
+        ThreadPackageRow(amount, price, highlighted = index == 1, scale = scale, tag = "thread-charge-pack-${index + 1}")
+    }
+}
+
+@Composable
+private fun ThreadPackageRow(amount: String, price: String, highlighted: Boolean, scale: Float, tag: String) {
+    Pressable({}, enabled = false, cornerRadius = 10 * scale, modifier = Modifier.fillMaxWidth().testTag(tag)) {
+        Row(
+            Modifier.fillMaxWidth().height((76 * scale).dp).background(AppColors.panel, RoundedCornerShape((10 * scale).dp))
+                .border(if (highlighted) (2 * scale).dp else 1.dp, if (highlighted) AppColors.warmLine else AppColors.line, RoundedCornerShape((10 * scale).dp))
+                .padding(horizontal = (16 * scale).dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(painterResource(R.drawable.coordit_yarn), null, Modifier.size((50 * scale).dp))
+            Spacer(Modifier.width((12 * scale).dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy((3 * scale).dp)) {
+                CoorditText(amount, CoorditTypography.gmarketBold(16 * scale))
+                CoorditText("실타래 충전", CoorditTypography.gmarketMedium(9 * scale).copy(color = AppColors.muted))
+            }
+            Box(Modifier.height((31 * scale).dp).background(AppColors.ink, CircleShape).padding(horizontal = (12 * scale).dp), contentAlignment = Alignment.Center) {
+                CoorditText(price, CoorditTypography.gmarketBold(13 * scale).copy(color = Color.White))
+            }
+        }
+    }
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
 
 private data class Menu(val page: Page, val title: String, val subtitle: String, val icon: Int)

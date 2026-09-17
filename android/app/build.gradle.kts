@@ -6,6 +6,10 @@ plugins {
 fun quoted(value: String) = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 val debugApi = providers.gradleProperty("COORDIT_API_BASE_URL").orElse("http://10.0.2.2:4000/")
 val releaseApi = providers.gradleProperty("COORDIT_RELEASE_API_BASE_URL").orElse("https://unconfigured.invalid/")
+val debugAdMobAppId = "ca-app-pub-3940256099942544~3347511713"
+val debugRewardedAdUnitId = "ca-app-pub-3940256099942544/5224354917"
+val releaseAdMobAppId = providers.gradleProperty("ADMOB_APP_ID").orElse("")
+val releaseRewardedAdUnitId = providers.gradleProperty("ADMOB_REWARDED_AD_UNIT_ID").orElse("")
 require(releaseApi.get().startsWith("https://")) { "Release API URL must use HTTPS" }
 android {
     namespace = "com.inseong.coordit"
@@ -23,12 +27,19 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             buildConfigField("String", "API_BASE_URL", quoted(debugApi.get()))
+            buildConfigField("String", "ADMOB_REWARDED_AD_UNIT_ID", quoted(debugRewardedAdUnitId))
+            buildConfigField("boolean", "ADMOB_REWARDED_ENABLED", "true")
             manifestPlaceholders["cleartextAllowed"] = "true"
+            manifestPlaceholders["adMobApplicationId"] = debugAdMobAppId
         }
         release {
             isMinifyEnabled = false
             buildConfigField("String", "API_BASE_URL", quoted(releaseApi.get()))
+            buildConfigField("String", "ADMOB_REWARDED_AD_UNIT_ID", quoted(releaseRewardedAdUnitId.get()))
+            buildConfigField("boolean", "ADMOB_REWARDED_ENABLED", (releaseAdMobAppId.get().isNotBlank() && releaseRewardedAdUnitId.get().isNotBlank()).toString())
             manifestPlaceholders["cleartextAllowed"] = "false"
+            // The SDK is never initialized in this variant until both production values above are supplied.
+            manifestPlaceholders["adMobApplicationId"] = releaseAdMobAppId.get().ifBlank { debugAdMobAppId }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -48,6 +59,8 @@ dependencies {
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    // 24.x is compiled with newer Kotlin metadata; 23.6.0 remains compatible with Kotlin 2.0.21.
+    implementation("com.google.android.gms:play-services-ads:23.6.0")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")

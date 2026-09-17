@@ -42,6 +42,11 @@ data class OnboardingRequest(
 }
 data class BackendHealth(val ok: Boolean, val service: String)
 data class ThreadBalanceResponse(val availableThreads: Int)
+data class ThreadRewardAttempt(
+    val attemptId: String,
+    val expiresAt: String,
+    val status: String,
+)
 data class UpdateProfileRequest(val displayName: String)
 data class BodyMeasurementRequest(
     val heightCm: Double,
