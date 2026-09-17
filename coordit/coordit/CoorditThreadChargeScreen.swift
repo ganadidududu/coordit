@@ -9,6 +9,8 @@ extension CoorditMyPageFamilyView {
     ) -> some View {
         let rewardedAdEnabled = backendSession.canUseRewardedAds
             && rewardedAdService.isActionEnabled
+        let rewardedAdVisible = backendSession.canUseRewardedAds
+            && rewardedAdService.isChargeControlVisible
         let purchasesEnabled = backendSession.canUseInAppPurchases && threadPurchaseService.isReady
         let purchaseMessage = backendSession.canUseInAppPurchases
             ? threadPurchaseService.state.message
@@ -69,88 +71,90 @@ extension CoorditMyPageFamilyView {
                 .padding(.bottom, contentMetrics.value(4))
             }
 
-            Button {
-                guard backendSession.canUseRewardedAds,
-                      rewardedAdService.isActionEnabled
-                else {
-                    return
-                }
-                if rewardedAdService.isReady {
-                    rewardedAdService.present(currentBalance: threadBalance)
-                } else {
-                    Task {
-                        await prepareRewardedAd()
+            if rewardedAdVisible {
+                Button {
+                    guard backendSession.canUseRewardedAds,
+                          rewardedAdService.isActionEnabled
+                    else {
+                        return
                     }
-                }
-            } label: {
-                HStack(spacing: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adContentSpacing)) {
-                    ZStack {
+                    if rewardedAdService.isReady {
+                        rewardedAdService.present(currentBalance: threadBalance)
+                    } else {
+                        Task {
+                            await prepareRewardedAd()
+                        }
+                    }
+                } label: {
+                    HStack(spacing: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adContentSpacing)) {
+                        ZStack {
+                            RoundedRectangle(
+                                cornerRadius: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.playTileRadius),
+                                style: .continuous
+                            )
+                            .fill(.white.opacity(0.14))
+
+                            Image(CoorditAssetNames.rechargePlay)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: contentMetrics.value(24), height: contentMetrics.value(24))
+                        }
+                        .frame(
+                            width: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.playTileSize),
+                            height: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.playTileSize)
+                        )
+
+                        Text("광고 보고 실타래 충전하기")
+                            .font(CoorditTypography.gmarketBold(size: contentMetrics.value(18), relativeTo: .headline))
+                            .foregroundStyle(.white)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.7)
+
+                        Spacer(minLength: 0)
+                        CoorditSettingsChevron(metrics: contentMetrics, color: .white)
+                    }
+                    .padding(.horizontal, contentMetrics.value(15))
+                    .frame(height: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adHeight))
+                    .background(
+                        LinearGradient(
+                            stops: [
+                                .init(color: CoorditDesignTokens.ColorToken.chargeGradientTop, location: 0),
+                                .init(color: CoorditSettingsStyle.ink, location: 0.62),
+                                .init(color: CoorditDesignTokens.ColorToken.chargeGradientEnd, location: 1)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .clipShape(
                         RoundedRectangle(
-                            cornerRadius: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.playTileRadius),
+                            cornerRadius: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adRadius),
                             style: .continuous
                         )
-                        .fill(.white.opacity(0.14))
-
-                        Image(CoorditAssetNames.rechargePlay)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: contentMetrics.value(24), height: contentMetrics.value(24))
-                    }
-                    .frame(
-                        width: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.playTileSize),
-                        height: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.playTileSize)
                     )
-
-                    Text("광고 보고 실타래 충전하기")
-                        .font(CoorditTypography.gmarketBold(size: contentMetrics.value(18), relativeTo: .headline))
-                        .foregroundStyle(.white)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.7)
-
-                    Spacer(minLength: 0)
-                    CoorditSettingsChevron(metrics: contentMetrics, color: .white)
+                    .shadow(
+                        color: .black.opacity(0.18),
+                        radius: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adShadowRadius),
+                        y: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adShadowYOffset)
+                    )
                 }
-                .padding(.horizontal, contentMetrics.value(15))
-                .frame(height: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adHeight))
-                .background(
-                    LinearGradient(
-                        stops: [
-                            .init(color: CoorditDesignTokens.ColorToken.chargeGradientTop, location: 0),
-                            .init(color: CoorditSettingsStyle.ink, location: 0.62),
-                            .init(color: CoorditDesignTokens.ColorToken.chargeGradientEnd, location: 1)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .clipShape(
-                    RoundedRectangle(
-                        cornerRadius: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adRadius),
-                        style: .continuous
-                    )
-                )
-                .shadow(
-                    color: .black.opacity(0.18),
-                    radius: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adShadowRadius),
-                    y: contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adShadowYOffset)
-                )
-            }
-            .coorditPressFeedback()
-            .disabled(!rewardedAdEnabled)
-            .allowsHitTesting(rewardedAdEnabled)
-            .opacity(rewardedAdEnabled ? 1 : 0.48)
-            .accessibilityLabel("광고 보고 실타래 충전하기")
-            .accessibilityIdentifier("coordit-thread-charge-ad-cta")
-            .padding(.bottom, contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adToPackagesSpacing))
+                .coorditPressFeedback()
+                .disabled(!rewardedAdEnabled)
+                .allowsHitTesting(rewardedAdEnabled)
+                .opacity(rewardedAdEnabled ? 1 : 0.48)
+                .accessibilityLabel("광고 보고 실타래 충전하기")
+                .accessibilityIdentifier("coordit-thread-charge-ad-cta")
+                .padding(.bottom, contentMetrics.value(CoorditDesignTokens.ChargeMetrics.adToPackagesSpacing))
 
-            if let message = rewardedAdService.status.message {
-                Text(message)
-                    .font(CoorditTypography.gmarketMedium(size: contentMetrics.value(11), relativeTo: .caption))
-                    .foregroundStyle(CoorditSettingsStyle.ink.opacity(0.72))
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
-                    .accessibilityIdentifier("coordit-thread-charge-ad-status")
-                    .padding(.bottom, contentMetrics.value(10))
+                if let message = rewardedAdService.status.message {
+                    Text(message)
+                        .font(CoorditTypography.gmarketMedium(size: contentMetrics.value(11), relativeTo: .caption))
+                        .foregroundStyle(CoorditSettingsStyle.ink.opacity(0.72))
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("coordit-thread-charge-ad-status")
+                        .padding(.bottom, contentMetrics.value(10))
+                }
             }
 
             if let purchaseMessage {

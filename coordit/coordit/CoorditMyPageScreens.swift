@@ -32,6 +32,7 @@ struct CoorditMyPageFamilyView: View {
     @State var bodyMeasurementsSaved = false
     @State var bodyMeasurementSaveError = ""
     @StateObject var rewardedAdService = CoorditRewardedAdService()
+    @StateObject var adPrivacyService = CoorditAdPrivacyService.shared
     @StateObject var threadPurchaseService = CoorditThreadPurchaseService()
     var body: some View {
         CoorditScreenScaffold(
