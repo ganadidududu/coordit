@@ -102,7 +102,8 @@ export const createFakeRepository = (state: FakeState = {}) => {
         birth_date: profile.birthDate ?? null,
         birth_year: profile.birthYear ?? null,
         created_at: fixedNow.toISOString(),
-        updated_at: fixedNow.toISOString()
+        updated_at: fixedNow.toISOString(),
+        is_guest: false
       };
       users.push(row);
       return row;

@@ -61,7 +61,7 @@ describe("POST /auth/google", () => {
     expect(await response.json()).toEqual({
       accessToken: "google-access-token",
       refreshToken: "google-refresh-token",
-      user: googleUser
+      user: { ...googleUser, isAnonymous: false }
     });
     expect(signInWithIdToken).toHaveBeenCalledWith({
       provider: "google",
