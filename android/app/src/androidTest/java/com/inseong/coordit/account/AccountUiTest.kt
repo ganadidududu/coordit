@@ -29,24 +29,48 @@ class AccountUiTest {
         bitmap.recycle()
     }
 
-    @Test fun authenticationBusyAndErrorPreserveProviderActions() {
+    @Test fun authenticationSheetSupportsProvidersGuestAndEmailLogin() {
         val busy = mutableStateOf(false)
         val error = mutableStateOf<String?>(null)
         var google = 0
         var apple = 0
-        compose.setContent { AuthenticationScreen(busy.value, error.value, { google++ }, { apple++ }) }
+        var guest = 0
+        var submitted: Pair<String, String>? = null
+        var dismissed = 0
+        compose.setContent {
+            AuthenticationScreen(
+                busy = busy.value,
+                error = error.value,
+                onGoogle = { google++ },
+                onApple = { apple++ },
+                onGuest = { guest++ },
+                onEmail = { email, password -> submitted = email to password },
+                onDismiss = { dismissed++ },
+            )
+        }
         capture("auth-default")
         compose.onNodeWithTag("splash-auth-google").performClick()
+        compose.onNodeWithTag("splash-auth-guest").performClick()
         assertEquals(1, google)
+        assertEquals(1, guest)
+        compose.onNodeWithTag("splash-auth-email").performClick()
+        compose.onNodeWithTag("splash-auth-email-field").performTextInput("coordit@example.com")
+        compose.onNodeWithTag("splash-auth-password-field").performTextInput("password")
+        compose.onNodeWithTag("splash-auth-email-submit").performClick()
+        assertEquals("coordit@example.com" to "password", submitted)
+        capture("auth-email")
+        compose.onNodeWithTag("splash-auth-email-back").performClick()
         compose.runOnIdle { busy.value = true }
         compose.onNodeWithTag("splash-auth-google").assertIsNotEnabled()
         compose.onNodeWithTag("splash-auth-apple").assertIsNotEnabled()
         capture("auth-busy")
         compose.runOnIdle { busy.value = false; error.value = "로그인하지 못했어요. 다시 시도해 주세요." }
-        compose.onNodeWithTag("authentication-error").assertIsDisplayed()
+        compose.onNodeWithTag("splash-auth-error").assertIsDisplayed()
         capture("auth-error")
         compose.onNodeWithTag("splash-auth-apple").performClick()
         assertEquals(1, apple)
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
+        assertEquals(1, dismissed)
     }
 
     @Test fun onboardingValidatesPreservesDraftAndRequiresConsents() {

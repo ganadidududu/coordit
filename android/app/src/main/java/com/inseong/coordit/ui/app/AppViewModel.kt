@@ -10,6 +10,9 @@ import com.inseong.coordit.data.model.*
 import com.inseong.coordit.data.repository.SessionRepository
 import com.inseong.coordit.data.home.HomeRepository
 import com.inseong.coordit.ui.home.HomeUiState
+import com.inseong.coordit.ui.threadcharge.AdPrivacyGateway
+import com.inseong.coordit.ui.threadcharge.AdPrivacyState
+import com.inseong.coordit.ui.threadcharge.DisabledAdPrivacyGateway
 import com.inseong.coordit.ui.threadcharge.DisabledRewardedAdGateway
 import com.inseong.coordit.ui.threadcharge.RewardedAdCallbacks
 import com.inseong.coordit.ui.threadcharge.RewardedAdGateway
@@ -23,13 +26,35 @@ import kotlinx.coroutines.flow.update
 import retrofit2.HttpException
 
 enum class AppStage { Restoring, Welcome, Authentication, LoadingAccount, AccountRecovery, Onboarding, ReturningWelcome, Home }
-enum class ThreadChargeStatus { Idle, LoadingAd, Ready, Presenting, AwaitingSettlement, Failed, Disabled }
+enum class ThreadChargeStatus { Idle, CheckingReadiness, CheckingConsent, LoadingAd, Ready, Presenting, AwaitingSettlement, Failed, Disabled }
 data class ThreadChargeState(
     val status: ThreadChargeStatus = ThreadChargeStatus.Idle,
     val message: String? = null,
+    val rewardedAdsEnabled: Boolean = false,
+    val privacyOptionsRequired: Boolean = false,
+    val privacyStatusText: String = "광고 개인정보 설정을 확인하고 있어요.",
 ) {
-    val canWatchAd: Boolean get() = status == ThreadChargeStatus.Ready
+    val canWatchAd: Boolean get() = rewardedAdsEnabled && status == ThreadChargeStatus.Ready
+    val isRewardedAdVisible: Boolean get() = rewardedAdsEnabled && status in setOf(
+        ThreadChargeStatus.LoadingAd,
+        ThreadChargeStatus.Ready,
+        ThreadChargeStatus.Presenting,
+        ThreadChargeStatus.AwaitingSettlement,
+        ThreadChargeStatus.Failed,
+    )
+    val canRetry: Boolean get() = status == ThreadChargeStatus.Failed || status == ThreadChargeStatus.Disabled
 }
+
+private fun ThreadChargeState.transition(
+    status: ThreadChargeStatus,
+    message: String? = null,
+    rewardedAdsEnabled: Boolean = this.rewardedAdsEnabled,
+) = copy(status = status, message = message, rewardedAdsEnabled = rewardedAdsEnabled)
+
+private fun ThreadChargeState.withPrivacy(state: AdPrivacyState) = copy(
+    privacyOptionsRequired = state.privacyOptionsRequired,
+    privacyStatusText = state.statusText,
+)
 data class AppState(
     val stage: AppStage = AppStage.Restoring,
     val busy: Boolean = false,
@@ -47,6 +72,7 @@ class AppViewModel(
     private val welcome: WelcomeStore,
     private val homeRepository: HomeRepository,
     private val rewardedAds: RewardedAdGateway = DisabledRewardedAdGateway,
+    private val adPrivacy: AdPrivacyGateway = DisabledAdPrivacyGateway,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(AppState())
     val state = mutableState.asStateFlow()
@@ -55,6 +81,7 @@ class AppViewModel(
     private var generation = 0L
     private var providerAttempt = 0L
     private var rewardWork: Job? = null
+    private var rewardAccessWork: Job? = null
     private var rewardAttemptToken = 0L
     private var rewardBalanceBefore = 0
     private var rewardEarned = false
@@ -111,6 +138,29 @@ class AppViewModel(
     }
     fun appleUnavailable() {
         if (!state.value.busy) mutableState.update { it.copy(error = "Android에서는 Apple 로그인을 아직 사용할 수 없어요. Google 계정으로 계속해 주세요.") }
+    }
+    fun loginGuest() = authenticateWith { session.loginGuest() }
+    fun loginEmail(email: String, password: String) {
+        if (email.trim().isEmpty() || password.isEmpty()) {
+            mutableState.update { it.copy(error = "이메일과 비밀번호를 입력해 주세요.") }
+            return
+        }
+        authenticateWith { session.loginEmail(email, password) }
+    }
+    private fun authenticateWith(signIn: suspend () -> Unit) {
+        if (state.value.busy || state.value.stage != AppStage.Authentication) return
+        mutableState.update { it.copy(busy = true, error = null) }
+        accountWork = viewModelScope.launch {
+            try {
+                signIn()
+                mutableState.update { it.copy(stage = AppStage.LoadingAccount, busy = false, error = null) }
+                loadAccount(returning = false)
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                val stage = if (session.session.value == null) AppStage.Authentication else AppStage.AccountRecovery
+                mutableState.update { it.copy(stage = stage, busy = false, error = userError(error)) }
+            }
+        }
     }
     fun retryAccount() {
         if (session.session.value == null) { restore(); return }
@@ -198,32 +248,85 @@ class AppViewModel(
         }
     }
     fun clearSettingsMessage() { mutableState.update { it.copy(error = null, settingsMessage = null) } }
-    fun openThreadCharge() {
+    fun openThreadCharge(activity: Activity? = null) {
         when (state.value.threadCharge.status) {
-            ThreadChargeStatus.LoadingAd, ThreadChargeStatus.Ready, ThreadChargeStatus.Presenting, ThreadChargeStatus.AwaitingSettlement -> return
-            else -> prepareRewardedAd()
+            ThreadChargeStatus.CheckingReadiness, ThreadChargeStatus.CheckingConsent, ThreadChargeStatus.LoadingAd,
+            ThreadChargeStatus.Ready, ThreadChargeStatus.Presenting, ThreadChargeStatus.AwaitingSettlement -> return
+            else -> refreshRewardedAdAccess(activity)
         }
     }
-    fun retryRewardedAd() = prepareRewardedAd()
+    fun retryRewardedAd(activity: Activity? = null) = refreshRewardedAdAccess(activity)
+
+    fun refreshAdPrivacy(activity: Activity?) {
+        viewModelScope.launch {
+            val privacy = adPrivacy.refreshConsent(activity)
+            mutableState.update { it.copy(threadCharge = it.threadCharge.withPrivacy(privacy)) }
+        }
+    }
+
+    fun showAdPrivacyOptions(activity: Activity?) {
+        viewModelScope.launch {
+            val privacy = adPrivacy.showPrivacyOptions(activity)
+            mutableState.update { it.copy(threadCharge = it.threadCharge.withPrivacy(privacy)) }
+        }
+    }
+
     fun showRewardedAd(activity: Activity) {
         if (!state.value.threadCharge.canWatchAd) return
         rewardBalanceBefore = state.value.threadBalance
         rewardEarned = false
-        mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.Presenting, "광고를 표시하고 있어요.")) }
+        mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.Presenting, "광고를 표시하고 있어요.")) }
         rewardedAds.show(activity)
     }
+
+    private fun refreshRewardedAdAccess(activity: Activity?) {
+        rewardAccessWork?.cancel()
+        rewardWork?.cancel()
+        rewardedAds.clear()
+        if (session.session.value == null) {
+            mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.Failed, "광고 보상은 로그인 후 받을 수 있어요.", false)) }
+            return
+        }
+        mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.CheckingReadiness, "충전 기능을 확인하고 있어요.", false)) }
+        rewardAccessWork = viewModelScope.launch {
+            val readiness = try {
+                session.loadMonetizationReadiness()
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.Failed, "충전 기능을 확인할 수 없어요. 다시 시도해 주세요.", false)) }
+                return@launch
+            }
+            if (!readiness.rewardedAdsEnabled) {
+                mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.Disabled, "광고 충전은 아직 준비 중이에요.", false)) }
+                return@launch
+            }
+            mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.CheckingConsent, "광고 개인정보 설정을 확인하고 있어요.", true)) }
+            val privacy = adPrivacy.refreshConsent(activity)
+            mutableState.update { it.copy(threadCharge = it.threadCharge.withPrivacy(privacy)) }
+            if (!privacy.canRequestAds) {
+                mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.Failed, "광고 개인정보 확인이 필요해요. 설정에서 다시 시도해 주세요.", true)) }
+                return@launch
+            }
+            prepareRewardedAd()
+        }
+    }
+
     private fun prepareRewardedAd(message: String = "광고를 준비하고 있어요.") {
         rewardWork?.cancel()
         if (session.session.value == null) {
-            mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.Failed, "광고 보상은 로그인 후 받을 수 있어요.")) }
+            mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.Failed, "광고 보상은 로그인 후 받을 수 있어요.", false)) }
+            return
+        }
+        if (!state.value.threadCharge.rewardedAdsEnabled) {
+            mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.Disabled, "광고 충전은 아직 준비 중이에요.", false)) }
             return
         }
         if (!rewardedAds.isAvailable) {
-            mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.Disabled, "광고 보상은 현재 준비 중이에요.")) }
+            mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.Disabled, "광고 보상은 현재 준비 중이에요.")) }
             return
         }
         val token = ++rewardAttemptToken
-        mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.LoadingAd, message)) }
+        mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.LoadingAd, message)) }
         rewardWork = viewModelScope.launch {
             try {
                 val attempt = session.createThreadRewardAttempt()
@@ -237,12 +340,12 @@ class AppViewModel(
     }
     private fun rewardedAdCallbacks(token: Long) = RewardedAdCallbacks(
         onReady = {
-            if (token == rewardAttemptToken) mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.Ready)) }
+            if (token == rewardAttemptToken) mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.Ready)) }
         },
         onRewarded = {
             if (token == rewardAttemptToken) {
                 rewardEarned = true
-                mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.AwaitingSettlement, "실타래 지급을 확인하고 있어요.")) }
+                mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.AwaitingSettlement, "실타래 지급을 확인하고 있어요.")) }
                 settleReward(token)
             }
         },
@@ -274,7 +377,7 @@ class AppViewModel(
     }
     private fun rewardFailed(message: String) {
         rewardedAds.clear()
-        mutableState.update { it.copy(threadCharge = ThreadChargeState(ThreadChargeStatus.Failed, message)) }
+        mutableState.update { it.copy(threadCharge = it.threadCharge.transition(ThreadChargeStatus.Failed, message)) }
     }
     fun saveReferences(ids: Set<String>) = updateHome(ids)
     private fun updateHome(ids: Set<String>?) {
@@ -294,7 +397,7 @@ class AppViewModel(
         }
     }
     fun logout(clearProvider: suspend () -> Unit = {}) {
-        accountWork?.cancel(); homeWork?.cancel(); rewardWork?.cancel(); rewardedAds.clear(); generation++; providerAttempt++; rewardAttemptToken++
+        accountWork?.cancel(); homeWork?.cancel(); rewardWork?.cancel(); rewardAccessWork?.cancel(); rewardedAds.clear(); generation++; providerAttempt++; rewardAttemptToken++
         mutableState.update { it.copy(busy = true, error = null) }
         accountWork = viewModelScope.launch {
             try {
@@ -309,7 +412,7 @@ class AppViewModel(
     }
     fun deleteAccount(clearProvider: suspend () -> Unit = {}) {
         if (state.value.busy) return
-        accountWork?.cancel(); homeWork?.cancel(); rewardWork?.cancel(); rewardedAds.clear(); generation++; providerAttempt++; rewardAttemptToken++
+        accountWork?.cancel(); homeWork?.cancel(); rewardWork?.cancel(); rewardAccessWork?.cancel(); rewardedAds.clear(); generation++; providerAttempt++; rewardAttemptToken++
         mutableState.update { it.copy(busy = true, error = null, settingsMessage = null) }
         accountWork = viewModelScope.launch {
             try {

@@ -21,35 +21,42 @@ class ThreadChargeFlowTest {
     @get:Rule val compose = createAndroidComposeRule<AccountPreviewActivity>()
 
     @Test fun chargeScreenRendersLoadingReadySettlementAndFailureStates() {
-        var charge by mutableStateOf(ThreadChargeState(ThreadChargeStatus.LoadingAd, "광고를 준비하고 있어요."))
+        var charge by mutableStateOf(ThreadChargeState(ThreadChargeStatus.LoadingAd, "광고를 준비하고 있어요.", rewardedAdsEnabled = true))
         var retryCount = 0
         compose.setContent {
             MyPageScreen(
                 profile = UserProfile("user", "coordit@example.com", "코디터"),
                 body = BodyMeasurement("body", 165.5, 54.2), threadBalance = 7, threadCharge = charge,
                 busy = false, error = null, message = null, onBack = {}, onHome = {}, onCloset = {}, onFitLab = {}, onRefresh = {},
-                onOpenThreadCharge = {}, onShowRewardedAd = {}, onRetryRewardedAd = { retryCount++ },
+                onOpenThreadCharge = { _ -> }, onShowRewardedAd = {}, onRetryRewardedAd = { _ -> retryCount++ },
+                onRefreshAdPrivacy = { _ -> }, onShowAdPrivacyOptions = { _ -> },
                 onSaveProfile = {}, onSaveBody = { _, _ -> }, onLogout = {}, onDeleteAccount = {}, onClearMessage = {},
             )
         }
 
         click("thread-charge")
         capture("01-loading")
-        compose.runOnUiThread { charge = ThreadChargeState(ThreadChargeStatus.Ready) }
+        compose.runOnUiThread { charge = ThreadChargeState(ThreadChargeStatus.Ready, rewardedAdsEnabled = true) }
         compose.waitForIdle()
         reopenCharge()
         capture("02-ready")
-        compose.runOnUiThread { charge = ThreadChargeState(ThreadChargeStatus.AwaitingSettlement, "실타래 지급을 확인하고 있어요.") }
+        compose.runOnUiThread { charge = ThreadChargeState(ThreadChargeStatus.AwaitingSettlement, "실타래 지급을 확인하고 있어요.", rewardedAdsEnabled = true) }
         compose.waitForIdle()
         reopenCharge()
         capture("03-settlement")
-        compose.runOnUiThread { charge = ThreadChargeState(ThreadChargeStatus.Failed, "실타래 지급 확인이 지연되고 있어요. 잠시 뒤 다시 시도해 주세요.") }
+        compose.runOnUiThread { charge = ThreadChargeState(ThreadChargeStatus.Failed, "실타래 지급 확인이 지연되고 있어요. 잠시 뒤 다시 시도해 주세요.", rewardedAdsEnabled = true) }
         compose.waitForIdle()
         reopenCharge()
         compose.onNodeWithTag("thread-charge-retry").assertExists()
         capture("04-failure")
         compose.onNodeWithTag("thread-charge-retry").performClick()
         assertEquals(1, retryCount)
+        compose.runOnUiThread { charge = ThreadChargeState(ThreadChargeStatus.Disabled, "광고 충전은 아직 준비 중이에요.") }
+        compose.waitForIdle()
+        reopenCharge()
+        compose.onNodeWithTag("thread-charge-rewarded-ad").assertDoesNotExist()
+        compose.onNodeWithTag("thread-charge-retry").assertExists()
+        capture("05-disabled")
     }
 
     private fun click(tag: String) {

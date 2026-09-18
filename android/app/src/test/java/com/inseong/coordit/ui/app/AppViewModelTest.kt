@@ -7,6 +7,8 @@ import com.inseong.coordit.data.local.SessionStore
 import com.inseong.coordit.data.model.*
 import com.inseong.coordit.data.remote.CoorditApi
 import com.inseong.coordit.data.repository.SessionRepository
+import com.inseong.coordit.ui.threadcharge.AdPrivacyGateway
+import com.inseong.coordit.ui.threadcharge.AdPrivacyState
 import com.inseong.coordit.ui.threadcharge.RewardedAdCallbacks
 import com.inseong.coordit.ui.threadcharge.RewardedAdGateway
 import kotlinx.coroutines.CompletableDeferred
@@ -30,7 +32,10 @@ class AppViewModelTest {
     private val welcome = MemoryWelcomeStore()
     private val homeApi = FakeHomeApi()
     private val session = SessionRepository(api, store)
-    private fun model(rewardedAds: RewardedAdGateway = TestRewardedAdGateway()) = AppViewModel(session, welcome, HomeRepository(homeApi), rewardedAds)
+    private fun model(
+        rewardedAds: RewardedAdGateway = TestRewardedAdGateway(),
+        adPrivacy: AdPrivacyGateway = TestAdPrivacyGateway(),
+    ) = AppViewModel(session, welcome, HomeRepository(homeApi), rewardedAds, adPrivacy)
 
     @Before fun setup() { Dispatchers.setMain(dispatcher) }
     @After fun teardown() { Dispatchers.resetMain() }
@@ -99,6 +104,28 @@ class AppViewModelTest {
         assertNull(model.state.value.profile)
     }
 
+    @Test fun guestLoginPersistsAnonymousSessionAndLoadsHome() = runTest {
+        val model = model()
+        runCurrent()
+        model.openAuthentication()
+        model.loginGuest()
+        runCurrent()
+        assertEquals(1, api.guestCalls)
+        assertTrue(requireNotNull(store.value).user.isAnonymous)
+        assertEquals(AppStage.Home, model.state.value.stage)
+    }
+
+    @Test fun emailLoginPersistsBackendSessionAndLoadsHome() = runTest {
+        val model = model()
+        runCurrent()
+        model.openAuthentication()
+        model.loginEmail(" member@example.com ", "secret")
+        runCurrent()
+        assertEquals(EmailAuthRequest("member@example.com", "secret"), api.emailRequest)
+        assertEquals("member@example.com", requireNotNull(store.value).user.email)
+        assertEquals(AppStage.Home, model.state.value.stage)
+    }
+
     @Test fun statusFailureNeverBypassesOnboardingAndCanRetry() = runTest {
         store.value = savedSession
         api.statusResult = { throw http(503) }
@@ -159,6 +186,32 @@ class AppViewModelTest {
         assertEquals(1, model.state.value.threadBalance)
         assertEquals(ThreadChargeStatus.Ready, model.state.value.threadCharge.status)
         assertEquals(2, api.rewardAttempts)
+    }
+
+    @Test fun rewardedAdWaitsForServerReadinessAndAdPrivacyConsent() = runTest {
+        store.value = savedSession
+        val rewardedAds = TestRewardedAdGateway()
+        val adPrivacy = TestAdPrivacyGateway(canRequestAds = false)
+        val model = model(rewardedAds, adPrivacy)
+        runCurrent()
+
+        api.monetizationReadiness = MonetizationReadiness(false, false)
+        model.openThreadCharge()
+        runCurrent()
+        assertEquals(ThreadChargeStatus.Disabled, model.state.value.threadCharge.status)
+        assertEquals(0, api.rewardAttempts)
+
+        api.monetizationReadiness = MonetizationReadiness(true, false)
+        model.retryRewardedAd()
+        runCurrent()
+        assertEquals(ThreadChargeStatus.Failed, model.state.value.threadCharge.status)
+        assertEquals(0, api.rewardAttempts)
+
+        adPrivacy.canRequestAds = true
+        model.retryRewardedAd()
+        runCurrent()
+        assertEquals(ThreadChargeStatus.Ready, model.state.value.threadCharge.status)
+        assertEquals(1, api.rewardAttempts)
     }
 
     @Test fun incompleteSubmissionResponseDoesNotUnlockHome() = runTest {
@@ -327,12 +380,23 @@ class AppViewModelTest {
         var statusCalls = 0
         var profileCalls = 0
         var googleCalls = 0
+        var guestCalls = 0
+        var emailRequest: EmailAuthRequest? = null
         var submitted: OnboardingRequest? = null
         var rewardBalance = 0
         var rewardAttempts = 0
+        var monetizationReadiness = MonetizationReadiness(true, false)
         override suspend fun refresh(request: RefreshAuthRequest) = refreshResult()
         override suspend fun loginGoogle(request: SocialAuthRequest): AuthSession { googleCalls++; return savedSession }
         override suspend fun loginApple(request: SocialAuthRequest): AuthSession = error("Unexpected Apple request")
+        override suspend fun loginEmail(request: EmailAuthRequest): AuthSession {
+            emailRequest = request
+            return AuthSession("test-access", "test-refresh", AuthUser(accountProfile.id, request.email))
+        }
+        override suspend fun loginGuest(): AuthSession {
+            guestCalls++
+            return AuthSession("guest-access", "guest-refresh", AuthUser("guest-user", "guest@example.invalid", isAnonymous = true))
+        }
         override suspend fun onboardingStatus(authorization: String): OnboardingStatus { statusCalls++; return statusResult() }
         override suspend fun me(authorization: String): UserProfile { profileCalls++; return profileResult() }
         override suspend fun updateMe(authorization: String, request: UpdateProfileRequest) = accountProfile.copy(displayName = request.displayName)
@@ -344,6 +408,7 @@ class AppViewModelTest {
         override suspend fun bodyMeasurements(authorization: String) = listOf(BodyMeasurement(id = "body", heightCm = 170.0))
         override suspend fun createBodyMeasurement(authorization: String, request: BodyMeasurementRequest) = BodyMeasurement("body-new", request.heightCm, request.weightKg)
         override suspend fun threadBalance(authorization: String) = ThreadBalanceResponse(rewardBalance)
+        override suspend fun monetizationReadiness(authorization: String) = monetizationReadiness
         override suspend fun createThreadRewardAttempt(authorization: String): ThreadRewardAttempt {
             rewardAttempts++
             return ThreadRewardAttempt("attempt-$rewardAttempts", "2026-09-17T00:10:00Z", "pending")
@@ -360,6 +425,14 @@ class AppViewModelTest {
         override fun show(activity: android.app.Activity) = Unit
         override fun clear() { callbacks = null }
         fun reward() { requireNotNull(callbacks).onRewarded() }
+    }
+    private class TestAdPrivacyGateway(var canRequestAds: Boolean = true) : AdPrivacyGateway {
+        override suspend fun refreshConsent(activity: android.app.Activity?) = AdPrivacyState(
+            canRequestAds = canRequestAds,
+            privacyOptionsRequired = false,
+            statusText = if (canRequestAds) "비개인화 광고 설정이 적용되어 있어요." else "광고 개인정보 확인이 필요해요.",
+        )
+        override suspend fun showPrivacyOptions(activity: android.app.Activity?) = refreshConsent(activity)
     }
     private class FakeHomeApi : HomeApi {
         var loadCalls = 0

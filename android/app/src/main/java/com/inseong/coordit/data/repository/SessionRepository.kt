@@ -38,6 +38,11 @@ class SessionRepository(private val api: CoorditApi, private val store: SessionS
         require(idToken.isNotBlank() && nonce.isNotBlank())
         persist(api.loginApple(SocialAuthRequest(idToken, nonce)))
     }
+    suspend fun loginEmail(email: String, password: String): AuthSession = sessionMutation.withLock {
+        require(email.isNotBlank() && password.isNotBlank())
+        persist(api.loginEmail(EmailAuthRequest(email.trim(), password)))
+    }
+    suspend fun loginGuest(): AuthSession = sessionMutation.withLock { persist(api.loginGuest()) }
     suspend fun logout() = sessionMutation.withLock { store.clear(); mutableSession.value = null }
     suspend fun health(): BackendHealth = api.health()
     suspend fun loadProfile(): UserProfile = api.me(authorization())
@@ -45,6 +50,7 @@ class SessionRepository(private val api: CoorditApi, private val store: SessionS
     suspend fun loadOnboardingStatus(): OnboardingStatus = api.onboardingStatus(authorization())
     suspend fun completeOnboarding(request: OnboardingRequest): OnboardingCompletion = api.completeOnboarding(authorization(), request)
     suspend fun loadThreadBalance(): ThreadBalanceResponse = api.threadBalance(authorization())
+    suspend fun loadMonetizationReadiness(): MonetizationReadiness = api.monetizationReadiness(authorization())
     suspend fun createThreadRewardAttempt(): ThreadRewardAttempt = api.createThreadRewardAttempt(authorization())
     suspend fun loadBodyMeasurements(): List<BodyMeasurement> = api.bodyMeasurements(authorization())
     suspend fun createBodyMeasurement(heightCm: Double, weightKg: Double): BodyMeasurement =

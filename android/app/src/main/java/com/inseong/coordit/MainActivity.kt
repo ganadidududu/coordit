@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.inseong.coordit.auth.GoogleIdentity
 import com.inseong.coordit.ui.app.AppViewModel
 import com.inseong.coordit.ui.app.CoorditApp
+import com.inseong.coordit.ui.threadcharge.GoogleAdPrivacyGateway
 import com.inseong.coordit.ui.threadcharge.GoogleRewardedAdGateway
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -34,7 +35,13 @@ class MainActivity : ComponentActivity() {
         val model = ViewModelProvider(this, object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                AppViewModel(container.repository, container.welcome, container.homeRepository, GoogleRewardedAdGateway(applicationContext)) as T
+                AppViewModel(
+                    container.repository,
+                    container.welcome,
+                    container.homeRepository,
+                    GoogleRewardedAdGateway(applicationContext),
+                    GoogleAdPrivacyGateway(applicationContext),
+                ) as T
         })[AppViewModel::class.java]
         val closet = ViewModelProvider(this, object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")

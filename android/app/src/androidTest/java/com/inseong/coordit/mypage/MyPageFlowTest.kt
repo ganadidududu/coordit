@@ -21,13 +21,16 @@ class MyPageFlowTest {
         var savedBody = 0.0 to 0.0
         var loggedOut = false
         var deleted = false
+        var privacyRefreshes = 0
+        var privacyOptionsOpened = 0
         compose.setContent {
             MyPageScreen(
                 profile = UserProfile("user", "coordit@example.com", "코디터", "female", "1998-04-12"),
                 body = BodyMeasurement("body", 165.5, 54.2), threadBalance = 7,
-                threadCharge = ThreadChargeState(ThreadChargeStatus.Ready), busy = false,
+                threadCharge = ThreadChargeState(ThreadChargeStatus.Ready, rewardedAdsEnabled = true), busy = false,
                 error = null, message = null, onBack = {}, onHome = {}, onCloset = {}, onFitLab = {}, onRefresh = {},
-                onOpenThreadCharge = {}, onShowRewardedAd = {}, onRetryRewardedAd = {},
+                onOpenThreadCharge = { _ -> }, onShowRewardedAd = {}, onRetryRewardedAd = { _ -> },
+                onRefreshAdPrivacy = { _ -> privacyRefreshes++ }, onShowAdPrivacyOptions = { _ -> privacyOptionsOpened++ },
                 onSaveProfile = { savedName = it }, onSaveBody = { h, w -> savedBody = h to w },
                 onLogout = { loggedOut = true }, onDeleteAccount = { deleted = true }, onClearMessage = {},
             )
@@ -39,14 +42,14 @@ class MyPageFlowTest {
 
         click("mypage-account"); capture("03-account")
         click("open-profile"); compose.onNodeWithContentDescription("이름").performTextReplacement("새 이름"); click("profile-save"); assertEquals("새 이름", savedName); capture("04-profile")
-        click("mypage-back"); click("open-logout"); click("confirm-action"); assertTrue(loggedOut); capture("05-logout")
-        click("mypage-back"); click("open-delete"); click("delete-ack"); click("delete-account"); assertTrue(deleted); capture("06-delete")
+        click("mypage-back"); click("mypage-backend-local-logout"); capture("05-logout")
+        click("confirm-action"); assertTrue(loggedOut); click("mypage-back"); click("open-delete"); click("delete-ack"); click("delete-account"); assertTrue(deleted); capture("06-delete")
 
         click("mypage-back"); click("mypage-back"); click("mypage-body"); capture("07-body")
         click("body-edit"); compose.onNodeWithContentDescription("키").performTextReplacement("172.4"); compose.onNodeWithContentDescription("몸무게").performTextReplacement("61.8"); click("body-save"); assertEquals(172.4 to 61.8, savedBody); capture("08-body-edit")
 
         click("mypage-back"); click("mypage-back"); click("mypage-notifications"); capture("09-notifications")
-        click("mypage-back"); click("mypage-privacy"); capture("10-privacy"); click("open-policy"); capture("11-policy")
+        click("mypage-back"); click("mypage-privacy"); compose.onNodeWithTag("ad-privacy-status", useUnmergedTree = true).assertExists(); assertTrue(privacyRefreshes > 0); compose.onNodeWithTag("ad-privacy-options").performClick(); assertEquals(1, privacyOptionsOpened); capture("10-privacy"); click("open-policy"); capture("11-policy")
         click("mypage-back"); click("open-terms"); capture("12-terms")
         click("mypage-back"); click("mypage-back"); compose.onNodeWithTag("mypage-account").assertExists()
     }

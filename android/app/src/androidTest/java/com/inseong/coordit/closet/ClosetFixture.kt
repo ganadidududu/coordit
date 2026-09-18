@@ -17,6 +17,8 @@ internal class ClosetAuthApi : CoorditApi {
     override suspend fun health() = BackendHealth(true, "test")
     override suspend fun loginGoogle(request: SocialAuthRequest) = AuthSession("test-access", "test-refresh", AuthUser(profile.id, profile.email))
     override suspend fun loginApple(request: SocialAuthRequest): AuthSession = error("not used")
+        override suspend fun loginEmail(request: EmailAuthRequest): AuthSession = AuthSession("test-access", "test-refresh", AuthUser(profile.id, request.email))
+        override suspend fun loginGuest(): AuthSession = AuthSession("guest-user", "test-refresh", AuthUser("guest-user", "guest@example.invalid", isAnonymous = true))
     override suspend fun refresh(request: RefreshAuthRequest): AuthSession = error("not used")
     override suspend fun me(authorization: String) = profile
     override suspend fun updateMe(authorization: String, request: UpdateProfileRequest) = profile.copy(displayName = request.displayName)
@@ -26,6 +28,7 @@ internal class ClosetAuthApi : CoorditApi {
     override suspend fun bodyMeasurements(authorization: String) = emptyList<BodyMeasurement>()
     override suspend fun createBodyMeasurement(authorization: String, request: BodyMeasurementRequest) = BodyMeasurement("body", request.heightCm, request.weightKg)
     override suspend fun threadBalance(authorization: String) = ThreadBalanceResponse(0)
+    override suspend fun monetizationReadiness(authorization: String) = MonetizationReadiness(false, false)
     override suspend fun createThreadRewardAttempt(authorization: String) = ThreadRewardAttempt("attempt", "2026-09-17T00:10:00Z", "pending")
 }
 internal class ClosetFixture : ClosetApi {

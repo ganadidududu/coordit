@@ -1,6 +1,5 @@
 package com.inseong.coordit.ui.app
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -50,8 +49,15 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
             SplashScreen(SplashPresentation.FirstInstall, model::openAuthentication, {}, reduceMotion = reduceMotion)
         }
         composable(AppStage.Authentication.name) {
-            BackHandler(enabled = !state.busy) { model.backToWelcome() }
-            AuthenticationScreen(state.busy, state.error, onGoogle, model::appleUnavailable)
+            AuthenticationScreen(
+                busy = state.busy,
+                error = state.error,
+                onGoogle = onGoogle,
+                onApple = model::appleUnavailable,
+                onGuest = model::loginGuest,
+                onEmail = model::loginEmail,
+                onDismiss = model::backToWelcome,
+            )
         }
         composable(AppStage.AccountRecovery.name) {
             AccountStatus(state.error ?: "계정 정보를 불러오지 못했어요.", model::retryAccount, onLogout, state.busy)
@@ -95,6 +101,7 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
             onCloset = { accountVisible = false; closetModel?.load(); nav.navigate("Closet") { popUpTo(AppStage.Home.name) } },
             onFitLab = { accountVisible = false; fitLabModel?.open(); nav.navigate("FitLab") { popUpTo(AppStage.Home.name) } },
             onRefresh = model::refreshMyPage, onOpenThreadCharge = model::openThreadCharge, onShowRewardedAd = model::showRewardedAd, onRetryRewardedAd = model::retryRewardedAd,
+            onRefreshAdPrivacy = model::refreshAdPrivacy, onShowAdPrivacyOptions = model::showAdPrivacyOptions,
             onSaveProfile = model::saveProfile, onSaveBody = model::saveBody,
             onLogout = onLogout, onDeleteAccount = onDeleteAccount, onClearMessage = model::clearSettingsMessage)
     }

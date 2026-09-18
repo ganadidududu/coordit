@@ -6,7 +6,11 @@ data class AuthSession(val accessToken: String, val refreshToken: String, val us
     fun isValid(): Boolean = accessToken.isNotBlank() && refreshToken.isNotBlank() && user.id.isNotBlank()
     override fun toString(): String = "AuthSession(redacted)"
 }
-data class AuthUser(val id: String, val email: String)
+data class AuthUser(
+    val id: String,
+    val email: String,
+    @SerializedName("isAnonymous") val isAnonymous: Boolean = false,
+)
 data class UserProfile(
     val id: String,
     val email: String,
@@ -42,6 +46,10 @@ data class OnboardingRequest(
 }
 data class BackendHealth(val ok: Boolean, val service: String)
 data class ThreadBalanceResponse(val availableThreads: Int)
+data class MonetizationReadiness(
+    val rewardedAdsEnabled: Boolean,
+    val iapEnabled: Boolean,
+)
 data class ThreadRewardAttempt(
     val attemptId: String,
     val expiresAt: String,
@@ -56,6 +64,9 @@ data class BodyMeasurementRequest(
 data class BackendErrorResponse(val message: String)
 data class SocialAuthRequest(val idToken: String, val nonce: String) {
     override fun toString(): String = "SocialAuthRequest(redacted)"
+}
+data class EmailAuthRequest(val email: String, val password: String) {
+    override fun toString(): String = "EmailAuthRequest(redacted)"
 }
 data class RefreshAuthRequest(val refreshToken: String) {
     override fun toString(): String = "RefreshAuthRequest(redacted)"

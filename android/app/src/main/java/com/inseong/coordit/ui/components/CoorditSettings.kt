@@ -18,8 +18,11 @@ import com.inseong.coordit.ui.theme.*
 
 @Composable
 fun SettingsCard(scale: Float, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier.fillMaxWidth().background(AppColors.panel, RoundedCornerShape((7 * scale).dp))
-        .border(1.dp, AppColors.line.copy(alpha = .7f), RoundedCornerShape((7 * scale).dp))
+    val shape = RoundedCornerShape((7 * scale).dp)
+    Column(modifier.fillMaxWidth()
+        .coorditShadow(Color.Black.copy(alpha = .035f), (9 * scale).dp, shape, (4 * scale).dp)
+        .background(AppColors.panel, shape)
+        .border(1.dp, AppColors.line.copy(alpha = .7f), shape)
         .padding(vertical = (12 * scale).dp), content = content)
 }
 
@@ -57,7 +60,7 @@ fun SettingsToggle(isOn: Boolean, onValueChange: (Boolean) -> Unit, label: Strin
         Box(Modifier.size((42 * scale).dp, (24 * scale).dp)
             .background(if (isOn) AppColors.ink else AppColors.toggleOff, CircleShape).padding((2 * scale).dp),
             contentAlignment = if (isOn) Alignment.CenterEnd else Alignment.CenterStart) {
-            Box(Modifier.size((20 * scale).dp).background(Color.White, CircleShape))
+            Box(Modifier.size((20 * scale).dp).coorditShadow(Color.Black.copy(alpha = .12f), (1.5f * scale).dp, CircleShape, (1 * scale).dp).background(Color.White, CircleShape))
         }
     }
 }
