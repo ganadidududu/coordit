@@ -4,6 +4,7 @@ import SwiftUI
 struct CoorditRootView: View {
     @State private var route: CoorditFrameRoute
     @State private var navigationDirection: CoorditNavigationDirection = .forward
+    @StateObject private var closetTutorial = CoorditClosetTutorial()
     @State private var closetItems: [CoorditClosetItem]
     @State private var selectedClosetItemID: String?
     @State private var closetDraft = CoorditClosetDraft()
@@ -144,6 +145,7 @@ struct CoorditRootView: View {
                     }
                 }
             }
+            .environmentObject(closetTutorial)
             .id(route)
             .transition(routeTransition)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -169,6 +171,10 @@ struct CoorditRootView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlayPreferenceValue(CoorditClosetSpotlightKey.self) { bounds in
+            CoorditClosetSpotlight(bounds: bounds)
+                .ignoresSafeArea()
+        }
         .buttonStyle(CoorditPressFeedbackButtonStyle())
         .task(id: backendSession.isAuthenticated) {
             if backendSession.isAuthenticated {

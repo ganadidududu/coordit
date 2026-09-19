@@ -16,6 +16,7 @@ extension CoorditClosetFamilyView {
             }
             .padding(.horizontal, metrics.value(27))
 
+            ScrollViewReader { scroll in
             ScrollView(showsIndicators: false) {
                 VStack(spacing: metrics.value(20)) {
                 HStack(alignment: .top, spacing: metrics.value(13)) {
@@ -101,6 +102,12 @@ extension CoorditClosetFamilyView {
                     CoorditFitLabOverlayLegend(metrics: metrics)
 
                     scorePanel(metrics: metrics, item: item, comparison: detailFitComparison)
+                        .closetTutorialTarget(
+                            .score,
+                            message: tutorialScoreMessage,
+                            canFinish: hasTutorialScore
+                        )
+                        .id("closet-tutorial-score")
                 }
                 .padding(.top, metrics.value(6))
 
@@ -113,6 +120,14 @@ extension CoorditClosetFamilyView {
                 )
             }
             .coorditScrollEdgeTreatment(topFade: metrics.value(18))
+            .closetTutorialViewport()
+            .onAppear {
+                if tutorial.step == .score { scroll.scrollTo("closet-tutorial-score", anchor: .top) }
+            }
+            .onChange(of: detailFitComparison?.fitScore) { _, _ in
+                if tutorial.step == .score { scroll.scrollTo("closet-tutorial-score", anchor: .top) }
+            }
+            }
         }
         .accessibilityIdentifier("coordit-screen-\(screenIdentifier)")
         .onAppear {
@@ -148,7 +163,20 @@ extension CoorditClosetFamilyView {
         }
     }
 
+    private var hasTutorialScore: Bool {
+        detailFitComparison?.fitScore?.isFinite == true && detailFitComparison?.bestFitGap?.isFinite == true
+    }
+
+    private var tutorialScoreMessage: String? {
+        if hasTutorialScore { return nil }
+        if detailFitComparison != nil {
+            return "의류 등록이 완료되었습니다. 아직 비교할 기준 의류가 없어 점수가 표시되지 않습니다. 홈에서 나에게 잘 맞는 기준 의류를 선택하면 ‘100점 핏 사이즈’와 핏 스코어가 계산됩니다."
+        }
+        return "의류 등록이 완료되었습니다. 실제 핏 스코어를 불러온 뒤 확인을 완료할 수 있습니다. 결과가 표시되지 않으면 연결 상태와 기준 의류 선택 여부를 확인해야 합니다."
+    }
+
     private func sizeChartCard(
+
         _ sizeChart: CoorditClosetSizeChart,
         category: CoorditClosetCategory,
         metrics: CoorditResponsiveMetrics
@@ -230,7 +258,7 @@ extension CoorditClosetFamilyView {
         item: CoorditClosetItem,
         comparison: CoorditClosetFitComparisonResponse?
     ) -> some View {
-        let score = resolvedFitScore(for: item, comparison: comparison)
+        let score = tutorial.step == .score ? comparison?.fitScore : resolvedFitScore(for: item, comparison: comparison)
         let difference = resolvedBestFitGap(for: item, comparison: comparison)
         let differences = comparison?.diff ?? item.fitDiffs
         return VStack(alignment: .leading, spacing: metrics.value(8)) {
