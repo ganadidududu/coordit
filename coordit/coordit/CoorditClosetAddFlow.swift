@@ -96,6 +96,7 @@ extension CoorditClosetFamilyView {
             onRouteChange(.closetOverview)
         } onSelect: { method in
             resetPendingSave()
+            tutorial.advance(from: .method, to: .link)
             draft.method = method
             onRouteChange(method.route)
         }
@@ -197,7 +198,9 @@ extension CoorditClosetFamilyView {
             selectedItemID = savedItem.id
             selectedCategory = savedItem.category
             resetPendingSave()
-            onRouteChange(await onSavedItem(savedItem) ?? .closetAddResult)
+            let destination = await onSavedItem(savedItem) ?? .closetAddResult
+            if destination == .closetAddResult { tutorial.advance(from: .register, to: .score) }
+            onRouteChange(destination)
         }
     }
 
@@ -207,6 +210,7 @@ extension CoorditClosetFamilyView {
 }
 
 private struct CoorditClosetAddMethodScreen: View {
+    @EnvironmentObject private var tutorial: CoorditClosetTutorial
     let metrics: CoorditResponsiveMetrics
     let onBack: () -> Void
     let onSelect: (CoorditClosetAddMethod) -> Void
@@ -269,6 +273,7 @@ private struct CoorditClosetAddMethodScreen: View {
                         }
                         .coorditPressFeedback()
                         .accessibilityIdentifier("closet-add-method-\(method.rawValue)")
+                        .modifier(ClosetLinkMethodTutorialModifier(isLink: method == .link))
                     }
                 }
                 }
@@ -280,12 +285,14 @@ private struct CoorditClosetAddMethodScreen: View {
                 )
             }
             .coorditScrollEdgeTreatment(topFade: metrics.value(18))
+            .closetTutorialViewport()
         }
         .accessibilityIdentifier("coordit-screen-closet-add-method")
     }
 }
 
 private struct CoorditClosetLinkInputScreen: View {
+    @EnvironmentObject private var tutorial: CoorditClosetTutorial
     @Binding var draft: CoorditClosetDraft
     let metrics: CoorditResponsiveMetrics
     let onBack: () -> Void
@@ -311,6 +318,7 @@ private struct CoorditClosetLinkInputScreen: View {
             CoorditClosetTitleBar(title: "LINK INPUT", metrics: metrics, horizontalOutset: 6, onBack: onBack)
                 .padding(.horizontal, metrics.value(22))
 
+            ScrollViewReader { scroll in
             ScrollView(showsIndicators: false) {
                 VStack(spacing: metrics.value(16)) {
                 CoorditClosetBasicsCard(draft: $draft, metrics: metrics, showsName: false)
@@ -322,17 +330,23 @@ private struct CoorditClosetLinkInputScreen: View {
                         TextField("https://", text: $draft.productLink)
                             .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
                             .keyboardType(.URL)
+                            .submitLabel(.done)
+                            .onSubmit { isLinkFocused = false }
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .focused($isLinkFocused)
                             .onTapGesture { isLinkFocused = true }
                             .accessibilityIdentifier("closet-product-link")
+                            .disabled(isExtracting)
                     }
                     .padding(.horizontal, metrics.value(13))
                     .frame(height: metrics.value(45))
                     .background(CoorditClosetColors.field)
                     .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
                 }
+
+                .closetTutorialTarget(.link)
+                .id(CoorditClosetTutorial.Step.link)
 
                 if let extractionError {
                     CoorditClosetFormCard(title: "링크에서 표를 찾지 못했어요", subtitle: extractionError, metrics: metrics) {
@@ -388,6 +402,8 @@ private struct CoorditClosetLinkInputScreen: View {
                             }
                         }
                     }
+                    .closetTutorialTarget(.size)
+                    .id(CoorditClosetTutorial.Step.size)
                 }
 
                 Text(draft.selectedSizeRow?.label ?? "")
@@ -403,6 +419,8 @@ private struct CoorditClosetLinkInputScreen: View {
                     metrics: metrics,
                     action: draft.extractedSizeRows.isEmpty ? extractLink : onSubmit
                 )
+                .closetTutorialTarget(draft.extractedSizeRows.isEmpty ? .analyze : .register)
+                .id(draft.extractedSizeRows.isEmpty ? CoorditClosetTutorial.Step.analyze : .register)
                 }
                 .padding(.top, metrics.value(16))
                 .padding(.horizontal, metrics.value(22))
@@ -412,9 +430,32 @@ private struct CoorditClosetLinkInputScreen: View {
                 )
             }
             .coorditScrollEdgeTreatment(topFade: metrics.value(18))
+            .closetTutorialViewport()
             .scrollDismissesKeyboard(.immediately)
+            .onChange(of: tutorial.step) { _, step in
+                guard let step else { return }
+                if step == .analyze || step == .size || step == .register {
+                    scroll.scrollTo(step, anchor: .top)
+                }
+            }
+            }
         }
         .accessibilityIdentifier("coordit-screen-closet-add-link")
+        .onChange(of: draft.productLink) { _, value in
+            if tutorial.step == .size || tutorial.step == .register {
+                draft.extractedSizeRows = []
+                draft.selectedSizeRowID = nil
+                tutorial.advance(from: tutorial.step == .size ? .size : .register, to: .link)
+            }
+            if !isLinkFocused { tutorial.updateLink(value) }
+        }
+        .onChange(of: isLinkFocused) { _, focused in
+            if focused {
+                tutorial.advance(from: .analyze, to: .link)
+            } else {
+                tutorial.updateLink(draft.productLink)
+            }
+        }
         .task {
 #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("--coordit-test-link-extraction-failure") {
@@ -469,6 +510,7 @@ private struct CoorditClosetLinkInputScreen: View {
                     extractionError = "링크에서 사이즈 행을 찾지 못했어요."
                     return
                 }
+                tutorial.advance(from: .analyze, to: .size)
             } catch {
                 extractionError = "추출에 실패했어요. 사진 OCR이나 직접 입력으로 계속할 수 있어요."
             }
@@ -484,6 +526,7 @@ private struct CoorditClosetLinkInputScreen: View {
         let isSelected = draft.selectedSizeRowID == row.id
         return Button {
             draft.selectedSizeRowID = row.id
+            tutorial.advance(from: .size, to: .register)
         } label: {
             HStack(spacing: metrics.value(10)) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
