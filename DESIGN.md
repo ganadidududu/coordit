@@ -157,3 +157,14 @@ Strategy: mixed, following the existing iOS visual language.
 ### Accepted Debt
 
 None accepted for this change. Existing feature-specific token duplication outside the shared title bar is observed but not changed by this task.
+
+### Closet guided tutorial
+
+- Structure: a contextual speech card immediately above the highlighted real control, inside the screen's scroll content so the copy and target remain reachable with the keyboard and Dynamic Type. No next button advances an action step.
+- Tokens: existing panel/ink/line colors; 14 pt bold title, 12 pt medium body, 11 pt progress; 12 pt spacing, 16 pt padding, 10 pt corners, 2 pt target outline; minimum 44 pt dismiss/finish touch targets.
+- Lifecycle: first Closet visit starts the guide; explicit dismissal or completion persists per installation. A Closet replay action starts from registration. Temporary navigation back reconciles the step to the visible screen; leaving Closet pauses it.
+- States: add garment, select link method, enter URL, analyze URL, select size, register, inspect real fit score. Only actual input/actions and successful asynchronous results advance. Analysis/save failures retain retry access. No synthetic score counts as tutorial completion.
+- Copy: concise Korean sentences ending in ~니다.; explain that selected reference garments, not every saved garment automatically, determine the 100-point reference size.
+- Accessibility: readable wrapping copy, stable step identifiers, no decorative animation or color-only instruction; contextual cards do not cover the target or intercept its tap.
+- Spotlight: a root-level black scrim at 26% opacity dims all other content and app chrome. The current guide and its actual target share one rounded transparent cutout, with a 6 pt inset allowance and 10 pt radius. Bounds track scrolling and are clipped to the visible content viewport and above bottom navigation. The scrim never intercepts touches or accessibility.
+- Replay placement: the replay action is the last item after the garment grid; restarting scrolls back to the first guide.

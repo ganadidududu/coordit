@@ -681,6 +681,14 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
     func closetFitComparison(clothingItemID: String) async -> CoorditClosetFitComparisonResponse? {
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--coordit-test-closet-tutorial-score") {
+            return CoorditClosetFitComparisonResponse(
+                status: "ok", garmentKind: "upper", referenceCount: 2,
+                fitScore: 93, bestFitGap: 7, diff: nil, reason: nil
+            )
+        }
+#endif
         guard let token = session?.accessToken else { return nil }
         #if DEBUG
         if usesAuthenticatedUITestFixture { return nil }

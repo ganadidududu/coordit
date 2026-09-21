@@ -158,6 +158,7 @@ struct CoorditClosetFamilyView: View {
     @Binding var selectedReferenceIDs: Set<String>
     @Binding var addSaveState: CoorditClosetAddSaveState
 
+    @EnvironmentObject var tutorial: CoorditClosetTutorial
     @EnvironmentObject var backendSession: CoorditBackendSessionStore
     @State var selectedCategory: CoorditClosetCategory = .top
     @State private var searchText = ""
@@ -255,6 +256,7 @@ struct CoorditClosetFamilyView: View {
                 overviewScreen(metrics: metrics)
             }
         }
+        .onAppear { tutorial.visit(route, draft: draft) }
         .task(id: referenceProfileRefreshKey) {
             await backendSession.refreshReferenceFitProfiles()
             while !Task.isCancelled {
@@ -277,6 +279,7 @@ struct CoorditClosetFamilyView: View {
             }
             .padding(.horizontal, metrics.value(16))
 
+            ScrollViewReader { scroll in
             ScrollView(showsIndicators: false) {
                 VStack(spacing: metrics.value(22)) {
                 VStack(alignment: .leading, spacing: metrics.value(12)) {
@@ -302,14 +305,29 @@ struct CoorditClosetFamilyView: View {
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
 
                 CoorditSolidPrimaryButton(title: "보유 의류 추가하기", metrics: metrics) {
+                    tutorial.advance(from: .add, to: .method)
                     draft = CoorditClosetDraft()
                     addSaveState.reset()
                     onRouteChange(.closetAddMethod)
                 }
                     .accessibilityIdentifier("closet-add-garment")
+                    .closetTutorialTarget(.add)
+                    .id("closet-tutorial-add")
 
                 searchField(metrics: metrics)
                 garmentGrid(metrics: metrics)
+
+                Button {
+                    tutorial.restart()
+                    scroll.scrollTo("closet-tutorial-add", anchor: .top)
+                } label: {
+                    Text("Closet 사용법 다시 보기")
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
+                        .foregroundStyle(CoorditClosetColors.navy)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityIdentifier("closet-tutorial-restart")
                 }
                 .padding(.top, metrics.value(22))
                 .padding(.horizontal, metrics.value(16))
@@ -319,6 +337,11 @@ struct CoorditClosetFamilyView: View {
                 )
             }
             .coorditScrollEdgeTreatment(topFade: metrics.value(18))
+            .closetTutorialViewport()
+            .onChange(of: tutorial.step) { _, step in
+                if step == .add { scroll.scrollTo("closet-tutorial-add", anchor: .top) }
+            }
+            }
         }
         .accessibilityIdentifier("coordit-screen-closet-overview")
     }
