@@ -192,9 +192,8 @@ struct CoorditFitLabFamilyView: View {
             return try await coordinator.prefillProduct(from: url, category: category)
         }
         #endif
-        guard let token = backendSession.session?.accessToken else {
-            throw CoorditFitLabError.loginRequired
-        }
+        guard backendSession.session != nil else { throw CoorditFitLabError.loginRequired }
+        let token = try await backendSession.validAccessToken()
         let api = CoorditFitLabHTTPAPI(baseURL: CoorditBackendConfig.baseURL(), accessToken: token)
         return try await api.prefillProduct(
             from: CoorditFitLabURLPrefillRequest(url: url, category: category)
@@ -207,9 +206,8 @@ struct CoorditFitLabFamilyView: View {
             return try await coordinator.fetchCompatibleReferences(category: category)
         }
         #endif
-        guard let token = backendSession.session?.accessToken else {
-            throw CoorditFitLabError.loginRequired
-        }
+        guard backendSession.session != nil else { throw CoorditFitLabError.loginRequired }
+        let token = try await backendSession.validAccessToken()
         let api = CoorditFitLabHTTPAPI(baseURL: CoorditBackendConfig.baseURL(), accessToken: token)
         return try await coordinator.fetchCompatibleReferences(category: category, using: api)
     }
@@ -490,13 +488,14 @@ struct CoorditFitLabFamilyView: View {
             return
         }
         #endif
-        guard let session = backendSession.session else {
+        guard let session = backendSession.session,
+              let token = try? await backendSession.validAccessToken() else {
             await coordinator.loadCompatibleReferences(authenticatedUserID: nil)
             return
         }
         let api = CoorditFitLabHTTPAPI(
             baseURL: CoorditBackendConfig.baseURL(),
-            accessToken: session.accessToken
+            accessToken: token
         )
         await coordinator.loadCompatibleReferences(using: api, authenticatedUserID: session.user.id)
     }
@@ -513,17 +512,20 @@ struct CoorditFitLabFamilyView: View {
             return
         }
         #endif
-        guard let session = backendSession.session else {
-            coordinator.startSubmission(authenticatedUserID: nil)
+        Task {
+            guard let session = backendSession.session,
+                  let token = try? await backendSession.validAccessToken() else {
+                coordinator.startSubmission(authenticatedUserID: nil)
+                onRouteChange(.fitLabLoading)
+                return
+            }
+            let api = CoorditFitLabHTTPAPI(
+                baseURL: CoorditBackendConfig.baseURL(),
+                accessToken: token
+            )
+            coordinator.startSubmission(using: api, authenticatedUserID: session.user.id)
             onRouteChange(.fitLabLoading)
-            return
         }
-        let api = CoorditFitLabHTTPAPI(
-            baseURL: CoorditBackendConfig.baseURL(),
-            accessToken: session.accessToken
-        )
-        coordinator.startSubmission(using: api, authenticatedUserID: session.user.id)
-        onRouteChange(.fitLabLoading)
     }
 
     private func consumeThreadIfNeededForNewSubmission() -> Bool {

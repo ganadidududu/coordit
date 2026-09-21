@@ -64,7 +64,7 @@ struct CoorditOnboardingView: View {
 
     private static let consentVersion = "2026-07-07"
 
-    let onFinished: () -> Void
+    let onFinished: () async -> Bool
 
     @EnvironmentObject private var backendSession: CoorditBackendSessionStore
     @FocusState private var focusedField: Field?
@@ -581,7 +581,9 @@ struct CoorditOnboardingView: View {
 
         Task {
             if await backendSession.completeOnboarding(request) {
-                onFinished()
+                if !(await onFinished()) {
+                    validationMessage = backendSession.statusText
+                }
             } else {
                 validationMessage = backendSession.statusText
             }
@@ -632,7 +634,7 @@ struct CoorditOnboardingView: View {
     private func returnToPreviousScreen() {
         if step == .profile {
             backendSession.logout()
-            onFinished()
+            Task { _ = await onFinished() }
         } else {
             moveBack()
         }

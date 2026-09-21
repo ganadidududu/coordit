@@ -46,7 +46,7 @@ final class CoorditThreadChargePurchaseUITests: XCTestCase {
         )
         XCTAssertEqual(
             app.staticTexts["coordit-thread-charge-pack-10-title"].label,
-            "StoreKit 실타래 10개"
+            "실타래 10개"
         )
         XCTAssertEqual(
             app.staticTexts["coordit-thread-charge-pack-10-price"].label,
@@ -245,8 +245,14 @@ final class CoorditThreadChargePurchaseUITests: XCTestCase {
         in app: XCUIApplication,
         balance: XCUIElement
     ) {
+        XCTAssertFalse(
+            app.descendants(matching: .any)
+                .matching(identifier: "coordit-thread-charge-ad-cta")
+                .firstMatch.exists,
+            "An unreleased rewarded-ad action must stay hidden"
+        )
+
         let identifiers = [
-            "coordit-thread-charge-ad-cta",
             "coordit-thread-charge-pack-5",
             "coordit-thread-charge-pack-10",
             "coordit-thread-charge-pack-20",
@@ -256,9 +262,6 @@ final class CoorditThreadChargePurchaseUITests: XCTestCase {
             let control = app.descendants(matching: .any).matching(identifier: identifier).firstMatch
             XCTAssertTrue(control.waitForExistence(timeout: 5), "Missing charge control: \(identifier)")
             XCTAssertFalse(control.isEnabled, "Charge control must be disabled: \(identifier)")
-            if control.isHittable {
-                control.tap()
-            }
         }
 
         XCTAssertEqual(balance.label, "36 실타래", "Readiness failure must not mutate thread balance")
