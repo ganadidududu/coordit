@@ -1,5 +1,11 @@
 import type { Category, FitType, JsonObject, MeasurementKey, MeasurementMap } from "../../shared/types/database";
-import type { FeedbackReliabilityStatus, FitScoreReasonCode } from "../fit/fit.types";
+import type {
+  FeedbackReliabilityStatus,
+  FitInteractionResult,
+  FitScoreReasonCode,
+  FitSemanticFact,
+  SizeTradeoffAnalysis
+} from "../fit/fit.types";
 
 export type ReportStyle = "concise_but_explanatory" | "detailed" | "short";
 
@@ -122,10 +128,46 @@ export interface FitReportInput {
     weightMultipliers: JsonObject;
     partFeedbackCounts: JsonObject;
   };
+  garmentContext: {
+    readonly category: Category;
+    readonly categoryLabel: string;
+    readonly fitType: FitType;
+    readonly fitTypeLabel: string;
+    readonly wearRole: string;
+    readonly primaryFitAreas: readonly MeasurementKey[];
+    readonly secondaryFitAreas: readonly MeasurementKey[];
+    readonly fitConsiderations: readonly string[];
+    readonly layeringRelevant: boolean;
+    readonly mobilityRelevant: boolean;
+  };
+  measurementSubscores: Partial<Record<MeasurementKey, number>>;
+  semanticSubscores: Readonly<Record<string, number>>;
+  semanticFactSizeLabel: string;
+  semanticFacts: readonly FitSemanticFact[];
+  interactions: readonly FitInteractionResult[];
+  sizeTradeoff?: SizeTradeoffAnalysis;
+  versions: {
+    readonly fitEngineVersion: string;
+    readonly garmentProfileVersion: string;
+    readonly semanticRulesVersion: string;
+    readonly fitReportPromptVersion: string;
+  };
   chartData: FitReportChartData;
 }
 
 export interface FitReportChartData {
+  fitPointScores: Array<{
+    key: "silhouette" | "mobility" | "layering";
+    label: string;
+    score: number;
+  }>;
+  measurementScores: Array<{
+    measurement: MeasurementKey;
+    label: string;
+    score: number;
+    diff: number;
+    status: string | null;
+  }>;
   idealVsProduct: Array<{
     measurement: MeasurementKey;
     label: string;
@@ -160,6 +202,8 @@ export interface FitReportJson {
   }>;
   cautions: string[];
   nextActions: string[];
+  garmentFitContext?: string;
+  sizeTradeoff?: string;
 }
 
 export interface GenerateFitReportOptions {
@@ -174,7 +218,7 @@ export interface GenerateFitReportResult {
   fitAnalysisResultId: string;
   source: "openrouter" | "fallback";
   modelName: string;
-  promptVersion: "fit_report_v6";
+  promptVersion: "fit_report_v6" | "fit_report_v7";
   report: FitReportJson;
   chartData: FitReportChartData;
   reportInput?: FitReportInput;

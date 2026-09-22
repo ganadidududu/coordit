@@ -8,6 +8,7 @@ import {
   getSelectedProductSize,
   normalizeSizeScores
 } from "./fit-report.chart-data";
+import { buildFitPointScores, buildMeasurementScores } from "./fit-report.scores";
 import { buildExplanationSummary } from "./fit-report.explanation";
 import {
   buildReferenceSummary,
@@ -23,6 +24,10 @@ import {
 } from "./fit-report.result-details";
 import { parseResultDetails } from "./fit-report.result-details.sanitizer";
 import type { FitReportInput, GenerateFitReportOptions } from "./fit-report.types";
+import { buildGarmentNarrativeContext } from "./fit-report.garment-context";
+import { buildFitSemanticFacts } from "../fit/fit-semantic-facts";
+import { analyzeFitInteractions } from "../fit/fit-interactions";
+import { buildMeasurementSubscores, buildSemanticSubscores } from "../fit/fit-subscores";
 
 export const buildFitReportInput = async (
   userId: string,
@@ -57,6 +62,39 @@ export const buildFitReportInput = async (
     }];
   });
 
+  const targetProduct = {
+    productName: externalProduct.product_name,
+    brand: externalProduct.brand,
+    mallName: externalProduct.mall_name,
+    category: externalProduct.category,
+    fitType: externalProduct.fit_type,
+    selectedSizeLabel: selectedSize.size_label,
+    recommendedSizeLabel: fitResult.recommended_size_label
+  };
+  const selectedIsRecommended = selectedSize.size_label === fitResult.recommended_size_label;
+  const selectedFacts = !selectedIsRecommended && details.semanticFacts?.length
+    ? buildFitSemanticFacts({
+      reference: idealMeasurements,
+      product: productMeasurements,
+      category: targetProduct.category,
+      fitType: targetProduct.fitType
+    })
+    : details.semanticFacts ?? [];
+  const selectedInteractions = selectedIsRecommended
+    ? details.interactions ?? []
+    : analyzeFitInteractions(targetProduct.category, selectedFacts);
+  const selectedMeasurementSubscores = selectedIsRecommended
+    ? details.measurementSubscores ?? {}
+    : buildMeasurementSubscores(selectedFacts);
+  const selectedSemanticSubscores = selectedIsRecommended
+    ? details.semanticSubscores ?? {}
+    : buildSemanticSubscores(targetProduct.category, selectedMeasurementSubscores);
+  const validSizeTradeoff = details.sizeTradeoff &&
+    details.sizeTradeoff.recommended === fitResult.recommended_size_label &&
+    sizeOptions.some((option) => option.sizeLabel === details.sizeTradeoff?.alternative)
+    ? details.sizeTradeoff
+    : undefined;
+
   return {
     locale: "ko-KR",
     reportStyle: options.style ?? "concise_but_explanatory",
@@ -71,15 +109,7 @@ export const buildFitReportInput = async (
       weightingStrategy: typeof details.weightingStrategy === "string" ? details.weightingStrategy : null
     },
     explanation: buildExplanationSummary(details),
-    targetProduct: {
-      productName: externalProduct.product_name,
-      brand: externalProduct.brand,
-      mallName: externalProduct.mall_name,
-      category: externalProduct.category,
-      fitType: externalProduct.fit_type,
-      selectedSizeLabel: selectedSize.size_label,
-      recommendedSizeLabel: fitResult.recommended_size_label
-    },
+    targetProduct,
     referenceClothingSummary: referenceSummary,
     idealFitNumbers: {
       measurements: idealMeasurements,
@@ -96,6 +126,23 @@ export const buildFitReportInput = async (
       weightMultipliers: details.feedbackProfile?.weightMultipliers ?? {},
       partFeedbackCounts: details.feedbackProfile?.partFeedbackCounts ?? {}
     },
-    chartData: buildChartData(measurementRows, sizeScores, details)
+    garmentContext: buildGarmentNarrativeContext(targetProduct),
+    measurementSubscores: selectedMeasurementSubscores,
+    semanticSubscores: selectedSemanticSubscores,
+    semanticFactSizeLabel: selectedSize.size_label,
+    semanticFacts: selectedFacts,
+    interactions: selectedInteractions,
+    ...(validSizeTradeoff ? { sizeTradeoff: validSizeTradeoff } : {}),
+    versions: {
+      fitEngineVersion: details.versions?.fitEngineVersion ?? fitResult.algorithm_version,
+      garmentProfileVersion: details.versions?.garmentProfileVersion ?? "legacy",
+      semanticRulesVersion: details.versions?.semanticRulesVersion ?? "legacy",
+      fitReportPromptVersion: "fit_report_v7"
+    },
+    chartData: {
+      ...buildChartData(measurementRows, sizeScores, details),
+      fitPointScores: buildFitPointScores(selectedSemanticSubscores),
+      measurementScores: buildMeasurementScores(measurementRows, selectedMeasurementSubscores)
+    }
   };
 };

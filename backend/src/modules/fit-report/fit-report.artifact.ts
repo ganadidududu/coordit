@@ -16,16 +16,30 @@ const measurementKeySchema = z.enum([
 const reportSchema = z.object({
   title: z.string(),
   summary: z.string(),
+  garmentFitContext: z.string().optional(),
   recommendationReason: z.string(),
   measurementAnalysis: z.array(z.object({
     measurement: z.string(),
     text: z.string()
   })),
   cautions: z.array(z.string()),
-  nextActions: z.array(z.string())
+  nextActions: z.array(z.string()),
+  sizeTradeoff: z.string().optional()
 });
 
 const chartDataSchema = z.object({
+  fitPointScores: z.array(z.object({
+    key: z.enum(["silhouette", "mobility", "layering"]),
+    label: z.string(),
+    score: z.number().finite().min(0).max(100)
+  })).default([]),
+  measurementScores: z.array(z.object({
+    measurement: measurementKeySchema,
+    label: z.string(),
+    score: z.number().finite().min(0).max(100),
+    diff: z.number().finite(),
+    status: z.string().nullable()
+  })).default([]),
   idealVsProduct: z.array(z.object({
     measurement: measurementKeySchema,
     label: z.string(),
@@ -60,7 +74,7 @@ const storedFitReportArtifactSchema = z.object({
   schemaVersion: z.literal(1),
   source: z.enum(["openrouter", "fallback"]),
   modelName: z.string(),
-  promptVersion: z.literal("fit_report_v6"),
+  promptVersion: z.enum(["fit_report_v6", "fit_report_v7"]),
   report: reportSchema,
   chartData: chartDataSchema
 });

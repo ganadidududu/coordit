@@ -5,7 +5,8 @@ import type {
   MeasurementWeights
 } from "./fit.types";
 
-export const ALGORITHM_VERSION = "mvp_rule_v1_7";
+export const ALGORITHM_VERSION = "fit_engine_v2_0";
+export const SEMANTIC_RULES_VERSION = "fit_semantics_v2_0";
 
 export const TOP_CATEGORIES: Category[] = [
   "tshirt",

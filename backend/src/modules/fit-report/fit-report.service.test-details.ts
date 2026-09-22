@@ -32,6 +32,43 @@ export const enrichedDetails: JsonObject = {
   ...legacyDetails,
   raw_data: { privateNote: "SECRET_RAW_PAYLOAD" },
   user_feedback: { comment: "SECRET_USER_COMMENT" },
+  measurementSubscores: { shoulder_width: 88, chest_width: 64 },
+  semanticSubscores: { silhouette: 76, mobility: 81, private: 999 },
+  semanticFacts: [{
+    measurement: "chest_width",
+    reference: 54,
+    product: 50.8,
+    diff: -3.2,
+    normalizedDiff: 1.6,
+    direction: "smaller",
+    severity: "significant",
+    importance: "critical",
+    semanticEffects: ["body_room_reduced", "arm_mobility_may_reduce"]
+  }],
+  interactions: [{
+    id: "upper_body_balance",
+    severity: "moderate",
+    direction: "mixed",
+    involvedMeasurements: ["shoulder_width", "chest_width"],
+    semanticEffects: ["upper_body_balance_changed"],
+    scorePenalty: 0.5
+  }],
+  sizeTradeoff: {
+    recommended: "S",
+    alternative: "M",
+    tradeoffs: [{
+      measurement: "chest_width",
+      recommendedDiff: -3.2,
+      alternativeDiff: 1.8,
+      preferred: "alternative"
+    }]
+  },
+  versions: {
+    fitEngineVersion: "fit_engine_v2_0",
+    garmentProfileVersion: "garment_profiles_v2_0",
+    semanticRulesVersion: "fit_semantics_v2_0",
+    fitReportPromptVersion: "fit_report_v7"
+  },
   scoreExplanation: {
     comparedMeasurementCount: 2,
     comparedMeasurements: ["shoulder_width", "chest_width"],

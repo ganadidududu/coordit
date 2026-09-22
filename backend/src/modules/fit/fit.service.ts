@@ -1,9 +1,10 @@
 import { supabase } from "../../config/supabase";
 import type { FitAnalysisResultRow } from "../../shared/types/database";
-import { areCategoriesCompatible } from "../../shared/utils/category-compatibility";
+import { selectReferenceCategoryTier } from "../../shared/utils/category-compatibility";
 import { createHttpError } from "../../shared/utils/http-error";
 import { rowToMeasurements } from "../../shared/utils/measurements";
-import { ALGORITHM_VERSION } from "./fit.constants";
+import { ALGORITHM_VERSION, SEMANTIC_RULES_VERSION } from "./fit.constants";
+import { GARMENT_PROFILE_VERSION } from "./garment-fit-profiles";
 import { buildUserFeedbackFitProfile } from "./feedback-fit-profile";
 import { recommendBestSizeWithReferences } from "./fit-score.engine";
 import type {
@@ -43,14 +44,14 @@ interface DbReferenceClothing {
   id: string;
   user_id: string;
   clothing_item_id: string;
-  category: string;
+  category: Category;
   fit_type: FitType;
   preference_score?: number | null;
 }
 
 interface DbClothingItem {
   id: string;
-  category: string;
+  category: Category;
   fit_type: FitType;
   size_label: string | null;
 }
@@ -63,7 +64,7 @@ interface DbMeasurementRow extends MeasurementMap {
 
 interface DbExternalProduct {
   id: string;
-  category: string;
+  category: Category;
   fit_type: FitType;
 }
 
@@ -146,13 +147,21 @@ export const prepareFitRecommendation = async ({
     throw createHttpError(404, "External product was not found");
   }
 
-  const incompatibleReference = referenceClothing.find(
-    (reference) =>
-      !areCategoriesCompatible(reference.category as Category, externalProduct.category as Category)
+  const targetCategory = externalProduct.category;
+  const categorySelection = selectReferenceCategoryTier(
+    referenceClothing.map((reference) => ({ id: reference.id, category: reference.category })),
+    targetCategory
   );
-  if (incompatibleReference) {
+  if (!categorySelection.level) {
     throw createHttpError(400, "Reference clothing category is not compatible with external product category");
   }
+  const selectedReferences = referenceClothing.filter((reference) => categorySelection.usedIds.includes(reference.id));
+  const referenceCompatibility = {
+    level: categorySelection.level,
+    targetCategory,
+    usedReferenceIds: categorySelection.usedIds,
+    excludedReferenceIds: categorySelection.excludedIds
+  };
 
   const { data: externalSizes, error: sizesError } = await supabase
     .from("external_product_sizes")
@@ -165,7 +174,7 @@ export const prepareFitRecommendation = async ({
     throw createHttpError(404, "External product sizes were not found");
   }
 
-  const referenceInput: ReferenceClothingInput[] = referenceClothing.map((reference) => {
+  const referenceInput: ReferenceClothingInput[] = selectedReferences.map((reference) => {
     const clothingItem = clothingItems.find((item) => item.id === reference.clothing_item_id);
     const clothingSize = clothingSizes.find((size) => size.clothing_item_id === reference.clothing_item_id);
     if (!clothingItem || !clothingSize) {
@@ -195,13 +204,13 @@ export const prepareFitRecommendation = async ({
 
   const feedbackProfile = await buildUserFeedbackFitProfile(
     userId,
-    externalProduct.category as Category
+    externalProduct.category
   );
 
   const recommendation = recommendBestSizeWithReferences(
     referenceInput,
     sizeInputs,
-    externalProduct.category as Category,
+    externalProduct.category,
     feedbackProfile
   );
   const best = recommendation.recommended;
@@ -224,6 +233,15 @@ export const prepareFitRecommendation = async ({
       weightingStrategy: recommendation.weightingStrategy,
       referenceProfile: recommendation.referenceProfile,
       feedbackProfile: recommendation.feedbackProfile,
+      garmentProfile: recommendation.garmentProfile,
+      sizeTradeoff: recommendation.sizeTradeoff,
+      referenceCompatibility,
+      versions: {
+        fitEngineVersion: ALGORITHM_VERSION,
+        garmentProfileVersion: GARMENT_PROFILE_VERSION,
+        semanticRulesVersion: SEMANTIC_RULES_VERSION,
+        fitReportPromptVersion: "fit_report_v7"
+      },
       allSizeScores: recommendation.allSizeScores.map((score) => ({
         externalProductSizeId: score.externalProductSizeId,
         sizeLabel: score.sizeLabel,
@@ -232,7 +250,11 @@ export const prepareFitRecommendation = async ({
         weightedFitDistance: score.weightedFitDistance,
         recommendationConfidence: score.recommendationConfidence,
         scoreExplanation: score.scoreExplanation,
-        confidenceBreakdown: score.confidenceBreakdown
+        confidenceBreakdown: score.confidenceBreakdown,
+        measurementSubscores: score.measurementSubscores,
+        semanticSubscores: score.semanticSubscores,
+        semanticFacts: score.semanticFacts,
+        interactions: score.interactions
       })),
       algorithmVersion: ALGORITHM_VERSION
     },
@@ -254,6 +276,19 @@ export const prepareFitRecommendation = async ({
         weightingStrategy: recommendation.weightingStrategy,
         referenceProfile: recommendation.referenceProfile,
         feedbackProfile: recommendation.feedbackProfile,
+        garmentProfile: recommendation.garmentProfile,
+        measurementSubscores: best.measurementSubscores,
+        semanticSubscores: best.semanticSubscores,
+        semanticFacts: best.semanticFacts,
+        interactions: best.interactions,
+        sizeTradeoff: recommendation.sizeTradeoff,
+        referenceCompatibility,
+        versions: {
+          fitEngineVersion: ALGORITHM_VERSION,
+          garmentProfileVersion: GARMENT_PROFILE_VERSION,
+          semanticRulesVersion: SEMANTIC_RULES_VERSION,
+          fitReportPromptVersion: "fit_report_v7"
+        },
         diffs: best.diffs,
         partExplanations: best.partExplanations,
         partStatuses: best.partStatuses,
@@ -312,6 +347,10 @@ export const replayFitRecommendation = (result: FitAnalysisResultRow): FitRecomm
     weightingStrategy: (details.weightingStrategy as FitRecommendationResult["weightingStrategy"]) ?? "base_static",
     referenceProfile: details.referenceProfile as FitRecommendationResult["referenceProfile"],
     feedbackProfile: details.feedbackProfile as FitRecommendationResult["feedbackProfile"],
+    garmentProfile: details.garmentProfile as FitRecommendationResult["garmentProfile"],
+    sizeTradeoff: details.sizeTradeoff as FitRecommendationResult["sizeTradeoff"],
+    referenceCompatibility: details.referenceCompatibility as FitRecommendationResult["referenceCompatibility"],
+    versions: details.versions as FitRecommendationResult["versions"],
     allSizeScores: (Array.isArray(details.allSizeScores) ? details.allSizeScores : []) as FitRecommendationResult["allSizeScores"],
     algorithmVersion: result.algorithm_version
   };

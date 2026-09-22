@@ -1,5 +1,6 @@
 import type { MeasurementKey } from "../../shared/types/database";
 import type { FitReportInput, FitReportJson, MeasurementReportRow, SizeFitOption } from "./fit-report.types";
+import { buildMeasurementWearerImpact } from "./fit-report.garment-context";
 
 const lengthMeasurementKeys: readonly MeasurementKey[] = [
   "total_length",
@@ -7,13 +8,6 @@ const lengthMeasurementKeys: readonly MeasurementKey[] = [
   "rise",
   "outseam"
 ] as const;
-
-const lowerBodyCategories = new Set<FitReportInput["targetProduct"]["category"]>([
-  "pants",
-  "jeans",
-  "shorts",
-  "skirt"
-]);
 
 const statusPriority: Readonly<Record<string, number>> = {
   too_tight: 4,
@@ -34,9 +28,6 @@ const topicParticle = (label: string): string => {
 
 const isLengthMeasurement = (key: MeasurementKey): boolean =>
   lengthMeasurementKeys.includes(key);
-
-const isLowerBodyCategory = (category: FitReportInput["targetProduct"]["category"]): boolean =>
-  lowerBodyCategories.has(category);
 
 const isBalanced = (measurements: readonly MeasurementReportRow[]): boolean =>
   measurements.length > 0 && measurements.every((measurement) => measurement.status === "good");
@@ -95,7 +86,7 @@ const wearingDescription = (measurement: MeasurementReportRow): string => {
     : "평소보다 몸에서 살짝 떨어져, 여유 있는 실루엣으로 보일 수 있어요.";
 };
 
-const summaryUsageDescription = (measurement: MeasurementReportRow): string => {
+const summaryUsageDescription = (measurement: MeasurementReportRow, layeringRelevant: boolean): string => {
   if (measurement.diff === 0) {
     return "평소처럼 입고 싶다면 무난한 선택이에요.";
   }
@@ -110,7 +101,9 @@ const summaryUsageDescription = (measurement: MeasurementReportRow): string => {
       : "편안한 착용감과 여유 있는 하체 실루엣을 원할 때 자연스러워요.";
   }
   return measurement.diff < 0
-    ? "단독 착용에는 괜찮지만, 레이어드를 자주 한다면 답답할 수 있어요."
+    ? layeringRelevant
+      ? "레이어드할 계획이라면 이 부위의 여유가 충분한지 상품 실측을 다시 확인해 보세요."
+      : `${measurement.label}이 기준보다 몸에 가까운 편이라, 원하는 실루엣인지 확인해 보세요.`
     : "편안한 착용감이나 여유 있는 실루엣을 원한다면 자연스러워요.";
 };
 
@@ -164,33 +157,58 @@ const tradeoffDescription = (measurement: MeasurementReportRow): string => {
   return measurement.diff < 0 ? "타이트함" : "여유감";
 };
 
+const structuredTradeoffSentence = (reportInput: FitReportInput): string => {
+  const tradeoff = reportInput.sizeTradeoff;
+  if (!tradeoff || tradeoff.tradeoffs.length === 0) {
+    return "비교 가능한 대안 실측이 없어 다른 사이즈의 착용감은 추측하지 않습니다.";
+  }
+  const alternativeAdvantages = tradeoff.tradeoffs
+    .filter((item) => item.preferred === "alternative")
+    .map((item) => reportInput.measurements.find((row) => row.key === item.measurement)?.label ?? item.measurement);
+  const recommendedAdvantages = tradeoff.tradeoffs
+    .filter((item) => item.preferred === "recommended")
+    .map((item) => reportInput.measurements.find((row) => row.key === item.measurement)?.label ?? item.measurement);
+  if (recommendedAdvantages.length === 0 && alternativeAdvantages.length === 0) {
+    return `추천 ${tradeoff.recommended} 사이즈와 대안 ${tradeoff.alternative} 사이즈는 비교한 부위의 기준과의 차이가 비슷합니다. 실제 여유 방향은 부위별 실측으로 확인해 보세요.`;
+  }
+  if (alternativeAdvantages.length === 0) {
+    return `추천 ${tradeoff.recommended} 사이즈는 ${recommendedAdvantages.join(", ")}에서 기준에 더 가깝습니다. 대안 ${tradeoff.alternative} 사이즈를 고른다면 원하는 여유와 길이인지 실측을 확인해 보세요.`;
+  }
+  if (recommendedAdvantages.length === 0) {
+    return `대안 ${tradeoff.alternative} 사이즈는 ${alternativeAdvantages.join(", ")}에서 기준에 더 가깝습니다. 추천 ${tradeoff.recommended} 사이즈와 전체 부위의 차이도 함께 비교해 보세요.`;
+  }
+  return `추천 ${tradeoff.recommended} 사이즈는 ${recommendedAdvantages.join(", ")}에서 기준에 더 가깝고, 대안 ${tradeoff.alternative} 사이즈는 ${alternativeAdvantages.join(", ")}에서 더 가깝습니다.`;
+};
+
 const recommendationChoice = (
   reportInput: FitReportInput,
   primaryMeasurement: MeasurementReportRow
 ): string => {
   const alternative = findAlternative(reportInput);
   if (!alternative) {
-    return `슬림한 핏을 원한다면 ${reportInput.recommendation.recommendedSize}를 선택하고, 편안함을 우선한다면 다른 사이즈의 실측도 확인해 보세요.`;
+    return `${reportInput.recommendation.recommendedSize}를 선택하기 전, 선호하는 핏과 상품의 상세 실측을 확인해 보세요.`;
   }
-  if (primaryMeasurement.diff < 0) {
+  const alternativeDiff = alternative.measurements.find((item) => item.key === primaryMeasurement.key)?.diff;
+  if (alternativeDiff === undefined) return `다른 사이즈는 ${primaryMeasurement.label} 실측을 확인한 뒤 비교해 보세요.`;
+  if (primaryMeasurement.diff < 0 && alternativeDiff > primaryMeasurement.diff) {
     return `슬림한 핏을 원한다면 ${reportInput.recommendation.recommendedSize}를, ${primaryMeasurement.label}의 편안함을 우선한다면 ${alternative.sizeLabel}을 함께 비교해 보세요.`;
   }
-  if (primaryMeasurement.diff > 0) {
+  if (primaryMeasurement.diff > 0 && alternativeDiff < primaryMeasurement.diff) {
     return `여유 있는 핏을 원한다면 ${reportInput.recommendation.recommendedSize}를, 더 정돈된 실루엣을 원한다면 ${alternative.sizeLabel}을 함께 비교해 보세요.`;
   }
-  return `평소처럼 입고 싶다면 ${reportInput.recommendation.recommendedSize}를 선택하고, 다른 사이즈는 원하는 여유에 따라 비교해 보세요.`;
+  return `${reportInput.recommendation.recommendedSize}와 ${alternative.sizeLabel} 중 원하는 ${primaryMeasurement.label} 차이에 가까운 쪽을 골라 보세요.`;
 };
 
 export const buildFallbackMeasurementAnalysisText = (
   measurement: MeasurementReportRow,
   targetProduct?: FitReportInput["targetProduct"]
 ): string => {
-  const garmentPrefix = targetProduct && isLowerBodyCategory(targetProduct.category)
-    ? "하의에서는"
-    : "상의에서는";
+  const categoryImpact = targetProduct
+    ? buildMeasurementWearerImpact(measurement, targetProduct)
+    : wearingDescription(measurement);
   return (
   `${measurement.label}${topicParticle(measurement.label)} 상품 ${formatNumber(measurement.product)}cm로, ${differenceDescription(measurement)}. ` +
-  `${garmentPrefix} ${wearingDescription(measurement)}`
+  `${categoryImpact}`
   );
 };
 
@@ -203,6 +221,8 @@ export const buildFallbackFitReport = (reportInput: FitReportInput): FitReportJs
       title: `${recommendedSize} 사이즈를 먼저 확인해 보세요`,
       summary: `${recommendedSize} 사이즈의 비교 가능한 실측이 부족해요.\n\n상품 상세 치수와 평소 입는 옷의 수치를 함께 확인해 보세요.\n\n특히 자주 신경 쓰는 부위를 먼저 비교하는 편이 좋아요.`,
       recommendationReason: `${recommendedSize}가 현재 계산된 추천 사이즈예요.\n실측이 있는 다른 사이즈도 함께 확인해 보세요.\n평소 선호하는 실루엣과 가장 가까운 쪽을 선택해 보세요.`,
+      garmentFitContext: `${reportInput.garmentContext.categoryLabel}에서는 ${reportInput.garmentContext.fitConsiderations.join(", ")}을 우선 확인합니다.`,
+      sizeTradeoff: structuredTradeoffSentence(reportInput),
       measurementAnalysis: [],
       cautions: ["소재의 신축성과 두께에 따라 실제 착용감은 달라질 수 있어요."],
       nextActions: ["상품 상세의 실측과 평소 입는 옷의 수치를 비교해 보세요."]
@@ -215,11 +235,12 @@ export const buildFallbackFitReport = (reportInput: FitReportInput): FitReportJs
     : `${recommendedSize} ${primaryMeasurement.label}이 ${headlineDescription(primaryMeasurement)}`;
   const summary = balanced
     ? `${recommendedSize}는 평소 핏에 가까워요.\n\n비교한 부위가 기준과 크게 다르지 않아, 익숙하게 입던 실루엣을 기대할 수 있어요.\n\n단독 착용을 기준으로 보면 무난한 선택이에요.`
-    : `${recommendedSize}는 ${primaryMeasurement.label}이 ${headlineDescription(primaryMeasurement)}.\n\n${differenceDescription(primaryMeasurement)}.\n\n${summaryUsageDescription(primaryMeasurement)}`;
+    : `${recommendedSize}는 ${primaryMeasurement.label}이 ${headlineDescription(primaryMeasurement)}.\n\n${differenceDescription(primaryMeasurement)}.\n\n${summaryUsageDescription(primaryMeasurement, reportInput.garmentContext.layeringRelevant)}`;
 
   return {
     title,
     summary,
+    garmentFitContext: `${reportInput.garmentContext.categoryLabel} ${reportInput.garmentContext.fitTypeLabel}에서는 ${reportInput.garmentContext.fitConsiderations.join(", ")}을 중심으로 봅니다.`,
     recommendationReason:
       `${recommendedSize}가 ${reportInput.recommendation.fitScore}점으로 가장 높은 선택이지만, ${primaryMeasurement.label}의 ${tradeoffDescription(primaryMeasurement)}은 감수해야 해요. ` +
         `${alternativeSentence(reportInput, primaryMeasurement)} ` +
@@ -228,10 +249,13 @@ export const buildFallbackFitReport = (reportInput: FitReportInput): FitReportJs
       measurement: measurement.label,
       text: buildFallbackMeasurementAnalysisText(measurement, reportInput.targetProduct)
     })),
+    sizeTradeoff: structuredTradeoffSentence(reportInput),
     cautions: ["소재의 신축성과 두께에 따라 같은 실측 차이도 다르게 느껴질 수 있어요."],
     nextActions: [
       `${primaryMeasurement.label}이 평소 선호하는 실루엣과 맞는지 확인해 보세요.`,
-      "레이어드할 예정이라면 가장 타이트한 부위의 여유를 우선 확인해 보세요."
+      reportInput.garmentContext.layeringRelevant
+        ? "레이어드할 예정이라면 가장 타이트한 부위의 여유를 우선 확인해 보세요."
+        : `${reportInput.garmentContext.categoryLabel}의 핵심 부위를 평소 옷의 실측과 비교해 보세요.`
     ]
   };
 };

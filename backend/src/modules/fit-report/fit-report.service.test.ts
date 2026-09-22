@@ -79,6 +79,13 @@ const main = async (): Promise<void> => {
 
   const fallbackReport = reportService.buildFallbackFitReport(reportInput);
   assertSanitizerContract(reportInput, fallbackReport, reportSanitizer);
+  const unsafeV7Fields = reportSanitizer.sanitizeGeneratedReport({
+    ...fallbackReport,
+    garmentFitContext: "니트는 신축성이 있어 잘 늘어납니다.",
+    sizeTradeoff: "S와 M 사이에 가슴단면이 99cm 차이 납니다."
+  }, reportInput, fallbackReport);
+  assert.equal(unsafeV7Fields.garmentFitContext, fallbackReport.garmentFitContext);
+  assert.equal(unsafeV7Fields.sizeTradeoff, fallbackReport.sizeTradeoff);
 
   const prompt = promptModule.buildFitReportPrompt(reportInput);
   const narrativeInputStart = prompt.indexOf('{\n  "locale"');
@@ -106,6 +113,25 @@ const main = async (): Promise<void> => {
   );
   assert.equal(Reflect.get(narrativeGarmentContext, "category"), reportInput.targetProduct.category);
   assert.equal(Reflect.get(narrativeGarmentContext, "fitType"), reportInput.targetProduct.fitType);
+  const narrativeSemanticFacts = Reflect.get(narrativeInput, "semanticFacts");
+  assert.ok(Array.isArray(narrativeSemanticFacts));
+  assert.equal(narrativeSemanticFacts.length, 1);
+  assert.equal(Array.isArray(Reflect.get(narrativeInput, "interactions")), true);
+  assert.ok(Reflect.get(narrativeInput, "sizeTradeoff"));
+  assert.equal(reportInput.versions.fitEngineVersion, "fit_engine_v2_0");
+  assert.deepEqual(reportInput.chartData.fitPointScores, [
+    { key: "silhouette", label: "실루엣", score: 76 },
+    { key: "mobility", label: "활동성", score: 81 }
+  ]);
+  assert.deepEqual(reportInput.chartData.measurementScores, [
+    { measurement: "shoulder_width", label: "어깨", score: 88, diff: 1.4, status: "loose" },
+    { measurement: "chest_width", label: "가슴단면", score: 64, diff: -3.2, status: "too_tight" }
+  ]);
+  const selectedAlternativeInput = await reportBuilder.buildFitReportInput(userId, fitResultId, { selectedSizeLabel: "M" });
+  assert.equal(selectedAlternativeInput.semanticFactSizeLabel, "M");
+  assert.equal(selectedAlternativeInput.semanticFacts.find((fact) => fact.measurement === "chest_width")?.product, 55.8);
+  assert.equal(selectedAlternativeInput.semanticFacts.find((fact) => fact.measurement === "chest_width")?.direction, "larger");
+  assert.equal(selectedAlternativeInput.measurements.find((row) => row.key === "chest_width")?.product, 55.8);
   const narrativeExplanation = Reflect.get(narrativeInput, "explanation");
   assert.ok(
     typeof narrativeExplanation === "object" &&
@@ -262,7 +288,7 @@ const main = async (): Promise<void> => {
   assert.equal(Reflect.get(provider, "data_collection"), "deny");
   assert.equal(generated.source, "openrouter");
   assert.equal(generated.modelName, "google/gemini-2.5-flash");
-  assert.equal(generated.promptVersion, "fit_report_v6");
+  assert.equal(generated.promptVersion, "fit_report_v7");
   assert.equal(generated.availableThreads, 34);
   assert.equal(reportThreadRequests, 1);
   assert.equal(generated.report.summary.includes("S"), true);

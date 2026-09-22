@@ -75,6 +75,11 @@ const main = async (): Promise<void> => {
   assert.equal(openRouterCalls, 1);
   assert.equal(reportThreadRequests, 1);
   assert.equal(balanceRequests, 1);
+  assert.equal(first.promptVersion, "fit_report_v7");
+  assert.equal(first.report.garmentFitContext?.includes("셔츠"), true);
+  assert.equal(first.report.sizeTradeoff?.includes("S"), true);
+  assert.equal(first.report.sizeTradeoff?.includes("M"), true);
+  assert.equal(first.chartData.idealVsProduct.some((row) => row.measurement === "chest_width"), true);
   assert.deepEqual(retry, first);
 };
 

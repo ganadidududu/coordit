@@ -26,13 +26,15 @@ const openRouterChatCompletionsUrl = "https://openrouter.ai/api/v1/chat/completi
 const fitReportJsonSchema = z.object({
   title: z.string(),
   summary: z.string(),
+  garmentFitContext: z.string(),
   recommendationReason: z.string(),
   measurementAnalysis: z.array(z.object({
     measurement: z.string(),
     text: z.string()
   })),
   cautions: z.array(z.string()),
-  nextActions: z.array(z.string())
+  nextActions: z.array(z.string()),
+  sizeTradeoff: z.string()
 });
 
 const openRouterCompletionSchema = z.object({
@@ -52,14 +54,17 @@ const fitReportResponseFormat = {
       required: [
         "title",
         "summary",
+        "garmentFitContext",
         "recommendationReason",
         "measurementAnalysis",
         "cautions",
-        "nextActions"
+        "nextActions",
+        "sizeTradeoff"
       ],
       properties: {
         title: { type: "string" },
         summary: { type: "string" },
+        garmentFitContext: { type: "string" },
         recommendationReason: { type: "string" },
         measurementAnalysis: {
           type: "array",
@@ -82,7 +87,8 @@ const fitReportResponseFormat = {
           type: "array",
           items: { type: "string" },
           maxItems: 2
-        }
+        },
+        sizeTradeoff: { type: "string" }
       }
     }
   }

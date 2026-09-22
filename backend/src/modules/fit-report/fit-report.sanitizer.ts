@@ -9,7 +9,8 @@ const forbiddenNarrativePatterns = [
   /(?:여름|겨울|봄|가을|한여름|환절기|장마)\s*(?:철|용|옷|코디|착용)?/i,
   /(?:린넨|울|캐시미어|가죽|기모|플리스|실크|벨벳|코듀로이|데님\s*(?:소재|원단)|면\s*(?:소재|원단)|코튼\s*(?:소재|원단)|폴리(?:에스터)?\s*(?:소재|원단)|나일론\s*(?:소재|원단))/i,
   /(?:포켓|주머니)(?:\s*(?:이|가|은|는|에|의|을|를|주변|디테일))?/i,
-  /(?:두꺼운|얇은|가벼운|무거운)\s*(?:원단|소재|이너|아우터|옷)/i
+  /(?:두꺼운|얇은|가벼운|무거운)\s*(?:원단|소재|이너|아우터|옷)/i,
+  /(?:신축성|두께|안감|패딩)\s*(?:이|은|는|가)?\s*(?:있|좋|높|두껍|얇|들어가)/i
 ] as const;
 
 const hasForbiddenNarrative = (text: string): boolean =>
@@ -271,9 +272,21 @@ export const sanitizeGeneratedReport = (
     return safeItems.length > 0 ? safeItems.slice(0, 2) : fallbackItems;
   };
   const alignedReport = alignMeasurementAnalysis(report, reportInput);
+  const safeV7Field = (text: string | undefined): text is string =>
+    typeof text === "string" && text.trim().length >= 10 &&
+    !hasForbiddenNarrative(text) && hasSupportedNumbers(text, reportInput);
+  const safeCategoryContext = safeV7Field(report.garmentFitContext) &&
+    report.garmentFitContext.includes(reportInput.garmentContext.categoryLabel);
+  const safeTradeoff = safeV7Field(report.sizeTradeoff) &&
+    reportInput.sizeTradeoff !== undefined && (
+      report.sizeTradeoff.includes(reportInput.sizeTradeoff.recommended) &&
+      report.sizeTradeoff.includes(reportInput.sizeTradeoff.alternative)
+    );
 
   return {
     ...alignedReport,
+    garmentFitContext: safeCategoryContext ? report.garmentFitContext : fallback.garmentFitContext,
+    sizeTradeoff: safeTradeoff ? report.sizeTradeoff : fallback.sizeTradeoff,
     title: report.title.trim().length >= 4 &&
       !hasForbiddenNarrative(report.title) &&
       hasSupportedNumbers(report.title, reportInput)
