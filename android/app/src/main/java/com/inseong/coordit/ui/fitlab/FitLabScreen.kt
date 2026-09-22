@@ -24,7 +24,6 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -280,8 +279,10 @@ private fun Result(state: FitLabState, s: Float, restart: () -> Unit, saveHistor
     ScoreCard("현재 베스트 스코어 기준", result, s)
     ClosetMannequin(state.draft.upper, result.diff.mapValues { it.value as Double? }, s)
     ScoreBars((state.report?.chartData?.sizeScoreRanking.orEmpty() + result.allSizeScores).distinctBy { it.sizeLabel }, result.recommendedSize, s)
+    FitPointScores(state.report?.chartData?.fitPointScores.orEmpty(), s)
+    MeasurementScores(state.report?.chartData?.measurementScores.orEmpty(), s)
     DifferenceChart(state.report?.chartData?.differenceBar.orEmpty(), state.report?.chartData?.idealVsProduct.orEmpty(), result.diff, s)
-    ReportDetails(state.report?.report, state.reportError, s)
+    ReportDetails(state.report?.report, state.report?.chartData, state.reportError, s)
     if (state.reportError != null) Primary(if (state.busy) "리포트 다시 만드는 중..." else "상세 리포트 다시 만들기", s, "fitlab-retry-report", !state.busy, retryReport)
     state.error?.let { Error(it, s) }
     if (state.report != null) Primary(if (state.historySaved) "히스토리에 저장됨" else if (state.busy) "저장 중..." else "히스토리에 추가", s, "fitlab-save-history", !state.busy && !state.historySaved, saveHistory)
@@ -307,8 +308,10 @@ private fun HistoryDetail(state: FitLabState, s: Float, delete: () -> Unit) {
     ScoreCard("과거 기준치 기준", result, s)
     ClosetMannequin(snapshot.upper, result.diff.mapValues { it.value as Double? }, s)
     ScoreBars((snapshot.report.chartData.sizeScoreRanking + result.allSizeScores).distinctBy { it.sizeLabel }, result.recommendedSize, s)
+    FitPointScores(snapshot.report.chartData.fitPointScores, s)
+    MeasurementScores(snapshot.report.chartData.measurementScores, s)
     DifferenceChart(snapshot.report.chartData.differenceBar, snapshot.report.chartData.idealVsProduct, result.diff, s)
-    ReportDetails(snapshot.report.report, null, s)
+    ReportDetails(snapshot.report.report, snapshot.report.chartData, null, s)
     state.error?.let { Error(it, s) }
     LightAction(if (state.busy) "삭제 중..." else "이 히스토리 삭제", s, "fitlab-delete-history", !state.busy, delete)
 }
@@ -370,6 +373,85 @@ private fun ScoreBars(rows: List<FitLabSizeScore>, recommended: String, s: Float
         }
     }
 }
+
+@Composable
+private fun FitPointScores(rows: List<FitLabFitPointScore>, s: Float) {
+    if (rows.isEmpty()) return
+    Column(Modifier.fillMaxWidth().testTag("fitlab-fit-profile")) {
+        Panel(s) {
+            CoorditText("FIT PROFILE BREAKDOWN", CoorditTypography.mona12(16 * s).copy(color = Color.Black))
+            FitText("실측 차이를 착용 관점별 점수로 나눠봤어요.", 10f, s, color = Color.Black.copy(alpha = .55f))
+            rows.forEach { row ->
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = (34 * s).dp).testTag("fitlab-fit-point-${row.key}"),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy((9 * s).dp),
+                ) {
+                    Box(Modifier.width((58 * s).dp)) {
+                        FitText(row.label, 11f, s, true, Color.Black)
+                    }
+                    Box(Modifier.weight(1f).height((9 * s).dp).background(FitLabDesign.field, CircleShape)) {
+                        Box(
+                            Modifier.fillMaxWidth((row.score / 100.0).coerceIn(0.0, 1.0).toFloat())
+                                .fillMaxHeight()
+                                .background(FitLabDesign.ink, CircleShape),
+                        )
+                    }
+                    Box(Modifier.width((34 * s).dp), contentAlignment = Alignment.CenterEnd) {
+                        FitText(score(row.score), 11f, s, true, Color.Black)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MeasurementScores(rows: List<FitLabMeasurementScore>, s: Float) {
+    if (rows.isEmpty()) return
+    Column(Modifier.fillMaxWidth().testTag("fitlab-measurement-scores")) {
+        Panel(s) {
+            CoorditText("PART SCORE BREAKDOWN", CoorditTypography.mona12(16 * s).copy(color = Color.Black))
+            FitText("부위별 실측이 기준 옷과 얼마나 가까운지 계산했어요.", 10f, s, color = Color.Black.copy(alpha = .55f))
+            rows.forEach { row ->
+                val (fitLabel, fitColor) = measurementScoreStatus(row)
+                Column(
+                    Modifier.fillMaxWidth().heightIn(min = (58 * s).dp).testTag("fitlab-measurement-score-${row.measurement}"),
+                    verticalArrangement = Arrangement.spacedBy((6 * s).dp),
+                ) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        FitText(row.label, 11f, s, true, Color.Black)
+                        Spacer(Modifier.weight(1f))
+                        FitText("${score(row.score)}점", 11f, s, true, Color.Black)
+                    }
+                    Box(Modifier.fillMaxWidth().height((8 * s).dp).background(FitLabDesign.field, CircleShape)) {
+                        Box(
+                            Modifier.fillMaxWidth((row.score / 100.0).coerceIn(0.0, 1.0).toFloat())
+                                .fillMaxHeight()
+                                .background(FitLabDesign.ink, CircleShape),
+                        )
+                    }
+                    FitText(measurementScoreDifference(row.diff, fitLabel), 9f, s, true, fitColor)
+                }
+            }
+        }
+    }
+}
+
+private fun measurementScoreStatus(row: FitLabMeasurementScore): Pair<String, Color> = when (row.status?.lowercase()) {
+    "tight", "too_tight", "small", "slightly_small", "too_small", "타이트" -> "타이트" to AppColors.danger
+    "loose", "too_loose", "large", "slightly_large", "too_large", "여유" -> "여유" to AppColors.blue
+    "good", "very_similar", "similar", "same", "비슷" -> "비슷" to AppColors.green
+    else -> when {
+        kotlin.math.abs(row.diff) < .001 -> "비슷" to AppColors.green
+        row.diff < 0 -> "타이트" to AppColors.danger
+        else -> "여유" to AppColors.blue
+    }
+}
+
+private fun measurementScoreDifference(diff: Double, status: String): String =
+    if (kotlin.math.abs(diff) < .001) "기준 대비 ±0cm · $status"
+    else "기준 대비 ${if (diff > 0) "+" else ""}${number(diff)}cm · $status"
 
 @Composable
 private fun DifferenceChart(rows: List<FitLabDifference>, comparisons: List<FitLabComparison>, fallback: Map<String, Double>, s: Float) {
@@ -440,7 +522,7 @@ private fun DifferenceChart(rows: List<FitLabDifference>, comparisons: List<FitL
 private data class DifferenceDisplay(val label: String, val diff: Double, val ideal: Double?, val product: Double?)
 
 @Composable
-private fun ReportDetails(report: FitLabReportBody?, error: String?, s: Float) {
+private fun ReportDetails(report: FitLabReportBody?, chartData: FitLabChartData?, error: String?, s: Float) {
     Column(Modifier.fillMaxWidth().testTag("fitlab-report-details"), verticalArrangement = Arrangement.spacedBy((14 * s).dp)) {
         Column(verticalArrangement = Arrangement.spacedBy((3 * s).dp)) {
             CoorditText("DETAILED FIT ANALYSIS", CoorditTypography.mona12(18 * s).copy(color = Color.Black))
@@ -450,12 +532,37 @@ private fun ReportDetails(report: FitLabReportBody?, error: String?, s: Float) {
         report?.let {
             ReportSection("OVERALL VERDICT", it.title, it.summary, true, s)
         }
+        report?.garmentFitContext?.takeIf(String::isNotBlank)?.let {
+            ReportSection("GARMENT FIT CONTEXT", "이 옷에서 중요한 핏 포인트", it, false, s, "fitlab-report-context")
+        }
         report?.recommendationReason?.let {
             ReportSection("WHY THIS SIZE", "이 사이즈를 추천하는 이유", it, false, s)
         }
+        report?.sizeTradeoff?.takeIf(String::isNotBlank)?.let {
+            ReportSection("SIZE TRADEOFF", "다른 사이즈와 비교하면", it, false, s, "fitlab-report-tradeoff")
+        }
         if (!report?.measurementAnalysis.isNullOrEmpty()) FitText("부위별 정밀 분석", 17f, s, true, Color.Black)
         report?.measurementAnalysis?.forEach { analysis ->
-            Panel(s) { FitText(analysis.measurement, 14f, s, true, Color.Black); FitText(analysis.text, 12f, s, color = Color.Black) }
+            val comparison = chartData?.idealVsProduct?.firstOrNull { it.label == analysis.measurement }
+            val direction = comparison?.let(::analysisDirection)
+            val railColor = direction?.second ?: Color.Black.copy(alpha = .4f)
+            Box(Modifier.fillMaxWidth().testTag("fitlab-report-measurement-${analysis.measurement}")) {
+                Panel(s) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        FitText(analysis.measurement, 14f, s, true, Color.Black)
+                        Spacer(Modifier.weight(1f))
+                        direction?.let { (label, color) ->
+                            Box(Modifier.background(color.copy(alpha = .12f), CircleShape).padding(horizontal = (7 * s).dp, vertical = (4 * s).dp)) {
+                                FitText(label, 9f, s, true, color)
+                            }
+                        }
+                    }
+                    FitText(analysis.text, 12f, s, color = Color.Black)
+                }
+                Box(Modifier.matchParentSize().padding(vertical = (10 * s).dp)) {
+                    Box(Modifier.align(Alignment.CenterStart).width((3 * s).dp).fillMaxHeight().background(railColor, RoundedCornerShape((2 * s).dp)))
+                }
+            }
         }
         if (!report?.cautions.isNullOrEmpty() || !report?.nextActions.isNullOrEmpty()) {
             Column(Modifier.fillMaxWidth().background(FitLabDesign.field, RoundedCornerShape((9 * s).dp)).padding((16 * s).dp), verticalArrangement = Arrangement.spacedBy((10 * s).dp)) {
@@ -467,9 +574,29 @@ private fun ReportDetails(report: FitLabReportBody?, error: String?, s: Float) {
     }
 }
 
+private fun analysisDirection(comparison: FitLabComparison): Pair<String, Color>? {
+    if (!comparison.diff.isFinite()) return null
+    val status = comparison.status?.lowercase()
+    val tolerance = when (comparison.measurement) {
+        "shoulder_width", "waist_width", "rise" -> .5
+        "chest_width", "sleeve_length", "hip_width" -> .75
+        else -> 1.0
+    }
+    return when (status) {
+        "tight", "too_tight", "small", "slightly_small", "too_small", "타이트" -> "− 타이트" to AppColors.danger
+        "good", "very_similar", "similar", "same", "비슷" -> "≈ 비슷" to AppColors.green
+        "loose", "too_loose", "large", "slightly_large", "too_large", "여유" -> "+ 여유" to AppColors.blue
+        else -> when {
+            kotlin.math.abs(comparison.diff) <= tolerance -> "≈ 비슷" to AppColors.green
+            comparison.diff < 0 -> "− 타이트" to AppColors.danger
+            else -> "+ 여유" to AppColors.blue
+        }
+    }
+}
+
 @Composable
-private fun ReportSection(eyebrow: String, title: String, text: String, dark: Boolean, s: Float) {
-    Column(Modifier.fillMaxWidth().testTag(if (dark) "fitlab-report-overall" else "fitlab-report-reason")) {
+private fun ReportSection(eyebrow: String, title: String, text: String, dark: Boolean, s: Float, tag: String = if (dark) "fitlab-report-overall" else "fitlab-report-reason") {
+    Column(Modifier.fillMaxWidth().testTag(tag)) {
     Panel(s, dark = dark) {
         FitText(eyebrow, 10f, s, color = if (dark) Color.White.copy(alpha = .72f) else Color.Black.copy(alpha = .55f))
         FitText(title, 16f, s, true, if (dark) Color.White else Color.Black)

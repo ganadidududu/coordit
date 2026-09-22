@@ -510,6 +510,145 @@ struct CoorditFitLabSizeScoreChart: View {
     }
 }
 
+struct CoorditFitLabPointScoreChart: View {
+    let scores: [CoorditFitLabReportResponse.ChartData.FitPointScore]
+    let metrics: CoorditResponsiveMetrics
+
+    var body: some View {
+        if !scores.isEmpty {
+            VStack(alignment: .leading, spacing: metrics.value(12)) {
+                VStack(alignment: .leading, spacing: metrics.value(3)) {
+                    Text("FIT PROFILE BREAKDOWN")
+                        .font(CoorditTypography.mona12(size: metrics.value(16), relativeTo: .headline))
+                    Text("실측 차이를 착용 관점별 점수로 나눠봤어요.")
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
+                        .foregroundStyle(CoorditFitLabPalette.muted)
+                }
+
+                ForEach(scores, id: \.key) { point in
+                    HStack(spacing: metrics.value(9)) {
+                        Text(point.label)
+                            .font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .body))
+                            .frame(width: metrics.value(58), alignment: .leading)
+                        GeometryReader { proxy in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(CoorditFitLabPalette.field)
+                                Capsule()
+                                    .fill(CoorditFitLabPalette.ink)
+                                    .frame(width: proxy.size.width * min(max(point.score, 0), 100) / 100)
+                            }
+                        }
+                        .frame(height: metrics.value(9))
+                        Text(CoorditFitLabResultMeasurement.score(point.score))
+                            .font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .body))
+                            .monospacedDigit()
+                            .frame(width: metrics.value(34), alignment: .trailing)
+                    }
+                    .foregroundStyle(Color.black)
+                    .frame(minHeight: metrics.value(34))
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(point.label) \(CoorditFitLabResultMeasurement.score(point.score))점")
+                    .accessibilityIdentifier("fitlab-fit-point-\(point.key)")
+                }
+            }
+            .padding(metrics.value(15))
+            .background(CoorditFitLabPalette.surface)
+            .clipShape(RoundedRectangle(cornerRadius: metrics.value(8), style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: metrics.value(8), style: .continuous)
+                    .stroke(Color.black.opacity(0.12), lineWidth: 1)
+            )
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("fitlab-fit-profile")
+        }
+    }
+}
+
+struct CoorditFitLabMeasurementScoreChart: View {
+    let scores: [CoorditFitLabReportResponse.ChartData.MeasurementScore]
+    let metrics: CoorditResponsiveMetrics
+
+    var body: some View {
+        if !scores.isEmpty {
+            VStack(alignment: .leading, spacing: metrics.value(12)) {
+                VStack(alignment: .leading, spacing: metrics.value(3)) {
+                    Text("PART SCORE BREAKDOWN")
+                        .font(CoorditTypography.mona12(size: metrics.value(16), relativeTo: .headline))
+                    Text("부위별 실측이 기준 옷과 얼마나 가까운지 계산했어요.")
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
+                        .foregroundStyle(CoorditFitLabPalette.muted)
+                }
+
+                ForEach(scores, id: \.measurement) { row in
+                    let presentation = presentation(for: row)
+                    VStack(alignment: .leading, spacing: metrics.value(6)) {
+                        HStack {
+                            Text(row.label)
+                            Spacer()
+                            Text("\(CoorditFitLabResultMeasurement.score(row.score))점")
+                                .monospacedDigit()
+                        }
+                        .font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .body))
+
+                        GeometryReader { proxy in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(CoorditFitLabPalette.field)
+                                Capsule()
+                                    .fill(CoorditFitLabPalette.ink)
+                                    .frame(width: proxy.size.width * min(max(row.score, 0), 100) / 100)
+                            }
+                        }
+                        .frame(height: metrics.value(8))
+
+                        Text(differenceText(row.diff, status: presentation.label))
+                            .font(CoorditTypography.gmarketBold(size: metrics.value(9), relativeTo: .caption))
+                            .foregroundStyle(presentation.color)
+                    }
+                    .foregroundStyle(Color.black)
+                    .frame(minHeight: metrics.value(58))
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(
+                        "\(row.label) \(CoorditFitLabResultMeasurement.score(row.score))점, \(differenceText(row.diff, status: presentation.label))"
+                    )
+                    .accessibilityIdentifier("fitlab-measurement-score-\(row.measurement.rawValue)")
+                }
+            }
+            .padding(metrics.value(15))
+            .background(CoorditFitLabPalette.surface)
+            .clipShape(RoundedRectangle(cornerRadius: metrics.value(8), style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: metrics.value(8), style: .continuous)
+                    .stroke(Color.black.opacity(0.12), lineWidth: 1)
+            )
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("fitlab-measurement-scores")
+        }
+    }
+
+    private func presentation(
+        for row: CoorditFitLabReportResponse.ChartData.MeasurementScore
+    ) -> (label: String, color: Color) {
+        switch row.status?.lowercased() {
+        case "tight", "too_tight", "small", "slightly_small", "too_small", "타이트":
+            return ("타이트", CoorditDesignTokens.ColorToken.red)
+        case "loose", "too_loose", "large", "slightly_large", "too_large", "여유":
+            return ("여유", CoorditDesignTokens.ColorToken.blue)
+        case "good", "very_similar", "similar", "same", "비슷":
+            return ("비슷", CoorditDesignTokens.ColorToken.green)
+        default:
+            if abs(row.diff) < 0.001 { return ("비슷", CoorditDesignTokens.ColorToken.green) }
+            return row.diff < 0
+                ? ("타이트", CoorditDesignTokens.ColorToken.red)
+                : ("여유", CoorditDesignTokens.ColorToken.blue)
+        }
+    }
+
+    private func differenceText(_ diff: Double, status: String) -> String {
+        guard abs(diff) >= 0.001 else { return "기준 대비 ±0cm · \(status)" }
+        return "기준 대비 \(CoorditFitLabResultMeasurement.signed(diff))cm · \(status)"
+    }
+}
+
 private struct CoorditFitLabYarnStyle {
     static let travelFraction: CGFloat = 0.44
     static let frameHeight: CGFloat = 38

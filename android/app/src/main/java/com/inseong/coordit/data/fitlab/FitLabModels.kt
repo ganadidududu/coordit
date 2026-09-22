@@ -84,6 +84,8 @@ data class FitLabReportBody(
     val title: String = "핏 리포트",
     val summary: String = "",
     val recommendationReason: String? = null,
+    val garmentFitContext: String? = null,
+    val sizeTradeoff: String? = null,
     val fitDnaSummary: String? = null,
     val measurementAnalysis: List<FitLabMeasurementAnalysis> = emptyList(),
     val cautions: List<String> = emptyList(),
@@ -91,7 +93,11 @@ data class FitLabReportBody(
 )
 data class FitLabComparison(val measurement: String, val label: String, val ideal: Double, val product: Double, val diff: Double, val status: String?)
 data class FitLabDifference(val measurement: String, val label: String, val diff: Double, val direction: String?, val status: String?)
+data class FitLabFitPointScore(val key: String, val label: String, val score: Double)
+data class FitLabMeasurementScore(val measurement: String, val label: String, val score: Double, val diff: Double, val status: String?)
 data class FitLabChartData(
+    val fitPointScores: List<FitLabFitPointScore> = emptyList(),
+    val measurementScores: List<FitLabMeasurementScore> = emptyList(),
     val idealVsProduct: List<FitLabComparison> = emptyList(),
     val differenceBar: List<FitLabDifference> = emptyList(),
     val sizeScoreRanking: List<FitLabSizeScore> = emptyList(),

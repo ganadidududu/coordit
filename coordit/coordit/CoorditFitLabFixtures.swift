@@ -157,8 +157,23 @@ enum CoorditFitLabContractProbe {
                 #"{"unknownFutureField":true,"report":{"title":"테스트","measurementAnalysis":"malformed","cautions":42,"unknownSection":"ignored"},"chartData":{"idealVsProduct":[{"measurement":"shoulder_width","label":"어깨","ideal":53,"product":54,"diff":1,"status":null},{"measurement":"future_measurement","label":"미래","ideal":1,"product":2,"diff":1},{"measurement":42}],"unknownSeries":[]}}"#.utf8
             )
             let decoded = try decoder.decode(CoorditFitLabReportResponse.self, from: minimalReport)
+            let v7Report = try decoder.decode(
+                CoorditFitLabReportResponse.self,
+                from: Data(#"{"report":{"title":"V7","garmentFitContext":"후드 맥락","sizeTradeoff":"M과 L의 차이"},"chartData":{"fitPointScores":[{"key":"silhouette","label":"실루엣","score":91}],"measurementScores":[{"measurement":"shoulder_width","label":"어깨","score":97.3,"diff":1,"status":"loose"}]}}"#.utf8)
+            )
             guard
                 decoded.report.title == "테스트",
+                decoded.report.garmentFitContext == nil,
+                decoded.report.sizeTradeoff == nil,
+                v7Report.report.garmentFitContext == "후드 맥락",
+                v7Report.report.sizeTradeoff == "M과 L의 차이",
+                v7Report.chartData.fitPointScores.first?.key == "silhouette",
+                v7Report.chartData.fitPointScores.first?.score == 91,
+                v7Report.chartData.measurementScores.first?.measurement == .shoulderWidth,
+                v7Report.chartData.measurementScores.first?.score == 97.3,
+                v7Report.chartData.measurementScores.first?.diff == 1,
+                decoded.chartData.fitPointScores.isEmpty,
+                decoded.chartData.measurementScores.isEmpty,
                 decoded.report.measurementAnalysis.isEmpty,
                 decoded.report.cautions.isEmpty,
                 decoded.chartData.idealVsProduct.count == 1,
@@ -656,6 +671,8 @@ enum CoorditFitLabFixtures {
             title: "M 사이즈 정밀 핏 리포트",
             summary: "M 사이즈는 92점으로 전체 후보 중 가장 안정적인 균형을 보여요. 어깨에는 자연스러운 여유가 있고 총장은 기준과 같아 전체 실루엣이 익숙하게 떨어집니다. 가슴과 소매는 기준보다 조금 작아 상체 라인은 상대적으로 정돈되어 보일 수 있어요.",
             recommendationReason: "S 사이즈는 가슴과 소매의 타이트함이 더 커질 수 있고, L 사이즈는 어깨와 몸통의 여유가 함께 증가합니다. M 사이즈는 어깨 1cm 여유와 동일한 총장을 유지하면서 가슴 차이를 1.5cm 안쪽으로 제한합니다. 폭과 길이 중 어느 한쪽으로 치우치지 않고 기준 의류의 실루엣에 가장 가깝게 접근한 후보이기 때문에 M을 추천해요.",
+            garmentFitContext: "후드에서는 어깨선과 가슴 여유가 상체의 실루엣을 좌우하고, 소매와 총장이 기준 옷과 얼마나 비슷한지도 함께 확인해야 해요.",
+            sizeTradeoff: "M은 어깨와 총장이 기준 옷에 더 가깝고, L은 가슴에 여유를 더할 수 있어요. 몸통 여유가 우선이면 L 실측을 다시 확인해 주세요.",
             measurementAnalysis: [
                 .init(measurement: "어깨", text: "기준 53cm와 상품 54cm를 비교하면 1cm 여유가 있습니다. 어깨선이 지나치게 내려가지 않으면서 움직임에 필요한 공간을 확보하는 정도예요. 정사이즈 실루엣을 유지하면서 상체가 답답해 보이지 않는 차이입니다."),
                 .init(measurement: "가슴", text: "기준 58cm보다 상품이 1.5cm 작습니다. 몸통이 기준 의류보다 조금 더 정돈되어 보이고, 두꺼운 이너를 입으면 가슴 부위가 타이트하게 느껴질 수 있어요. 단독 착용에서는 슬림한 상체 실루엣을 만드는 방향입니다."),
@@ -666,6 +683,17 @@ enum CoorditFitLabFixtures {
             nextActions: ["M 사이즈의 실측표를 한 번 더 확인해 주세요."]
         ),
         chartData: .init(
+            fitPointScores: [
+                .init(key: "silhouette", label: "실루엣", score: 95.2),
+                .init(key: "mobility", label: "활동성", score: 97.6),
+                .init(key: "layering", label: "레이어링", score: 91.5),
+            ],
+            measurementScores: [
+                .init(measurement: .shoulderWidth, label: "어깨", score: 97.3, diff: 1, status: "loose"),
+                .init(measurement: .chestWidth, label: "가슴", score: 85.6, diff: -1.5, status: "tight"),
+                .init(measurement: .totalLength, label: "총장", score: 100, diff: 0, status: "similar"),
+                .init(measurement: .sleeveLength, label: "소매", score: 97.9, diff: -0.5, status: "similar"),
+            ],
             idealVsProduct: [
                 .init(measurement: .shoulderWidth, label: "어깨", ideal: 53, product: 54, diff: 1, status: "loose"),
                 .init(measurement: .chestWidth, label: "가슴", ideal: 58, product: 56.5, diff: -1.5, status: "tight"),
@@ -686,6 +714,8 @@ enum CoorditFitLabFixtures {
         modelName: report.modelName,
         report: report.report,
         chartData: .init(
+            fitPointScores: report.chartData.fitPointScores,
+            measurementScores: report.chartData.measurementScores,
             idealVsProduct: report.chartData.idealVsProduct,
             differenceBar: report.chartData.differenceBar
         )
@@ -709,6 +739,12 @@ enum CoorditFitLabFixtures {
             nextActions: ["밑위 착용감을 확인해 주세요."]
         ),
         chartData: .init(
+            measurementScores: [
+                .init(measurement: .waistWidth, label: "허리", score: 94.6, diff: 1, status: "loose"),
+                .init(measurement: .hipWidth, label: "힙", score: 100, diff: 0, status: "similar"),
+                .init(measurement: .rise, label: "밑위", score: 88.2, diff: -1, status: "tight"),
+                .init(measurement: .outseam, label: "총장", score: 94.6, diff: 2, status: "loose"),
+            ],
             idealVsProduct: [
                 .init(measurement: .waistWidth, label: "허리", ideal: 39, product: 40, diff: 1, status: "loose"),
                 .init(measurement: .hipWidth, label: "힙", ideal: 50, product: 50, diff: 0, status: "similar"),
@@ -729,6 +765,7 @@ enum CoorditFitLabFixtures {
         modelName: lowerReport.modelName,
         report: lowerReport.report,
         chartData: .init(
+            measurementScores: lowerReport.chartData.measurementScores,
             idealVsProduct: lowerReport.chartData.idealVsProduct,
             differenceBar: lowerReport.chartData.differenceBar,
             sizeScoreRanking: lowerNumericSizeLabelRecommendation.allSizeScores

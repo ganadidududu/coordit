@@ -87,11 +87,21 @@ class FitLabFlowTest {
             compose.waitUntil(5_000) { model.state.value.report != null || api.reportKeys.size >= 2 }
             ready(model)
             assertNotNull(model.state.value.report)
+            compose.onNodeWithTag("fitlab-report-context").assertExists()
+            compose.onNodeWithTag("fitlab-fit-point-silhouette").assertExists()
+            compose.onNodeWithTag("fitlab-measurement-score-shoulder_width").assertExists()
+            compose.onNodeWithTag("fitlab-report-reason").assertExists()
+            compose.onNodeWithTag("fitlab-report-tradeoff").assertExists()
             assertEquals(2, api.reportKeys.size)
             assertEquals(api.reportKeys.first(), api.reportKeys.last())
             capture("08-result")
+            captureFitProfile("08a-fit-profile")
+            captureAt("fitlab-measurement-scores", "08a-part-scores")
             captureAfterScroll("08a-difference")
             captureAt("fitlab-report-overall", "08b-report")
+            captureAt("fitlab-report-context", "08b-context")
+            captureAt("fitlab-report-tradeoff", "08b-tradeoff")
+            captureAt("fitlab-report-measurement-어깨", "08b-measurement")
             captureBottom("08c-actions")
             tap("fitlab-save-history")
             compose.waitUntil(5_000) { model.state.value.history.size == 1 || model.state.value.error != null }
@@ -102,6 +112,7 @@ class FitLabFlowTest {
             click("fitlab-history-analysis-1")
             assertEquals(FitLabRoute.HistoryDetail, model.state.value.screen)
             capture("09-history-detail")
+            captureFitProfile("09a-history-fit-profile")
             captureBottom("09b-history-actions")
             tap("fitlab-delete-history")
             compose.waitUntil(5_000) { model.state.value.screen == FitLabRoute.Sources || model.state.value.error != null }
@@ -239,6 +250,22 @@ class FitLabFlowTest {
         bitmap.recycle()
     }
 
+    private fun captureFitProfile(name: String) {
+        compose.onNodeWithTag("fitlab-fit-point-silhouette").performScrollTo()
+        compose.onNodeWithTag("fitlab-scroll").performTouchInput {
+            swipe(
+                start = androidx.compose.ui.geometry.Offset(center.x, center.y + 150f),
+                end = androidx.compose.ui.geometry.Offset(center.x, center.y - 150f),
+                durationMillis = 500,
+            )
+        }
+        compose.waitForIdle()
+        val bitmap = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
+        val directory = java.io.File(compose.activity.getExternalFilesDir(null), "fitlab-qa").apply { mkdirs() }
+        java.io.File(directory, "$name.png").outputStream().use { bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+        bitmap.recycle()
+    }
+
     private fun captureAfterScroll(name: String) {
         repeat(3) {
             compose.onNodeWithTag("fitlab-scroll").performTouchInput {
@@ -331,8 +358,16 @@ private class FitLabFixture : FitLabApi {
         reportKeys += request.idempotencyKey
         if (reportKeys.size == 1) throw IOException("ambiguous report result")
         return FitLabReportResponse(
-            id, "fixture", FitLabReportBody("M 사이즈 핏 리포트", "기준 옷과 비슷한 여유가 예상돼요.", measurementAnalysis = listOf(FitLabMeasurementAnalysis("어깨", "0.5cm 여유"))),
+            id, "fixture", FitLabReportBody("M 사이즈 핏 리포트", "기준 옷과 비슷한 여유가 예상돼요.", recommendationReason = "M은 어깨와 가슴의 균형이 가장 가까워요.", garmentFitContext = "티셔츠에서는 어깨와 가슴의 균형을 확인해요.", sizeTradeoff = "M은 어깨, L은 가슴 여유가 유리해요.", measurementAnalysis = listOf(FitLabMeasurementAnalysis("어깨", "0.5cm 여유"))),
             FitLabChartData(
+                fitPointScores = listOf(
+                    FitLabFitPointScore("silhouette", "실루엣", 96.5),
+                    FitLabFitPointScore("mobility", "활동성", 97.0),
+                ),
+                measurementScores = listOf(
+                    FitLabMeasurementScore("shoulder_width", "어깨", 98.0, 0.5, "similar"),
+                    FitLabMeasurementScore("chest_width", "가슴", 94.9, 1.0, "loose"),
+                ),
                 idealVsProduct = listOf(
                     FitLabComparison("shoulder_width", "어깨", 44.5, 45.0, 0.5, "비슷"),
                     FitLabComparison("chest_width", "가슴", 51.0, 52.0, 1.0, "여유"),
