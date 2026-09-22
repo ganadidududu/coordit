@@ -658,13 +658,14 @@ Product Analysis는 외부 상품 정보를 자동으로 가져오거나 분석�
 | 주요 반환값 | 추천 사이즈, fit score, confidence, 기준 의류 통계, 부위별 차이, 사이즈별 점수 |
 | 사용 화면 | Fit Lab |
 
-`feedbackProfile`은 기존 호환성과 오프라인 분석용 메타데이터로 포함될 수 있지만
-fit score, 추천 사이즈, 기준 프로필, 동적 가중치를 변경하지 않는다.
+`feedbackProfile`은 기존 호환성과 calibration 분석용 메타데이터로 포함된다. reliability가
+`applied`인 경우에만 제한된 offset/weight modifier가 적용되며, insufficient/conflicting
+상태에서는 fit score와 추천 사이즈를 변경하지 않는다.
 
 추천 응답은 기존 필드를 유지한다. 클라이언트는 `fitScore`, `fitLabel`,
 `recommendationConfidence`, `diff`, `partExplanations`, `partStatuses`,
 `allSizeScores`를 계속 사용할 수 있다. 추가 설명 메타데이터는 선택 필드다.
-현재 추천 알고리즘 버전은 `mvp_rule_v1_7`이며 응답의 `algorithmVersion` 및
+현재 추천 알고리즘 버전은 `fit_engine_v2_0`이며 응답의 `algorithmVersion` 및
 DB의 `algorithm_version`에 기록된다.
 
 Fit Lab 분석은 실타래를 사용하는 요청이다. 하나의 사용자가 같은
@@ -679,6 +680,12 @@ Fit Lab 분석은 실타래를 사용하는 요청이다. 하나의 사용자가
 | `confidenceBreakdown` | 최종 신뢰도 라벨, 점수 간격, 측정 데이터 품질, 피드백 신뢰도, reason code를 담는다. |
 | `allSizeScores[].scoreExplanation` | 후보 사이즈별 설명 메타데이터다. 없으면 기존 후보 점수 필드만 사용한다. |
 | `allSizeScores[].confidenceBreakdown` | 후보 사이즈별 신뢰도 메타데이터다. 없으면 `recommendationConfidence`만 사용한다. |
+| `garmentProfile` | category별 weight, tolerance, 중요 부위와 semantic concern이다. |
+| `measurementSubscores`, `semanticSubscores` | 엔진이 계산한 0~100 deterministic 부위/착용 관점 점수다. |
+| `semanticFacts`, `interactions` | 리포트가 번역하는 deterministic 착용 영향과 부위 조합 결과다. |
+| `sizeTradeoff` | 추천 사이즈와 실제 실측이 있는 차순위 후보의 부위별 차이다. |
+| `referenceCompatibility` | exact 우선 또는 related fallback으로 사용한 기준 의류 metadata다. |
+| `versions` | engine/profile/semantic/report prompt version을 기록한다. |
 
 저장된 추천 결과의 `GET /fit-analysis-results/:id` 및 최근 결과 목록은 기존
 DB 필드 `fit_score`, `fit_label`, `recommendation_confidence`,
@@ -770,16 +777,26 @@ QA용 선택 메타데이터이며 모바일 클라이언트는 없어도 기존
   "fitAnalysisResultId": "uuid",
   "source": "openrouter",
   "modelName": "google/gemini-2.5-flash",
-  "promptVersion": "fit_report_v6",
+  "promptVersion": "fit_report_v7",
   "report": {
     "title": "L 사이즈 핏 리포트",
     "summary": "...",
+    "garmentFitContext": "...",
     "recommendationReason": "...",
     "measurementAnalysis": [],
     "cautions": [],
+    "sizeTradeoff": "...",
     "nextActions": []
   },
   "chartData": {
+    "fitPointScores": [
+      { "key": "silhouette", "label": "실루엣", "score": 91 },
+      { "key": "mobility", "label": "활동성", "score": 86 }
+    ],
+    "measurementScores": [
+      { "measurement": "shoulder_width", "label": "어깨", "score": 97.3, "diff": 1, "status": "loose" },
+      { "measurement": "chest_width", "label": "가슴단면", "score": 85.6, "diff": -1.5, "status": "tight" }
+    ],
     "idealVsProduct": [],
     "differenceBar": [],
     "sizeScoreRanking": [],
@@ -800,10 +817,18 @@ QA용 선택 메타데이터이며 모바일 클라이언트는 없어도 기존
 - `OPENROUTER_TIMEOUT_MS`: 기본값 `20000`
 
 `includeDebug = true`이면 테스트용으로 `reportInput`과 `prompt`를 응답에 포함한다.
-`fit_report_v6`는 추천 사이즈, 사이즈별 fit score, 기준/상품 실측과 부위별 차이,
-의류 카테고리·핏 타입·주요 설명 부위를 LLM에 전달한다. confidence, 신뢰도, 피드백, 데이터 품질,
+`fitPointScores`는 엔진이 계산한 0~100 범위의 결정론적 세부 점수다. 현재 key는
+`silhouette`, `mobility`, `layering`이며, 클라이언트는 전달된 항목만 같은 척도로 표시한다.
+LLM 응답에서 이 점수를 추론하거나 누락된 항목을 채우지 않는다.
+`measurementScores`도 엔진이 계산한 0~100 범위의 결정론적 부위별 기준 옷 유사도다.
+각 행은 같은 부위의 signed `diff`(cm)와 `status`를 함께 제공하며, 클라이언트는 전달된
+행만 표시한다. 이 점수는 체형 평가나 confidence가 아니며, 값이 높을수록 해당 부위 실측이
+사용자의 기준 옷에 가깝다는 뜻이다. 이전 저장 리포트에서 필드가 없으면 빈 배열로 처리한다.
+
+`fit_report_v7`는 추천 사이즈, 사이즈별 fit score, 기준/상품 실측과 부위별 차이,
+category-specific context, deterministic semantic facts, interactions, subscore, size trade-off를 LLM에 전달한다. confidence, 신뢰도, 피드백, 데이터 품질,
 기준 의류 개수는 사용자용 서술에 전달하거나 노출하지 않는다. OpenRouter는 fit score
-또는 추천 사이즈를 계산하지 않으며, 부적합하거나 지나치게 짧은 출력은 측정 기반
+또는 추천 사이즈와 수치를 계산하지 않으며, 부적합하거나 지나치게 짧은 출력은 측정 기반
 문장으로 보정한다. 계절·두께·소재·주머니처럼 입력에 없는 상품 디테일은 단정하지
 않는다. 호출이나 JSON 파싱 실패 시 fallback 리포트도 기존 엔진 결과를 그대로 설명한다.
 

@@ -2,7 +2,7 @@
 
 문서 상태: 모바일 MVP 기준 정리본  
 기준일: 2026-07-31
-현재 버전: `mvp_rule_v1_7`
+현재 버전: `fit_engine_v2_0`
 
 ## 1. 문서 목적
 
@@ -14,7 +14,7 @@
 
 Fit Engine은 사용자가 잘 맞는다고 지정한 기준 의류의 실측값과 외부 상품의 사이즈표를 비교해 가장 적합한 사이즈를 추천한다.
 
-현재 엔진은 ML 모델이 아니라 rule-based 엔진이다. 다중 기준 의류, 표준편차 기반 가중치, 가상 기준 프로필을 사용해 사용자가 직접 고른 기준 의류의 핏을 반영한다. 사용자 피드백과 기준 의류 개수는 fit score나 추천 사이즈를 보정하지 않는다.
+현재 엔진은 ML 모델이 아니라 deterministic rule-based 엔진이다. 다중 기준 의류, category별 garment profile, 방향성 tolerance, Huber loss, 부위 interaction을 사용한다. 피드백은 calibration readiness가 `applied`인 경우에만 제한된 offset/weight modifier로 반영한다.
 
 ## 3. 입력
 
@@ -51,39 +51,13 @@ Fit Engine은 사용자가 잘 맞는다고 지정한 기준 의류의 실측값
 
 ## 5. 카테고리 호환성
 
-동일 카테고리는 항상 호환된다.
-
-추가 호환 그룹:
-
-- `hoodie`, `sweatshirt`
-- `pants`, `jeans`
-- `shirt`, `tshirt`, `knit`
-- `jacket`, `coat`
-- `shorts`, `skirt`
-
-호환되지 않는 카테고리 조합은 추천 계산 대상이 아니다.
+동일 카테고리는 `exact`다. `related`는 상의의 `tshirt`·`shirt`·`sweatshirt`·`hoodie`·`knit` 내의 명시된 조합, `jacket`↔`coat`, 하의의 `pants`·`jeans`·`shorts` 내의 명시된 조합에만 허용된다. `skirt`는 다른 category와 호환되지 않는다. 전체 방향별 목록은 `category-compatibility.ts`가 단일 출처다. 선택한 기준 의류에 exact가 하나라도 있으면 related는 제외하고, exact가 없을 때만 related를 사용한다. 둘 다 없으면 요청을 거절한다.
 
 ## 6. 측정값과 기본 가중치
 
 누락된 측정값은 `0`으로 보지 않고 비교에서 제외한다. 비교 가능한 측정값이 없으면 추천을 계산할 수 없다.
 
-### 6.1 상의
-
-| 측정값 | 기본 가중치 |
-| --- | ---: |
-| `shoulder_width` | 0.35 |
-| `chest_width` | 0.30 |
-| `total_length` | 0.20 |
-| `sleeve_length` | 0.15 |
-
-### 6.2 하의
-
-| 측정값 | 기본 가중치 |
-| --- | ---: |
-| `waist_width` | 0.35 |
-| `hip_width` | 0.25 |
-| `rise` | 0.15 |
-| `outseam` | 0.25 |
+11개 category의 기본 가중치와 방향별 허용 오차는 `garment-fit-profiles.ts`에서 각각 정의한다. 예를 들어 티셔츠는 가슴단면·총장, 재킷은 어깨·가슴단면·소매, 팬츠는 허리·힙·밑위·아웃심, 스커트는 허리·힙·총장 중심이다. 스커트에는 `rise`·`outseam` 가중치가 없다. 각 profile의 가중치 합은 1이며, 동일 부위의 cm 차이라도 category별 tolerance와 weight 때문에 점수가 달라진다.
 
 ## 7. Multiple Reference Clothing
 
@@ -148,20 +122,7 @@ normalizedWeight = dynamicWeight / sum(dynamicWeights)
 
 허용 오차는 해당 부위의 cm 차이에 얼마나 민감하게 감점할지 정하는 기준이다. 중요도 가중치와 다른 개념이다.
 
-```text
-τₖ = clamp(sₖ, toleranceFloorₖ, toleranceCeilingₖ)
-```
-
-현재 하의 기준 허용 오차:
-
-| 항목 | 최소 허용 오차 | 최대 허용 오차 |
-| --- | ---: | ---: |
-| `waist_width` | 0.5cm | 3cm |
-| `hip_width` | 0.75cm | 5cm |
-| `rise` | 0.5cm | 4cm |
-| `outseam` | 1cm | 8cm |
-
-허용 오차 하한은 지나치게 민감한 감점을 막고, 상한은 지나치게 관대한 추천을 막는다.
+V2의 최종 허용 오차는 `category`·부위·차이 방향의 profile 값에 `fitType` modifier를 곱한다. 다중 기준 의류에서 학습한 허용 오차가 있으면 profile 기본값 대비 1~1.5배의 제한된 variance modifier를 추가로 적용한다. 따라서 같은 +3cm와 -3cm도 다른 normalized loss를 낼 수 있다. `fit-tolerance.ts`가 계산의 단일 출처다.
 
 ## 11. 후보 사이즈 점수 계산
 
@@ -169,25 +130,21 @@ normalizedWeight = dynamicWeight / sum(dynamicWeights)
 
 ```text
 diffₖ = yₖ - μₖ
-normalized_distance = Σ((|diffₖ| / τₖ) × Wₖ) / Σ(used Wₖ)
-fit_score = 0.1 + 99.9 × exp(-normalized_distance / 8)
-final_fit_score = clamp(fit_score - fit_type_penalty, 0.1, 100)
+zₖ = |diffₖ| / directional_tolerance(category, fit_type, direction)
+normalized_loss = Σ(huber(zₖ) × Wₖ) / Σ(used Wₖ)
+fit_score = clamp(100 × exp(-normalized_loss / 1.5), 0.1, 100)
+final_fit_score = clamp(fit_score - capped_interaction_penalty, 0.1, 100)
 ```
 
 가상 기준 프로필과 실측이 같은 후보는 정확히 100점을 받는다. 작은 차이는 완만하게 감점하고, 큰 차이는 0점에 가까워지도록 전체 점수 범위를 사용한다. 유효한 실측 비교 결과의 최저값은 0.1점이므로 화면에서 0.0점은 표시하지 않는다. `weighted_fit_distance`는 cm가 아니라 허용 오차로 정규화된 거리다.
 
-`mvp_rule_v1_7`에서는 피드백 offset과 weight multiplier를 점수 계산에 적용하지 않는다. 점수는 사용자가 이번 분석에서 선택한 기준 의류 실측과 상품 실측의 차이로만 결정된다.
+누락 실측은 사용 가능한 weight만 다시 정규화한다. OCR confidence와 source quality는 score에 반영하지 않고 recommendation confidence metadata에만 반영한다. 피드백은 reliability가 명시적으로 `applied`일 때만 builder가 제한한 범위 안에서 적용한다.
 
-## 12. Fit Type Penalty
+## 12. Category, Fit Type, Interaction
 
-Fit type penalty는 상품 fit type과 기준 프로필의 차이를 보정한다.
+11개 category는 독립 weight, smaller/larger tolerance, critical/secondary measurement, semantic concern을 가진다. `slim`, `regular`, `relaxed`, `oversized`는 방향성 tolerance와 volume measurement importance에 제한된 modifier를 적용한다.
 
-현재 규칙:
-
-- `oversized`인데 어깨/가슴이 기준보다 너무 작으면 penalty
-- `relaxed`인데 가슴이 기준보다 너무 작으면 penalty
-- `slim`인데 가슴/허리가 너무 크면 penalty
-- `regular`인데 주요 부위 차이가 과도하면 penalty
+interaction은 어깨+가슴, 어깨+소매, 가슴+총장, 허리+힙, 힙+밑위 등 category profile에 선언된다. interaction 결과와 semantic effects는 deterministic이며, 동일 차이를 두 번 과도하게 벌하지 않도록 전체 interaction penalty를 2점으로 제한한다.
 
 ## 13. Fit Score
 
@@ -231,7 +188,7 @@ small/large 계열 label은 주요 부위 평균 차이가 음수인지 양수�
 - `medium`
 - `low`
 
-`mvp_rule_v1_7`에서도 confidence 판단 근거는 `scoreExplanation`과
+`fit_engine_v2_0`에서도 confidence 판단 근거는 `scoreExplanation`과
 `confidenceBreakdown`에 선택 메타데이터로 저장될 수 있다. 이 메타데이터는
 내부 진단용이며 `fit_score` 계산값이나 사용자 리포트 서술을 바꾸지 않는다.
 

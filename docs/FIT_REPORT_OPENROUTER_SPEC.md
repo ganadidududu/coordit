@@ -2,8 +2,8 @@
 
 문서 상태: 현행 계약
 기준일: 2026-07-31
-엔진 버전: `mvp_rule_v1_7`
-프롬프트 버전: `fit_report_v6`
+엔진 버전: `fit_engine_v2_0`
+프롬프트 버전: `fit_report_v7`
 
 ## 1. 목적
 
@@ -134,7 +134,7 @@ OpenRouter는 strict JSON Schema로 다음 JSON만 반환한다.
 - `cautions`: 데이터로 확정할 수 없는 구매 전 확인 사항 최대 2개
 - `nextActions`: 상품 상세나 보유 의류에서 확인할 수 있는 행동 최대 2개
 
-`fitDnaSummary`와 `feedbackPersonalization`은 `fit_report_v6` 공개 출력 필드가 아니다.
+`fitDnaSummary`와 `feedbackPersonalization`은 `fit_report_v7` 공개 출력 필드가 아니다. V7은 대신 검증된 `garmentContext`, `semanticFacts`, `interactions`, `sizeTradeoff`를 narrative input으로 사용한다. `semanticFactSizeLabel`은 해당 facts가 선택한 어느 사이즈의 실측을 설명하는지 명시하며, 추천 사이즈와 다른 사이즈를 선택한 경우 해당 facts를 선택 사이즈 실측으로 재구성한다.
 
 ## 5. 출력 보정
 
@@ -185,7 +185,7 @@ POST /fit-analysis-results/:id/report
   "fitAnalysisResultId": "uuid",
   "source": "openrouter",
   "modelName": "google/gemini-2.5-flash",
-  "promptVersion": "fit_report_v6",
+  "promptVersion": "fit_report_v7",
   "report": {
     "title": "L 사이즈 정밀 핏 리포트",
     "summary": "...",
