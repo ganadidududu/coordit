@@ -777,7 +777,7 @@ QA용 선택 메타데이터이며 모바일 클라이언트는 없어도 기존
   "fitAnalysisResultId": "uuid",
   "source": "openrouter",
   "modelName": "google/gemini-2.5-flash",
-  "promptVersion": "fit_report_v7",
+  "promptVersion": "fit_report_v9",
   "report": {
     "title": "L 사이즈 핏 리포트",
     "summary": "...",
@@ -825,11 +825,12 @@ LLM 응답에서 이 점수를 추론하거나 누락된 항목을 채우지 않
 행만 표시한다. 이 점수는 체형 평가나 confidence가 아니며, 값이 높을수록 해당 부위 실측이
 사용자의 기준 옷에 가깝다는 뜻이다. 이전 저장 리포트에서 필드가 없으면 빈 배열로 처리한다.
 
-`fit_report_v7`는 추천 사이즈, 사이즈별 fit score, 기준/상품 실측과 부위별 차이,
+`fit_report_v9`는 추천 사이즈, 사이즈별 fit score, 기준/상품 실측과 부위별 차이,
 category-specific context, deterministic semantic facts, interactions, subscore, size trade-off를 LLM에 전달한다. confidence, 신뢰도, 피드백, 데이터 품질,
 기준 의류 개수는 사용자용 서술에 전달하거나 노출하지 않는다. OpenRouter는 fit score
 또는 추천 사이즈와 수치를 계산하지 않으며, 부적합하거나 지나치게 짧은 출력은 측정 기반
-문장으로 보정한다. 계절·두께·소재·주머니처럼 입력에 없는 상품 디테일은 단정하지
+문장으로 보정한다. 부위별 분석은 기준·상품 수치와 방향이 안전하게 확인되면 LLM이 작성한
+고유한 해석을 보존한다. 계절·두께·소재·주머니처럼 입력에 없는 상품 디테일은 단정하지
 않는다. 호출이나 JSON 파싱 실패 시 fallback 리포트도 기존 엔진 결과를 그대로 설명한다.
 
 ## 10. Feedback

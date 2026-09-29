@@ -425,4 +425,4 @@ Migration notes:
 - 기존 운영 데이터가 있다면 `inseam` 값을 `outseam`으로 이전할지 별도 판단이 필요하다.
 - Styling 확장용 테이블은 별도 migration에 포함되어 있다.
 - MVP+2 피드백 보정을 위해 `user_feedback.part_feedback` JSONB 컬럼을 추가했다.
-- Fit Engine `fit_engine_v2_0` 및 report prompt `fit_report_v7`는 새 SQL migration이 없다. profile, subscore, semantic fact, interaction, trade-off, version metadata는 `fit_analysis_results.result_details` JSONB에 additive하게 저장되고 legacy-tolerant 하게 읽힌다. 피드백은 calibration readiness가 `applied`일 때만 제한적으로 반영된다.
+- Fit Engine `fit_engine_v2_0` 및 report prompt `fit_report_v9`는 새 SQL migration이 없다. profile, subscore, semantic fact, interaction, trade-off, version metadata는 `fit_analysis_results.result_details` JSONB에 additive하게 저장되고 legacy-tolerant 하게 읽힌다. 피드백은 calibration readiness가 `applied`일 때만 제한적으로 반영된다.

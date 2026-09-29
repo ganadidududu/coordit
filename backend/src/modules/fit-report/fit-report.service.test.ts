@@ -288,7 +288,7 @@ const main = async (): Promise<void> => {
   assert.equal(Reflect.get(provider, "data_collection"), "deny");
   assert.equal(generated.source, "openrouter");
   assert.equal(generated.modelName, "google/gemini-2.5-flash");
-  assert.equal(generated.promptVersion, "fit_report_v7");
+  assert.equal(generated.promptVersion, "fit_report_v9");
   assert.equal(generated.availableThreads, 34);
   assert.equal(reportThreadRequests, 1);
   assert.equal(generated.report.summary.includes("S"), true);

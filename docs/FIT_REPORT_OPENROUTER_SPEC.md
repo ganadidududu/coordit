@@ -3,7 +3,7 @@
 문서 상태: 현행 계약
 기준일: 2026-07-31
 엔진 버전: `fit_engine_v2_0`
-프롬프트 버전: `fit_report_v7`
+프롬프트 버전: `fit_report_v9`
 
 ## 1. 목적
 
@@ -127,20 +127,20 @@ OpenRouter는 strict JSON Schema로 다음 JSON만 반환한다.
 
 작성 기준:
 
-- `summary`: 추천 사이즈, fit score, 전체 실루엣과 핵심 장단점을 4~5문장으로 작성
-- `recommendationReason`: 다른 모든 사이즈 점수와 부위별 균형을 6~9문장으로 설명
-- `measurementAnalysis`: 모든 입력 부위를 순서대로 작성하고 기준값, 상품값,
-  signed diff와 착용 의미를 포함
+- `summary`: 빈 줄로 나눈 결론·핵심 차이·실제 선택 장면의 세 짧은 문단으로 작성
+- `recommendationReason`: 추천 사이즈의 이점과 타협점, 실측이 있는 대안, 취향별 최종 선택을 세 문장으로 설명
+- `measurementAnalysis`: 모든 입력 부위를 순서대로 한 번씩 작성하고 각 `measurement`은 응답 스키마가 강제하는 입력 `label`을 그대로 복사한다. 각 부위마다 기준값·상품값·차이 방향,
+  해당 부위 고유의 실루엣 또는 위치 변화, 사이즈 선택 의미를 세 문장으로 작성
 - `cautions`: 데이터로 확정할 수 없는 구매 전 확인 사항 최대 2개
 - `nextActions`: 상품 상세나 보유 의류에서 확인할 수 있는 행동 최대 2개
 
-`fitDnaSummary`와 `feedbackPersonalization`은 `fit_report_v7` 공개 출력 필드가 아니다. V7은 대신 검증된 `garmentContext`, `semanticFacts`, `interactions`, `sizeTradeoff`를 narrative input으로 사용한다. `semanticFactSizeLabel`은 해당 facts가 선택한 어느 사이즈의 실측을 설명하는지 명시하며, 추천 사이즈와 다른 사이즈를 선택한 경우 해당 facts를 선택 사이즈 실측으로 재구성한다.
+`fitDnaSummary`와 `feedbackPersonalization`은 `fit_report_v9` 공개 출력 필드가 아니다. V9은 대신 검증된 `garmentContext`, `semanticFacts`, `interactions`, `sizeTradeoff`를 narrative input으로 사용한다. `semanticFactSizeLabel`은 해당 facts가 선택한 어느 사이즈의 실측을 설명하는지 명시하며, 추천 사이즈와 다른 사이즈를 선택한 경우 해당 facts를 선택 사이즈 실측으로 재구성한다.
 
 ## 5. 출력 보정
 
 백엔드는 OpenRouter의 structured output을 그대로 신뢰하지 않는다.
 
-- 부위별 문장에 입력과 다른 숫자가 있으면 해당 부위를 측정 기반 문장으로 교체한다.
+- 부위별 문장에 입력과 다른 숫자가 있거나 기준·상품 수치 또는 차이 방향이 빠지면 해당 부위를 측정 기반 문장으로 교체한다.
 - 입력에 없는 숫자가 요약·추천 이유·확인 사항에 있으면 해당 섹션을 fallback으로 교체한다.
 - 지나치게 짧은 요약 또는 추천 이유는 상세 fallback 문장으로 교체한다.
 - 신뢰도, 피드백, 기준 샘플 부족 서술이 있으면 해당 섹션을 교체한다.
@@ -148,8 +148,9 @@ OpenRouter는 strict JSON Schema로 다음 JSON만 반환한다.
   서술을 교체한다. cm 수치는 부위별 분석에서만 허용한다.
 - 누락된 부위는 모두 측정 기반 문장으로 채운다.
 
-작성 목표는 위 문장 범위이며, 출력 보정의 하한은 summary 4문장,
-recommendationReason 6문장, 부위별 분석 3문장이다. 목표보다 긴 문장은 다른
+작성 목표는 위 문장 범위이며, 출력 보정의 하한은 summary 3문장,
+recommendationReason 3문장, 부위별 분석 2문장이다. 부위별 분석은 수치와 방향이
+안전하면 한 문장 부족하더라도 LLM의 고유한 해석을 보존한다. 목표보다 긴 문장은 다른
 안전성·숫자 조건을 만족하면 불필요한 재시도를 피하기 위해 허용한다.
 
 OpenRouter가 만든 `summary`와 `recommendationReason`에 각각 안전한 모델 문장이 하나
@@ -185,7 +186,7 @@ POST /fit-analysis-results/:id/report
   "fitAnalysisResultId": "uuid",
   "source": "openrouter",
   "modelName": "google/gemini-2.5-flash",
-  "promptVersion": "fit_report_v7",
+  "promptVersion": "fit_report_v9",
   "report": {
     "title": "L 사이즈 정밀 핏 리포트",
     "summary": "...",

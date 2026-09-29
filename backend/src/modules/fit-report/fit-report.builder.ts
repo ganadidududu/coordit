@@ -137,7 +137,7 @@ export const buildFitReportInput = async (
       fitEngineVersion: details.versions?.fitEngineVersion ?? fitResult.algorithm_version,
       garmentProfileVersion: details.versions?.garmentProfileVersion ?? "legacy",
       semanticRulesVersion: details.versions?.semanticRulesVersion ?? "legacy",
-      fitReportPromptVersion: "fit_report_v7"
+      fitReportPromptVersion: "fit_report_v9"
     },
     chartData: {
       ...buildChartData(measurementRows, sizeScores, details),

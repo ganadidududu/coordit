@@ -240,7 +240,7 @@ export const prepareFitRecommendation = async ({
         fitEngineVersion: ALGORITHM_VERSION,
         garmentProfileVersion: GARMENT_PROFILE_VERSION,
         semanticRulesVersion: SEMANTIC_RULES_VERSION,
-        fitReportPromptVersion: "fit_report_v7"
+        fitReportPromptVersion: "fit_report_v9"
       },
       allSizeScores: recommendation.allSizeScores.map((score) => ({
         externalProductSizeId: score.externalProductSizeId,
@@ -287,7 +287,7 @@ export const prepareFitRecommendation = async ({
           fitEngineVersion: ALGORITHM_VERSION,
           garmentProfileVersion: GARMENT_PROFILE_VERSION,
           semanticRulesVersion: SEMANTIC_RULES_VERSION,
-          fitReportPromptVersion: "fit_report_v7"
+          fitReportPromptVersion: "fit_report_v9"
         },
         diffs: best.diffs,
         partExplanations: best.partExplanations,

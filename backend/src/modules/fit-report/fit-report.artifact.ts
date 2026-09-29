@@ -74,7 +74,7 @@ const storedFitReportArtifactSchema = z.object({
   schemaVersion: z.literal(1),
   source: z.enum(["openrouter", "fallback"]),
   modelName: z.string(),
-  promptVersion: z.enum(["fit_report_v6", "fit_report_v7"]),
+  promptVersion: z.enum(["fit_report_v6", "fit_report_v7", "fit_report_v9"]),
   report: reportSchema,
   chartData: chartDataSchema
 });

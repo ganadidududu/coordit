@@ -1,6 +1,6 @@
 import type { FitReportInput } from "./fit-report.types";
 
-export const FIT_REPORT_PROMPT_VERSION = "fit_report_v7" as const;
+export const FIT_REPORT_PROMPT_VERSION = "fit_report_v9" as const;
 
 export const FIT_REPORT_SYSTEM_PROMPT = `너는 Coordit의 패션 핏 컨설턴트다.
 기준 의류 실측과 상품의 사이즈별 실측을 바탕으로, 사용자가 실제로 어떤 사이즈를 고를지 판단할 수 있게 돕는다.
@@ -93,8 +93,8 @@ export const buildFitReportPrompt = (reportInput: FitReportInput): string => `${
 1. title은 "M 가슴단면이 타이트할 수 있어요"처럼 결론부터 말한다. "정밀 핏 리포트" 같은 제목은 쓰지 않는다.
 2. summary는 빈 줄로 나눈 정확히 세 개의 짧은 문단으로 작성한다: 결론 한 문장, 기준과의 핵심 차이 한 문장, 실제 선택 장면 한 문장.
 3. summary에는 가장 중요한 부위만 기준 수치와 차이를 쓸 수 있다. 나머지 수치 나열은 금지한다.
-4. measurementAnalysis에는 measurements의 모든 부위를 입력 순서대로 빠짐없이 한 항목씩 작성한다.
-5. 각 부위는 정확히 두 문장으로 작성한다: 첫 문장은 기준·상품·cm 차이와 방향, 둘째 문장은 예상되는 착용감 또는 실루엣이다.
+4. measurementAnalysis에는 measurements의 모든 부위를 입력 순서대로 빠짐없이 한 항목씩 작성하고, 각 measurement 값은 입력의 label을 한 글자도 바꾸지 않고 그대로 복사한다. "어깨너비", "소매 길이"처럼 별칭을 쓰거나 번역하지 마라.
+5. 각 부위는 서로 다른 정확히 세 문장으로 작성한다: 첫 문장은 기준·상품 수치와 차이의 방향, 둘째 문장은 그 부위에만 맞는 실루엣 또는 위치 변화, 셋째 문장은 사이즈 선택이나 착용 장면에서의 의미를 설명한다. 총장은 밑단, 소매는 손목, 어깨는 어깨선, 가슴·허리·힙은 해당 부위의 볼륨을 중심으로 쓰고, 부위 사이에 같은 문장이나 "익숙한 핏" 같은 일반 결론을 반복하지 마라.
 6. 값이 유사 범위여도 차이가 0이 아니라면 작아지는 방향인지 커지는 방향인지 문장에 반영한다.
 7. recommendationReason은 정확히 세 문장으로 작성한다: 추천 사이즈의 이점과 타협점, 실제 실측이 있는 가장 가까운 대안의 변화, 취향별 최종 선택.
 8. 대안의 실측이 입력에 없으면 그 대안이 더 편하거나 더 타이트하다고 말하지 말고, 점수만 비교하거나 상세 치수 확인을 권한다.

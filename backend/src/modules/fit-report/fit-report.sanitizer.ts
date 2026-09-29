@@ -96,9 +96,6 @@ const hasMinimumDetail = (text: string, minimumLength: number, minimumSentences:
   text.trim().length >= minimumLength &&
   text.split(/[.!?。]+/).filter((sentence) => sentence.trim().length > 0).length >= minimumSentences;
 
-const assertNever = (value: never): never => {
-  throw new Error(`Unsupported measurement key: ${value}`);
-};
 type NarrativeMinimumDetail = {
   readonly length: number;
   readonly sentences: number;
@@ -116,53 +113,6 @@ const isUsableNarrative = (
 
 const summaryMinimumDetail = { length: 55, sentences: 3 } as const;
 const recommendationMinimumDetail = { length: 75, sentences: 3 } as const;
-
-const topicParticle = (label: string): string => {
-  const lastCharacter = label.at(-1);
-  if (!lastCharacter) return "은";
-  const hangulOffset = lastCharacter.charCodeAt(0) - 0xac00;
-  return hangulOffset >= 0 && hangulOffset <= 11171 && hangulOffset % 28 !== 0 ? "은" : "는";
-};
-
-const measurementFitSentence = (row: FitReportInput["measurements"][number]): string => {
-  switch (row.key) {
-    case "total_length":
-      return row.diff < 0
-        ? "기준보다 짧아 밑단 위치가 평소보다 위로 올라갈 수 있습니다."
-        : row.diff > 0
-          ? "기준보다 길어 밑단 위치가 평소보다 아래로 내려갈 수 있습니다."
-          : "기준과 같은 길이로 밑단 위치가 익숙한 기준에 가깝습니다.";
-    case "sleeve_length":
-      return row.diff < 0
-        ? "기준보다 짧아 손목이 더 드러나는 방향입니다."
-        : row.diff > 0
-          ? "기준보다 길어 손목과 손등을 더 덮는 방향입니다."
-          : "기준과 같은 길이로 손목을 덮는 정도가 익숙한 기준에 가깝습니다.";
-    case "outseam":
-      return row.diff < 0
-        ? "기준보다 짧아 밑단이 발목 쪽에서 더 빨리 끝나는 방향입니다."
-        : row.diff > 0
-          ? "기준보다 길어 신발 위에서 밑단이 더 길게 머무는 방향입니다."
-          : "기준과 같은 길이로 신발 위 밑단의 마무리가 익숙한 기준에 가깝습니다.";
-    case "rise":
-      return row.diff < 0
-        ? "기준보다 짧아 허리선이 낮거나 몸에 더 가깝게 자리할 수 있습니다."
-        : row.diff > 0
-          ? "기준보다 길어 허리선이 높거나 여유 있게 자리할 수 있습니다."
-          : "기준과 같은 깊이로 허리선 위치가 익숙한 기준에 가깝습니다.";
-    case "shoulder_width":
-    case "chest_width":
-    case "waist_width":
-    case "hip_width":
-      return row.diff < 0
-        ? "기준보다 작아 이 부위는 상대적으로 타이트하게 느껴질 수 있습니다."
-        : row.diff > 0
-          ? "기준보다 커 이 부위에는 상대적으로 여유가 생길 수 있습니다."
-          : "기준과 같은 수치로 이 부위의 볼륨은 익숙한 핏에 가깝습니다.";
-    default:
-      return assertNever(row.key);
-  }
-};
 
 const safeNarrativeSentences = (text: string, reportInput: FitReportInput): string[] =>
   text.split(/[.!?。]+/)
@@ -200,18 +150,11 @@ export const hasAcceptedCoreNarrative = (
   safeNarrativeSentences(report.summary, reportInput).length > 0 &&
   safeNarrativeSentences(report.recommendationReason, reportInput).length > 0;
 
-export const formatSigned = (value: number): string => `${value > 0 ? "+" : ""}${value}`;
-
-export const buildMeasurementAnalysisText = (
-  row: FitReportInput["measurements"][number],
-  targetProduct: FitReportInput["targetProduct"]
-): string => buildFallbackMeasurementAnalysisText(row, targetProduct);
-
 const hasExpectedDifferenceDirection = (
   text: string,
   row: FitReportInput["measurements"][number]
 ): boolean => {
-  if (row.diff === 0) return /같아요|동일/.test(text);
+  if (row.diff === 0) return /같아요|동일|일치|차이.{0,5}없/.test(text);
   const isLengthMeasurement = ["total_length", "sleeve_length", "rise", "outseam"].includes(row.key);
   if (row.diff < 0) return isLengthMeasurement ? /짧/.test(text) : /좁|타이트/.test(text);
   return isLengthMeasurement ? /길/.test(text) : /넓|여유/.test(text);
@@ -221,21 +164,17 @@ const hasConsistentMeasurementNumbers = (
   text: string,
   row: FitReportInput["measurements"][number]
 ): boolean => {
-  const numericTokens = [...text.matchAll(/[+-]?\d+(?:\.\d+)?/g)].map((match) => match[0]);
-  const numericValues = numericTokens.map(Number).filter(Number.isFinite);
+  const numericValues = extractNumbers(text);
   const allowedValues = [row.ideal, row.product, row.diff, Math.abs(row.diff)];
   const contains = (expected: number): boolean =>
     numericValues.some((value) => Math.abs(value - expected) < 0.001);
-  const containsSignedDiff = numericTokens.some((value) => value === formatSigned(row.diff));
-
-  const hasCorrectDifference = containsSignedDiff || (
-    contains(Math.abs(row.diff)) && hasExpectedDifferenceDirection(text, row)
-  );
 
   return numericValues.every((value) =>
     allowedValues.some((allowed) => Math.abs(value - allowed) < 0.001)
-  ) && contains(row.ideal) && contains(row.product) && hasCorrectDifference;
+  ) && contains(row.ideal) && contains(row.product) && hasExpectedDifferenceDirection(text, row);
 };
+
+const normalizeMeasurement = (value: string): string => value.replace(/\s|너비|폭|길이|단면/g, "");
 
 const alignMeasurementAnalysis = (
   report: FitReportJson,
@@ -244,7 +183,9 @@ const alignMeasurementAnalysis = (
   ...report,
   measurementAnalysis: reportInput.measurements.map((row) => {
     const generated = report.measurementAnalysis.find((item) =>
-      item.measurement === row.label || item.measurement === row.key
+      item.measurement === row.label ||
+      item.measurement === row.key ||
+      normalizeMeasurement(item.measurement) === normalizeMeasurement(row.label)
     );
     return {
       measurement: row.label,
@@ -253,7 +194,7 @@ const alignMeasurementAnalysis = (
         hasMinimumDetail(generated.text, 45, 2) &&
         hasConsistentMeasurementNumbers(generated.text, row)
         ? generated.text
-        : buildMeasurementAnalysisText(row, reportInput.targetProduct)
+        : buildFallbackMeasurementAnalysisText(row, reportInput.targetProduct)
     };
   })
 });
