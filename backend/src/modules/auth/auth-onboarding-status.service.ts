@@ -19,6 +19,10 @@ export type OnboardingStatusRepository = {
   readonly findUserConsents: (userId: string) => Promise<readonly UserConsent[]>;
 };
 
+type ProductAccessRepository = OnboardingStatusRepository & {
+  readonly isGuestUser: (userId: string) => Promise<boolean>;
+};
+
 const latestVersionsByKey = (versions: readonly RequiredConsentVersion[]): Map<RequiredConsentKey, string> => {
   const latestVersions = new Map<RequiredConsentKey, string>();
   for (const version of versions) {
@@ -75,6 +79,31 @@ const supabaseOnboardingStatusRepository: OnboardingStatusRepository = {
   }
 };
 
+const supabaseProductAccessRepository: ProductAccessRepository = {
+  ...supabaseOnboardingStatusRepository,
+  async isGuestUser(userId: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from("users")
+      .select("is_guest")
+      .eq("id", userId)
+      .single<{ is_guest: boolean }>();
+    if (error || !data) throw createHttpError(500, "Failed to check account access");
+    return data.is_guest;
+  }
+};
+
+export const canUseProductWithRepository = async (
+  repository: ProductAccessRepository,
+  userId: string
+): Promise<boolean> => {
+  if (await repository.isGuestUser(userId)) return true;
+  return isOnboardingCompleteWithRepository(repository, userId);
+};
+
 export const isOnboardingCompleteForUser = async (userId: string): Promise<boolean> => {
   return isOnboardingCompleteWithRepository(supabaseOnboardingStatusRepository, userId);
+};
+
+export const canUseProductForUser = async (userId: string): Promise<boolean> => {
+  return canUseProductWithRepository(supabaseProductAccessRepository, userId);
 };

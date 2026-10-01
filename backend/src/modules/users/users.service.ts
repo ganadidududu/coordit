@@ -7,13 +7,15 @@ type UserProfileUpsertRow = {
   readonly id: string;
   readonly email: string;
   readonly updated_at: string;
-  readonly display_name?: string;
+  display_name?: string | null;
+  is_guest?: boolean;
 };
 
 type UserProfileIdentity = {
   readonly id: string;
   readonly email: string;
-  readonly displayName?: string;
+  readonly displayName?: string | null;
+  readonly isGuest?: boolean;
 };
 
 export const toUserProfileUpsertRow = (user: UserProfileIdentity): UserProfileUpsertRow => {
@@ -23,8 +25,9 @@ export const toUserProfileUpsertRow = (user: UserProfileIdentity): UserProfileUp
     updated_at: new Date().toISOString()
   };
   if (user.displayName !== undefined) {
-    return { ...row, display_name: user.displayName };
+    row.display_name = user.displayName;
   }
+  if (user.isGuest !== undefined) row.is_guest = user.isGuest;
   return row;
 };
 

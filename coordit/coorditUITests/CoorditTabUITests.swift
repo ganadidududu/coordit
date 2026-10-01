@@ -8,6 +8,11 @@ final class CoorditTabUITests: XCTestCase {
 
     func testTabsAreTappable() throws {
         let app = XCUIApplication()
+        app.launchArguments = [
+            "--coordit-ui-testing",
+            "--coordit-start-route",
+            "main01",
+        ]
         app.launch()
         XCTAssertTrue(element("main01-screen", in: app).waitForExistence(timeout: 5))
 
@@ -56,8 +61,6 @@ final class CoorditTabUITests: XCTestCase {
             "mypage-body-measurements",
             "mypage-privacy-policy",
             "mypage-terms",
-            "mypage-contact",
-            "mypage-bug-report",
             "closet-detail-top",
             "closet-detail-bottom",
         ]

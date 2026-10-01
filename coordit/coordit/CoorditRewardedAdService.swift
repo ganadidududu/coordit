@@ -175,6 +175,15 @@ final class CoorditRewardedAdService: NSObject, ObservableObject, FullScreenCont
         }
     }
 
+    var isChargeControlVisible: Bool {
+        switch status {
+        case .ready, .presenting, .awaitingServerSettlement, .settled, .failed:
+            true
+        case .idle, .disabled, .readinessUnavailable, .loading, .requiresLogin:
+            false
+        }
+    }
+
     func prepare(
         walletSession liveWalletSession: CoorditRewardedWalletSession,
         currentBalance: Int
@@ -198,6 +207,14 @@ final class CoorditRewardedAdService: NSObject, ObservableObject, FullScreenCont
             status = .failed("광고 설정을 확인할 수 없어요. 다시 시도해 주세요.")
             recordFixtureEvent("load-failed")
             return
+        }
+
+        if fixtureScenario == nil {
+            guard await CoorditAdPrivacyService.shared.refreshConsent() else {
+                status = .failed("광고 개인정보 확인이 필요해요. 설정에서 다시 시도해 주세요.")
+                recordFixtureEvent("load-blocked:privacy")
+                return
+            }
         }
 
         let generation = UUID()

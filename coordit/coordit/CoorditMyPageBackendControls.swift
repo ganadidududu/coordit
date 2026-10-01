@@ -4,11 +4,18 @@ import SwiftUI
 extension CoorditMyPageFamilyView {
     func backendConnectionStatus(metrics: CoorditResponsiveMetrics) -> some View {
         CoorditSettingsStatusBanner(
-            text: backendSession.statusText,
+            text: backendAccountStatusText,
             identifier: "mypage-backend-status",
             metrics: metrics,
             isWarning: backendSession.isWarning
         )
+    }
+
+    private var backendAccountStatusText: String {
+        if backendSession.isWarning { return backendSession.statusText }
+        if backendSession.isMember { return "계정 연결됨" }
+        if backendSession.isAuthenticated { return "비회원으로 이용 중" }
+        return "계정을 연결하면 기록을 안전하게 보관할 수 있어요"
     }
 
     func syncBackendProfile() {

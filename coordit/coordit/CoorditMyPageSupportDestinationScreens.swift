@@ -81,6 +81,12 @@ extension CoorditMyPageFamilyView {
                     bodyText: "사용자는 자신의 정보를 열람, 수정, 삭제하거나 처리 정지를 요청할 수 있습니다. 문의 이메일을 통해 개인정보 관련 요청을 접수할 수 있습니다.",
                     metrics: metrics
                 )
+                CoorditSettingsDivider(metrics: metrics)
+                CoorditSettingsDocumentSection(
+                    title: "5. 비개인화 광고",
+                    bodyText: "보상형 광고는 Google Mobile Ads SDK를 통해 비개인화 방식으로 제공됩니다. 광고 제공 과정에서 IP 주소를 바탕으로 한 대략적 위치, 기기 식별자, 광고 데이터, 앱 상호작용, 진단 및 성능 정보가 처리될 수 있습니다. 맞춤형 광고나 앱 추적 권한은 사용하지 않으며, 광고 개인정보 설정은 개인정보/보안 화면에서 확인할 수 있습니다.",
+                    metrics: metrics
+                )
             }
         }
     }

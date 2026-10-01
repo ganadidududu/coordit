@@ -1,5 +1,4 @@
 import SwiftUI
-import GoogleMobileAds
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -9,14 +8,15 @@ struct coorditApp: App {
     @StateObject private var backendSession = CoorditBackendSessionStore()
     init() {
         CoorditFontRegistration.registerBundledFonts()
-        // For EEA, UK, or Switzerland releases, obtain UMP consent before this call.
-        MobileAds.shared.start()
     }
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(backendSession)
                 .background(CoorditTouchResponsivenessTuner())
+                .task {
+                    await CoorditAdPrivacyService.shared.refreshConsent()
+                }
                 .onOpenURL { url in
                     if CoorditSharedFitLabImport.isOpenURL(url) {
                         let productURL = CoorditSharedFitLabImport.productURL(fromOpenURL: url)

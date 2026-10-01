@@ -56,7 +56,7 @@ describe("POST /auth/refresh", () => {
     expect(await response.json()).toEqual({
       accessToken: "rotated-access-token",
       refreshToken: "rotated-refresh-token",
-      user: refreshedUser
+      user: { ...refreshedUser, isAnonymous: false }
     });
     expect(refreshSession).toHaveBeenCalledWith({ refresh_token: "stored-refresh-token" });
   });
@@ -71,5 +71,44 @@ describe("POST /auth/refresh", () => {
 
     expect(response.status).toBe(400);
     expect(refreshSession).not.toHaveBeenCalled();
+  });
+
+  it("preserves an anonymous guest across refresh-token rotation", async () => {
+    const guestUser = {
+      id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      is_anonymous: true
+    };
+    vi.spyOn(supabaseAuth.auth, "refreshSession").mockResolvedValue({
+      data: {
+        user: guestUser,
+        session: {
+          access_token: "rotated-guest-access-token",
+          refresh_token: "rotated-guest-refresh-token"
+        }
+      },
+      error: null
+    } as never);
+    const single = vi.fn().mockResolvedValue({ data: guestUser, error: null });
+    const select = vi.fn().mockReturnValue({ single });
+    const upsert = vi.fn().mockReturnValue({ select });
+    vi.spyOn(supabaseAdmin, "from").mockReturnValue({ upsert } as never);
+
+    const response = await fetch(`${baseURL}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken: "guest-refresh-token" })
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      accessToken: "rotated-guest-access-token",
+      refreshToken: "rotated-guest-refresh-token",
+      user: {
+        id: guestUser.id,
+        email: `guest+${guestUser.id}@guest.coordit.invalid`,
+        isAnonymous: true
+      }
+    });
+    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ is_guest: true }));
   });
 });

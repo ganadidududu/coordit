@@ -25,6 +25,18 @@ extension CoorditMyPageFamilyView {
                     CoorditSettingsChevron(metrics: metrics)
                 }
                 CoorditSettingsDivider(metrics: metrics)
+                CoorditSettingsDetailRow(
+                    title: "광고 개인정보 설정",
+                    subtitle: adPrivacyService.statusText,
+                    metrics: metrics,
+                    action: {
+                        Task { await adPrivacyService.presentPrivacyOptions() }
+                    }
+                ) {
+                    CoorditSettingsChevron(metrics: metrics)
+                }
+                .accessibilityIdentifier("광고 개인정보 설정")
+                CoorditSettingsDivider(metrics: metrics)
                 CoorditSettingsDetailRow(title: "데이터 수집 동의", metrics: metrics) {
                     CoorditSettingsValuePill(text: "필수 동의 완료", metrics: metrics)
                 }
@@ -38,6 +50,7 @@ extension CoorditMyPageFamilyView {
                 }
             }
         }
+        .task { await adPrivacyService.refreshConsent() }
     }
 
     func appSettings(metrics: CoorditResponsiveMetrics) -> some View {

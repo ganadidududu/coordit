@@ -1,31 +1,45 @@
-import { supabaseAuth } from "../../config/supabase";
+import {
+  createSupabaseAuthClient,
+  supabase,
+  supabaseAdmin,
+  supabaseAuth,
+} from "../../config/supabase";
 import { createHttpError } from "../../shared/utils/http-error";
 import { upsertUserProfile } from "../users/users.service";
+import {
+  authenticateOrUpgradeGuest,
+  type GuestUpgradeSession,
+  type GuestIdentityLinkResult,
+} from "./social-auth-upgrade.service";
 
 export interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
-  user: {
-    id: string;
-    email: string;
+  readonly accessToken: string;
+  readonly refreshToken: string;
+  readonly user: {
+    readonly id: string;
+    readonly email: string;
+    readonly isAnonymous: boolean;
   };
 }
 
 const toAuthResponse = async (
-  authUser: { id: string; email?: string },
-  session: { access_token?: string; refresh_token?: string } | null
+  authUser: { readonly id: string; readonly email?: string; readonly is_anonymous?: boolean },
+  session: { readonly access_token?: string; readonly refresh_token?: string } | null
 ): Promise<AuthResponse> => {
-  if (!authUser.email) throw createHttpError(400, "Auth user email is missing");
+  const isAnonymous = authUser.is_anonymous === true;
+  const email = authUser.email
+    ?? (isAnonymous ? `guest+${authUser.id}@guest.coordit.invalid` : undefined);
+  if (!email) throw createHttpError(400, "Auth user email is missing");
   if (!session?.access_token || !session.refresh_token) {
     throw createHttpError(401, "Supabase did not return an active session");
   }
 
-  await upsertUserProfile({ id: authUser.id, email: authUser.email });
+  await upsertUserProfile({ id: authUser.id, email, isGuest: isAnonymous });
 
   return {
     accessToken: session.access_token,
     refreshToken: session.refresh_token,
-    user: { id: authUser.id, email: authUser.email }
+    user: { id: authUser.id, email, isAnonymous }
   };
 };
 
@@ -49,29 +63,98 @@ export const loginWithEmail = async (
 
 export const loginWithGoogleIdToken = async (
   idToken: string,
-  nonce: string
-): Promise<AuthResponse> => {
-  const { data, error } = await supabaseAuth.auth.signInWithIdToken({
-    provider: "google",
-    token: idToken,
-    nonce
-  });
-  if (error || !data.user) throw createHttpError(401, error?.message ?? "Google login failed");
-  return toAuthResponse(data.user, data.session);
-};
+  nonce: string,
+  guest: GuestUpgradeSession | null = null
+): Promise<AuthResponse> => loginWithSocialIdToken({ provider: "google", idToken, nonce }, guest);
 
 export const loginWithAppleIdToken = async (
   idToken: string,
-  nonce: string
+  nonce: string,
+  guest: GuestUpgradeSession | null = null
 ): Promise<AuthResponse> => {
-  const { data, error } = await supabaseAuth.auth.signInWithIdToken({
-    provider: "apple",
-    token: idToken,
-    nonce
-  });
-  if (error || !data.user) throw createHttpError(401, error?.message ?? "Apple login failed");
+  return loginWithSocialIdToken({ provider: "apple", idToken, nonce }, guest);
+};
+
+type SocialIdToken =
+  | { readonly provider: "google"; readonly idToken: string; readonly nonce: string }
+  | { readonly provider: "apple"; readonly idToken: string; readonly nonce: string };
+
+const socialCredentials = (credential: SocialIdToken) => {
+  switch (credential.provider) {
+    case "google":
+      return {
+        provider: "google",
+        token: credential.idToken,
+        nonce: credential.nonce,
+      } as const;
+    case "apple":
+      return {
+        provider: "apple",
+        token: credential.idToken,
+        nonce: credential.nonce,
+      } as const;
+    default: {
+      const exhaustiveCredential: never = credential;
+      return exhaustiveCredential;
+    }
+  }
+};
+
+const signInMember = async (credential: SocialIdToken): Promise<AuthResponse> => {
+  const { data, error } = await supabaseAuth.auth.signInWithIdToken(socialCredentials(credential));
+  if (error || !data.user) {
+    throw createHttpError(401, error?.message ?? `${credential.provider} login failed`);
+  }
   return toAuthResponse(data.user, data.session);
 };
+
+const linkGuestIdentity = async (
+  credential: SocialIdToken,
+  guest: GuestUpgradeSession
+): Promise<GuestIdentityLinkResult> => {
+  const guestAuth = createSupabaseAuthClient();
+  const { data: guestData, error: guestError } = await guestAuth.auth.setSession({
+    access_token: guest.accessToken,
+    refresh_token: guest.refreshToken,
+  });
+  if (
+    guestError
+    || !guestData.user
+    || guestData.user.id !== guest.userId
+    || guestData.user.is_anonymous !== true
+  ) {
+    throw createHttpError(401, guestError?.message ?? "Guest session is invalid");
+  }
+
+  // Native ID-token providers are signed in separately, then the guest data is
+  // atomically migrated to that member account by authenticateOrUpgradeGuest.
+  // Supabase linkIdentity only supports browser OAuth credentials.
+  void credential;
+  return { kind: "identity_exists" };
+};
+
+const loginWithSocialIdToken = async (
+  credential: SocialIdToken,
+  guest: GuestUpgradeSession | null
+): Promise<AuthResponse> => authenticateOrUpgradeGuest(guest, {
+  linkGuestIdentity: async (activeGuest) => linkGuestIdentity(credential, activeGuest),
+  signInMember: async () => signInMember(credential),
+  mergeGuestData: async (guestUserId, memberUserId) => {
+    const { error } = await supabase.rpc("merge_guest_account", {
+      p_guest_user_id: guestUserId,
+      p_member_user_id: memberUserId,
+    });
+    if (error) throw createHttpError(500, error.message);
+  },
+  deleteGuestAuthUser: async (guestUserId) => {
+    try {
+      const { error } = await supabaseAdmin.auth.admin.deleteUser(guestUserId);
+      if (error) console.warn("Guest auth cleanup failed after account merge", { guestUserId });
+    } catch {
+      console.warn("Guest auth cleanup failed after account merge", { guestUserId });
+    }
+  },
+});
 
 export const refreshAuthSession = async (refreshToken: string): Promise<AuthResponse> => {
   const { data, error } = await supabaseAuth.auth.refreshSession({
