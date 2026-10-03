@@ -3,6 +3,7 @@ import Darwin
 
 #if os(iOS)
 struct CoorditFitLabURLInputView: View {
+    @EnvironmentObject private var tutorial: CoorditFitLabTutorial
     let metrics: CoorditResponsiveMetrics
     @Binding var draft: CoorditFitLabDraft
     let requestLedger: () -> [String]
@@ -53,11 +54,14 @@ struct CoorditFitLabURLInputView: View {
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
         .id(stage)
+        .fitLabTutorialScroll()
         .scrollDismissesKeyboard(.interactively)
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("완료") { focusedField = nil }
+                Button("완료") {
+                    if stage == .entry { completeLinkEntry() } else { focusedField = nil }
+                }
             }
         }
         .accessibilityIdentifier("fitlab-url-flow")
@@ -68,6 +72,17 @@ struct CoorditFitLabURLInputView: View {
         }
         .onAppear {
             applyInitialURLIfNeeded()
+            updateTutorialForEntry()
+        }
+        .onChange(of: focusedField) { _, field in
+            if stage == .entry, field == "url" { tutorial.show(.link) }
+        }
+        .onChange(of: stage) { _, stage in
+            switch stage {
+            case .entry: updateTutorialForEntry()
+            case .review: tutorial.show(.review)
+            case .confirmed: tutorial.show(.continueToReferences)
+            }
         }
     }
 
@@ -81,16 +96,42 @@ struct CoorditFitLabURLInputView: View {
                 .foregroundStyle(Color.black.opacity(0.65))
                 .fixedSize(horizontal: false, vertical: true)
 
-            TextField("https://shop.example/product", text: $urlText)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .keyboardType(.URL)
-                .padding(metrics.value(11))
-                .background(CoorditFitLabPalette.field)
-                .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
-                .focused($focusedField, equals: "url")
-                .accessibilityLabel("상품 링크")
-                .accessibilityIdentifier("fitlab-url-field")
+            VStack(alignment: .leading, spacing: metrics.value(12)) {
+                TextField("https://shop.example/product", text: $urlText)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .keyboardType(.asciiCapable)
+                    .textContentType(.URL)
+                    .submitLabel(.done)
+                    .onSubmit(completeLinkEntry)
+                    .padding(metrics.value(11))
+                    .background(CoorditFitLabPalette.field)
+                    .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
+                    .focused($focusedField, equals: "url")
+                    .onTapGesture { focusedField = "url" }
+                    .accessibilityLabel("상품 링크")
+                    .accessibilityIdentifier("fitlab-url-field")
+                    .disabled(isLoading)
+
+                HStack(spacing: metrics.value(12)) {
+                    PasteButton(payloadType: String.self) { values in
+                        guard let value = values.first else { return }
+                        focusedField = "url"
+                        urlText = value.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                    .tint(CoorditFitLabPalette.ink)
+                    .disabled(isLoading)
+                    .accessibilityIdentifier("fitlab-url-paste")
+
+                    if tutorial.step == .link {
+                        Button("다음", action: completeLinkEntry)
+                            .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary, height: 44))
+                            .disabled(isLoading || Self.validatedURL(from: urlText) == nil)
+                            .accessibilityIdentifier("fitlab-url-next")
+                    }
+                }
+            }
+            .fitLabTutorialTarget(.link)
 
             Text("가져올 옷 분류")
                 .font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))
@@ -121,6 +162,7 @@ struct CoorditFitLabURLInputView: View {
             .coorditPressFeedback()
             .disabled(isLoading)
             .accessibilityIdentifier("fitlab-url-import")
+            .fitLabTutorialTarget(.importLink)
 
             if errorMessage != nil {
                 VStack(spacing: metrics.value(8)) {
@@ -274,6 +316,7 @@ struct CoorditFitLabURLInputView: View {
             }
             .coorditPressFeedback()
             .accessibilityIdentifier("fitlab-url-confirm")
+            .fitLabTutorialTarget(.review)
 
             #if DEBUG
             Text(urlText.trimmingCharacters(in: .whitespacesAndNewlines))
@@ -327,9 +370,11 @@ struct CoorditFitLabURLInputView: View {
                     )
                 )
             CoorditFitLabPrimaryButton(title: "기준 옷 선택으로", metrics: metrics) {
+                tutorial.advance(from: .continueToReferences, to: .references)
                 draft.isSourceConfirmed = true
             }
             .accessibilityIdentifier("fitlab-url-continue-to-references")
+            .fitLabTutorialTarget(.continueToReferences)
         }
         .padding(metrics.value(18))
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -504,6 +549,17 @@ struct CoorditFitLabURLInputView: View {
         }
     }
 
+    private func completeLinkEntry() {
+        focusedField = nil
+        guard Self.validatedURL(from: urlText) != nil else { return }
+        tutorial.advance(from: .link, to: .importLink)
+    }
+
+    private func updateTutorialForEntry() {
+        guard stage == .entry else { return }
+        tutorial.show(focusedField == "url" || Self.validatedURL(from: urlText) == nil ? .link : .importLink)
+    }
+
     private func startImport() {
         focusedField = nil
         errorMessage = nil
@@ -578,6 +634,7 @@ struct CoorditFitLabURLInputView: View {
     }
 
     private func confirm() {
+        focusedField = nil
         let trimmedName = productName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty, !rows.isEmpty else {
             validationMessage = "상품명과 사이즈 행을 확인해 주세요."

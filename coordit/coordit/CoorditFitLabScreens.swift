@@ -742,6 +742,7 @@ private struct CoorditFitLabLoadingScreen: View {
 }
 
 private struct CoorditFitLabResultScreen: View {
+    @EnvironmentObject private var tutorial: CoorditFitLabTutorial
     let variant: CoorditFitLabResultVariant
     let recommendation: CoorditFitLabRecommendationResponse?
     let report: CoorditFitLabReportResponse?
@@ -793,6 +794,8 @@ private struct CoorditFitLabResultScreen: View {
                     metrics: metrics
                 )
 
+                .fitLabTutorialTarget(.result)
+
                 CoorditFitLabDifferenceChart(
                     measurements: scoreCard.measurements,
                     metrics: metrics
@@ -823,6 +826,7 @@ private struct CoorditFitLabResultScreen: View {
                     )
                     .disabled(isRetryingReport)
                     .accessibilityIdentifier("fitlab-retry-report")
+                    .fitLabTutorialTarget(.save, message: "상세 리포트를 불러오지 못했습니다. 리포트 다시 시도를 누르면 완료된 분석으로 리포트를 다시 요청합니다.")
                 }
 
                 if canSaveHistory {
@@ -837,10 +841,12 @@ private struct CoorditFitLabResultScreen: View {
                             isSaving = false
                             guard saved else { return }
                             didSave = true
+                            if tutorial.step != nil { tutorial.dismiss() }
                             finishReport()
                         }
                     }
                     .accessibilityIdentifier("fitlab-add-history")
+                    .fitLabTutorialTarget(.save)
                 } else {
                     Text("기준 옷 비교를 완성한 뒤 히스토리에 저장할 수 있어요.")
                         .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
@@ -857,6 +863,7 @@ private struct CoorditFitLabResultScreen: View {
                 }
 
                 Button("확인하기") {
+                    if tutorial.step != nil { tutorial.dismiss() }
                     finishReport()
                 }
                 .buttonStyle(
@@ -894,6 +901,13 @@ private struct CoorditFitLabResultScreen: View {
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
+        .fitLabTutorialScroll()
+        .onAppear {
+            if tutorial.step != .save { tutorial.show(.result) }
+        }
+        .onChange(of: selectedSizeLabel) { _, value in
+            if value != nil { tutorial.advance(from: .result, to: .save) }
+        }
         .onChange(of: recommendation?.fitAnalysisResultID) { _, _ in
             selectedSizeLabel = nil
         }

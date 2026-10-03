@@ -2,6 +2,7 @@ import SwiftUI
 
 #if os(iOS)
 struct CoorditFitLabSubmissionView: View {
+    @EnvironmentObject private var tutorial: CoorditFitLabTutorial
     let metrics: CoorditResponsiveMetrics
     @ObservedObject var coordinator: CoorditFitLabCoordinator
     let requestLedger: () -> [String]
@@ -26,6 +27,10 @@ struct CoorditFitLabSubmissionView: View {
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
+        .fitLabTutorialScroll()
+        .onAppear { updateTutorialSelection() }
+        .onChange(of: coordinator.draft.selectedReferenceIDs) { _, _ in updateTutorialSelection() }
+        .onChange(of: coordinator.references) { _, _ in updateTutorialSelection() }
         .task {
             if coordinator.references.isEmpty, coordinator.recommendation == nil {
                 await loadReferences()
@@ -42,6 +47,11 @@ struct CoorditFitLabSubmissionView: View {
         } message: {
             Text("현재 입력한 상품 정보, 기준 의류 선택, 아직 저장하지 않은 분석 결과는 초기화돼요. 이미 저장된 분석 기록은 그대로 남아요.")
         }
+    }
+
+    private func updateTutorialSelection() {
+        guard coordinator.recommendation == nil else { return }
+        tutorial.show(coordinator.canSubmit ? .analyze : .references)
     }
 
     private var selectionPanel: some View {
@@ -96,6 +106,7 @@ struct CoorditFitLabSubmissionView: View {
             } else {
                 ForEach(coordinator.references) { reference in
                     referenceButton(reference)
+                        .fitLabTutorialTarget(.references, enabled: reference.id == coordinator.references.first?.id)
                 }
             }
 
@@ -111,6 +122,7 @@ struct CoorditFitLabSubmissionView: View {
                 .coorditPressFeedback()
                 .disabled(coordinator.loadState == .loading)
                 .accessibilityIdentifier("fitlab-manage-references")
+                .fitLabTutorialTarget(.references, enabled: coordinator.references.isEmpty)
             }
 
             Text("선택한 기준 옷 \(coordinator.draft.selectedReferenceIDs.count)개")
@@ -141,6 +153,7 @@ struct CoorditFitLabSubmissionView: View {
             .coorditPressFeedback()
             .disabled(!coordinator.canSubmit || coordinator.loadState == .loading)
             .accessibilityIdentifier(coordinator.retryStep == nil ? "fitlab-submit-analysis" : "fitlab-retry-submission")
+            .fitLabTutorialTarget(.analyze)
 
             Text("다른 탭으로 이동해도 계산은 계속돼요. 완료되면 앱에서 알려드릴게요.")
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
