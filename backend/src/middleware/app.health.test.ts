@@ -119,6 +119,36 @@ describe("GET /health", () => {
     });
   });
 
+  it("serves the authorized AdMob seller record without authentication", async () => {
+    // Given: the backend app is listening without an authenticated user.
+    runningServer = await startApp();
+
+    // When: AdMob requests the app-ads.txt file from the published developer host.
+    const response = await fetch(`http://127.0.0.1:${runningServer.port}/app-ads.txt`);
+
+    // Then: the public plain-text contract exposes the exact authorized seller record.
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/plain; charset=utf-8");
+    await expect(response.text()).resolves.toBe(
+      "google.com, pub-7471774017488090, DIRECT, f08c47fec0942fa0\n"
+    );
+  });
+
+  it("allows ad crawlers to discover the seller record", async () => {
+    // Given: an ad crawler visits the published developer host without authentication.
+    runningServer = await startApp();
+
+    // When: the crawler requests the standard robots policy before app-ads.txt.
+    const response = await fetch(`http://127.0.0.1:${runningServer.port}/robots.txt`);
+
+    // Then: the public policy explicitly permits discovery of the seller record.
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/plain; charset=utf-8");
+    await expect(response.text()).resolves.toBe(
+      "User-agent: *\nAllow: /app-ads.txt\n"
+    );
+  });
+
   it("serves the public support page without authentication", async () => {
     // Given: the backend app is listening without an authenticated user.
     runningServer = await startApp();
@@ -152,5 +182,8 @@ describe("GET /health", () => {
     expect(body).toContain("word-break: keep-all");
     expect(body).toContain('<span class="nowrap">FIT LAB</span>');
     expect(body).toContain('<span class="nowrap">요청할 수 있습니다</span>');
+    expect(body).toContain("비개인화 보상형 광고");
+    expect(body).toContain("맞춤형 광고와 앱 추적 권한을 사용하지 않습니다");
+    expect(body).toContain("광고 개인정보 설정");
   });
 });

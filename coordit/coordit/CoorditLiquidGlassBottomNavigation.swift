@@ -31,7 +31,7 @@ struct CoorditLiquidGlassBottomNavigation: View {
             .shadow(color: Main01DesignTokens.Colors.chrome.opacity(0.28), radius: 12, y: 6)
         }
         .padding(.horizontal, 16 * scale)
-        .padding(.bottom, 10 * scale)
+        .padding(.bottom, 18 * scale)
         .frame(height: Main01DesignTokens.Metrics.navHeight * scale, alignment: .bottom)
         .accessibilityIdentifier(accessibilityIdentifier)
     }

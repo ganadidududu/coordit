@@ -100,6 +100,8 @@ export const privacyPageHtml = `<!doctype html>
     <section>
       <h2>3. 외부 서비스와 처리 위탁</h2>
       <p>서비스 운영을 위해 Supabase(인증·데이터 저장), Apple 및 Google(로그인·결제), Google Cloud(서버 운영), OpenRouter 및 선택된 AI 모델 제공자(<span class="nowrap">FIT LAB</span> 생성), Google Mobile Ads(광고), 앱 안정성·분석 제공자를 <span class="nowrap">사용할 수 있습니다</span>. 각 제공자는 필요한 범위에서 정보를 처리하며 자체 정책과 법령을 따릅니다.</p>
+      <h3>비개인화 보상형 광고</h3>
+      <p>Google Mobile Ads SDK를 통해 비개인화 보상형 광고를 제공합니다. 광고 제공과 성과 측정 과정에서 IP 주소를 바탕으로 한 대략적 위치, 기기 식별자, 광고 데이터, 앱 상호작용, 충돌 및 성능 정보가 처리될 수 있습니다. COORDIT은 맞춤형 광고와 앱 추적 권한을 사용하지 않습니다. 이용자는 앱의 개인정보/보안 화면에 있는 광고 개인정보 설정에서 동의 선택사항을 확인하거나 변경할 수 있습니다.</p>
     </section>
     <section>
       <h2>4. 보유 기간과 삭제</h2>

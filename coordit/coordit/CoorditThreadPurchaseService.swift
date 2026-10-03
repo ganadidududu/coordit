@@ -527,19 +527,19 @@ final class CoorditThreadPurchaseFixtureStorefront:
         [
             CoorditThreadProduct(
                 id: CoorditThreadProductID.pack5.rawValue,
-                displayName: "StoreKit 실타래 5개",
+                displayName: "실타래 5개",
                 displayPrice: "₩1,500",
                 threadAmount: 5
             ),
             CoorditThreadProduct(
                 id: CoorditThreadProductID.pack10.rawValue,
-                displayName: "StoreKit 실타래 10개",
+                displayName: "실타래 10개",
                 displayPrice: "₩2,500",
                 threadAmount: 10
             ),
             CoorditThreadProduct(
                 id: CoorditThreadProductID.pack20.rawValue,
-                displayName: "StoreKit 실타래 20개",
+                displayName: "실타래 20개",
                 displayPrice: "₩4,000",
                 threadAmount: 20
             ),

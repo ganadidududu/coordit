@@ -1,0 +1,5533 @@
+{
+  "sourceCommit": "bd1f9311638645a4a1500c2a5693a33482dc1214",
+  "counts": {
+    "swiftFiles": 83,
+    "applicationSwiftFiles": 71,
+    "uiTestSwiftFiles": 12,
+    "imageSets": 26,
+    "fontFiles": 5,
+    "literalSfSymbols": 16
+  },
+  "files": [
+    {
+      "file": "coordit/CoorditShareExtension/ShareViewController.swift",
+      "lineCount": 361,
+      "imports": [
+        "Foundation",
+        "LinkPresentation",
+        "UniformTypeIdentifiers",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 6,
+          "source": "final class ShareViewController: UIViewController {"
+        },
+        {
+          "line": 300,
+          "source": "private enum CoorditShareImportBridge {"
+        },
+        {
+          "line": 307,
+          "source": "private struct PendingImport: Codable, Equatable {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/ContentView.swift",
+      "lineCount": 18,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 3,
+          "source": "struct ContentView: View {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditAppleSignIn.swift",
+      "lineCount": 122,
+      "imports": [
+        "AuthenticationServices",
+        "CryptoKit",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 6,
+          "source": "enum CoorditAppleSignInError: LocalizedError {"
+        },
+        {
+          "line": 27,
+          "source": "enum CoorditAppleSignIn {"
+        },
+        {
+          "line": 60,
+          "source": "private final class Coordinator: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {"
+        },
+        {
+          "line": 108,
+          "source": "struct CoorditAppleSignInCredential {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditAssetNames.swift",
+      "lineCount": 22,
+      "imports": [],
+      "declarations": [
+        {
+          "line": 1,
+          "source": "enum CoorditAssetNames {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditBackTitleCard.swift",
+      "lineCount": 114,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditNavigationDirection {"
+        },
+        {
+          "line": 42,
+          "source": "struct CoorditBackTitleCard: View {"
+        },
+        {
+          "line": 76,
+          "source": "struct CoorditPressFeedbackButtonStyle: ButtonStyle {"
+        }
+      ],
+      "state": [],
+      "typography": [
+        {
+          "line": 51,
+          "source": ".font(.system(size: metrics.value(23), weight: .bold))"
+        },
+        {
+          "line": 56,
+          "source": ".font(CoorditTypography.climate2019(size: metrics.value(22), relativeTo: .headline))"
+        },
+        {
+          "line": 57,
+          "source": ".tracking(metrics.value(1.2))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditBackendClient.swift",
+      "lineCount": 538,
+      "imports": [
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditBackendConfig {"
+        },
+        {
+          "line": 64,
+          "source": "enum CoorditBackendClientError: LocalizedError {"
+        },
+        {
+          "line": 83,
+          "source": "struct CoorditMonetizationReadiness: Codable, Equatable {"
+        },
+        {
+          "line": 88,
+          "source": "enum CoorditAppleIapSettlementStatus: String, Codable, Equatable {"
+        },
+        {
+          "line": 93,
+          "source": "struct CoorditAppleIapSettlement: Equatable {"
+        },
+        {
+          "line": 99,
+          "source": "struct CoorditBackendClient {"
+        },
+        {
+          "line": 395,
+          "source": "private struct GoogleAuthRequest: Encodable {"
+        },
+        {
+          "line": 400,
+          "source": "private struct AppleAuthRequest: Encodable {"
+        },
+        {
+          "line": 405,
+          "source": "private struct RefreshAuthRequest: Encodable {"
+        },
+        {
+          "line": 409,
+          "source": "private struct UpdateProfileRequest: Encodable {"
+        },
+        {
+          "line": 413,
+          "source": "private struct CoorditAppleIapVerificationRequest: Encodable {"
+        },
+        {
+          "line": 417,
+          "source": "private struct CoorditAppleIapVerificationResponse: Decodable {"
+        },
+        {
+          "line": 422,
+          "source": "struct CoorditThreadRewardAttempt: Decodable {"
+        },
+        {
+          "line": 428,
+          "source": "struct BodyMeasurementRequest: Encodable {"
+        },
+        {
+          "line": 433,
+          "source": "struct RawData: Encodable {"
+        },
+        {
+          "line": 438,
+          "source": "struct CreateClothingItemRequest: Encodable {"
+        },
+        {
+          "line": 446,
+          "source": "private struct CreateClothingItemWithSizeRequest: Encodable {"
+        },
+        {
+          "line": 452,
+          "source": "struct ClothingSizeRequest: Encodable {"
+        },
+        {
+          "line": 464,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 478,
+          "source": "struct CreateReferenceClothingRequest: Encodable {"
+        },
+        {
+          "line": 488,
+          "source": "struct CreateExternalProductRequest: Encodable {"
+        },
+        {
+          "line": 498,
+          "source": "struct ExternalProductSizeRequest: Encodable {"
+        },
+        {
+          "line": 514,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 532,
+          "source": "struct FitRecommendRequest: Encodable {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditBackendModels.swift",
+      "lineCount": 288,
+      "imports": [
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditAuthSession: Codable, Equatable {"
+        },
+        {
+          "line": 10,
+          "source": "struct CoorditAuthUser: Codable, Equatable {"
+        },
+        {
+          "line": 15,
+          "source": "struct CoorditUserProfile: Codable, Equatable {"
+        },
+        {
+          "line": 25,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 37,
+          "source": "struct CoorditBodyMeasurement: Codable, Equatable {"
+        },
+        {
+          "line": 48,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 61,
+          "source": "struct CoorditOnboardingStatus: Decodable, Equatable {"
+        },
+        {
+          "line": 65,
+          "source": "struct CoorditOnboardingCompletion: Decodable, Equatable {"
+        },
+        {
+          "line": 71,
+          "source": "struct CoorditOnboardingRequest: Encodable {"
+        },
+        {
+          "line": 78,
+          "source": "struct Measurements: Encodable {"
+        },
+        {
+          "line": 83,
+          "source": "struct Consent: Encodable {"
+        },
+        {
+          "line": 89,
+          "source": "struct CoorditBackendHealth: Codable, Equatable {"
+        },
+        {
+          "line": 94,
+          "source": "struct CoorditThreadBalanceResponse: Codable, Equatable {"
+        },
+        {
+          "line": 98,
+          "source": "struct CoorditBackendErrorResponse: Codable, Equatable {"
+        },
+        {
+          "line": 102,
+          "source": "struct CoorditClothingItemResponse: Codable, Equatable {"
+        },
+        {
+          "line": 109,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 118,
+          "source": "struct CoorditClothingItemWithSizeResponse: Codable, Equatable {"
+        },
+        {
+          "line": 123,
+          "source": "struct CoorditReferenceClothingResponse: Codable, Equatable {"
+        },
+        {
+          "line": 131,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 141,
+          "source": "struct CoorditExternalProductResponse: Codable, Equatable {"
+        },
+        {
+          "line": 147,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 155,
+          "source": "struct CoorditExternalProductSizeResponse: Codable, Equatable {"
+        },
+        {
+          "line": 159,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 165,
+          "source": "struct CoorditClothingSizeResponse: Codable, Equatable {"
+        },
+        {
+          "line": 177,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 204,
+          "source": "struct CoorditMeasurementMap: Codable, Equatable {"
+        },
+        {
+          "line": 214,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 226,
+          "source": "struct CoorditReferenceFitProfileResponse: Codable, Equatable {"
+        },
+        {
+          "line": 234,
+          "source": "struct CoorditClosetFitComparisonResponse: Codable, Equatable {"
+        },
+        {
+          "line": 244,
+          "source": "struct CoorditFitRecommendation: Codable, Equatable {"
+        },
+        {
+          "line": 258,
+          "source": "struct CoorditMeasurementStatusMap: Codable, Equatable {"
+        },
+        {
+          "line": 268,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 280,
+          "source": "struct CoorditFitRecommendationSizeScore: Codable, Equatable {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditBackendSessionStore.swift",
+      "lineCount": 998,
+      "imports": [
+        "Foundation",
+        "Combine"
+      ],
+      "declarations": [
+        {
+          "line": 5,
+          "source": "struct CoorditClosetServerSnapshot {"
+        },
+        {
+          "line": 10,
+          "source": "struct CoorditReferenceSyncResult {"
+        },
+        {
+          "line": 15,
+          "source": "enum CoorditMonetizationReadinessState: Equatable {"
+        },
+        {
+          "line": 55,
+          "source": "final class CoorditBackendSessionStore: ObservableObject {"
+        },
+        {
+          "line": 902,
+          "source": "private enum UITestingMonetizationReadiness {"
+        }
+      ],
+      "state": [
+        {
+          "line": 56,
+          "source": "@Published private(set) var session: CoorditAuthSession?"
+        },
+        {
+          "line": 57,
+          "source": "@Published private(set) var profile: CoorditUserProfile?"
+        },
+        {
+          "line": 58,
+          "source": "@Published private(set) var latestBodyMeasurement: CoorditBodyMeasurement?"
+        },
+        {
+          "line": 59,
+          "source": "@Published private(set) var onboardingComplete = false"
+        },
+        {
+          "line": 60,
+          "source": "@Published private(set) var referenceFitProfiles: [String: CoorditReferenceFitProfileResponse] = [:]"
+        },
+        {
+          "line": 61,
+          "source": "@Published private(set) var statusText = \"백엔드 연결 확인 전\""
+        },
+        {
+          "line": 62,
+          "source": "@Published private(set) var isWorking = false"
+        },
+        {
+          "line": 63,
+          "source": "@Published private(set) var isWarning = false"
+        },
+        {
+          "line": 64,
+          "source": "@Published private(set) var monetizationReadinessState: CoorditMonetizationReadinessState = .notLoaded"
+        }
+      ],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditBackendTokenStore.swift",
+      "lineCount": 58,
+      "imports": [
+        "Foundation",
+        "Security"
+      ],
+      "declarations": [
+        {
+          "line": 5,
+          "source": "struct CoorditBackendTokenStore {"
+        },
+        {
+          "line": 50,
+          "source": "enum TokenStoreError: LocalizedError {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditBottomNavigation.swift",
+      "lineCount": 20,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditBottomNavigation: View {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditClosetAddFlow.swift",
+      "lineCount": 1204,
+      "imports": [
+        "PhotosUI",
+        "SwiftUI",
+        "AVFoundation"
+      ],
+      "declarations": [
+        {
+          "line": 6,
+          "source": "enum CoorditClosetAddMethod: String, CaseIterable, Identifiable {"
+        },
+        {
+          "line": 46,
+          "source": "struct CoorditClosetDraft {"
+        },
+        {
+          "line": 209,
+          "source": "private struct CoorditClosetAddMethodScreen: View {"
+        },
+        {
+          "line": 288,
+          "source": "private struct CoorditClosetLinkInputScreen: View {"
+        },
+        {
+          "line": 542,
+          "source": "private struct CoorditClosetPhotoInputScreen: View {"
+        },
+        {
+          "line": 862,
+          "source": "private struct CoorditClosetManualInputScreen: View {"
+        },
+        {
+          "line": 964,
+          "source": "private struct CoorditClosetAddLoadingScreen: View {"
+        },
+        {
+          "line": 1023,
+          "source": "private struct CoorditClosetBasicsCard: View {"
+        },
+        {
+          "line": 1078,
+          "source": "private struct CoorditClosetFormCard<Content: View>: View {"
+        },
+        {
+          "line": 1114,
+          "source": "private struct CoorditClosetPhotoPickerSlot: View {"
+        },
+        {
+          "line": 1190,
+          "source": "private struct CoorditClosetSubmitButton: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 289,
+          "source": "@Binding var draft: CoorditClosetDraft"
+        },
+        {
+          "line": 296,
+          "source": "@EnvironmentObject private var backendSession: CoorditBackendSessionStore"
+        },
+        {
+          "line": 297,
+          "source": "@State private var isExtracting = false"
+        },
+        {
+          "line": 298,
+          "source": "@State private var extractionError: String?"
+        },
+        {
+          "line": 300,
+          "source": "@FocusState private var isLinkFocused: Bool"
+        },
+        {
+          "line": 543,
+          "source": "@Binding var draft: CoorditClosetDraft"
+        },
+        {
+          "line": 549,
+          "source": "@State private var pendingCropImage: UIImage?"
+        },
+        {
+          "line": 550,
+          "source": "@State private var isCameraPresented = false"
+        },
+        {
+          "line": 551,
+          "source": "@State private var isRecognizing = false"
+        },
+        {
+          "line": 552,
+          "source": "@State private var recognitionError: String?"
+        },
+        {
+          "line": 863,
+          "source": "@Binding var draft: CoorditClosetDraft"
+        },
+        {
+          "line": 867,
+          "source": "@FocusState private var focusedMeasurement: Int?"
+        },
+        {
+          "line": 1024,
+          "source": "@Binding var draft: CoorditClosetDraft"
+        },
+        {
+          "line": 1028,
+          "source": "@FocusState private var isNameFocused: Bool"
+        },
+        {
+          "line": 1117,
+          "source": "@Binding var imageData: Data?"
+        },
+        {
+          "line": 1122,
+          "source": "@State private var pickerItem: PhotosPickerItem?"
+        }
+      ],
+      "typography": [
+        {
+          "line": 223,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(20)))"
+        },
+        {
+          "line": 226,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11)))"
+        },
+        {
+          "line": 239,
+          "source": ".font(.system(size: metrics.value(23), weight: .semibold))"
+        },
+        {
+          "line": 247,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(15)))"
+        },
+        {
+          "line": 250,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9)))"
+        },
+        {
+          "line": 257,
+          "source": ".font(.system(size: metrics.value(16), weight: .bold))"
+        },
+        {
+          "line": 323,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12)))"
+        },
+        {
+          "line": 370,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14)))"
+        },
+        {
+          "line": 394,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 490,
+          "source": ".font(.system(size: metrics.value(20), weight: .semibold))"
+        },
+        {
+          "line": 494,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14)))"
+        },
+        {
+          "line": 499,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9)))"
+        },
+        {
+          "line": 596,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11)))"
+        },
+        {
+          "line": 604,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10)))"
+        },
+        {
+          "line": 643,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 695,
+          "source": ".font(.system(size: metrics.value(20), weight: .semibold))"
+        },
+        {
+          "line": 699,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14)))"
+        },
+        {
+          "line": 708,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9)))"
+        },
+        {
+          "line": 937,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9)))"
+        },
+        {
+          "line": 947,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14)))"
+        },
+        {
+          "line": 952,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9)))"
+        },
+        {
+          "line": 986,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(15)))"
+        },
+        {
+          "line": 989,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9)))"
+        },
+        {
+          "line": 994,
+          "source": ".font(.system(size: metrics.value(30), weight: .semibold))"
+        },
+        {
+          "line": 997,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(15)))"
+        },
+        {
+          "line": 1000,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9)))"
+        },
+        {
+          "line": 1038,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12)))"
+        },
+        {
+          "line": 1062,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12)))"
+        },
+        {
+          "line": 1067,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12)))"
+        },
+        {
+          "line": 1095,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(15)))"
+        },
+        {
+          "line": 1098,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9)))"
+        },
+        {
+          "line": 1140,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(9)))"
+        },
+        {
+          "line": 1151,
+          "source": ".font(.system(size: metrics.value(25), weight: .semibold))"
+        },
+        {
+          "line": 1154,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(12)))"
+        },
+        {
+          "line": 1157,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(8)))"
+        }
+      ],
+      "presentations": [
+        {
+          "line": 662,
+          "source": ".fullScreenCover("
+        },
+        {
+          "line": 677,
+          "source": ".sheet(isPresented: $isCameraPresented) {"
+        }
+      ]
+    },
+    {
+      "file": "coordit/coordit/CoorditClosetComponents.swift",
+      "lineCount": 246,
+      "imports": [
+        "SwiftUI",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 5,
+          "source": "enum CoorditClosetColors {"
+        },
+        {
+          "line": 16,
+          "source": "struct CoorditClosetTitleBar: View {"
+        },
+        {
+          "line": 45,
+          "source": "struct CoorditClosetSegment: View {"
+        },
+        {
+          "line": 77,
+          "source": "struct CoorditClosetMetricTile: View {"
+        },
+        {
+          "line": 100,
+          "source": "struct CoorditClosetPrimaryButton: View {"
+        },
+        {
+          "line": 120,
+          "source": "struct CoorditSolidPrimaryButton: View {"
+        },
+        {
+          "line": 140,
+          "source": "struct CoorditClosetGarmentCard: View {"
+        },
+        {
+          "line": 183,
+          "source": "struct CoorditClosetGarmentArtwork: View {"
+        },
+        {
+          "line": 231,
+          "source": "private struct CoorditPantsPlaceholderShape: Shape {"
+        }
+      ],
+      "state": [],
+      "typography": [
+        {
+          "line": 65,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11)))"
+        },
+        {
+          "line": 86,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(16)))"
+        },
+        {
+          "line": 89,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(8)))"
+        },
+        {
+          "line": 109,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(17), relativeTo: .headline))"
+        },
+        {
+          "line": 128,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(11.5)))"
+        },
+        {
+          "line": 152,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(6)))"
+        },
+        {
+          "line": 159,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(12)))"
+        },
+        {
+          "line": 166,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(15)))"
+        },
+        {
+          "line": 169,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(7.5)))"
+        },
+        {
+          "line": 208,
+          "source": ".font(.system(size: metrics.value(22), weight: .medium))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditClosetDetailScreen.swift",
+      "lineCount": 410,
+      "imports": [
+        "SwiftUI",
+        "PhotosUI"
+      ],
+      "declarations": [],
+      "state": [],
+      "typography": [
+        {
+          "line": 29,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(19)))"
+        },
+        {
+          "line": 80,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 173,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14)))"
+        },
+        {
+          "line": 177,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11)))"
+        },
+        {
+          "line": 189,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(9)))"
+        },
+        {
+          "line": 192,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(13)))"
+        },
+        {
+          "line": 238,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10)))"
+        },
+        {
+          "line": 241,
+          "source": ".font(CoorditTypography.climate2019(size: metrics.value(22)))"
+        },
+        {
+          "line": 245,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11)))"
+        },
+        {
+          "line": 256,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11)))"
+        },
+        {
+          "line": 400,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10)))"
+        }
+      ],
+      "presentations": [
+        {
+          "line": 129,
+          "source": ".alert(\"옷 이름 수정하기\", isPresented: $isRenamingDetailItem) {"
+        },
+        {
+          "line": 137,
+          "source": ".confirmationDialog("
+        }
+      ]
+    },
+    {
+      "file": "coordit/coordit/CoorditClosetScreens.swift",
+      "lineCount": 654,
+      "imports": [
+        "SwiftUI",
+        "PhotosUI",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 7,
+          "source": "enum CoorditClosetCategory: CaseIterable, Equatable {"
+        },
+        {
+          "line": 19,
+          "source": "struct CoorditClosetSizeChart: Equatable {"
+        },
+        {
+          "line": 24,
+          "source": "struct CoorditClosetAddSaveState: Equatable {"
+        },
+        {
+          "line": 49,
+          "source": "struct CoorditClosetItem: Identifiable {"
+        },
+        {
+          "line": 150,
+          "source": "struct CoorditClosetFamilyView: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 155,
+          "source": "@Binding var items: [CoorditClosetItem]"
+        },
+        {
+          "line": 156,
+          "source": "@Binding var selectedItemID: String?"
+        },
+        {
+          "line": 157,
+          "source": "@Binding var draft: CoorditClosetDraft"
+        },
+        {
+          "line": 158,
+          "source": "@Binding var selectedReferenceIDs: Set<String>"
+        },
+        {
+          "line": 159,
+          "source": "@Binding var addSaveState: CoorditClosetAddSaveState"
+        },
+        {
+          "line": 161,
+          "source": "@EnvironmentObject var backendSession: CoorditBackendSessionStore"
+        },
+        {
+          "line": 162,
+          "source": "@State var selectedCategory: CoorditClosetCategory = .top"
+        },
+        {
+          "line": 163,
+          "source": "@State private var searchText = \"\""
+        },
+        {
+          "line": 164,
+          "source": "@State private var selectedExactCategory: CoorditFitLabCategory?"
+        },
+        {
+          "line": 165,
+          "source": "@State var detailVariant: CoorditClosetCategory"
+        },
+        {
+          "line": 166,
+          "source": "@State var detailPhotoSelection: PhotosPickerItem?"
+        },
+        {
+          "line": 167,
+          "source": "@State var detailPhotoGenerations: [String: Int]"
+        },
+        {
+          "line": 168,
+          "source": "@State var isRenamingDetailItem: Bool"
+        },
+        {
+          "line": 169,
+          "source": "@State var pendingDetailName: String"
+        },
+        {
+          "line": 170,
+          "source": "@State var showsDeleteConfirmation: Bool"
+        },
+        {
+          "line": 171,
+          "source": "@State var isDeletingDetailItem: Bool"
+        },
+        {
+          "line": 172,
+          "source": "@State var detailFitComparison: CoorditClosetFitComparisonResponse?"
+        },
+        {
+          "line": 175,
+          "source": "@State var detailPhotoTestStates: [String: String]"
+        },
+        {
+          "line": 176,
+          "source": "@State var detailPhotoTestRejections: [String: String]"
+        },
+        {
+          "line": 177,
+          "source": "@State var detailPhotoScenarioAppearances: [String: Int]"
+        }
+      ],
+      "typography": [
+        {
+          "line": 285,
+          "source": ".font(CoorditTypography.mona12(size: metrics.value(11)))"
+        },
+        {
+          "line": 289,
+          "source": ".font(CoorditTypography.climate2010(size: metrics.value(21)))"
+        },
+        {
+          "line": 291,
+          "source": ".tracking(metrics.value(-0.9))"
+        },
+        {
+          "line": 389,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10)))"
+        },
+        {
+          "line": 442,
+          "source": ".font(.system(size: metrics.value(22), weight: .semibold))"
+        },
+        {
+          "line": 445,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12)))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditDesignTokens.swift",
+      "lineCount": 152,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditDesignTokens {"
+        },
+        {
+          "line": 5,
+          "source": "enum ColorToken {"
+        },
+        {
+          "line": 33,
+          "source": "enum Spacing {"
+        },
+        {
+          "line": 40,
+          "source": "enum HomeReferenceMetrics {"
+        },
+        {
+          "line": 70,
+          "source": "enum GlobalNoticeMetrics {"
+        },
+        {
+          "line": 81,
+          "source": "enum ChargeMetrics {"
+        },
+        {
+          "line": 101,
+          "source": "enum CoorditContentActionProminence {"
+        },
+        {
+          "line": 106,
+          "source": "struct CoorditContentActionButtonStyle: ButtonStyle {"
+        }
+      ],
+      "state": [],
+      "typography": [
+        {
+          "line": 128,
+          "source": ".font(CoorditTypography.gmarketBold(size: fontSize, relativeTo: .headline))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFeatureTitleBar.swift",
+      "lineCount": 32,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditFeatureTitleBar: View {"
+        }
+      ],
+      "state": [],
+      "typography": [
+        {
+          "line": 14,
+          "source": ".font(.system(size: metrics.value(25), weight: .bold))"
+        },
+        {
+          "line": 16,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(22), relativeTo: .headline))"
+        },
+        {
+          "line": 17,
+          "source": ".tracking(metrics.value(1.5))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitEngineMapping.swift",
+      "lineCount": 183,
+      "imports": [
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditClothingSaveResult: Equatable {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabAPI.swift",
+      "lineCount": 93,
+      "imports": [
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "protocol CoorditFitLabAPI: Sendable {"
+        },
+        {
+          "line": 14,
+          "source": "struct CoorditFitLabHTTPAPI: CoorditFitLabAPI {"
+        },
+        {
+          "line": 89,
+          "source": "private struct ErrorEnvelope: Decodable {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabAPIModels.swift",
+      "lineCount": 402,
+      "imports": [
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditFitLabReferenceRow: Codable, Identifiable, Equatable, Sendable {"
+        },
+        {
+          "line": 13,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 22,
+          "source": "struct CoorditFitLabURLPrefillRequest: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 32,
+          "source": "struct CoorditFitLabURLPrefillResponse: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 33,
+          "source": "struct Size: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 55,
+          "source": "struct CoorditFitLabProductRequest: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 63,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 69,
+          "source": "struct CoorditFitLabExternalProductRow: Codable, Identifiable, Equatable, Sendable {"
+        },
+        {
+          "line": 74,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 80,
+          "source": "struct CoorditFitLabSizeRequest: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 131,
+          "source": "struct CoorditFitLabExternalProductSizeRow: Codable, Identifiable, Equatable, Sendable {"
+        },
+        {
+          "line": 136,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 143,
+          "source": "struct CoorditFitLabRecommendationRequest: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 148,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 155,
+          "source": "struct CoorditFitLabRecommendationResponse: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 167,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 215,
+          "source": "struct CoorditFitLabAnalysisResultRow: Codable, Identifiable, Equatable, Sendable {"
+        },
+        {
+          "line": 227,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 241,
+          "source": "struct CoorditFitLabReportRequest: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 247,
+          "source": "struct CoorditFitLabReportResponse: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 248,
+          "source": "struct Report: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 258,
+          "source": "struct MeasurementAnalysis: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 296,
+          "source": "struct ChartData: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 297,
+          "source": "struct Comparison: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 306,
+          "source": "struct Difference: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 314,
+          "source": "struct SizeScore: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 370,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 386,
+          "source": "private struct LossyDecodable<Value: Decodable>: Decodable {"
+        },
+        {
+          "line": 394,
+          "source": "private struct DynamicCodingKey: CodingKey {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabComponents.swift",
+      "lineCount": 644,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditFitLabPalette {"
+        },
+        {
+          "line": 13,
+          "source": "struct CoorditFitLabTitleCard: View {"
+        },
+        {
+          "line": 28,
+          "source": "struct CoorditFitLabPrimaryButton: View {"
+        },
+        {
+          "line": 46,
+          "source": "struct CoorditFitLabSourceButton: View {"
+        },
+        {
+          "line": 83,
+          "source": "struct CoorditFitLabTexturedPanel: View {"
+        },
+        {
+          "line": 113,
+          "source": "struct CoorditFitLabSubtleNoise: View {"
+        },
+        {
+          "line": 131,
+          "source": "struct CoorditFitLabMannequinPanel: View {"
+        },
+        {
+          "line": 236,
+          "source": "private struct CoorditFitLabOverlayMarker: View {"
+        },
+        {
+          "line": 275,
+          "source": "private struct CoorditFitLabCalloutConnector: View {"
+        },
+        {
+          "line": 305,
+          "source": "private struct CoorditFitLabSemanticSilhouette: View {"
+        },
+        {
+          "line": 352,
+          "source": "private struct CoorditFitLabMeasurementRegion: Shape {"
+        },
+        {
+          "line": 394,
+          "source": "struct CoorditFitLabOverlayLegend: View {"
+        },
+        {
+          "line": 422,
+          "source": "struct CoorditFitLabReportCard: View {"
+        },
+        {
+          "line": 599,
+          "source": "struct CoorditFitLabDescriptionCard: View {"
+        },
+        {
+          "line": 630,
+          "source": "struct CoorditFitLabStars: View {"
+        }
+      ],
+      "state": [],
+      "typography": [
+        {
+          "line": 54,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(15), relativeTo: .body))"
+        },
+        {
+          "line": 250,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(8), relativeTo: .caption2))"
+        },
+        {
+          "line": 253,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(9), relativeTo: .caption2))"
+        },
+        {
+          "line": 415,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(7), relativeTo: .caption2))"
+        },
+        {
+          "line": 431,
+          "source": ".font(CoorditTypography.mona12(size: metrics.value(18), relativeTo: .headline))"
+        },
+        {
+          "line": 433,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 439,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .body))"
+        },
+        {
+          "line": 462,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(17), relativeTo: .headline))"
+        },
+        {
+          "line": 473,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(15), relativeTo: .headline))"
+        },
+        {
+          "line": 494,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))"
+        },
+        {
+          "line": 513,
+          "source": ".font(CoorditTypography.mona12(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 514,
+          "source": ".tracking(metrics.value(0.7))"
+        },
+        {
+          "line": 517,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(16), relativeTo: .headline))"
+        },
+        {
+          "line": 519,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))"
+        },
+        {
+          "line": 520,
+          "source": ".lineSpacing(metrics.value(4))"
+        },
+        {
+          "line": 550,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))"
+        },
+        {
+          "line": 554,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(9), relativeTo: .caption))"
+        },
+        {
+          "line": 563,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))"
+        },
+        {
+          "line": 564,
+          "source": ".lineSpacing(metrics.value(4))"
+        },
+        {
+          "line": 579,
+          "source": ".font(.system(size: metrics.value(13), weight: .semibold))"
+        },
+        {
+          "line": 582,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .body))"
+        },
+        {
+          "line": 583,
+          "source": ".lineSpacing(metrics.value(3))"
+        },
+        {
+          "line": 607,
+          "source": ".font(CoorditTypography.mona12(size: metrics.value(16), relativeTo: .body))"
+        },
+        {
+          "line": 613,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(9), relativeTo: .caption))"
+        },
+        {
+          "line": 637,
+          "source": ".font(.system(size: metrics.value(15), weight: .semibold))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabCoordinator.swift",
+      "lineCount": 1021,
+      "imports": [
+        "Foundation",
+        "Combine",
+        "CryptoKit"
+      ],
+      "declarations": [
+        {
+          "line": 6,
+          "source": "enum CoorditFitLabAnalysisState: Equatable {"
+        },
+        {
+          "line": 14,
+          "source": "final class CoorditFitLabCoordinator: ObservableObject {"
+        },
+        {
+          "line": 15,
+          "source": "private struct PendingSubmissionKey: Codable {"
+        },
+        {
+          "line": 20,
+          "source": "private struct SubmissionFingerprint: Codable {"
+        }
+      ],
+      "state": [
+        {
+          "line": 30,
+          "source": "@Published var draft: CoorditFitLabDraft"
+        },
+        {
+          "line": 31,
+          "source": "@Published private(set) var references: [CoorditFitLabReferenceRow] = []"
+        },
+        {
+          "line": 32,
+          "source": "@Published private(set) var createdProductID: String?"
+        },
+        {
+          "line": 33,
+          "source": "@Published private(set) var createdSizeIDs: [String] = []"
+        },
+        {
+          "line": 34,
+          "source": "@Published private(set) var checkpoint = CoorditFitLabSubmissionCheckpoint()"
+        },
+        {
+          "line": 35,
+          "source": "@Published private(set) var recommendation: CoorditFitLabRecommendationResponse?"
+        },
+        {
+          "line": 36,
+          "source": "@Published private(set) var report: CoorditFitLabReportResponse?"
+        },
+        {
+          "line": 37,
+          "source": "@Published private(set) var reportFailureMessage: String?"
+        },
+        {
+          "line": 38,
+          "source": "@Published var selectedHistory: CoorditFitLabHistorySnapshot?"
+        },
+        {
+          "line": 39,
+          "source": "@Published private(set) var savedHistory: [CoorditFitLabHistorySnapshot] = []"
+        },
+        {
+          "line": 40,
+          "source": "@Published private(set) var historyRecoveryNotice: String?"
+        },
+        {
+          "line": 41,
+          "source": "@Published private(set) var activeHistoryUserID: String?"
+        },
+        {
+          "line": 42,
+          "source": "@Published private(set) var error: CoorditFitLabError?"
+        },
+        {
+          "line": 43,
+          "source": "@Published private(set) var retryStep: CoorditFitLabSubmissionStep?"
+        },
+        {
+          "line": 44,
+          "source": "@Published private(set) var submissionStep: CoorditFitLabSubmissionStep = .idle"
+        },
+        {
+          "line": 45,
+          "source": "@Published private(set) var loadState: CoorditFitLabLoadState = .idle"
+        },
+        {
+          "line": 46,
+          "source": "@Published private(set) var screen: CoorditFitLabScreen"
+        },
+        {
+          "line": 47,
+          "source": "@Published private(set) var analysisState: CoorditFitLabAnalysisState = .idle"
+        },
+        {
+          "line": 48,
+          "source": "@Published private(set) var isAnalysisNoticeVisible = false"
+        },
+        {
+          "line": 49,
+          "source": "@Published private(set) var authoritativeThreadBalance: Int?"
+        },
+        {
+          "line": 65,
+          "source": "@Published private(set) var historyEdgeProbe = \"idle\""
+        },
+        {
+          "line": 66,
+          "source": "@Published private(set) var historyUserProbe = \"idle\""
+        },
+        {
+          "line": 67,
+          "source": "@Published private(set) var historyStoreAudit = \"idle\""
+        },
+        {
+          "line": 68,
+          "source": "@Published private(set) var historyRaceProbe = \"idle\""
+        },
+        {
+          "line": 69,
+          "source": "@Published private(set) var historyF2Probe = \"idle\""
+        },
+        {
+          "line": 70,
+          "source": "@Published private(set) var historyQuarantineCount = 0"
+        }
+      ],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabFixtures.swift",
+      "lineCount": 764,
+      "imports": [
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditFitLabFixtureConfiguration: Sendable {"
+        },
+        {
+          "line": 52,
+          "source": "enum CoorditFitLabHistoryFixtureResetRegistry {"
+        },
+        {
+          "line": 66,
+          "source": "enum CoorditFitLabContractProbe {"
+        },
+        {
+          "line": 195,
+          "source": "final class CoorditFitLabFixtureAPI: CoorditFitLabAPI {"
+        },
+        {
+          "line": 388,
+          "source": "struct CoorditFitLabFixtureOCRService: CoorditFitLabOCRServicing {"
+        },
+        {
+          "line": 401,
+          "source": "actor CoorditFitLabFixtureHistoryStore: CoorditFitLabHistoryStoring {"
+        },
+        {
+          "line": 422,
+          "source": "actor CoorditFitLabSuspendingHistoryStore: CoorditFitLabHistoryStoring {"
+        },
+        {
+          "line": 506,
+          "source": "enum CoorditFitLabFixtures {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabHistoryDetailScreen.swift",
+      "lineCount": 135,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditFitLabHistoryDetailScreen: View {"
+        },
+        {
+          "line": 89,
+          "source": "enum CoorditFitLabResultVariant: Equatable {"
+        }
+      ],
+      "state": [
+        {
+          "line": 9,
+          "source": "@State private var isDeleting = false"
+        }
+      ],
+      "typography": [
+        {
+          "line": 23,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))"
+        },
+        {
+          "line": 27,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .body))"
+        },
+        {
+          "line": 30,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 34,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 66,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabHistoryStore.swift",
+      "lineCount": 449,
+      "imports": [
+        "CryptoKit",
+        "Darwin"
+      ],
+      "declarations": [
+        {
+          "line": 6,
+          "source": "protocol CoorditFitLabHistoryStoring: Sendable {"
+        },
+        {
+          "line": 14,
+          "source": "enum CoorditFitLabHistoryStoreError: LocalizedError, Equatable {"
+        },
+        {
+          "line": 28,
+          "source": "actor CoorditFitLabFileHistoryStore: CoorditFitLabHistoryStoring {"
+        },
+        {
+          "line": 29,
+          "source": "private struct Envelope: Codable {"
+        },
+        {
+          "line": 33,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 39,
+          "source": "private struct EnvelopeHeader: Decodable {"
+        },
+        {
+          "line": 42,
+          "source": "enum CodingKeys: String, CodingKey {"
+        },
+        {
+          "line": 47,
+          "source": "private struct LegacyEnvelope: Decodable {"
+        },
+        {
+          "line": 48,
+          "source": "struct Snapshot: Decodable {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabManualInput.swift",
+      "lineCount": 910,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditFitLabInputDestination: Equatable {"
+        },
+        {
+          "line": 11,
+          "source": "struct CoorditFitLabInputScreen: View {"
+        },
+        {
+          "line": 383,
+          "source": "private struct CoorditFitLabManualDraftView: View {"
+        },
+        {
+          "line": 860,
+          "source": "private struct EditableRow: Identifiable, Equatable {"
+        },
+        {
+          "line": 876,
+          "source": "private enum PendingChange: Equatable {"
+        }
+      ],
+      "state": [
+        {
+          "line": 14,
+          "source": "@Binding var draft: CoorditFitLabDraft"
+        },
+        {
+          "line": 15,
+          "source": "@Binding var destination: CoorditFitLabInputDestination"
+        },
+        {
+          "line": 385,
+          "source": "@Binding var draft: CoorditFitLabDraft"
+        },
+        {
+          "line": 387,
+          "source": "@State private var kind: CoorditFitLabGarmentKind"
+        },
+        {
+          "line": 388,
+          "source": "@State private var category: CoorditFitLabCategory"
+        },
+        {
+          "line": 389,
+          "source": "@State private var productName: String"
+        },
+        {
+          "line": 390,
+          "source": "@State private var brand: String"
+        },
+        {
+          "line": 391,
+          "source": "@State private var rows: [EditableRow]"
+        },
+        {
+          "line": 392,
+          "source": "@State private var rowErrors: [UUID: [String]] = [:]"
+        },
+        {
+          "line": 393,
+          "source": "@State private var globalError: String?"
+        },
+        {
+          "line": 394,
+          "source": "@State private var productError: String?"
+        },
+        {
+          "line": 395,
+          "source": "@State private var isReviewing = false"
+        },
+        {
+          "line": 396,
+          "source": "@State private var pendingChange: PendingChange?"
+        },
+        {
+          "line": 397,
+          "source": "@FocusState private var focusedField: String?"
+        }
+      ],
+      "typography": [
+        {
+          "line": 128,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(18), relativeTo: .headline))"
+        },
+        {
+          "line": 131,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .footnote))"
+        },
+        {
+          "line": 172,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(15), relativeTo: .headline))"
+        },
+        {
+          "line": 176,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .footnote))"
+        },
+        {
+          "line": 188,
+          "source": ".font(.title2)"
+        },
+        {
+          "line": 191,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(13), relativeTo: .body))"
+        },
+        {
+          "line": 194,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 242,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))"
+        },
+        {
+          "line": 249,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .caption))"
+        },
+        {
+          "line": 256,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .caption))"
+        },
+        {
+          "line": 264,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .headline))"
+        },
+        {
+          "line": 286,
+          "source": ".font(.title3)"
+        },
+        {
+          "line": 293,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))"
+        },
+        {
+          "line": 297,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 300,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(9), relativeTo: .caption2))"
+        },
+        {
+          "line": 305,
+          "source": ".font(.caption.weight(.bold))"
+        },
+        {
+          "line": 337,
+          "source": ".font(.system(size: metrics.value(19), weight: .semibold))"
+        },
+        {
+          "line": 345,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))"
+        },
+        {
+          "line": 351,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 449,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12)))"
+        },
+        {
+          "line": 454,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12)))"
+        },
+        {
+          "line": 465,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 471,
+          "source": ".font(.footnote.weight(.semibold))"
+        },
+        {
+          "line": 480,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .footnote))"
+        },
+        {
+          "line": 507,
+          "source": ".font(.footnote.weight(.semibold))"
+        },
+        {
+          "line": 517,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))"
+        },
+        {
+          "line": 545,
+          "source": ".font(.system(size: metrics.value(42)))"
+        },
+        {
+          "line": 548,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(20), relativeTo: .title3))"
+        },
+        {
+          "line": 551,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(15), relativeTo: .body))"
+        },
+        {
+          "line": 555,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(13), relativeTo: .body))"
+        },
+        {
+          "line": 596,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))"
+        },
+        {
+          "line": 617,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 633,
+          "source": ".font(.subheadline.weight(.semibold))"
+        },
+        {
+          "line": 658,
+          "source": ".font(.footnote)"
+        },
+        {
+          "line": 674,
+          "source": ".font(.footnote.weight(.semibold))"
+        }
+      ],
+      "presentations": [
+        {
+          "line": 421,
+          "source": ".alert(\"입력값을 변경할까요?\", isPresented: pendingAlertBinding, presenting: pendingChange) { change in"
+        }
+      ]
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabModels.swift",
+      "lineCount": 265,
+      "imports": [
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditFitLabSource: String, Codable, CaseIterable, Sendable {"
+        },
+        {
+          "line": 10,
+          "source": "enum CoorditFitLabGarmentKind: String, Codable, CaseIterable, Sendable {"
+        },
+        {
+          "line": 15,
+          "source": "enum CoorditFitLabCategory: String, Codable, CaseIterable, Identifiable, Sendable {"
+        },
+        {
+          "line": 49,
+          "source": "enum CoorditFitLabMeasurementKey: String, Codable, CaseIterable, Identifiable, Sendable {"
+        },
+        {
+          "line": 69,
+          "source": "enum CoorditFitLabScreen: String, Codable, CaseIterable, Sendable {"
+        },
+        {
+          "line": 79,
+          "source": "enum CoorditFitLabSubmissionStep: String, Codable, CaseIterable, Sendable {"
+        },
+        {
+          "line": 90,
+          "source": "enum CoorditFitLabLoadState: Equatable, Sendable {"
+        },
+        {
+          "line": 97,
+          "source": "enum CoorditFitLabError: Error, Equatable, Sendable {"
+        },
+        {
+          "line": 120,
+          "source": "struct CoorditFitLabSizeDraft: Identifiable, Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 126,
+          "source": "struct CoorditFitLabDraft: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 140,
+          "source": "enum CoorditFitLabDraftValidation {"
+        },
+        {
+          "line": 178,
+          "source": "struct CoorditFitLabSubmissionCheckpoint: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 189,
+          "source": "struct CoorditFitLabOCRMetadata: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 194,
+          "source": "struct CoorditFitLabHistorySnapshot: Identifiable, Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 197,
+          "source": "struct ProductSummary: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 211,
+          "source": "struct ReferenceSummary: Codable, Equatable, Sendable {"
+        },
+        {
+          "line": 261,
+          "source": "protocol CoorditFitLabOCRServicing: Sendable {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabOCR.swift",
+      "lineCount": 365,
+      "imports": [
+        "CoreGraphics",
+        "Foundation",
+        "ImageIO",
+        "Vision"
+      ],
+      "declarations": [
+        {
+          "line": 8,
+          "source": "actor CoorditFitLabVisionExecutionProbe {"
+        },
+        {
+          "line": 18,
+          "source": "struct CoorditFitLabOCRBox: Equatable, Sendable {"
+        },
+        {
+          "line": 35,
+          "source": "struct CoorditFitLabOCRObservation: Equatable, Sendable {"
+        },
+        {
+          "line": 41,
+          "source": "struct CoorditFitLabOCRResult: Equatable, Sendable {"
+        },
+        {
+          "line": 82,
+          "source": "protocol CoorditFitLabOCRParsing: Sendable {"
+        },
+        {
+          "line": 86,
+          "source": "struct CoorditFitLabVisionOCRService: CoorditFitLabOCRServicing {"
+        },
+        {
+          "line": 140,
+          "source": "private struct RecognitionOutput: Sendable {"
+        },
+        {
+          "line": 172,
+          "source": "struct CoorditFitLabSizeChartOCRParser: CoorditFitLabOCRParsing {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabOCRInput.swift",
+      "lineCount": 1010,
+      "imports": [
+        "SwiftUI",
+        "AVFoundation",
+        "PhotosUI",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 8,
+          "source": "struct CoorditFitLabOCRInputView: View {"
+        },
+        {
+          "line": 879,
+          "source": "private struct EditableRow: Identifiable, Equatable {"
+        },
+        {
+          "line": 892,
+          "source": "private struct DeterministicGenerator: RandomNumberGenerator {"
+        },
+        {
+          "line": 901,
+          "source": "private enum Phase: Equatable {"
+        },
+        {
+          "line": 907,
+          "source": "private enum CoorditFitLabRenderedOCRFixture {"
+        },
+        {
+          "line": 935,
+          "source": "struct CoorditFitLabCameraPicker: UIViewControllerRepresentable {"
+        },
+        {
+          "line": 949,
+          "source": "final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {"
+        }
+      ],
+      "state": [
+        {
+          "line": 10,
+          "source": "@Binding var draft: CoorditFitLabDraft"
+        },
+        {
+          "line": 16,
+          "source": "@State private var phase: Phase = .chooser"
+        },
+        {
+          "line": 17,
+          "source": "@State private var result: CoorditFitLabOCRResult?"
+        },
+        {
+          "line": 18,
+          "source": "@State private var rows: [EditableRow] = []"
+        },
+        {
+          "line": 19,
+          "source": "@State private var productName = \"\""
+        },
+        {
+          "line": 20,
+          "source": "@State private var kind: CoorditFitLabGarmentKind = .upper"
+        },
+        {
+          "line": 21,
+          "source": "@State private var category: CoorditFitLabCategory = .tshirt"
+        },
+        {
+          "line": 22,
+          "source": "@State private var selectedPhoto: PhotosPickerItem?"
+        },
+        {
+          "line": 23,
+          "source": "@State private var pendingCropImage: UIImage?"
+        },
+        {
+          "line": 24,
+          "source": "@State private var isCameraPresented = false"
+        },
+        {
+          "line": 25,
+          "source": "@State private var message: String?"
+        },
+        {
+          "line": 26,
+          "source": "@State private var rowErrors: [UUID: [String]] = [:]"
+        },
+        {
+          "line": 27,
+          "source": "@State private var globalError: String?"
+        },
+        {
+          "line": 28,
+          "source": "@State private var cameraAuthorizationProbe = \"not-checked\""
+        },
+        {
+          "line": 29,
+          "source": "@State private var cameraCancellationProbe = \"not-invoked\""
+        },
+        {
+          "line": 30,
+          "source": "@State private var operationGeneration = 0"
+        },
+        {
+          "line": 31,
+          "source": "@State private var operationTask: Task<Void, Never>?"
+        },
+        {
+          "line": 32,
+          "source": "@State private var isFlowActive = false"
+        },
+        {
+          "line": 33,
+          "source": "@State private var visionExecutionProbe = \"idle\""
+        },
+        {
+          "line": 34,
+          "source": "@State private var heartbeatProbe = \"idle\""
+        },
+        {
+          "line": 35,
+          "source": "@FocusState private var focusedField: String?"
+        }
+      ],
+      "typography": [
+        {
+          "line": 69,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 141,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))"
+        },
+        {
+          "line": 144,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .footnote))"
+        },
+        {
+          "line": 164,
+          "source": ".font(.caption.weight(.semibold))"
+        },
+        {
+          "line": 215,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(16), relativeTo: .headline))"
+        },
+        {
+          "line": 217,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .footnote))"
+        },
+        {
+          "line": 261,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 276,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 281,
+          "source": ".font(.footnote.weight(.semibold))"
+        },
+        {
+          "line": 286,
+          "source": ".font(.footnote)"
+        },
+        {
+          "line": 292,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(15), relativeTo: .headline))"
+        },
+        {
+          "line": 294,
+          "source": ".font(.caption.monospaced())"
+        },
+        {
+          "line": 299,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 313,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(15), relativeTo: .headline))"
+        },
+        {
+          "line": 321,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12)))"
+        },
+        {
+          "line": 326,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12)))"
+        },
+        {
+          "line": 337,
+          "source": ".font(.footnote.weight(.semibold))"
+        },
+        {
+          "line": 370,
+          "source": ".font(.largeTitle)"
+        },
+        {
+          "line": 373,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))"
+        },
+        {
+          "line": 375,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(15), relativeTo: .body))"
+        },
+        {
+          "line": 379,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .footnote))"
+        },
+        {
+          "line": 402,
+          "source": ".font(.largeTitle)"
+        },
+        {
+          "line": 405,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))"
+        },
+        {
+          "line": 408,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(15), relativeTo: .body))"
+        },
+        {
+          "line": 433,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(15), relativeTo: .headline))"
+        },
+        {
+          "line": 444,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(14), relativeTo: .body))"
+        },
+        {
+          "line": 454,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))"
+        },
+        {
+          "line": 478,
+          "source": ".font(.footnote)"
+        },
+        {
+          "line": 491,
+          "source": ".font(.footnote.weight(.semibold))"
+        }
+      ],
+      "presentations": [
+        {
+          "line": 74,
+          "source": ".sheet(isPresented: $isCameraPresented) {"
+        },
+        {
+          "line": 85,
+          "source": ".fullScreenCover("
+        }
+      ]
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabScoreComponents.swift",
+      "lineCount": 986,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditFitLabResultMeasurement: Identifiable {"
+        },
+        {
+          "line": 5,
+          "source": "enum Direction {"
+        },
+        {
+          "line": 95,
+          "source": "struct CoorditFitLabSizeOption: Identifiable {"
+        },
+        {
+          "line": 270,
+          "source": "struct CoorditFitLabScoreCard: View {"
+        },
+        {
+          "line": 352,
+          "source": "struct CoorditFitLabMeasurementRows: View {"
+        },
+        {
+          "line": 394,
+          "source": "struct CoorditFitLabSizeScoreChart: View {"
+        },
+        {
+          "line": 513,
+          "source": "private struct CoorditFitLabYarnStyle {"
+        },
+        {
+          "line": 591,
+          "source": "struct CoorditFitLabYarnTrail: View {"
+        },
+        {
+          "line": 897,
+          "source": "struct CoorditFitLabDifferenceChart: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 396,
+          "source": "@Binding var selectedSizeLabel: String?"
+        },
+        {
+          "line": 599,
+          "source": "@State private var animationStart = Date()"
+        },
+        {
+          "line": 600,
+          "source": "@State private var animationSettled = false"
+        }
+      ],
+      "typography": [
+        {
+          "line": 310,
+          "source": ".font(CoorditTypography.mona12(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 313,
+          "source": ".font(CoorditTypography.climate2019(size: metrics.value(19), relativeTo: .headline))"
+        },
+        {
+          "line": 314,
+          "source": ".tracking(metrics.value(0.7))"
+        },
+        {
+          "line": 320,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9), relativeTo: .caption))"
+        },
+        {
+          "line": 322,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(20), relativeTo: .title3))"
+        },
+        {
+          "line": 328,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9), relativeTo: .caption))"
+        },
+        {
+          "line": 330,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(20), relativeTo: .title3))"
+        },
+        {
+          "line": 361,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .body))"
+        },
+        {
+          "line": 378,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 434,
+          "source": ".font(CoorditTypography.mona12(size: metrics.value(16), relativeTo: .headline))"
+        },
+        {
+          "line": 436,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 448,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .body))"
+        },
+        {
+          "line": 468,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 473,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(8), relativeTo: .caption2))"
+        },
+        {
+          "line": 909,
+          "source": ".font(CoorditTypography.mona12(size: metrics.value(16), relativeTo: .headline))"
+        },
+        {
+          "line": 911,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 925,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(9), relativeTo: .caption2))"
+        },
+        {
+          "line": 934,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .body))"
+        },
+        {
+          "line": 936,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9), relativeTo: .caption))"
+        },
+        {
+          "line": 940,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .body))"
+        },
+        {
+          "line": 959,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .body))"
+        },
+        {
+          "line": 962,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabScreens.swift",
+      "lineCount": 945,
+      "imports": [
+        "SwiftUI",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 7,
+          "source": "struct CoorditFitLabFamilyView: View {"
+        },
+        {
+          "line": 638,
+          "source": "private struct CoorditGmarketBoldFontDiagnostic: View {"
+        },
+        {
+          "line": 658,
+          "source": "struct CoorditFitLabScreens: View {"
+        },
+        {
+          "line": 678,
+          "source": "private struct CoorditFitLabLoadingScreen: View {"
+        },
+        {
+          "line": 744,
+          "source": "private struct CoorditFitLabResultScreen: View {"
+        },
+        {
+          "line": 903,
+          "source": "private struct CoorditFitLabHistoryRegisterScreen: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 11,
+          "source": "@EnvironmentObject private var backendSession: CoorditBackendSessionStore"
+        },
+        {
+          "line": 12,
+          "source": "@ObservedObject var coordinator: CoorditFitLabCoordinator"
+        },
+        {
+          "line": 13,
+          "source": "@Binding var threadBalance: Int"
+        },
+        {
+          "line": 14,
+          "source": "@Binding var sharedImportURL: URL?"
+        },
+        {
+          "line": 17,
+          "source": "@State private var inputDestination: CoorditFitLabInputDestination = .sources"
+        },
+        {
+          "line": 18,
+          "source": "@State private var inputNavigationDirection: CoorditNavigationDirection = .forward"
+        },
+        {
+          "line": 661,
+          "source": "@ObservedObject var coordinator: CoorditFitLabCoordinator"
+        },
+        {
+          "line": 662,
+          "source": "@State private var threadBalance = 36"
+        },
+        {
+          "line": 680,
+          "source": "@ObservedObject var coordinator: CoorditFitLabCoordinator"
+        },
+        {
+          "line": 756,
+          "source": "@State private var didSave = false"
+        },
+        {
+          "line": 757,
+          "source": "@State private var isSaving = false"
+        },
+        {
+          "line": 758,
+          "source": "@State private var isRetryingReport = false"
+        },
+        {
+          "line": 759,
+          "source": "@State private var selectedSizeLabel: String?"
+        }
+      ],
+      "typography": [
+        {
+          "line": 64,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 473,
+          "source": ".font(.system(size: 7))"
+        },
+        {
+          "line": 545,
+          "source": ".font(.headline)"
+        },
+        {
+          "line": 548,
+          "source": ".font(.subheadline)"
+        },
+        {
+          "line": 550,
+          "source": ".font(.caption)"
+        },
+        {
+          "line": 568,
+          "source": ".font(.headline)"
+        },
+        {
+          "line": 571,
+          "source": ".font(.caption)"
+        },
+        {
+          "line": 593,
+          "source": ".font(.body)"
+        },
+        {
+          "line": 596,
+          "source": ".font(.body)"
+        },
+        {
+          "line": 613,
+          "source": ".font(.title3.bold())"
+        },
+        {
+          "line": 616,
+          "source": ".font(.body)"
+        },
+        {
+          "line": 618,
+          "source": ".font(.headline)"
+        },
+        {
+          "line": 629,
+          "source": ".font(.caption)"
+        },
+        {
+          "line": 688,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(16), relativeTo: .body))"
+        },
+        {
+          "line": 692,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 698,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 707,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 846,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 854,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 877,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 886,
+          "source": ".font(.system(size: 1))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabSizeExtractor.swift",
+      "lineCount": 315,
+      "imports": [
+        "Foundation",
+        "UIKit",
+        "Vision"
+      ],
+      "declarations": [
+        {
+          "line": 6,
+          "source": "struct CoorditClosetOCRSizeRow: Identifiable, Equatable {"
+        },
+        {
+          "line": 46,
+          "source": "enum CoorditFitLabSizeExtractor {"
+        },
+        {
+          "line": 310,
+          "source": "private struct ParsedSizeRow {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabSubmissionView.swift",
+      "lineCount": 326,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditFitLabSubmissionView: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 6,
+          "source": "@ObservedObject var coordinator: CoorditFitLabCoordinator"
+        },
+        {
+          "line": 12,
+          "source": "@State private var showsDiscardConfirmation = false"
+        },
+        {
+          "line": 13,
+          "source": "@State private var selectedSizeLabel: String?"
+        }
+      ],
+      "typography": [
+        {
+          "line": 50,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))"
+        },
+        {
+          "line": 54,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .body))"
+        },
+        {
+          "line": 60,
+          "source": ".font(.system(size: metrics.value(17), weight: .semibold))"
+        },
+        {
+          "line": 67,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))"
+        },
+        {
+          "line": 70,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 72,
+          "source": ".lineSpacing(metrics.value(2))"
+        },
+        {
+          "line": 75,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(10.5), relativeTo: .caption))"
+        },
+        {
+          "line": 77,
+          "source": ".lineSpacing(metrics.value(3))"
+        },
+        {
+          "line": 94,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(13), relativeTo: .body))"
+        },
+        {
+          "line": 105,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .headline))"
+        },
+        {
+          "line": 117,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))"
+        },
+        {
+          "line": 134,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))"
+        },
+        {
+          "line": 146,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 182,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .body))"
+        },
+        {
+          "line": 184,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 203,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(20), relativeTo: .title3))"
+        },
+        {
+          "line": 206,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(17), relativeTo: .headline))"
+        },
+        {
+          "line": 271,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))"
+        },
+        {
+          "line": 273,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .body))"
+        },
+        {
+          "line": 304,
+          "source": ".font(.system(size: 1))"
+        }
+      ],
+      "presentations": [
+        {
+          "line": 37,
+          "source": ".alert(\"새 상품을 등록할까요?\", isPresented: $showsDiscardConfirmation) {"
+        }
+      ]
+    },
+    {
+      "file": "coordit/coordit/CoorditFitLabURLInput.swift",
+      "lineCount": 763,
+      "imports": [
+        "SwiftUI",
+        "Darwin"
+      ],
+      "declarations": [
+        {
+          "line": 5,
+          "source": "struct CoorditFitLabURLInputView: View {"
+        },
+        {
+          "line": 728,
+          "source": "private enum Stage {"
+        },
+        {
+          "line": 734,
+          "source": "private struct EditableRow: Identifiable, Equatable {"
+        }
+      ],
+      "state": [
+        {
+          "line": 7,
+          "source": "@Binding var draft: CoorditFitLabDraft"
+        },
+        {
+          "line": 15,
+          "source": "@State private var stage: Stage = .entry"
+        },
+        {
+          "line": 16,
+          "source": "@State private var urlText = \"\""
+        },
+        {
+          "line": 17,
+          "source": "@State private var errorMessage: String?"
+        },
+        {
+          "line": 18,
+          "source": "@State private var isLoading = false"
+        },
+        {
+          "line": 19,
+          "source": "@State private var kind: CoorditFitLabGarmentKind = .upper"
+        },
+        {
+          "line": 20,
+          "source": "@State private var category: CoorditFitLabCategory = .tshirt"
+        },
+        {
+          "line": 21,
+          "source": "@State private var productName = \"\""
+        },
+        {
+          "line": 22,
+          "source": "@State private var brand = \"\""
+        },
+        {
+          "line": 23,
+          "source": "@State private var rows: [EditableRow] = []"
+        },
+        {
+          "line": 24,
+          "source": "@State private var validationMessage: String?"
+        },
+        {
+          "line": 25,
+          "source": "@State private var referenceRefreshIntent: CoorditFitLabCategory?"
+        },
+        {
+          "line": 26,
+          "source": "@State private var compatibleReferences: [CoorditFitLabReferenceRow] = []"
+        },
+        {
+          "line": 27,
+          "source": "@State private var referenceErrorMessage: String?"
+        },
+        {
+          "line": 28,
+          "source": "@State private var discardedReferenceCategory: CoorditFitLabCategory?"
+        },
+        {
+          "line": 29,
+          "source": "@State private var referenceRequestGeneration = 0"
+        },
+        {
+          "line": 30,
+          "source": "@State private var referenceRequest: Task<Void, Never>?"
+        },
+        {
+          "line": 31,
+          "source": "@State private var importGeneration = 0"
+        },
+        {
+          "line": 32,
+          "source": "@State private var importRequest: Task<Void, Never>?"
+        },
+        {
+          "line": 33,
+          "source": "@FocusState private var focusedField: String?"
+        }
+      ],
+      "typography": [
+        {
+          "line": 77,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(18), relativeTo: .headline))"
+        },
+        {
+          "line": 80,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .body))"
+        },
+        {
+          "line": 96,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))"
+        },
+        {
+          "line": 103,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .footnote))"
+        },
+        {
+          "line": 114,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))"
+        },
+        {
+          "line": 154,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(11)))"
+        },
+        {
+          "line": 174,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 180,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))"
+        },
+        {
+          "line": 191,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 197,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 203,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 209,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 217,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 237,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .footnote))"
+        },
+        {
+          "line": 261,
+          "source": ".font(.footnote.weight(.semibold))"
+        },
+        {
+          "line": 268,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))"
+        },
+        {
+          "line": 280,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 287,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 306,
+          "source": ".font(.system(size: metrics.value(42)))"
+        },
+        {
+          "line": 309,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(18), relativeTo: .headline))"
+        },
+        {
+          "line": 312,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(13), relativeTo: .body))"
+        },
+        {
+          "line": 317,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .body))"
+        },
+        {
+          "line": 344,
+          "source": ".font(.subheadline.weight(.semibold))"
+        },
+        {
+          "line": 363,
+          "source": ".font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 391,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 435,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12)))"
+        },
+        {
+          "line": 440,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12)))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFontRegistration.swift",
+      "lineCount": 23,
+      "imports": [
+        "CoreText",
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditFontRegistration {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditFrameRoute.swift",
+      "lineCount": 222,
+      "imports": [
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditFrameRoute: String, CaseIterable, Identifiable {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditGlobalFitAnalysisBanner.swift",
+      "lineCount": 136,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditGlobalFitAnalysisBanner: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 5,
+          "source": "@ObservedObject var coordinator: CoorditFitLabCoordinator"
+        }
+      ],
+      "typography": [
+        {
+          "line": 23,
+          "source": ".font(CoorditTypography.gmarketBold(size: 12))"
+        },
+        {
+          "line": 25,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 9))"
+        },
+        {
+          "line": 38,
+          "source": ".font(.system(size: 20, weight: .semibold))"
+        },
+        {
+          "line": 41,
+          "source": ".font(CoorditTypography.gmarketBold(size: 12))"
+        },
+        {
+          "line": 43,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 9))"
+        },
+        {
+          "line": 56,
+          "source": ".font(.system(size: 20, weight: .semibold))"
+        },
+        {
+          "line": 59,
+          "source": ".font(CoorditTypography.gmarketBold(size: 12))"
+        },
+        {
+          "line": 61,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 9))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditGoogleNonce.swift",
+      "lineCount": 17,
+      "imports": [
+        "CryptoKit",
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditGoogleNonce {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditGoogleSignIn.swift",
+      "lineCount": 120,
+      "imports": [
+        "Foundation",
+        "GoogleSignIn",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 6,
+          "source": "enum CoorditGoogleSignInError: LocalizedError {"
+        },
+        {
+          "line": 23,
+          "source": "struct CoorditGoogleSignInCredential {"
+        },
+        {
+          "line": 28,
+          "source": "enum CoorditGoogleSignIn {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditHomeReferenceSelection.swift",
+      "lineCount": 246,
+      "imports": [
+        "SwiftUI",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 6,
+          "source": "struct CoorditHomeReferenceCard: View {"
+        },
+        {
+          "line": 82,
+          "source": "struct CoorditHomeReferenceSelectionSheet: View {"
+        },
+        {
+          "line": 233,
+          "source": "private struct CoorditHomeReferenceThumbnail: View {"
+        },
+        {
+          "line": 242,
+          "source": "private enum CoorditHomeReferencePalette {"
+        }
+      ],
+      "state": [
+        {
+          "line": 89,
+          "source": "@State private var selection: Set<String>"
+        }
+      ],
+      "typography": [
+        {
+          "line": 22,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14)))"
+        },
+        {
+          "line": 25,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9.5)))"
+        },
+        {
+          "line": 33,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(9.5)))"
+        },
+        {
+          "line": 51,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(8.5)))"
+        },
+        {
+          "line": 54,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(7.5)))"
+        },
+        {
+          "line": 109,
+          "source": ".font(CoorditTypography.gmarketMedium(size: CoorditDesignTokens.HomeReferenceMetrics.introFontSize))"
+        },
+        {
+          "line": 122,
+          "source": ".font(CoorditTypography.gmarketBold(size: CoorditDesignTokens.HomeReferenceMetrics.actionFontSize))"
+        },
+        {
+          "line": 155,
+          "source": ".font(CoorditTypography.gmarketBold(size: CoorditDesignTokens.HomeReferenceMetrics.groupTitleFontSize))"
+        },
+        {
+          "line": 158,
+          "source": ".font(CoorditTypography.gmarketMedium(size: CoorditDesignTokens.HomeReferenceMetrics.emptyTextFontSize))"
+        },
+        {
+          "line": 189,
+          "source": ".font(CoorditTypography.gmarketBold(size: CoorditDesignTokens.HomeReferenceMetrics.rowTitleFontSize))"
+        },
+        {
+          "line": 191,
+          "source": ".font(CoorditTypography.gmarketMedium(size: CoorditDesignTokens.HomeReferenceMetrics.rowSubtitleFontSize))"
+        },
+        {
+          "line": 196,
+          "source": ".font(.system(size: CoorditDesignTokens.HomeReferenceMetrics.rowIconSize, weight: .semibold))"
+        },
+        {
+          "line": 211,
+          "source": ".font(.system(size: CoorditDesignTokens.HomeReferenceMetrics.emptyIconSize, weight: .medium))"
+        },
+        {
+          "line": 213,
+          "source": ".font(CoorditTypography.gmarketBold(size: CoorditDesignTokens.HomeReferenceMetrics.groupTitleFontSize))"
+        },
+        {
+          "line": 218,
+          "source": ".font(CoorditTypography.gmarketBold(size: CoorditDesignTokens.HomeReferenceMetrics.actionFontSize))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditHomeScreens.swift",
+      "lineCount": 479,
+      "imports": [
+        "Combine",
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 5,
+          "source": "struct CoorditMain04Screen: View {"
+        },
+        {
+          "line": 78,
+          "source": "private struct CoorditBannerCard: View {"
+        },
+        {
+          "line": 147,
+          "source": "private struct CoorditFashionMagazinePage: View {"
+        },
+        {
+          "line": 216,
+          "source": "private struct CoorditFashionMagazineIssue {"
+        },
+        {
+          "line": 252,
+          "source": "private struct CoorditHomeFitLabHistoryItem: Identifiable {"
+        },
+        {
+          "line": 274,
+          "source": "private struct CoorditFitLabHistoryCard: View {"
+        },
+        {
+          "line": 374,
+          "source": "private struct CoorditFitLabHistoryPreviewCard: View {"
+        },
+        {
+          "line": 438,
+          "source": "private struct CoorditClosetEntryCard: View {"
+        },
+        {
+          "line": 474,
+          "source": "private enum CoorditHomePalette {"
+        }
+      ],
+      "state": [
+        {
+          "line": 7,
+          "source": "@Binding var closetItems: [CoorditClosetItem]"
+        },
+        {
+          "line": 8,
+          "source": "@Binding var selectedReferenceIDs: Set<String>"
+        },
+        {
+          "line": 12,
+          "source": "@State private var showsReferenceSelection = false"
+        },
+        {
+          "line": 13,
+          "source": "@EnvironmentObject private var backendSession: CoorditBackendSessionStore"
+        },
+        {
+          "line": 80,
+          "source": "@State private var selectedIssue = 0"
+        }
+      ],
+      "typography": [
+        {
+          "line": 52,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9.5)))"
+        },
+        {
+          "line": 89,
+          "source": ".font(CoorditTypography.climate2019(size: metrics.value(17), relativeTo: .headline))"
+        },
+        {
+          "line": 90,
+          "source": ".tracking(-0.6 * metrics.scale)"
+        },
+        {
+          "line": 155,
+          "source": ".font(CoorditTypography.mona12(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 164,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(8.5), relativeTo: .caption2))"
+        },
+        {
+          "line": 172,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(25), relativeTo: .title3))"
+        },
+        {
+          "line": 179,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10.5), relativeTo: .caption))"
+        },
+        {
+          "line": 190,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(8), relativeTo: .caption2))"
+        },
+        {
+          "line": 294,
+          "source": ".font(CoorditTypography.climate2019(size: metrics.value(18.6), relativeTo: .headline))"
+        },
+        {
+          "line": 295,
+          "source": ".tracking(-0.93 * metrics.scale)"
+        },
+        {
+          "line": 300,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(8.8), relativeTo: .caption2))"
+        },
+        {
+          "line": 317,
+          "source": ".font(CoorditTypography.climate2019(size: metrics.value(8.8), relativeTo: .caption2))"
+        },
+        {
+          "line": 318,
+          "source": ".tracking(-0.35 * metrics.scale)"
+        },
+        {
+          "line": 325,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(8.2), relativeTo: .caption2))"
+        },
+        {
+          "line": 336,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 383,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 389,
+          "source": ".font(CoorditTypography.mona12(size: metrics.value(7.4), relativeTo: .caption2))"
+        },
+        {
+          "line": 396,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(8.2), relativeTo: .caption2))"
+        },
+        {
+          "line": 406,
+          "source": ".font(CoorditTypography.mona12(size: metrics.value(7.4), relativeTo: .caption2))"
+        },
+        {
+          "line": 411,
+          "source": ".font(CoorditTypography.mona12(size: metrics.value(19), relativeTo: .headline))"
+        },
+        {
+          "line": 446,
+          "source": ".font(CoorditTypography.climate2019(size: metrics.value(17.2), relativeTo: .headline))"
+        },
+        {
+          "line": 447,
+          "source": ".tracking(-0.86 * metrics.scale)"
+        }
+      ],
+      "presentations": [
+        {
+          "line": 65,
+          "source": ".sheet(isPresented: $showsReferenceSelection) {"
+        }
+      ]
+    },
+    {
+      "file": "coordit/coordit/CoorditLiquidGlassBottomNavigation.swift",
+      "lineCount": 91,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditLiquidGlassBottomNavigation: View {"
+        }
+      ],
+      "state": [],
+      "typography": [
+        {
+          "line": 79,
+          "source": ".font(Main01DesignTokens.Typography.navLabel(size: tab.fontSize * scale))"
+        },
+        {
+          "line": 80,
+          "source": ".tracking(tab.tracking * scale)"
+        },
+        {
+          "line": 84,
+          "source": ".font(Main01DesignTokens.Typography.navLabel(size: tab.fontSize * scale))"
+        },
+        {
+          "line": 85,
+          "source": ".tracking(tab.tracking * scale)"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditMainShell.swift",
+      "lineCount": 64,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditMainShell: View {"
+        }
+      ],
+      "state": [],
+      "typography": [
+        {
+          "line": 44,
+          "source": ".font(CoorditTypography.climate(size: metrics.value(14)))"
+        },
+        {
+          "line": 47,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(18)))"
+        },
+        {
+          "line": 50,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11)))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditMockData.swift",
+      "lineCount": 81,
+      "imports": [
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditRouteContent {"
+        },
+        {
+          "line": 10,
+          "source": "enum CoorditMockData {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditMyPageAccountDestinationScreens.swift",
+      "lineCount": 165,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [],
+      "state": [],
+      "typography": [
+        {
+          "line": 10,
+          "source": ".font(.system(size: metrics.value(34), weight: .light))"
+        },
+        {
+          "line": 20,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(10), relativeTo: .caption))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditMyPageBackendControls.swift",
+      "lineCount": 54,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [],
+      "state": [],
+      "typography": [
+        {
+          "line": 32,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))"
+        },
+        {
+          "line": 35,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditMyPageDestinationComponents.swift",
+      "lineCount": 193,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditSettingsTextField: View {"
+        },
+        {
+          "line": 46,
+          "source": "struct CoorditSettingsPrimaryButton: View {"
+        },
+        {
+          "line": 76,
+          "source": "struct CoorditSettingsStatusBanner: View {"
+        },
+        {
+          "line": 102,
+          "source": "struct CoorditSettingsInfoPanel: View {"
+        },
+        {
+          "line": 141,
+          "source": "struct CoorditSettingsConfirmationToggle: View {"
+        },
+        {
+          "line": 171,
+          "source": "struct CoorditSettingsDocumentSection: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 7,
+          "source": "@Binding var text: String"
+        },
+        {
+          "line": 143,
+          "source": "@Binding var isOn: Bool"
+        }
+      ],
+      "typography": [
+        {
+          "line": 16,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 27,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))"
+        },
+        {
+          "line": 57,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))"
+        },
+        {
+          "line": 85,
+          "source": ".font(.system(size: metrics.value(15), weight: .semibold))"
+        },
+        {
+          "line": 87,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 112,
+          "source": ".font(.system(size: metrics.value(28), weight: .medium))"
+        },
+        {
+          "line": 119,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(16), relativeTo: .headline))"
+        },
+        {
+          "line": 123,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .body))"
+        },
+        {
+          "line": 126,
+          "source": ".lineSpacing(metrics.value(4))"
+        },
+        {
+          "line": 152,
+          "source": ".font(.system(size: metrics.value(19), weight: .semibold))"
+        },
+        {
+          "line": 155,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 179,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .subheadline))"
+        },
+        {
+          "line": 182,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .body))"
+        },
+        {
+          "line": 184,
+          "source": ".lineSpacing(metrics.value(4))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditMyPagePreferencesScreens.swift",
+      "lineCount": 207,
+      "imports": [
+        "SwiftUI",
+        "UIKit",
+        "UserNotifications"
+      ],
+      "declarations": [
+        {
+          "line": 166,
+          "source": "enum CoorditMarketingNotificationStatus {"
+        },
+        {
+          "line": 189,
+          "source": "enum CoorditAppSupport {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": [
+        {
+          "line": 136,
+          "source": "isAuthorized = (try? await notificationCenter.requestAuthorization(options: [.alert, .badge, .sound])) ?? false"
+        }
+      ]
+    },
+    {
+      "file": "coordit/coordit/CoorditMyPageScreens.swift",
+      "lineCount": 504,
+      "imports": [
+        "SwiftUI",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 8,
+          "source": "struct CoorditMyPageFamilyView: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 10,
+          "source": "@Binding var threadBalance: Int"
+        },
+        {
+          "line": 11,
+          "source": "@Binding var showsThreadRechargePrompt: Bool"
+        },
+        {
+          "line": 15,
+          "source": "@EnvironmentObject var backendSession: CoorditBackendSessionStore"
+        },
+        {
+          "line": 18,
+          "source": "@State var feedDataConsent = true"
+        },
+        {
+          "line": 19,
+          "source": "@State var aiDataConsent = false"
+        },
+        {
+          "line": 20,
+          "source": "@AppStorage(\"coordit.marketing-notifications.enabled\") var marketingNotifications = false"
+        },
+        {
+          "line": 21,
+          "source": "@State var marketingNotificationStatus: CoorditMarketingNotificationStatus = .notDetermined"
+        },
+        {
+          "line": 22,
+          "source": "@State var profileName = \"코딧 사용자\""
+        },
+        {
+          "line": 23,
+          "source": "@State var profileBio = \"나에게 꼭 맞는 핏을 찾고 있어요.\""
+        },
+        {
+          "line": 24,
+          "source": "@State var profileAvatarIndex = 0"
+        },
+        {
+          "line": 25,
+          "source": "@State var profileSaved = false"
+        },
+        {
+          "line": 26,
+          "source": "@State var logoutCompleted = false"
+        },
+        {
+          "line": 27,
+          "source": "@State var deletionAcknowledged = false"
+        },
+        {
+          "line": 28,
+          "source": "@State var deletionCompleted = false"
+        },
+        {
+          "line": 29,
+          "source": "@State var deletionLocalCleanupFailed = false"
+        },
+        {
+          "line": 30,
+          "source": "@State var heightMeasurement = \"\""
+        },
+        {
+          "line": 31,
+          "source": "@State var weightMeasurement = \"\""
+        },
+        {
+          "line": 32,
+          "source": "@State var bodyMeasurementsSaved = false"
+        },
+        {
+          "line": 33,
+          "source": "@State var bodyMeasurementSaveError = \"\""
+        },
+        {
+          "line": 34,
+          "source": "@StateObject var rewardedAdService = CoorditRewardedAdService()"
+        },
+        {
+          "line": 35,
+          "source": "@StateObject var threadPurchaseService = CoorditThreadPurchaseService()"
+        }
+      ],
+      "typography": [
+        {
+          "line": 390,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 393,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(20), relativeTo: .title3))"
+        },
+        {
+          "line": 403,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .headline))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditMyPageSupportDestinationScreens.swift",
+      "lineCount": 160,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [],
+      "state": [],
+      "typography": [
+        {
+          "line": 141,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(10), relativeTo: .caption))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditOnboardingView.swift",
+      "lineCount": 670,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditOnboardingView: View {"
+        },
+        {
+          "line": 5,
+          "source": "private enum Step: Int, CaseIterable {"
+        },
+        {
+          "line": 27,
+          "source": "private enum LegalDocument: String, Identifiable {"
+        },
+        {
+          "line": 58,
+          "source": "private enum Field: Hashable {"
+        }
+      ],
+      "state": [
+        {
+          "line": 69,
+          "source": "@EnvironmentObject private var backendSession: CoorditBackendSessionStore"
+        },
+        {
+          "line": 70,
+          "source": "@FocusState private var focusedField: Field?"
+        },
+        {
+          "line": 71,
+          "source": "@State private var step: Step = .profile"
+        },
+        {
+          "line": 72,
+          "source": "@State private var displayName = \"\""
+        },
+        {
+          "line": 73,
+          "source": "@State private var gender = \"\""
+        },
+        {
+          "line": 74,
+          "source": "@State private var birthYear = \"\""
+        },
+        {
+          "line": 75,
+          "source": "@State private var birthMonth = \"\""
+        },
+        {
+          "line": 76,
+          "source": "@State private var birthDay = \"\""
+        },
+        {
+          "line": 77,
+          "source": "@State private var heightCm = \"\""
+        },
+        {
+          "line": 78,
+          "source": "@State private var weightKg = \"\""
+        },
+        {
+          "line": 79,
+          "source": "@State private var acceptsTerms = false"
+        },
+        {
+          "line": 80,
+          "source": "@State private var acceptsPrivacy = false"
+        },
+        {
+          "line": 81,
+          "source": "@State private var acceptsFitData = false"
+        },
+        {
+          "line": 82,
+          "source": "@State private var acceptsMarketing = false"
+        },
+        {
+          "line": 83,
+          "source": "@State private var legalDocument: LegalDocument?"
+        },
+        {
+          "line": 84,
+          "source": "@State private var validationMessage = \"\""
+        }
+      ],
+      "typography": [
+        {
+          "line": 153,
+          "source": ".font(CoorditTypography.gmarketBold(size: 22, relativeTo: .title2))"
+        },
+        {
+          "line": 158,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 12, relativeTo: .subheadline))"
+        },
+        {
+          "line": 169,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 9, relativeTo: .caption))"
+        },
+        {
+          "line": 171,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 11, relativeTo: .caption))"
+        },
+        {
+          "line": 205,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 12, relativeTo: .body))"
+        },
+        {
+          "line": 240,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 11, relativeTo: .caption))"
+        },
+        {
+          "line": 292,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 11, relativeTo: .caption))"
+        },
+        {
+          "line": 297,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 11, relativeTo: .caption))"
+        },
+        {
+          "line": 305,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 14, relativeTo: .body))"
+        },
+        {
+          "line": 319,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 13, relativeTo: .body))"
+        },
+        {
+          "line": 336,
+          "source": ".font(CoorditTypography.gmarketBold(size: 14, relativeTo: .body))"
+        },
+        {
+          "line": 369,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 15, relativeTo: .body))"
+        },
+        {
+          "line": 396,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 12, relativeTo: .caption))"
+        },
+        {
+          "line": 417,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 12, relativeTo: .caption))"
+        },
+        {
+          "line": 422,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 14, relativeTo: .body))"
+        },
+        {
+          "line": 426,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 11, relativeTo: .caption))"
+        },
+        {
+          "line": 454,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 13, relativeTo: .body))"
+        },
+        {
+          "line": 457,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 10, relativeTo: .caption))"
+        },
+        {
+          "line": 459,
+          "source": ".lineSpacing(2)"
+        },
+        {
+          "line": 466,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 11, relativeTo: .caption))"
+        },
+        {
+          "line": 482,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 13, relativeTo: .body))"
+        },
+        {
+          "line": 485,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 10, relativeTo: .caption))"
+        },
+        {
+          "line": 495,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 27, relativeTo: .title))"
+        },
+        {
+          "line": 501,
+          "source": ".font(CoorditTypography.gmarketBold(size: 15, relativeTo: .headline))"
+        },
+        {
+          "line": 504,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 13, relativeTo: .body))"
+        },
+        {
+          "line": 506,
+          "source": ".lineSpacing(5)"
+        }
+      ],
+      "presentations": [
+        {
+          "line": 134,
+          "source": ".sheet(item: $legalDocument) { document in"
+        }
+      ]
+    },
+    {
+      "file": "coordit/coordit/CoorditOrbitLoadingIndicator.swift",
+      "lineCount": 60,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditOrbitLoadingIndicator: View {"
+        }
+      ],
+      "state": [],
+      "typography": [
+        {
+          "line": 36,
+          "source": ".font(.system(size: metrics.value(10), weight: .bold))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditResponsiveMetrics.swift",
+      "lineCount": 20,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditResponsiveMetrics {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditRewardedAdService.swift",
+      "lineCount": 513,
+      "imports": [
+        "Combine",
+        "Foundation",
+        "GoogleMobileAds",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 7,
+          "source": "struct CoorditRewardedWalletSession {"
+        },
+        {
+          "line": 15,
+          "source": "protocol CoorditRewardedAdPresenting: AnyObject {"
+        },
+        {
+          "line": 25,
+          "source": "protocol CoorditRewardedAdLoading: AnyObject {"
+        },
+        {
+          "line": 34,
+          "source": "private final class CoorditGoogleRewardedAdLoader: CoorditRewardedAdLoading {"
+        },
+        {
+          "line": 53,
+          "source": "private final class CoorditGoogleRewardedAdPresenter: CoorditRewardedAdPresenting {"
+        },
+        {
+          "line": 71,
+          "source": "final class CoorditRewardedAdService: NSObject, ObservableObject, FullScreenContentDelegate {"
+        },
+        {
+          "line": 72,
+          "source": "enum Status: Equatable {"
+        },
+        {
+          "line": 448,
+          "source": "enum CoorditRewardedAdFixtureScenario: String {"
+        },
+        {
+          "line": 471,
+          "source": "private final class CoorditFixtureRewardedAdLoader: CoorditRewardedAdLoading {"
+        },
+        {
+          "line": 491,
+          "source": "private final class CoorditFixtureRewardedAdPresenter: CoorditRewardedAdPresenting {"
+        },
+        {
+          "line": 509,
+          "source": "private enum CoorditRewardedAdFixtureError: Error {"
+        }
+      ],
+      "state": [
+        {
+          "line": 108,
+          "source": "@Published private(set) var status: Status = .idle"
+        },
+        {
+          "line": 109,
+          "source": "@Published private(set) var settledBalance: Int?"
+        },
+        {
+          "line": 110,
+          "source": "@Published private(set) var fixtureReceipt = \"\""
+        }
+      ],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditRootView.swift",
+      "lineCount": 579,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditRootView: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 5,
+          "source": "@State private var route: CoorditFrameRoute"
+        },
+        {
+          "line": 6,
+          "source": "@State private var navigationDirection: CoorditNavigationDirection = .forward"
+        },
+        {
+          "line": 7,
+          "source": "@State private var closetItems: [CoorditClosetItem]"
+        },
+        {
+          "line": 8,
+          "source": "@State private var selectedClosetItemID: String?"
+        },
+        {
+          "line": 9,
+          "source": "@State private var closetDraft = CoorditClosetDraft()"
+        },
+        {
+          "line": 10,
+          "source": "@State private var closetAddSaveState = CoorditClosetAddSaveState()"
+        },
+        {
+          "line": 11,
+          "source": "@State private var isRegisteringFitLabReference = false"
+        },
+        {
+          "line": 12,
+          "source": "@State private var selectedReferenceIDs: Set<String> = []"
+        },
+        {
+          "line": 13,
+          "source": "@State private var showsFitLabReferenceSelection = false"
+        },
+        {
+          "line": 14,
+          "source": "@State private var showsOnboarding = false"
+        },
+        {
+          "line": 15,
+          "source": "@State private var threadBalance: Int"
+        },
+        {
+          "line": 16,
+          "source": "@State private var showsThreadRechargePrompt = false"
+        },
+        {
+          "line": 17,
+          "source": "@State private var sharedFitLabImportURL: URL?"
+        },
+        {
+          "line": 18,
+          "source": "@State private var showsAuthenticationEntry = false"
+        },
+        {
+          "line": 19,
+          "source": "@EnvironmentObject private var backendSession: CoorditBackendSessionStore"
+        },
+        {
+          "line": 22,
+          "source": "@StateObject private var fitLabCoordinator: CoorditFitLabCoordinator"
+        }
+      ],
+      "typography": [],
+      "presentations": [
+        {
+          "line": 235,
+          "source": ".sheet(isPresented: $showsFitLabReferenceSelection) {"
+        },
+        {
+          "line": 243,
+          "source": ".fullScreenCover(isPresented: $showsOnboarding) {"
+        }
+      ]
+    },
+    {
+      "file": "coordit/coordit/CoorditScreenScaffold.swift",
+      "lineCount": 151,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "private struct CoorditShowsScreenChromeKey: EnvironmentKey {"
+        },
+        {
+          "line": 8,
+          "source": "private struct CoorditShowsScreenBackgroundKey: EnvironmentKey {"
+        },
+        {
+          "line": 24,
+          "source": "struct CoorditSharedAppBackground: View {"
+        },
+        {
+          "line": 43,
+          "source": "private struct CoorditScrollEdgeTreatment: ViewModifier {"
+        },
+        {
+          "line": 72,
+          "source": "struct CoorditScreenChrome: View {"
+        },
+        {
+          "line": 104,
+          "source": "struct CoorditScreenScaffold<Content: View>: View {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditSettingsComponents.swift",
+      "lineCount": 273,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditSettingsStyle {"
+        },
+        {
+          "line": 14,
+          "source": "struct CoorditSettingsHeaderCard: View {"
+        },
+        {
+          "line": 30,
+          "source": "struct CoorditSettingsIconTile: View {"
+        },
+        {
+          "line": 46,
+          "source": "struct CoorditSettingsMenuRow: View {"
+        },
+        {
+          "line": 89,
+          "source": "struct CoorditSettingsCard<Content: View>: View {"
+        },
+        {
+          "line": 115,
+          "source": "struct CoorditSettingsDetailRow<Trailing: View>: View {"
+        },
+        {
+          "line": 182,
+          "source": "struct CoorditSettingsDivider: View {"
+        },
+        {
+          "line": 193,
+          "source": "struct CoorditSettingsChevron: View {"
+        },
+        {
+          "line": 205,
+          "source": "struct CoorditSettingsValuePill: View {"
+        },
+        {
+          "line": 223,
+          "source": "struct CoorditSettingsToggle: View {"
+        },
+        {
+          "line": 257,
+          "source": "struct CoorditSettingsSegment: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 224,
+          "source": "@Binding var isOn: Bool"
+        }
+      ],
+      "typography": [
+        {
+          "line": 60,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(16), relativeTo: .headline))"
+        },
+        {
+          "line": 64,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9), relativeTo: .caption))"
+        },
+        {
+          "line": 162,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .subheadline))"
+        },
+        {
+          "line": 167,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9), relativeTo: .caption))"
+        },
+        {
+          "line": 199,
+          "source": ".font(.system(size: metrics.value(14), weight: .semibold))"
+        },
+        {
+          "line": 213,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(9), relativeTo: .caption))"
+        },
+        {
+          "line": 264,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(8), relativeTo: .caption2))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditSharedFitLabImport.swift",
+      "lineCount": 143,
+      "imports": [
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditSharedFitLabImport {"
+        },
+        {
+          "line": 12,
+          "source": "private struct PendingImport: Codable, Equatable {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditSizeChartCropper.swift",
+      "lineCount": 207,
+      "imports": [
+        "SwiftUI",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 6,
+          "source": "enum CoorditSizeChartImageCropper {"
+        },
+        {
+          "line": 29,
+          "source": "struct CoorditSizeChartCropView: View {"
+        },
+        {
+          "line": 184,
+          "source": "private enum Corner: CaseIterable {"
+        }
+      ],
+      "state": [
+        {
+          "line": 34,
+          "source": "@State private var cropRect = CGRect(x: 0.06, y: 0.18, width: 0.88, height: 0.64)"
+        },
+        {
+          "line": 35,
+          "source": "@State private var dragStart: CGRect?"
+        }
+      ],
+      "typography": [
+        {
+          "line": 44,
+          "source": ".font(CoorditTypography.gmarketBold(size: 18))"
+        },
+        {
+          "line": 46,
+          "source": ".font(CoorditTypography.gmarketMedium(size: 11))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditSplashAuthenticationSheet.swift",
+      "lineCount": 211,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditAuthenticationEntryView: View {"
+        },
+        {
+          "line": 173,
+          "source": "private enum CoorditAuthenticationEntryDesign {"
+        }
+      ],
+      "state": [
+        {
+          "line": 7,
+          "source": "@EnvironmentObject private var backendSession: CoorditBackendSessionStore"
+        }
+      ],
+      "typography": [
+        {
+          "line": 41,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(CoorditAuthenticationEntryDesign.pageTitleFontSize), relativeTo: .title))"
+        },
+        {
+          "line": 60,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(CoorditAuthenticationEntryDesign.introductionTitleFontSize), relativeTo: .title2))"
+        },
+        {
+          "line": 62,
+          "source": ".lineSpacing(metrics.value(CoorditAuthenticationEntryDesign.introductionTitleLineSpacing))"
+        },
+        {
+          "line": 67,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(CoorditAuthenticationEntryDesign.introductionBodyFontSize), relativeTo: .subheadline))"
+        },
+        {
+          "line": 69,
+          "source": ".lineSpacing(metrics.value(CoorditAuthenticationEntryDesign.introductionBodyLineSpacing))"
+        },
+        {
+          "line": 126,
+          "source": ".font(.system(size: metrics.value(CoorditAuthenticationEntryDesign.providerMarkFontSize), weight: .bold, design: .rounded))"
+        },
+        {
+          "line": 129,
+          "source": ".font(.system(size: metrics.value(CoorditAuthenticationEntryDesign.providerMarkFontSize), weight: .semibold))"
+        },
+        {
+          "line": 137,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(CoorditAuthenticationEntryDesign.providerTitleFontSize), relativeTo: .body))"
+        },
+        {
+          "line": 143,
+          "source": ".font(.system(size: metrics.value(CoorditAuthenticationEntryDesign.providerArrowFontSize), weight: .semibold))"
+        },
+        {
+          "line": 164,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(CoorditAuthenticationEntryDesign.legalFontSize), relativeTo: .caption))"
+        },
+        {
+          "line": 166,
+          "source": ".lineSpacing(metrics.value(CoorditAuthenticationEntryDesign.legalLineSpacing))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditSplashScreen.swift",
+      "lineCount": 259,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditSplashScreen: View {"
+        },
+        {
+          "line": 147,
+          "source": "private enum CoorditSplashWelcomeEntryDesign {"
+        },
+        {
+          "line": 159,
+          "source": "private struct CoorditSplashBackground: View {"
+        },
+        {
+          "line": 176,
+          "source": "private struct CoorditSplashDivider: View {"
+        },
+        {
+          "line": 194,
+          "source": "private struct CoorditSplashLogo: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 9,
+          "source": "@State private var taglineVisible = false"
+        },
+        {
+          "line": 10,
+          "source": "@State private var dividerProgress: CGFloat = 0"
+        },
+        {
+          "line": 11,
+          "source": "@State private var logoVisible = false"
+        }
+      ],
+      "typography": [
+        {
+          "line": 35,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(24.462), relativeTo: .title2))"
+        },
+        {
+          "line": 71,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(14), relativeTo: .caption))"
+        },
+        {
+          "line": 83,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(CoorditSplashWelcomeEntryDesign.titleSize), relativeTo: .headline))"
+        },
+        {
+          "line": 225,
+          "source": ".font(CoorditTypography.climate2019(size: 22.565 * sizeScale, relativeTo: .title))"
+        },
+        {
+          "line": 226,
+          "source": ".kerning(-4.513 * sizeScale)"
+        },
+        {
+          "line": 232,
+          "source": ".font(CoorditTypography.climate2019(size: 22.565 * sizeScale, relativeTo: .title))"
+        },
+        {
+          "line": 233,
+          "source": ".kerning(-4.513 * sizeScale)"
+        },
+        {
+          "line": 236,
+          "source": ".font(CoorditTypography.climate2030(size: 23.016 * sizeScale, relativeTo: .title))"
+        },
+        {
+          "line": 237,
+          "source": ".kerning(-4.1429 * sizeScale)"
+        },
+        {
+          "line": 240,
+          "source": ".font(CoorditTypography.climate2019(size: 22.565 * sizeScale, relativeTo: .title))"
+        },
+        {
+          "line": 241,
+          "source": ".kerning(-3.3847 * sizeScale)"
+        },
+        {
+          "line": 244,
+          "source": ".font(CoorditTypography.climate2019(size: 22.565 * sizeScale, relativeTo: .title))"
+        },
+        {
+          "line": 245,
+          "source": ".kerning(-4.513 * sizeScale)"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditThreadChargeScreen.swift",
+      "lineCount": 337,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 277,
+          "source": "struct CoorditThreadRechargeRequiredPopup: View {"
+        }
+      ],
+      "state": [],
+      "typography": [
+        {
+          "line": 26,
+          "source": ".font(CoorditTypography.gmarketBold(size: contentMetrics.value(12), relativeTo: .subheadline))"
+        },
+        {
+          "line": 29,
+          "source": ".font(CoorditTypography.gmarketBold(size: contentMetrics.value(29), relativeTo: .title))"
+        },
+        {
+          "line": 51,
+          "source": ".font(CoorditTypography.gmarketMedium(size: contentMetrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 61,
+          "source": ".font(CoorditTypography.gmarketBold(size: contentMetrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 105,
+          "source": ".font(CoorditTypography.gmarketBold(size: contentMetrics.value(18), relativeTo: .headline))"
+        },
+        {
+          "line": 148,
+          "source": ".font(CoorditTypography.gmarketMedium(size: contentMetrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 158,
+          "source": ".font(CoorditTypography.gmarketMedium(size: contentMetrics.value(10), relativeTo: .caption))"
+        },
+        {
+          "line": 180,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 190,
+          "source": ".font(.system(size: 1))"
+        },
+        {
+          "line": 226,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(16), relativeTo: .headline))"
+        },
+        {
+          "line": 232,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(9), relativeTo: .caption))"
+        },
+        {
+          "line": 239,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .caption))"
+        },
+        {
+          "line": 298,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(18), relativeTo: .headline))"
+        },
+        {
+          "line": 303,
+          "source": ".font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))"
+        },
+        {
+          "line": 310,
+          "source": ".font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditThreadPurchaseService.swift",
+      "lineCount": 624,
+      "imports": [
+        "Foundation",
+        "Combine",
+        "StoreKit"
+      ],
+      "declarations": [
+        {
+          "line": 6,
+          "source": "enum CoorditThreadProductID: String, CaseIterable, Sendable {"
+        },
+        {
+          "line": 24,
+          "source": "struct CoorditThreadProduct: Identifiable, Equatable, Sendable {"
+        },
+        {
+          "line": 36,
+          "source": "struct CoorditThreadStoreTransaction: @unchecked Sendable {"
+        },
+        {
+          "line": 45,
+          "source": "enum CoorditThreadStorePurchaseResult: @unchecked Sendable {"
+        },
+        {
+          "line": 53,
+          "source": "protocol CoorditThreadStorefront: AnyObject {"
+        },
+        {
+          "line": 62,
+          "source": "private protocol CoorditThreadPurchaseFixtureReporting: AnyObject {"
+        },
+        {
+          "line": 70,
+          "source": "final class CoorditStoreKitThreadStorefront: CoorditThreadStorefront {"
+        },
+        {
+          "line": 166,
+          "source": "enum CoorditThreadPurchaseError: LocalizedError {"
+        },
+        {
+          "line": 186,
+          "source": "enum CoorditThreadPurchaseState: Equatable {"
+        },
+        {
+          "line": 231,
+          "source": "final class CoorditThreadPurchaseService: ObservableObject {"
+        },
+        {
+          "line": 471,
+          "source": "enum CoorditThreadPurchaseFixtureScenario: String {"
+        },
+        {
+          "line": 491,
+          "source": "private final class CoorditThreadPurchaseFinishProbe {"
+        },
+        {
+          "line": 509,
+          "source": "final class CoorditThreadPurchaseFixtureStorefront:"
+        }
+      ],
+      "state": [
+        {
+          "line": 235,
+          "source": "@Published private(set) var products: [CoorditThreadProduct] = []"
+        },
+        {
+          "line": 236,
+          "source": "@Published private(set) var state: CoorditThreadPurchaseState = .idle"
+        },
+        {
+          "line": 237,
+          "source": "@Published private(set) var settledBalance: Int?"
+        },
+        {
+          "line": 238,
+          "source": "@Published private(set) var sanitizedEvents: [String] = []"
+        }
+      ],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditTypography.swift",
+      "lineCount": 46,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditTypography {"
+        },
+        {
+          "line": 5,
+          "source": "enum PostScriptName {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/CoorditWelcomeLaunchState.swift",
+      "lineCount": 63,
+      "imports": [
+        "Foundation"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum CoorditSplashPresentation: Equatable {"
+        },
+        {
+          "line": 13,
+          "source": "enum CoorditWelcomeLaunchState {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/Main01BottomNavigation.swift",
+      "lineCount": 32,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct Main01BottomNavigation: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 5,
+          "source": "@Binding var selectedTab: Main01Tab"
+        }
+      ],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/Main01ChromeBackground.swift",
+      "lineCount": 30,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct Main01ChromeBackground: View {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/Main01DesignTokens.swift",
+      "lineCount": 137,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum Main01DesignTokens {"
+        },
+        {
+          "line": 5,
+          "source": "enum Colors {"
+        },
+        {
+          "line": 107,
+          "source": "enum Metrics {"
+        },
+        {
+          "line": 126,
+          "source": "enum Typography {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/Main01Header.swift",
+      "lineCount": 111,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct Main01Header: View {"
+        },
+        {
+          "line": 53,
+          "source": "private struct Main01BrandLogo: View {"
+        }
+      ],
+      "state": [],
+      "typography": [
+        {
+          "line": 78,
+          "source": ".font(Main01DesignTokens.Typography.logo(\"2019\", size: 22.565 * scale))"
+        },
+        {
+          "line": 79,
+          "source": ".kerning(-4.513 * scale)"
+        },
+        {
+          "line": 85,
+          "source": ".font(Main01DesignTokens.Typography.logo(\"2019\", size: 22.565 * scale))"
+        },
+        {
+          "line": 86,
+          "source": ".kerning(-4.513 * scale)"
+        },
+        {
+          "line": 89,
+          "source": ".font(Main01DesignTokens.Typography.logo(\"2030\", size: 23.016 * scale))"
+        },
+        {
+          "line": 90,
+          "source": ".kerning(-4.1429 * scale)"
+        },
+        {
+          "line": 93,
+          "source": ".font(Main01DesignTokens.Typography.logo(\"2019\", size: 22.565 * scale))"
+        },
+        {
+          "line": 94,
+          "source": ".kerning(-3.3847 * scale)"
+        },
+        {
+          "line": 97,
+          "source": ".font(Main01DesignTokens.Typography.logo(\"2019\", size: 22.565 * scale))"
+        },
+        {
+          "line": 98,
+          "source": ".kerning(-4.513 * scale)"
+        }
+      ],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/Main01Screen.swift",
+      "lineCount": 48,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "struct CoorditMain01Screen: View {"
+        }
+      ],
+      "state": [
+        {
+          "line": 5,
+          "source": "@State private var selectedTab: Main01Tab"
+        }
+      ],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/Main01Tab.swift",
+      "lineCount": 51,
+      "imports": [
+        "SwiftUI"
+      ],
+      "declarations": [
+        {
+          "line": 4,
+          "source": "enum Main01Tab: String, CaseIterable, Identifiable {"
+        }
+      ],
+      "state": [],
+      "typography": [],
+      "presentations": []
+    },
+    {
+      "file": "coordit/coordit/coorditApp.swift",
+      "lineCount": 38,
+      "imports": [
+        "SwiftUI",
+        "GoogleMobileAds",
+        "UIKit"
+      ],
+      "declarations": [
+        {
+          "line": 8,
+          "source": "struct coorditApp: App {"
+        },
+        {
+          "line": 30,
+          "source": "private struct CoorditTouchResponsivenessTuner: UIViewRepresentable {"
+        }
+      ],
+      "state": [
+        {
+          "line": 9,
+          "source": "@StateObject private var backendSession = CoorditBackendSessionStore()"
+        }
+      ],
+      "typography": [],
+      "presentations": []
+    }
+  ],
+  "assets": [
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/AccentColor.colorset",
+      "images": [],
+      "colors": [
+        {
+          "idiom": "universal"
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/AppIcon.appiconset",
+      "images": [
+        {
+          "filename": "AppIcon-20@2x.png",
+          "scale": "2x",
+          "idiom": "iphone",
+          "bytes": 3045
+        },
+        {
+          "filename": "AppIcon-20@3x.png",
+          "scale": "3x",
+          "idiom": "iphone",
+          "bytes": 5751
+        },
+        {
+          "filename": "AppIcon-29@2x.png",
+          "scale": "2x",
+          "idiom": "iphone",
+          "bytes": 5463
+        },
+        {
+          "filename": "AppIcon-29@3x.png",
+          "scale": "3x",
+          "idiom": "iphone",
+          "bytes": 11053
+        },
+        {
+          "filename": "AppIcon-40@2x.png",
+          "scale": "2x",
+          "idiom": "iphone",
+          "bytes": 9430
+        },
+        {
+          "filename": "AppIcon-40@3x.png",
+          "scale": "3x",
+          "idiom": "iphone",
+          "bytes": 20552
+        },
+        {
+          "filename": "AppIcon-60@2x.png",
+          "scale": "2x",
+          "idiom": "iphone",
+          "bytes": 20552
+        },
+        {
+          "filename": "AppIcon-60@3x.png",
+          "scale": "3x",
+          "idiom": "iphone",
+          "bytes": 46675
+        },
+        {
+          "filename": "AppIcon-1024.png",
+          "scale": "1x",
+          "idiom": "ios-marketing",
+          "bytes": 1332013
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets",
+      "images": []
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditClosetFitBottom.imageset",
+      "images": [
+        {
+          "filename": "closet-fit-bottom.svg",
+          "idiom": "universal",
+          "bytes": 39355,
+          "viewBox": "0 0 125 248",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditClosetFitTop.imageset",
+      "images": [
+        {
+          "filename": "closet-fit-top.svg",
+          "idiom": "universal",
+          "bytes": 39355,
+          "viewBox": "0 0 125 248",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditFitDetail.imageset",
+      "images": [
+        {
+          "filename": "fit-detail.svg",
+          "idiom": "universal",
+          "bytes": 39355,
+          "viewBox": "0 0 125 248",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditFitLower.imageset",
+      "images": [
+        {
+          "filename": "fit-lower.svg",
+          "idiom": "universal",
+          "bytes": 40081,
+          "viewBox": "0 0 125 258",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditFitLowerLineMask.imageset",
+      "images": [
+        {
+          "filename": "fit-lower-line-mask.svg",
+          "idiom": "universal",
+          "bytes": 39902,
+          "viewBox": "0 0 125 258",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ],
+      "properties": {
+        "template-rendering-intent": "template"
+      }
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditFitUpper.imageset",
+      "images": [
+        {
+          "filename": "fit-upper.svg",
+          "idiom": "universal",
+          "bytes": 39423,
+          "viewBox": "0 0 125 258",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditFitUpperLineMask.imageset",
+      "images": [
+        {
+          "filename": "fit-upper-line-mask.svg",
+          "idiom": "universal",
+          "bytes": 39244,
+          "viewBox": "0 0 125 258",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ],
+      "properties": {
+        "template-rendering-intent": "template"
+      }
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditLoadingMannequin.imageset",
+      "images": [
+        {
+          "filename": "loading-mannequin.svg",
+          "idiom": "universal",
+          "bytes": 1422,
+          "viewBox": "0 0 51 95.375",
+          "hasSvgFilter": false,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditLoadingOrbit.imageset",
+      "images": [
+        {
+          "filename": "loading-orbit.svg",
+          "idiom": "universal",
+          "bytes": 2782,
+          "viewBox": "0 0 80.8103 62.2567",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditMypageAccount.imageset",
+      "images": [
+        {
+          "filename": "mypage-account.svg",
+          "idiom": "universal",
+          "bytes": 1524,
+          "viewBox": "0 0 20 20",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditMypageBody.imageset",
+      "images": [
+        {
+          "filename": "mypage-body.svg",
+          "idiom": "universal",
+          "bytes": 1024,
+          "viewBox": "0 0 20 20",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditMypageNotifications.imageset",
+      "images": [
+        {
+          "filename": "mypage-notifications.svg",
+          "idiom": "universal",
+          "bytes": 1215,
+          "viewBox": "0 0 20 20",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditMypagePrivacy.imageset",
+      "images": [
+        {
+          "filename": "mypage-privacy.svg",
+          "idiom": "universal",
+          "bytes": 1066,
+          "viewBox": "0 0 20 20",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditMypageSettings.imageset",
+      "images": [
+        {
+          "filename": "mypage-settings.svg",
+          "idiom": "universal",
+          "bytes": 2018,
+          "viewBox": "0 0 20 20",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditMypageTitle.imageset",
+      "images": [
+        {
+          "filename": "mypage-title.svg",
+          "idiom": "universal",
+          "bytes": 615,
+          "viewBox": "0 0 14 12.5",
+          "hasSvgFilter": false,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditRechargePlay.imageset",
+      "images": [
+        {
+          "filename": "recharge-play.svg",
+          "idiom": "universal",
+          "bytes": 365,
+          "viewBox": "0 0 20 20",
+          "hasSvgFilter": false,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditSplashReference.imageset",
+      "images": [
+        {
+          "filename": "splash-reference.png",
+          "scale": "1x",
+          "idiom": "universal",
+          "bytes": 573702
+        },
+        {
+          "idiom": "universal",
+          "scale": "2x"
+        },
+        {
+          "idiom": "universal",
+          "scale": "3x"
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditStars.imageset",
+      "images": [
+        {
+          "filename": "stars.svg",
+          "idiom": "universal",
+          "bytes": 3578,
+          "viewBox": "0 0 108 20",
+          "hasSvgFilter": false,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/CoorditYarn.imageset",
+      "images": [
+        {
+          "filename": "yarn.svg",
+          "idiom": "universal",
+          "bytes": 1948,
+          "viewBox": "0 0 54 54",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/FigmaLogoO1.imageset",
+      "images": [
+        {
+          "filename": "o1.svg",
+          "idiom": "universal",
+          "bytes": 1347,
+          "viewBox": "0 0 18.5032 14.8932",
+          "hasSvgFilter": false,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/FigmaLogoO2.imageset",
+      "images": [
+        {
+          "filename": "o2.svg",
+          "idiom": "universal",
+          "bytes": 1345,
+          "viewBox": "0 0 18.5032 14.8932",
+          "hasSvgFilter": false,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/FigmaTabCloset.imageset",
+      "images": [
+        {
+          "filename": "closet.svg",
+          "idiom": "universal",
+          "bytes": 2094,
+          "viewBox": "0 0 19.6095 19.2999",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/FigmaTabFit.imageset",
+      "images": [
+        {
+          "filename": "fit.svg",
+          "idiom": "universal",
+          "bytes": 2244,
+          "viewBox": "0 0 19.5999 15.2999",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/FigmaTabHome.imageset",
+      "images": [
+        {
+          "filename": "home.svg",
+          "idiom": "universal",
+          "bytes": 1229,
+          "viewBox": "0 0 20 20",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/FigmaTopMy.imageset",
+      "images": [
+        {
+          "filename": "my.svg",
+          "idiom": "universal",
+          "bytes": 1624,
+          "viewBox": "0 0 30 30",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    },
+    {
+      "catalog": "coordit/coordit/Assets.xcassets/FigmaTopSun.imageset",
+      "images": [
+        {
+          "filename": "sun.svg",
+          "idiom": "universal",
+          "bytes": 4713,
+          "viewBox": "0 0 31 31",
+          "hasSvgFilter": true,
+          "hasSvgMask": false
+        }
+      ]
+    }
+  ],
+  "fonts": [
+    {
+      "file": "coordit/coordit/ClimateCrisisKRVF.ttf",
+      "bytes": 2211488,
+      "variableFont": {
+        "axes": [
+          {
+            "tag": "YEAR",
+            "min": 1979,
+            "default": 1979,
+            "max": 2050
+          }
+        ],
+        "instances": [
+          [
+            {
+              "YEAR": 1979
+            }
+          ],
+          [
+            {
+              "YEAR": 1994
+            }
+          ],
+          [
+            {
+              "YEAR": 1992
+            }
+          ],
+          [
+            {
+              "YEAR": 2012
+            }
+          ],
+          [
+            {
+              "YEAR": 2019
+            }
+          ],
+          [
+            {
+              "YEAR": 2028
+            }
+          ],
+          [
+            {
+              "YEAR": 2040
+            }
+          ],
+          [
+            {
+              "YEAR": 2050
+            }
+          ]
+        ],
+        "namedInstances": [
+          {
+            "name": "1979",
+            "year": 1979,
+            "postScriptName": "ClimateCrisisKR-VF-1979"
+          },
+          {
+            "name": "1990",
+            "year": 1994,
+            "postScriptName": "ClimateCrisisKR-VF-1990"
+          },
+          {
+            "name": "2000",
+            "year": 1992,
+            "postScriptName": "ClimateCrisisKR-VF-2000"
+          },
+          {
+            "name": "2010",
+            "year": 2012,
+            "postScriptName": "ClimateCrisisKR-VF-2010"
+          },
+          {
+            "name": "2019",
+            "year": 2019,
+            "postScriptName": "ClimateCrisisKR-VF-2019"
+          },
+          {
+            "name": "2030",
+            "year": 2028,
+            "postScriptName": "ClimateCrisisKR-VF-2030"
+          },
+          {
+            "name": "2040",
+            "year": 2040,
+            "postScriptName": "ClimateCrisisKR-VF-2040"
+          },
+          {
+            "name": "2050",
+            "year": 2050,
+            "postScriptName": "ClimateCrisisKR-VF-2050"
+          }
+        ]
+      }
+    },
+    {
+      "file": "coordit/coordit/GmarketSansBold.otf",
+      "bytes": 889708
+    },
+    {
+      "file": "coordit/coordit/GmarketSansLight.otf",
+      "bytes": 842968
+    },
+    {
+      "file": "coordit/coordit/GmarketSansMedium.otf",
+      "bytes": 868048
+    },
+    {
+      "file": "coordit/coordit/Mona12TextHK.otf",
+      "bytes": 2274612
+    }
+  ],
+  "sfSymbolLiterals": [
+    "arrow.right",
+    "camera.badge.ellipsis",
+    "checkmark.circle.fill",
+    "chevron.left",
+    "chevron.right",
+    "clock.arrow.circlepath",
+    "exclamationmark.circle.fill",
+    "exclamationmark.triangle.fill",
+    "hanger",
+    "link",
+    "magnifyingglass",
+    "plus.circle.fill",
+    "sparkle",
+    "star.fill",
+    "trash",
+    "tshirt"
+  ]
+}
