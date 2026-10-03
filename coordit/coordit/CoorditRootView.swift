@@ -5,6 +5,7 @@ struct CoorditRootView: View {
     @State private var route: CoorditFrameRoute
     @State private var navigationDirection: CoorditNavigationDirection = .forward
     @StateObject private var closetTutorial = CoorditClosetTutorial()
+    @StateObject private var fitLabTutorial = CoorditFitLabTutorial()
     @State private var closetItems: [CoorditClosetItem]
     @State private var selectedClosetItemID: String?
     @State private var closetDraft = CoorditClosetDraft()
@@ -146,6 +147,7 @@ struct CoorditRootView: View {
                 }
             }
             .environmentObject(closetTutorial)
+            .environmentObject(fitLabTutorial)
             .id(route)
             .transition(routeTransition)
             .frame(maxWidth: .infinity, maxHeight: .infinity)

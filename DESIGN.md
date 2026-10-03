@@ -168,3 +168,13 @@ None accepted for this change. Existing feature-specific token duplication outsi
 - Accessibility: readable wrapping copy, stable step identifiers, no decorative animation or color-only instruction; contextual cards do not cover the target or intercept its tap.
 - Spotlight: a root-level black scrim at 26% opacity dims all other content and app chrome. The current guide and its actual target share one rounded transparent cutout, with a 6 pt inset allowance and 10 pt radius. Bounds track scrolling and are clipped to the visible content viewport and above bottom navigation. The scrim never intercepts touches or accessibility.
 - Replay placement: the replay action is the last item after the garment grid; restarting scrolls back to the first guide.
+
+### Fit Lab guided tutorial
+
+- Reuses Closet's contextual guide card, outline, 26% scrim, typography, and touch targets. Shared rendering keeps the two tutorials visually consistent; progress and persistence remain independent.
+- Nine action-driven stages: select URL source, enter URL, import, verify editable size table, continue to references, choose compatible reference garments, submit analysis, select a result size, save history. Input completion dismisses the keyboard before the import guide appears.
+- Only successful import/validation/analysis/history persistence advances the corresponding stage. Empty references retain the real registration action; analysis failures retain retry. No tutorial action generates sample data or bypasses the one-thread analysis charge.
+- First Fit Lab source visit starts the guide. Dismissal/completion persists per installation. Replay sits below recent history and scrolls to the source action without clearing a draft. Returning to input reconciles with the visible screen; OCR/manual paths pause this URL tutorial.
+- Result guidance explains scores and size comparison; history guidance states saving keeps the report while confirmation leaves without saving. No automatic analysis or save is triggered by the guide.
+
+- Fit Lab 상품 링크는 영문 키보드와 시스템 붙여넣기 버튼을 제공한다. 튜토리얼 입력 완료는 화면의 다음 버튼 또는 키보드 완료로 진행하며, 단순 포커스 해제나 스크롤만으로 단계를 바꾸지 않는다.

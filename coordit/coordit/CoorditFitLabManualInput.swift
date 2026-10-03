@@ -9,6 +9,7 @@ enum CoorditFitLabInputDestination: Equatable {
 }
 
 struct CoorditFitLabInputScreen: View {
+    @EnvironmentObject private var tutorial: CoorditFitLabTutorial
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let metrics: CoorditResponsiveMetrics
     @Binding var draft: CoorditFitLabDraft
@@ -74,6 +75,9 @@ struct CoorditFitLabInputScreen: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .clipped()
         .compositingGroup()
+        .onChange(of: destination) { _, destination in
+            if destination == .manual || destination == .ocr { tutorial.pause() }
+        }
     }
 
     @ViewBuilder
@@ -142,8 +146,10 @@ struct CoorditFitLabInputScreen: View {
                         identifier: "fitlab-source-url"
                     ) {
                         draft.source = .url
+                        tutorial.advance(from: .source, to: .link)
                         destination = .url
                     }
+                    .fitLabTutorialTarget(.source)
                     sourceCard(
                         title: "사진으로 첨부하기",
                         subtitle: "캡처를 읽고 수정",
@@ -222,11 +228,18 @@ struct CoorditFitLabInputScreen: View {
                     RoundedRectangle(cornerRadius: metrics.value(8), style: .continuous)
                         .stroke(Color.black.opacity(0.12), lineWidth: 0.8)
                 )
+                Button("Fit Lab 사용법 다시 보기") { tutorial.restart() }
+                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
+                    .foregroundStyle(CoorditFitLabPalette.ink)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .accessibilityIdentifier("fitlab-tutorial-restart")
             }
             .padding(.horizontal, metrics.value(33))
             .padding(.bottom, metrics.value(120))
         }
         .scrollDismissesKeyboard(.interactively)
+        .fitLabTutorialScroll()
+        .onAppear { tutorial.visitSources() }
     }
 
     private var sourceThreadCostNotice: some View {
