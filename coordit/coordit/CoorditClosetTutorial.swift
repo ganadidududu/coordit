@@ -93,27 +93,51 @@ private struct CoorditClosetTutorialTarget: ViewModifier {
     let canFinish: Bool
 
     func body(content: Content) -> some View {
+        content.modifier(CoorditTutorialTarget(
+            isActive: tutorial.step == step,
+            progress: "CLOSET 가이드 · \(step.rawValue + 1)/7",
+            title: step.title,
+            message: message ?? step.message,
+            identifier: "closet-tutorial",
+            stepIdentifier: "closet-tutorial-step-\(step.rawValue)",
+            finishTitle: step == .score && canFinish ? "핏 스코어 확인 완료" : nil,
+            dismiss: tutorial.dismiss
+        ))
+    }
+}
+
+struct CoorditTutorialTarget: ViewModifier {
+    let isActive: Bool
+    let progress: String
+    let title: String
+    let message: String
+    let identifier: String
+    let stepIdentifier: String
+    var finishTitle: String? = nil
+    let dismiss: () -> Void
+
+    func body(content: Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            if tutorial.step == step {
+            if isActive {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text("CLOSET 가이드 · \(step.rawValue + 1)/7")
+                        Text(progress)
                             .font(CoorditTypography.gmarketMedium(size: 11))
                         Spacer()
-                        Button("나중에", action: tutorial.dismiss)
+                        Button("나중에", action: dismiss)
                             .font(CoorditTypography.gmarketMedium(size: 12))
                             .frame(minWidth: 44, minHeight: 44)
-                            .accessibilityIdentifier("closet-tutorial-dismiss")
+                            .accessibilityIdentifier("\(identifier)-dismiss")
                     }
-                    Text(step.title)
+                    Text(title)
                         .font(CoorditTypography.gmarketBold(size: 14))
-                    Text(message ?? step.message)
+                    Text(message)
                         .font(CoorditTypography.gmarketMedium(size: 12))
                         .fixedSize(horizontal: false, vertical: true)
-                    if step == .score && canFinish {
-                        Button("핏 스코어 확인 완료", action: tutorial.dismiss)
+                    if let finishTitle {
+                        Button(finishTitle, action: dismiss)
                             .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary))
-                            .accessibilityIdentifier("closet-tutorial-finish")
+                            .accessibilityIdentifier("\(identifier)-finish")
                     }
                     Image(systemName: "arrow.down")
                         .accessibilityHidden(true)
@@ -127,11 +151,11 @@ private struct CoorditClosetTutorialTarget: ViewModifier {
                         .stroke(CoorditDesignTokens.ColorToken.line, lineWidth: 1)
                 }
                 .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("closet-tutorial-step-\(step.rawValue)")
+                .accessibilityIdentifier(stepIdentifier)
             }
             content
                 .overlay {
-                    if tutorial.step == step {
+                    if isActive {
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(CoorditDesignTokens.ColorToken.ink, lineWidth: 2)
                             .padding(-3)
@@ -140,7 +164,7 @@ private struct CoorditClosetTutorialTarget: ViewModifier {
                 }
         }
         .anchorPreference(key: CoorditClosetSpotlightKey.self, value: .bounds) { anchor in
-            CoorditClosetSpotlightBounds(target: tutorial.step == step ? anchor : nil)
+            CoorditClosetSpotlightBounds(target: isActive ? anchor : nil)
         }
     }
 }
