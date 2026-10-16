@@ -12,7 +12,7 @@
 **내가 잘 입는 옷의 실측과 구매할 상품의 사이즈표를 비교하세요.**<br>
 coordit은 가장 가까운 사이즈와 부위별 차이를 함께 보여줍니다.
 
-**iOS · SwiftUI** &nbsp; / &nbsp; **Measurement-based Fit** &nbsp; / &nbsp; **Rule Engine + Fit Report**
+**iOS · SwiftUI** &nbsp; / &nbsp; **Android · Jetpack Compose** &nbsp; / &nbsp; **Measurement-based Fit**
 
 <img src="docs/images/readme/wardrobe.png" alt="기준 의류의 실측을 보여주는 Closet" width="360">
 &nbsp;
@@ -47,7 +47,9 @@ flowchart TD
 
 ## How it works
 
-현재 제품 소개는 **iOS 앱의 Closet → Fit Lab 흐름**을 기준으로 합니다. 첫 실행에서는 시작 화면과 로그인/회원가입 진입 버튼을 만납니다. Google·Apple 계정 연결, 비회원 시작, 이메일 로그인이 구현되어 있으며, 새 사용자는 프로필·선택적 키/몸무게·약관 동의 온보딩을 거칩니다.
+coordit의 제품 플랫폼은 **iOS와 Android**입니다. 아래 화면은 iOS 앱의 **Closet → Fit Lab 흐름**을 보여줍니다. Android도 옷장·기준 의류·핏 분석·히스토리를 구현하고 있으며, 플랫폼별 지원 범위는 [구현 상태](#project-status)에 정리했습니다.
+
+iOS 첫 실행에서는 시작 화면과 로그인/회원가입 진입 버튼을 만납니다. Google·Apple 계정 연결, 비회원 시작, 이메일 로그인이 구현되어 있으며, 새 사용자는 프로필·선택적 키/몸무게·약관 동의 온보딩을 거칩니다.
 
 ### 01. 잘 입는 옷부터 등록하세요
 
@@ -144,11 +146,9 @@ Fit Score = max(0.1, round(100 × exp(−L / 1.5), 2) − 부위 조합 감점)
 flowchart TD
     IOS["iOS · SwiftUI / Vision OCR"] --> API["Express REST API"]
     ANDROID["Android · Compose / ML Kit"] --> API
-    WEB["Web · Next.js / React"] --> API
     SHARE["iOS Share Extension"] --> IOS
     IOS --> LOCAL["기기 로컬 히스토리<br/>Keychain"]
-    WEB --> AUTH["Supabase Auth"]
-    API --> AUTH
+    API --> AUTH["Supabase Auth"]
     API --> DB["Supabase PostgreSQL / SQL RPC"]
     API --> ENGINE["Deterministic Fit Engine"]
     ENGINE --> REPORT["Fit Report · 검증 / fallback"]
@@ -166,7 +166,6 @@ API는 Supabase로 Bearer 토큰을 검증하고 온보딩 상태를 확인합�
 | --- | --- |
 | iOS | Swift, SwiftUI, Vision OCR, PhotosUI, AuthenticationServices, Keychain, StoreKit, Share Extension |
 | Android | Kotlin 2.0, Jetpack Compose, StateFlow, Retrofit, ML Kit OCR, Keystore |
-| Web | Next.js 14, React 18, TypeScript, Tailwind CSS |
 | API | Node.js, Express 4, TypeScript, Zod, Supabase JS |
 | Data / Auth | Supabase PostgreSQL, Auth, RLS, SQL functions |
 | Fit / Report | 자체 규칙 엔진, OpenRouter, 검증된 결과 기반 fallback |
@@ -179,7 +178,6 @@ API는 Supabase로 Bearer 토큰을 검증하고 온보딩 상태를 확인합�
 coordit-dev/
 ├── coordit/       # SwiftUI 앱, Xcode 프로젝트, 공유 확장, UI 테스트
 ├── android/       # Kotlin / Compose 앱과 포팅 검증 기록
-├── frontend/      # Next.js 웹 클라이언트와 공개 자산
 ├── backend/       # REST API, Fit Engine, 리포트, 테스트
 ├── supabase/      # 스키마, 인덱스, RLS, 기능별 마이그레이션
 ├── config/        # SimSlim 등 공통 개발 설정
@@ -187,36 +185,28 @@ coordit-dev/
 └── docs/          # 제품·API·배포 문서와 README 캡처
 ```
 
-[문서 모음](docs/README.md) · [iOS 디자인 시스템](DESIGN.md) · [Android 안내](android/README.md) · [백엔드 안내](backend/README.md) · [웹 안내](frontend/README.md) · [개발 도구](tools/README.md)
+[문서 모음](docs/README.md) · [iOS 디자인 시스템](DESIGN.md) · [Android 안내](android/README.md) · [백엔드 안내](backend/README.md) · [개발 도구](tools/README.md)
 
-`.omo/`, `.worktrees/`, 의존성과 빌드 출력은 제품 소스가 아닙니다. `deliverables/`의 로컬 영상·보고서는 별도 사용자 산출물입니다. 웹 로고의 원본 경로는 `frontend/public/logo.png`입니다.
+`frontend/`는 내부 테스트용 웹이며 배포 대상이 아닙니다. README의 로고는 기존 `frontend/public/logo.png` 자산을 사용합니다. `.omo/`, `.worktrees/`, 의존성과 빌드 출력, `deliverables/`의 로컬 산출물은 위 제품 구조에서 제외했습니다.
 
 ## Getting started
 
-**npm은 backend와 frontend에서 각각 실행합니다.** Node.js 22는 저장소 CI 기준입니다. 실제 데이터 기능에는 별도의 개발용 Supabase 프로젝트가 필요합니다.
+**공통 API를 실행한 뒤 iOS 또는 Android 앱을 연결합니다.** API는 Node.js 22(CI 기준)와 npm, 실제 데이터 기능에는 별도의 개발용 Supabase 프로젝트가 필요합니다. iOS는 Xcode와 iOS 26.5 SDK·Simulator runtime, Android는 JDK 17 이상과 Android SDK 35를 준비합니다.
 
 ```bash
 git clone https://github.com/ganadidududu/coordit.git coordit-dev
 cd coordit-dev
 npm --prefix backend ci
-npm --prefix frontend ci
 
 # 새 checkout에서만 복사. 기존 환경파일이 있으면 필요한 항목을 병합하세요.
 cp backend/.env.example backend/.env
-cp frontend/.env.local.example frontend/.env.local
 ```
 
-환경값을 설정하고 [개발 DB 준비 순서](docs/README_DEVELOPMENT.md#database)를 적용한 뒤, 저장소 루트에서 별도 터미널 두 개를 엽니다.
+환경값을 설정하고 [개발 DB 준비 순서](docs/README_DEVELOPMENT.md#database)를 적용한 뒤, 저장소 루트에서 API를 실행합니다.
 
 ```bash
-# 터미널 1: http://localhost:4000
+# http://localhost:4000
 cd backend
-npm run dev
-```
-
-```bash
-# 터미널 2: http://localhost:3000
-cd frontend
 npm run dev
 ```
 
@@ -228,13 +218,12 @@ API 기본 동작은 `curl http://localhost:4000/health`로 확인합니다. `/h
 | --- | --- | --- |
 | Backend · 필수 | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Auth와 서버 데이터 접근 |
 | Backend | `PORT`, `NODE_ENV`, `CORS_ORIGINS` | 기본 포트 4000. production에서는 정확한 HTTPS origin 목록 필수 |
-| Frontend | `NEXT_PUBLIC_API_BASE_URL` | Express API 주소 |
-| Frontend | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 브라우저 소셜 로그인과 세션 |
 | 상세 설명 생성 | `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `OPENROUTER_TIMEOUT_MS` | 기본 모델 `google/gemini-2.5-flash`; 키가 없으면 fallback 경로 |
-| 선택 기능 | `ANTHROPIC_API_KEY`, `APPLE_DEVICECHECK_*`, `APPLE_IAP_*`, `ADMOB_*` | 스타일링, 비회원 환영 지급, 결제·광고 정산 |
+| 선택 기능 | `APPLE_DEVICECHECK_*`, `APPLE_IAP_*`, `ADMOB_*` | 비회원 환영 지급, 결제·광고 정산 |
 | iOS build setting | `COORDIT_API_BASE_URL` | 개발 API 주소. 로컬 실행 시 명시적으로 덮어쓰기 |
+| Android Gradle property | `COORDIT_API_BASE_URL`, `COORDIT_RELEASE_API_BASE_URL`, `GOOGLE_WEB_CLIENT_ID` | debug/release API 주소, Google 로그인 설정 |
 
-서버 비밀값은 `frontend/.env.local`이나 앱에 넣지 않습니다. 루트 `.env.example`을 통째로 프런트엔드에 복사하지 말고 위의 앱별 파일을 사용하세요. `JWT_SECRET`은 예제에 남아 있지만 현재 인증 미들웨어는 자체 JWT 검증 대신 Supabase `auth.getUser`를 호출합니다.
+서버 비밀값은 모바일 앱에 넣지 않습니다. 서버는 `backend/.env.example`을 기준으로 설정합니다. `JWT_SECRET`은 예제에 남아 있지만 현재 인증 미들웨어는 자체 JWT 검증 대신 Supabase `auth.getUser`를 호출합니다.
 
 ### iOS demo
 
@@ -260,13 +249,24 @@ xcrun simctl launch "$SIM_UDID" com.inseong.coordit \
 
 마지막 실행은 **기존 DEBUG fixture로 실제 결과 UI를 확인하는 오프라인 데모**입니다. 실제 서버 연동은 테스트 인자를 제거하고 개발용 Auth·DB 설정을 사용합니다. 공유된 Xcode 설정에 staging 주소가 있으므로 로컬 빌드에서는 위 API override를 유지하세요.
 
+### Android
+
+Android Studio에서 `android/`를 열고 SDK 경로를 설정합니다. 에뮬레이터를 실행한 뒤 저장소 루트의 새 터미널에서 다음을 실행합니다. `10.0.2.2`는 Android Emulator에서 호스트 Mac의 로컬 API에 접근하는 주소입니다.
+
+```bash
+cd android
+./gradlew :app:installDebug -PCOORDIT_API_BASE_URL=http://10.0.2.2:4000/
+adb shell am start -n com.inseong.coordit.debug/com.inseong.coordit.MainActivity
+```
+
+Google 로그인에는 Android client·서명 등록이 필요합니다. release API는 HTTPS 주소를 별도로 설정합니다. 자세한 SDK·빌드·인증 설정은 [Android 안내](android/README.md)와 [Google 로그인 설정](android/docs/GOOGLE_SIGN_IN_SETUP.md)을 따릅니다.
+
 ### Checks
 
 ```bash
 npm --prefix backend run typecheck
 npm --prefix backend run test:fit
 npm --prefix backend run test:report
-npm --prefix frontend run typecheck
 ```
 
 전체 backend CI는 `npm test`, build, Docker build도 수행합니다. 이 README 작업에서 확인한 실행 결과와 검증 범위는 [캡처·검증 기록](docs/README_EVIDENCE.md)에 정리했습니다.
@@ -281,11 +281,11 @@ npm --prefix frontend run typecheck
 | 구현 | Supabase 인증 검증, 소유자별 API, 다중 기준 의류 V2 엔진, 상세 리포트와 fallback, 분석 기록·피드백 API |
 | 베타 | 상품 URL 가져오기. 상품 페이지 형식과 접근 가능 여부에 따라 결과가 달라지며 사용자 확인 필요 |
 | 구현·설정 의존 | OpenRouter 리포트 문장 생성, 실타래 지갑, StoreKit·AdMob 정산. 기본 결제·광고 활성화 플래그는 false |
-| 별도 웹 기능 | Next.js의 옷장·기준 의류·상품·추천 API 화면, Anthropic 기반 스타일링 생성·저장. iOS와 동일 기능 범위는 아님 |
-| 진행 중 | Android 포팅. 주요 화면과 API 연결은 있으나 Apple 로그인·Google Play 결제·공유/딥링크 등은 남음 |
+| 구현 · Android | Google 로그인·세션 복원, 온보딩, 옷장·기준 의류, 수동 입력·OCR·링크 추출, Fit Lab 추천·리포트·기기 로컬 히스토리 |
+| 진행 중 · Android | 포팅 안정화, Apple 로그인·Google Play 결제·공유/딥링크 등 남은 플랫폼 연동 |
 | 아직 제공하지 않음 | 학습된 ML 사이즈 예측, 브랜드별 실측 정규화, 기기 간 로컬 히스토리 동기화, iOS 구매 후 피드백 입력 UI |
 
-웹 랜딩의 고정 통계·브랜드 수·LiDAR 문구는 검증된 제품 성과로 인용하지 않습니다. 현재 구현과 출시 조건은 [출시 준비 문서](docs/RELEASE_READINESS.md), [Android 진행 상태](android/docs/IMPLEMENTATION_STATUS.md), [운영 배포 문서](docs/DEPLOYMENT_PRODUCTION.md)를 함께 확인하세요.
+현재 구현과 출시 조건은 [출시 준비 문서](docs/RELEASE_READINESS.md), [Android 진행 상태](android/docs/IMPLEMENTATION_STATUS.md), [운영 배포 문서](docs/DEPLOYMENT_PRODUCTION.md)를 함께 확인하세요.
 
 ## Roadmap
 

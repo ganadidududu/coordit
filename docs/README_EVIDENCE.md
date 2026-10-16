@@ -6,7 +6,7 @@
 
 | 항목 | 확인한 구현 / 근거 |
 | --- | --- |
-| 주 소개 플랫폼 | SwiftUI iOS 앱. [RootView](../coordit/coordit/CoorditRootView.swift), [FrameRoute](../coordit/coordit/CoorditFrameRoute.swift), [DESIGN.md](../DESIGN.md) |
+| 제품 플랫폼 | iOS·Android. 본문의 실제 캡처는 SwiftUI iOS 앱. [RootView](../coordit/coordit/CoorditRootView.swift), [FrameRoute](../coordit/coordit/CoorditFrameRoute.swift), [DESIGN.md](../DESIGN.md) |
 | 첫 실행·인증 | splash와 provider sheet. [인증 UI](../coordit/coordit/CoorditSplashAuthenticationSheet.swift), [서버 인증](../backend/src/modules/auth/auth.service.ts), [Bearer 검증](../backend/src/middleware/auth.middleware.ts) |
 | 등록 | 링크·사진·직접 입력. 이름, 상하의·세부 카테고리, cm 실측. [Closet 등록](../coordit/coordit/CoorditClosetAddFlow.swift) |
 | 기준 옷 | Home 선택 sheet와 Fit Lab 기준 의류 선택. [Home](../coordit/coordit/CoorditHomeScreens.swift), [RootView](../coordit/coordit/CoorditRootView.swift) |
@@ -17,7 +17,7 @@
 | 히스토리 | [FileHistoryStore](../coordit/coordit/CoorditFitLabHistoryStore.swift), [상세 UI](../coordit/coordit/CoorditFitLabHistoryDetailScreen.swift). 사용자별 로컬 스냅샷 |
 | 피드백 | [routes](../backend/src/routes.ts), [feedback profile](../backend/src/modules/fit/feedback-fit-profile.builder.ts). 서버 API·보정 구현, iOS 입력 UI 연결은 확인되지 않음 |
 | 카테고리 / 핏 | [garment profiles](../backend/src/modules/fit/garment-fit-profiles.ts), [tolerance](../backend/src/modules/fit/fit-tolerance.ts), [V2](../backend/src/modules/fit/fit-score.v2.ts) |
-| 웹 | Next.js route, AuthContext, API-backed reference/external-products/fit-result와 별도 styling 기능. 랜딩의 정적 수치는 성과 근거에서 제외 |
+| 웹 | 사용자 확인에 따라 내부 테스트용·배포 제외로 명시. 제품 소개·아키텍처·스택·실행 안내에서 제외. 기존 조사·실행 기록은 아래에 보존 |
 | Android | Kotlin/Compose 구현과 [포팅 상태](../android/docs/IMPLEMENTATION_STATUS.md). 전체 출시 완료로 표현하지 않음 |
 | DB / 배포 | schema/indexes/RLS 및 기능별 SQL, Dockerfile, backend CI, staging/production 배포 문서 |
 
@@ -32,6 +32,7 @@
 - 기본 schema/indexes/RLS만으로 최신 앱 실행이 끝난다고 안내하지 않았다. atomic closet save·지갑·상세 리포트·비회원 등 후속 SQL 순서를 분리했다.
 - 비회원 병합 함수의 `styling_looks` 의존성도 확인했다. 기본 SQL 목록의 생성 성공만으로 계정 병합까지 준비되었다고 안내하지 않았다.
 - 작업 중 함께 반영된 저장소 정리의 `tools/`, `frontend/public/logo.png`, 플랫폼별 폴더·문서 안내를 새 README에 유지했다.
+- 제품 플랫폼을 iOS·Android로 한정했다. 웹은 내부 테스트용으로 명시하고, Android Emulator의 로컬 API 연결·실행 안내를 추가했다. Android 명령은 Gradle 설정·기존 검증 문서와 대조했으며 이번 작업에서 Android 빌드를 재실행하지 않았다.
 
 ## 캡처 방식
 
@@ -89,7 +90,7 @@ SQL 검증은 최소 Auth 스텁 역할·함수로 수행했다. Supabase 서비
 | Viewport | 데스크톱 1440 × 900, 모바일 390 × 844 |
 | 가로 넘침 | 없음. 모바일 document width 390px |
 | 이미지 | README의 로고 1개·캡처 9개 모두 로드 성공 |
-| 링크 | 세 문서의 로컬 파일·디렉터리 참조 87개 존재 확인, README 내부 앵커 누락 0개 |
+| 링크 | 세 문서의 로컬 파일·디렉터리 참조 존재 확인, README 내부 앵커 누락 0개 |
 | Mermaid | 제품 흐름·아키텍처 2개 파싱 및 SVG 렌더 성공 |
 | 문서 구조 | h1 → h2 → h3 순서, 표 5개와 코드 블록 확인 |
 | 시각 검토 | Hero, 사용 흐름, Fit Engine, 아키텍처를 두 viewport에서 캡처해 확인 |
