@@ -798,6 +798,16 @@ private struct CoorditFitLabResultScreen: View {
 
                 .fitLabTutorialTarget(.result)
 
+                CoorditFitLabPointScoreChart(
+                    scores: report?.chartData.fitPointScores ?? [],
+                    metrics: metrics
+                )
+
+                CoorditFitLabMeasurementScoreChart(
+                    scores: report?.chartData.measurementScores ?? [],
+                    metrics: metrics
+                )
+
                 CoorditFitLabDifferenceChart(
                     measurements: scoreCard.measurements,
                     metrics: metrics

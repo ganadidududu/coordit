@@ -448,6 +448,16 @@ struct CoorditFitLabReportCard: View {
                     prominent: true
                 )
 
+                if let context = report.report.garmentFitContext, !context.isEmpty {
+                    reportSection(
+                        eyebrow: "GARMENT FIT CONTEXT",
+                        title: "이 옷에서 중요한 핏 포인트",
+                        text: context,
+                        prominent: false
+                    )
+                    .accessibilityIdentifier("fitlab-report-context")
+                }
+
                 if let reason = report.report.recommendationReason, !reason.isEmpty {
                     reportSection(
                         eyebrow: "WHY THIS SIZE",
@@ -455,6 +465,16 @@ struct CoorditFitLabReportCard: View {
                         text: reason,
                         prominent: false
                     )
+                }
+
+                if let tradeoff = report.report.sizeTradeoff, !tradeoff.isEmpty {
+                    reportSection(
+                        eyebrow: "SIZE TRADEOFF",
+                        title: "다른 사이즈와 비교하면",
+                        text: tradeoff,
+                        prominent: false
+                    )
+                    .accessibilityIdentifier("fitlab-report-tradeoff")
                 }
 
                 if !report.report.measurementAnalysis.isEmpty {
@@ -571,6 +591,12 @@ struct CoorditFitLabReportCard: View {
             RoundedRectangle(cornerRadius: metrics.value(9), style: .continuous)
                 .stroke(Color.black.opacity(0.1), lineWidth: 1)
         )
+        .overlay(alignment: .leading) {
+            RoundedRectangle(cornerRadius: metrics.value(2), style: .continuous)
+                .fill(direction?.color ?? CoorditFitLabPalette.muted)
+                .frame(width: metrics.value(3))
+                .padding(.vertical, metrics.value(10))
+        }
     }
 
     private func noteRow(_ text: String, systemName: String) -> some View {
@@ -589,7 +615,9 @@ struct CoorditFitLabReportCard: View {
         guard let report else { return fallbackMessage ?? "상세 리포트 없음" }
         let analysis = report.report.measurementAnalysis.map { "\($0.measurement) \($0.text)" }
         return ([report.report.title, report.report.summary]
+            + [report.report.garmentFitContext].compactMap { $0 }
             + [report.report.recommendationReason].compactMap { $0 }
+            + [report.report.sizeTradeoff].compactMap { $0 }
             + analysis
             + report.report.cautions
             + report.report.nextActions).joined(separator: " ")

@@ -133,6 +133,12 @@ final class CoorditFitLabUITests: XCTestCase {
         XCTAssertEqual(element("fitlab-history-detail-analysis", in: app).label, "analysis-fixture-upper")
         XCTAssertEqual(element("fitlab-history-detail-product", in: app).label, "픽스처 후드")
         capture("final-deep-history-recovery", app: app)
+        XCTAssertEqual(scrollIntoView("fitlab-fit-point-silhouette", in: app).label, "실루엣 95.2점")
+        XCTAssertTrue(scrollIntoView("fitlab-measurement-score-shoulder_width", in: app).label.contains("97.3점"))
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.42))
+            .press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.55)))
+        settleRendering()
+        capture("history-v7-fit-profile", app: app)
     }
 
     func testReportCopyComesFromCompletedLLMResponseInsteadOfFallback() throws {
@@ -148,7 +154,27 @@ final class CoorditFitLabUITests: XCTestCase {
         let report = element("fitlab-report-description", in: app)
         XCTAssertTrue(report.waitForExistence(timeout: 3))
         XCTAssertTrue(report.label.contains("M 사이즈는 92점으로 전체 후보 중 가장 안정적인 균형을 보여요."))
+        XCTAssertTrue(report.label.contains("후드에서는 어깨선과 가슴 여유"))
+        XCTAssertTrue(report.label.contains("M은 어깨와 총장이 기준 옷에 더 가깝고"))
         XCTAssertFalse(element("fitlab-report-fallback", in: app).exists)
+        XCTAssertEqual(scrollIntoView("fitlab-fit-point-silhouette", in: app).label, "실루엣 95.2점")
+        XCTAssertTrue(scrollIntoView("fitlab-measurement-score-shoulder_width", in: app).label.contains("기준 대비 +1cm · 여유"))
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.42))
+            .press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.55)))
+        settleRendering()
+        capture("result-v7-fit-profile", app: app)
+        _ = scrollIntoView("fitlab-measurement-scores", in: app)
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.75))
+            .press(
+                forDuration: 0.1,
+                thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.45))
+            )
+        settleRendering()
+        capture("result-v7-part-scores", app: app)
+        _ = scrollIntoView("fitlab-report-context", in: app)
+        capture("result-v7-garment-context", app: app)
+        _ = scrollIntoView("fitlab-report-tradeoff", in: app)
+        capture("result-v7-size-tradeoff", app: app)
     }
 
     func testFitLabSubmissionConsumesOneThreadForAnalysisAndOneForReport() throws {

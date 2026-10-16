@@ -26,13 +26,15 @@ const openRouterChatCompletionsUrl = "https://openrouter.ai/api/v1/chat/completi
 const fitReportJsonSchema = z.object({
   title: z.string(),
   summary: z.string(),
+  garmentFitContext: z.string(),
   recommendationReason: z.string(),
   measurementAnalysis: z.array(z.object({
     measurement: z.string(),
     text: z.string()
   })),
   cautions: z.array(z.string()),
-  nextActions: z.array(z.string())
+  nextActions: z.array(z.string()),
+  sizeTradeoff: z.string()
 });
 
 const openRouterCompletionSchema = z.object({
@@ -41,7 +43,7 @@ const openRouterCompletionSchema = z.object({
   })).min(1)
 });
 
-const fitReportResponseFormat = {
+const buildFitReportResponseFormat = (reportInput: FitReportInput) => ({
   type: "json_schema",
   json_schema: {
     name: "fit_report",
@@ -52,23 +54,31 @@ const fitReportResponseFormat = {
       required: [
         "title",
         "summary",
+        "garmentFitContext",
         "recommendationReason",
         "measurementAnalysis",
         "cautions",
-        "nextActions"
+        "nextActions",
+        "sizeTradeoff"
       ],
       properties: {
         title: { type: "string" },
         summary: { type: "string" },
+        garmentFitContext: { type: "string" },
         recommendationReason: { type: "string" },
         measurementAnalysis: {
           type: "array",
+          minItems: reportInput.measurements.length,
+          maxItems: reportInput.measurements.length,
           items: {
             type: "object",
             additionalProperties: false,
             required: ["measurement", "text"],
             properties: {
-              measurement: { type: "string" },
+              measurement: {
+                type: "string",
+                enum: reportInput.measurements.map((measurement) => measurement.label)
+              },
               text: { type: "string" }
             }
           }
@@ -82,15 +92,20 @@ const fitReportResponseFormat = {
           type: "array",
           items: { type: "string" },
           maxItems: 2
-        }
+        },
+        sizeTradeoff: { type: "string" }
       }
     }
   }
-} as const;
+});
 
 export { buildFallbackFitReport } from "./fit-report.fallback";
 
-const callOpenRouter = async (prompt: string, modelName: string): Promise<FitReportJson> => {
+const callOpenRouter = async (
+  prompt: string,
+  modelName: string,
+  reportInput: FitReportInput
+): Promise<FitReportJson> => {
   if (!env.openRouterApiKey) {
     throw new FitReportFallbackError("not_configured");
   }
@@ -107,7 +122,7 @@ const callOpenRouter = async (prompt: string, modelName: string): Promise<FitRep
       stream: false,
       temperature: 0.2,
       messages: [{ role: "user", content: prompt }],
-      response_format: fitReportResponseFormat,
+      response_format: buildFitReportResponseFormat(reportInput),
       provider: {
         require_parameters: true,
         zdr: true,
@@ -191,7 +206,7 @@ export const generateFitReport = async (
 
   let generated: GenerateFitReportResult;
   try {
-    const generatedReport = await callOpenRouter(prompt, modelName);
+    const generatedReport = await callOpenRouter(prompt, modelName, reportInput);
     const report = sanitizeGeneratedReport(
       generatedReport,
       reportInput,

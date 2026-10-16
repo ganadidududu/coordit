@@ -1,13 +1,13 @@
 import {
   ALGORITHM_VERSION,
-  BOTTOM_CATEGORIES,
-  BOTTOM_WEIGHTS,
   MEASUREMENT_BASE_TOLERANCES,
-  MEASUREMENT_LABELS,
-  TOP_WEIGHTS
+  MEASUREMENT_LABELS
 } from "./fit.constants";
 import { completeFitScore, getReferenceSampleCounts } from "./fit-score.explanation";
 import type { SizeFitScoreBase } from "./fit-score.explanation";
+import { calculateV2ScoreDetails } from "./fit-score.v2";
+import { buildSizeTradeoff } from "./fit-size-tradeoff";
+import { getGarmentFitProfile } from "./garment-fit-profiles";
 import type {
   BestSizeRecommendation,
   Category,
@@ -59,10 +59,7 @@ const getPartStatus = (diff: number) => {
 };
 
 export const getWeightsByCategory = (category: Category): MeasurementWeights => {
-  if (BOTTOM_CATEGORIES.includes(category)) {
-    return BOTTOM_WEIGHTS;
-  }
-  return TOP_WEIGHTS;
+  return getGarmentFitProfile(category).weights;
 };
 
 const getMeasurementKeysFromWeights = (weights: MeasurementWeights): MeasurementKey[] =>
@@ -422,12 +419,11 @@ export const applyFitTypePenalty = (
 };
 
 const getAverageMajorDiff = (diffs: MeasurementDiffs, category: Category): number => {
-  const keys: MeasurementKey[] = BOTTOM_CATEGORIES.includes(category)
-    ? ["waist_width", "hip_width", "rise", "outseam"]
-    : ["shoulder_width", "chest_width", "total_length", "sleeve_length"];
-  const values = keys.map((key) => diffs[key]).filter(isNumber);
-  if (values.length === 0) return 0;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
+  const entries = Object.entries(getGarmentFitProfile(category).weights) as [MeasurementKey, number][];
+  const available = entries.filter(([key]) => isNumber(diffs[key]));
+  const weightSum = available.reduce((sum, [, weight]) => sum + weight, 0);
+  if (weightSum === 0) return 0;
+  return available.reduce((sum, [key, weight]) => sum + (diffs[key] ?? 0) * weight, 0) / weightSum;
 };
 
 export const getFitLabel = (
@@ -499,15 +495,15 @@ export const calculateFitScoreForSize = (
 ): SizeFitScore => {
   const measurementKeys = getMeasurementKeysFromWeights(weights);
   const diffs = calculateDiff(referenceClothing.measurements, externalProductSize.measurements);
-  const weightedFitDistance = calculateWeightedFitDistance(
-    referenceClothing.measurements,
-    externalProductSize.measurements,
-    weights
-  );
-  const baseScore = convertDistanceToScore(weightedFitDistance);
   const fitType = externalProductSize.fitType ?? referenceClothing.fitType;
-  const { finalScore, penalty } = applyFitTypePenalty(baseScore, fitType, diffs);
-  const fitLabel = getFitLabel(finalScore, diffs, category);
+  const v2 = calculateV2ScoreDetails({
+    reference: referenceClothing.measurements,
+    product: externalProductSize.measurements,
+    category,
+    fitType,
+    weights
+  });
+  const fitLabel = getFitLabel(v2.finalFitScore, diffs, category);
   const comparedMeasurements = measurementKeys.filter((key) =>
     isNumber(diffs[key])
   );
@@ -515,8 +511,8 @@ export const calculateFitScoreForSize = (
   const result: SizeFitScoreBase = {
     externalProductSizeId: externalProductSize.id,
     sizeLabel: externalProductSize.sizeLabel,
-    fitScore: baseScore,
-    finalFitScore: finalScore,
+    fitScore: v2.fitScore,
+    finalFitScore: v2.finalFitScore,
     fitLabel,
     fitComment: "",
     partExplanations: [],
@@ -524,12 +520,16 @@ export const calculateFitScoreForSize = (
       (Object.entries(diffs) as [MeasurementKey, number][]).map(([key, diff]) => [key, getPartStatus(diff)])
     ),
     recommendationConfidence: "low",
-    weightedFitDistance,
-    penalty,
+    weightedFitDistance: v2.weightedFitDistance,
+    penalty: v2.penalty,
     diffs,
     comparedMeasurements,
     measurementQuality: externalProductSize.measurementQuality,
-    algorithmVersion: ALGORITHM_VERSION
+    algorithmVersion: ALGORITHM_VERSION,
+    measurementSubscores: v2.measurementSubscores,
+    semanticSubscores: v2.semanticSubscores,
+    semanticFacts: v2.semanticFacts,
+    interactions: v2.interactions
   };
   const completedResult = completeFitScore(
     result,
@@ -560,35 +560,23 @@ export const calculateFitScoreForReferenceProfile = (
 ): SizeFitScore => {
   const measurementKeys = getMeasurementKeysFromWeights(weights);
   const diffs = calculateDiff(profile.measurements, externalProductSize.measurements);
-  let weightedDistance = 0;
-  let usedWeight = 0;
-
-  for (const [key, weight] of Object.entries(weights) as [MeasurementKey, number][]) {
-    const diff = diffs[key];
-    const tolerance = profile.tolerances[key];
-    if (!isNumber(diff) || !isNumber(tolerance) || tolerance <= 0) continue;
-    weightedDistance += (Math.abs(diff) / tolerance) * weight;
-    usedWeight += weight;
-  }
-
-  if (usedWeight === 0) throw new Error("No comparable measurements were provided");
-
-  const normalizedFitDistance = round(weightedDistance / usedWeight, 3);
-  const baseScore = convertDistanceToScore(normalizedFitDistance);
-  const { finalScore, penalty } = applyFitTypePenalty(
-    baseScore,
-    externalProductSize.fitType ?? "regular",
-    diffs
-  );
-  const fitLabel = getFitLabel(finalScore, diffs, category);
+  const v2 = calculateV2ScoreDetails({
+    reference: profile.measurements,
+    product: externalProductSize.measurements,
+    category,
+    fitType: externalProductSize.fitType ?? "regular",
+    weights,
+    referenceProfile: profile
+  });
+  const fitLabel = getFitLabel(v2.finalFitScore, diffs, category);
   const comparedMeasurements = measurementKeys.filter((key) =>
     isNumber(diffs[key]) && isNumber(profile.tolerances[key])
   );
   const result: SizeFitScoreBase = {
     externalProductSizeId: externalProductSize.id,
     sizeLabel: externalProductSize.sizeLabel,
-    fitScore: baseScore,
-    finalFitScore: finalScore,
+    fitScore: v2.fitScore,
+    finalFitScore: v2.finalFitScore,
     fitLabel,
     fitComment: "",
     partExplanations: [],
@@ -596,12 +584,16 @@ export const calculateFitScoreForReferenceProfile = (
       (Object.entries(diffs) as [MeasurementKey, number][]).map(([key, diff]) => [key, getPartStatus(diff)])
     ),
     recommendationConfidence: "low",
-    weightedFitDistance: normalizedFitDistance,
-    penalty,
+    weightedFitDistance: v2.weightedFitDistance,
+    penalty: v2.penalty,
     diffs,
     comparedMeasurements,
     measurementQuality: externalProductSize.measurementQuality,
-    algorithmVersion: ALGORITHM_VERSION
+    algorithmVersion: ALGORITHM_VERSION,
+    measurementSubscores: v2.measurementSubscores,
+    semanticSubscores: v2.semanticSubscores,
+    semanticFacts: v2.semanticFacts,
+    interactions: v2.interactions
   };
   const completedResult = completeFitScore(
     result,
@@ -703,7 +695,9 @@ export const recommendBestSize = (
     baseWeights: normalizedWeights,
     dynamicWeights: normalizedWeights,
     referenceVariance: {},
-    weightingStrategy: "base_static"
+    weightingStrategy: "base_static",
+    garmentProfile: getGarmentFitProfile(category),
+    sizeTradeoff: buildSizeTradeoff(rankedScores[0], rankedScores[1])
   };
 };
 
@@ -718,9 +712,16 @@ export const recommendBestSizeWithReferences = (
   }
 
   const baseWeights = normalizeWeights(getWeightsByCategory(category));
-  const { dynamicWeights, referenceVariance } =
+  const { dynamicWeights: varianceWeights, referenceVariance } =
     calculateDynamicWeightsByReferenceVariance(baseWeights, referenceClothing);
-  const referenceProfile = calculateReferenceFitProfile(referenceClothing, dynamicWeights);
+  const feedbackReady = feedbackProfile?.reliability?.applied === true;
+  const dynamicWeights = feedbackReady
+    ? applyFeedbackWeightMultipliers(varianceWeights, feedbackProfile)
+    : varianceWeights;
+  const baseReferenceProfile = calculateReferenceFitProfile(referenceClothing, dynamicWeights);
+  const referenceProfile = feedbackReady
+    ? applyFeedbackOffsetsToProfile(baseReferenceProfile, feedbackProfile)
+    : baseReferenceProfile;
 
   const allSizeScores = externalProductSizes
     .map((size) => calculateFitScoreForReferenceProfile(referenceProfile, size, category, dynamicWeights))
@@ -730,7 +731,7 @@ export const recommendBestSizeWithReferences = (
     allSizeScores,
     measurementKeys,
     referenceProfile.sampleCounts,
-    undefined,
+    feedbackReady ? feedbackProfile : undefined,
     dynamicWeights,
     referenceProfile.tolerances
   );
@@ -741,8 +742,10 @@ export const recommendBestSizeWithReferences = (
     baseWeights,
     dynamicWeights,
     referenceVariance,
-    weightingStrategy: "reference_profile_v1",
+    weightingStrategy: feedbackReady ? "feedback_adjusted_profile_v1" : "reference_profile_v1",
     referenceProfile,
-    feedbackProfile
+    feedbackProfile,
+    garmentProfile: getGarmentFitProfile(category),
+    sizeTradeoff: buildSizeTradeoff(rankedScores[0], rankedScores[1])
   };
 };

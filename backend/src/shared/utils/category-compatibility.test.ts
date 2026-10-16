@@ -2,38 +2,39 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   areCategoriesCompatible,
-  getCompatibleCategories
+  getCategoryCompatibility,
+  getCompatibleCategories,
+  selectReferenceCategoryTier
 } from "./category-compatibility";
 
-test("all upper categories share the same reference pool", () => {
-  // Given: references from exact upper categories that differ from the target.
-  const upperReferences = ["shirt", "hoodie", "coat"] as const;
-
-  // When: compatibility is evaluated for a T-shirt target.
-  const compatibility = upperReferences.map((category) =>
-    areCategoriesCompatible(category, "tshirt")
-  );
-
-  // Then: every upper reference can contribute to the calculation.
-  assert.deepEqual(compatibility, [true, true, true]);
+test("category compatibility distinguishes exact, related, and incompatible", () => {
+  assert.equal(getCategoryCompatibility("tshirt", "tshirt"), "exact");
+  assert.equal(getCategoryCompatibility("sweatshirt", "hoodie"), "related");
+  assert.equal(getCategoryCompatibility("hoodie", "sweatshirt"), "related");
+  assert.equal(getCategoryCompatibility("shirt", "tshirt"), "related");
+  assert.equal(getCategoryCompatibility("tshirt", "shirt"), "related");
+  assert.equal(getCategoryCompatibility("jacket", "coat"), "related");
+  assert.equal(getCategoryCompatibility("pants", "jeans"), "related");
+  assert.equal(getCategoryCompatibility("tshirt", "coat"), "incompatible");
+  assert.equal(getCategoryCompatibility("skirt", "pants"), "incompatible");
 });
 
-test("all lower categories share the same reference pool", () => {
-  // Given: a pants target and every supported lower exact category.
-  const lowerCategories = ["pants", "jeans", "shorts", "skirt"] as const;
-
-  // When: compatible categories are resolved.
-  const compatibleCategories = getCompatibleCategories("pants");
-
-  // Then: the complete lower group is returned without upper categories.
-  assert.deepEqual(compatibleCategories, lowerCategories);
+test("exact references take priority and related references are the fallback", () => {
+  const withExact = selectReferenceCategoryTier([
+    { id: "related", category: "coat" },
+    { id: "exact", category: "jacket" },
+    { id: "bad", category: "tshirt" }
+  ], "jacket");
+  const relatedOnly = selectReferenceCategoryTier([
+    { id: "related", category: "coat" },
+    { id: "bad", category: "tshirt" }
+  ], "jacket");
+  assert.deepEqual(withExact, { level: "exact", usedIds: ["exact"], excludedIds: ["related", "bad"] });
+  assert.deepEqual(relatedOnly, { level: "related", usedIds: ["related"], excludedIds: ["bad"] });
 });
 
-test("upper and lower categories remain incompatible", () => {
-  // Given: categories from opposite garment groups.
-  // When: compatibility is evaluated.
-  const isCompatible = areCategoriesCompatible("jacket", "jeans");
-
-  // Then: cross-group references are rejected.
-  assert.equal(isCompatible, false);
+test("compatible category list contains exact and related categories only", () => {
+  assert.deepEqual(getCompatibleCategories("coat"), ["coat", "jacket"]);
+  assert.equal(areCategoriesCompatible("jacket", "coat"), true);
+  assert.equal(areCategoriesCompatible("tshirt", "coat"), false);
 });

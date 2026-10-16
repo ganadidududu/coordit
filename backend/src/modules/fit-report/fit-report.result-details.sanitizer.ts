@@ -17,6 +17,7 @@ import {
   type ConfidenceFeedbackReliabilityInput,
   type ResultDetails
 } from "./fit-report.result-details";
+import { sanitizeInteractions, sanitizeSemanticFacts, sanitizeSizeTradeoff, sanitizeVersions } from "./fit-report.result-details-v2";
 
 type FeedbackProfileInput = NonNullable<ResultDetails["feedbackProfile"]>;
 
@@ -25,7 +26,7 @@ const CONTRIBUTION_STATUSES: readonly FitScoreContribution["status"][] = ["very_
 const CONFIDENCE_LABELS: readonly RecommendationConfidence[] = ["high", "medium", "low"] as const;
 const FEEDBACK_FIT_LABELS: readonly FeedbackFitLabel[] = ["too_small", "slightly_small", "good", "slightly_large", "too_large"] as const;
 const FEEDBACK_RELIABILITY_STATUSES = ["applied", "insufficient_signal", "conflicting_feedback", "no_directional_signal", "unavailable"] as const;
-const WEIGHTING_STRATEGIES: readonly WeightingStrategy[] = ["base_static", "reference_variance_v1", "reference_profile_v1", "feedback_adjusted_profile_v1"] as const;
+const WEIGHTING_STRATEGIES: readonly WeightingStrategy[] = ["base_static", "reference_variance_v1", "reference_profile_v1", "feedback_adjusted_profile_v1", "category_profile_v2"] as const;
 const DATA_QUALITY_SUMMARIES = ["complete", "sparse"] as const;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -249,6 +250,18 @@ export const parseResultDetails = (source: unknown): ResultDetails => {
   const scoreExplanation = sanitizeScoreExplanation(source.scoreExplanation);
   const confidenceBreakdown = sanitizeConfidenceBreakdown(source.confidenceBreakdown);
   const referenceClothingIds = sanitizeReferenceIds(source.referenceClothingIds);
+  const semanticFacts = sanitizeSemanticFacts(source.semanticFacts);
+  const interactions = sanitizeInteractions(source.interactions);
+  const sizeTradeoff = sanitizeSizeTradeoff(source.sizeTradeoff);
+  const measurementSubscores = pickWeightMap(source.measurementSubscores);
+  const semanticSubscores = isRecord(source.semanticSubscores)
+    ? Object.entries(source.semanticSubscores).reduce<Record<string, number>>((scores, [key, value]) => {
+      const score = asNumber(value);
+      if (["silhouette", "mobility", "layering"].includes(key) && score !== null) scores[key] = score;
+      return scores;
+    }, {})
+    : {};
+  const versions = sanitizeVersions(source.versions);
 
   return {
     ...(parsedReferenceProfile ? { referenceProfile: parsedReferenceProfile } : {}),
@@ -260,6 +273,12 @@ export const parseResultDetails = (source: unknown): ResultDetails => {
     ...(scoreExplanation ? { scoreExplanation } : {}),
     ...(confidenceBreakdown ? { confidenceBreakdown } : {}),
     ...(referenceClothingIds && referenceClothingIds.length > 0 ? { referenceClothingIds } : {}),
+    ...(hasKeys(measurementSubscores) ? { measurementSubscores } : {}),
+    ...(Object.keys(semanticSubscores).length > 0 ? { semanticSubscores } : {}),
+    ...(semanticFacts.length > 0 ? { semanticFacts } : {}),
+    ...(interactions.length > 0 ? { interactions } : {}),
+    ...(sizeTradeoff ? { sizeTradeoff } : {}),
+    ...(versions ? { versions } : {}),
     ...(Array.isArray(source.allSizeScores) ? { allSizeScores: source.allSizeScores } : {})
   };
 };
