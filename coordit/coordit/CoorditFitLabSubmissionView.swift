@@ -236,6 +236,7 @@ struct CoorditFitLabSubmissionView: View {
                     selectedSize: selectedSize,
                     metrics: metrics
                 )
+                let selection = CoorditFitLabScoreSelection(selected: selectedSize, recommendation: recommendation, report: coordinator.report)
                 scoreCard
                 CoorditFitLabMannequinPanel(
                     assetName: variant.assetName,
@@ -249,11 +250,15 @@ struct CoorditFitLabSubmissionView: View {
                     selectedSizeLabel: $selectedSizeLabel,
                     metrics: metrics
                 )
+                CoorditFitLabComparisonNote(selected: selection.sizeLabel, recommended: recommendation.recommendedSize, missingScores: !selection.isRecommended && selection.measurementScores.isEmpty, metrics: metrics)
+                CoorditFitLabPointScoreChart(scores: selection.fitPointScores, metrics: metrics)
+                CoorditFitLabMeasurementScoreChart(scores: selection.measurementScores, metrics: metrics)
                 CoorditFitLabDifferenceChart(measurements: scoreCard.measurements, metrics: metrics)
                 CoorditFitLabReportCard(
                     report: coordinator.report,
                     fallbackMessage: nil,
-                    metrics: metrics
+                    metrics: metrics,
+                    recommendedSize: recommendation.recommendedSize
                 )
             }
 

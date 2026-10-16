@@ -120,6 +120,17 @@ struct CoorditFitLabSizeOption: Identifiable {
         for comparison in report?.chartData.idealVsProduct ?? [] {
             referenceComparisons[comparison.measurement] = comparison
         }
+        let engineScores = scoresBySize(recommendation.allSizeScores)
+
+        func engineMeasurements(_ label: String) -> [CoorditFitLabResultMeasurement]? {
+            let normalized = CoorditFitLabDraftValidation.normalizedSizeLabel(label)
+            guard let facts = engineScores[normalized]?.semanticFacts, !facts.isEmpty else { return nil }
+            let comparisons = facts.reduce(into: [CoorditFitLabMeasurementKey: CoorditFitLabReportResponse.ChartData.Comparison]()) { values, fact in
+                guard fact.reference.isFinite, fact.product.isFinite, fact.diff.isFinite else { return }
+                values[fact.measurement] = .init(measurement: fact.measurement, label: variant.label(for: fact.measurement), ideal: fact.reference, product: fact.product, diff: fact.diff, status: nil)
+            }
+            return authoritativeMeasurements(variant: variant, comparisons: comparisons)
+        }
 
         let draftOptions = nonEmptyDrafts.map { draft in
             let normalizedLabel = CoorditFitLabDraftValidation.normalizedSizeLabel(draft.label)
@@ -130,7 +141,7 @@ struct CoorditFitLabSizeOption: Identifiable {
                 ?? (isRecommended ? recommendation.fitScore : nil)
             let measurements = isRecommended
                 ? authoritativeMeasurements(variant: variant, comparisons: referenceComparisons)
-                : measurements(variant: variant, draft: draft, comparisons: referenceComparisons)
+                : engineMeasurements(draft.label) ?? measurements(variant: variant, draft: draft, comparisons: referenceComparisons)
             return CoorditFitLabSizeOption(
                 sizeLabel: draft.label,
                 fitScore: score,
@@ -157,7 +168,7 @@ struct CoorditFitLabSizeOption: Identifiable {
                     isRecommended: isRecommended,
                     measurements: isRecommended
                         ? authoritativeMeasurements(variant: variant, comparisons: referenceComparisons)
-                        : []
+                        : engineMeasurements(row.sizeLabel) ?? []
                 )
             }
         }
@@ -520,12 +531,13 @@ struct CoorditFitLabPointScoreChart: View {
                 VStack(alignment: .leading, spacing: metrics.value(3)) {
                     Text("FIT PROFILE BREAKDOWN")
                         .font(CoorditTypography.mona12(size: metrics.value(16), relativeTo: .headline))
-                    Text("실측 차이를 착용 관점별 점수로 나눠봤어요.")
+                    Text("기준 옷과의 실측 차이를 착용 관점으로 나눈 점수예요.")
                         .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
                         .foregroundStyle(CoorditFitLabPalette.muted)
                 }
 
                 ForEach(scores, id: \.key) { point in
+                    VStack(alignment: .leading, spacing: metrics.value(3)) {
                     HStack(spacing: metrics.value(9)) {
                         Text(point.label)
                             .font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .body))
@@ -549,6 +561,11 @@ struct CoorditFitLabPointScoreChart: View {
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel("\(point.label) \(CoorditFitLabResultMeasurement.score(point.score))점")
                     .accessibilityIdentifier("fitlab-fit-point-\(point.key)")
+                    Text(CoorditFitLabScoreSelection.pointDescription(point.key))
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
+                        .foregroundStyle(CoorditFitLabPalette.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
             .padding(metrics.value(15))
@@ -574,7 +591,7 @@ struct CoorditFitLabMeasurementScoreChart: View {
                 VStack(alignment: .leading, spacing: metrics.value(3)) {
                     Text("PART SCORE BREAKDOWN")
                         .font(CoorditTypography.mona12(size: metrics.value(16), relativeTo: .headline))
-                    Text("부위별 실측이 기준 옷과 얼마나 가까운지 계산했어요.")
+                    Text("100점에 가까울수록 기준 옷의 실측과 비슷해요. 옷 종류와 의도된 핏에 따라 차이를 다르게 반영해요.")
                         .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
                         .foregroundStyle(CoorditFitLabPalette.muted)
                 }

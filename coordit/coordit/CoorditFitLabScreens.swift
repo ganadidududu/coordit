@@ -778,6 +778,7 @@ private struct CoorditFitLabResultScreen: View {
             selectedSize: selectedSize,
             metrics: metrics
         )
+        let selection = CoorditFitLabScoreSelection(selected: selectedSize, recommendation: recommendation, report: report)
         ScrollView {
             VStack(spacing: metrics.value(14)) {
                 scoreCard
@@ -798,13 +799,20 @@ private struct CoorditFitLabResultScreen: View {
 
                 .fitLabTutorialTarget(.result)
 
+                CoorditFitLabComparisonNote(
+                    selected: selection.sizeLabel,
+                    recommended: recommendation?.recommendedSize ?? "-",
+                    missingScores: !selection.isRecommended && selection.measurementScores.isEmpty,
+                    metrics: metrics
+                )
+
                 CoorditFitLabPointScoreChart(
-                    scores: report?.chartData.fitPointScores ?? [],
+                    scores: selection.fitPointScores,
                     metrics: metrics
                 )
 
                 CoorditFitLabMeasurementScoreChart(
-                    scores: report?.chartData.measurementScores ?? [],
+                    scores: selection.measurementScores,
                     metrics: metrics
                 )
 
@@ -816,7 +824,8 @@ private struct CoorditFitLabResultScreen: View {
                 CoorditFitLabReportCard(
                     report: report,
                     fallbackMessage: fallbackMessage,
-                    metrics: metrics
+                    metrics: metrics,
+                    recommendedSize: recommendation?.recommendedSize
                 )
 
                 if fallbackMessage != nil {

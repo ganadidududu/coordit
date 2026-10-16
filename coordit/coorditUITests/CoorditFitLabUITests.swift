@@ -139,6 +139,10 @@ final class CoorditFitLabUITests: XCTestCase {
             .press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.55)))
         settleRendering()
         capture("history-v7-fit-profile", app: app)
+        scrollIntoView("fitlab-size-score-L", in: app, direction: .down).tap()
+        XCTAssertEqual(element("fitlab-total-score", in: app).label, "81.0")
+        XCTAssertEqual(scrollIntoView("fitlab-fit-point-silhouette", in: app).label, "실루엣 80.0점")
+        capture("history-alternative-fit-profile", app: app)
     }
 
     func testReportCopyComesFromCompletedLLMResponseInsteadOfFallback() throws {
@@ -734,6 +738,8 @@ final class CoorditFitLabUITests: XCTestCase {
         scrollIntoView("fitlab-size-score-L", in: upper, direction: .down).tap()
         XCTAssertEqual(element("fitlab-size-score-L", in: upper).value as? String, "선택됨")
         XCTAssertEqual(element("fitlab-size-score-M", in: upper).value as? String, "선택 안 됨")
+        XCTAssertEqual(scrollIntoView("fitlab-fit-point-silhouette", in: upper).label, "실루엣 80.0점")
+        XCTAssertTrue(element("fitlab-comparison-basis", in: upper).exists)
         XCTAssertEqual(element("fitlab-recommended-size", in: upper).label, "L")
         XCTAssertEqual(element("fitlab-total-score", in: upper).label, "81.0")
         XCTAssertTrue(element("fitlab-overlay-shoulder_width", in: upper).label.contains("여유"))
@@ -813,6 +819,11 @@ final class CoorditFitLabUITests: XCTestCase {
             "베스트 100 cm | 상품 102 cm | 차이 +2 cm | 여유"
         )
         XCTAssertFalse(element("fitlab-measurement-shoulder_width", in: lower).exists)
+        scrollIntoView("fitlab-size-score-XL", in: lower, direction: .down).tap()
+        XCTAssertEqual(element("fitlab-total-score", in: lower).label, "79.0")
+        XCTAssertFalse(element("fitlab-fit-point-silhouette", in: lower).exists)
+        XCTAssertTrue(scrollIntoView("fitlab-alternative-scores-unavailable", in: lower).exists)
+        capture("result-lower-legacy-alternative", app: lower)
     }
 
     func testNumericSizeLabelsStayReadableInScoreComparison() throws {

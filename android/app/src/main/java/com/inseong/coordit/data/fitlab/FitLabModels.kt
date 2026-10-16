@@ -65,7 +65,15 @@ data class FitLabSizeRequest(
 )
 data class FitLabSizeResponse(val id: String, @SerializedName("size_label") val sizeLabel: String? = null)
 data class FitLabRecommendRequest(val referenceClothingIds: List<String>, val externalProductId: String, val idempotencyKey: String)
-data class FitLabSizeScore(val sizeLabel: String, val fitScore: Double, val fitLabel: String? = null)
+data class FitLabSizeScore(
+    val sizeLabel: String,
+    val fitScore: Double,
+    val fitLabel: String? = null,
+    val measurementSubscores: Map<String, Double>? = null,
+    val semanticSubscores: Map<String, Double>? = null,
+    val semanticFacts: List<FitLabSizeFact>? = null,
+)
+data class FitLabSizeFact(val measurement: String, val reference: Double, val product: Double, val diff: Double)
 data class FitLabRecommendation(
     val fitAnalysisResultId: String,
     val recommendedSize: String,

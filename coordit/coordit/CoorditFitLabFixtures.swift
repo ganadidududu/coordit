@@ -625,7 +625,17 @@ enum CoorditFitLabFixtures {
         allSizeScores: [
             .init(sizeLabel: "S", fitScore: 76, fitLabel: "acceptable", weightedFitDistance: 2.8, recommendationConfidence: "high"),
             .init(sizeLabel: "M", fitScore: 92, fitLabel: "good_fit", weightedFitDistance: 0.8, recommendationConfidence: "high"),
-            .init(sizeLabel: "L", fitScore: 81, fitLabel: "good_fit", weightedFitDistance: 2.1, recommendationConfidence: "high"),
+            .init(
+                sizeLabel: "L", fitScore: 81, fitLabel: "good_fit", weightedFitDistance: 2.1, recommendationConfidence: "high",
+                measurementSubscores: ["shoulder_width": 70, "chest_width": 90, "total_length": 90, "sleeve_length": 85],
+                semanticSubscores: ["silhouette": 80, "mobility": 78, "layering": 90],
+                semanticFacts: [
+                    .init(measurement: .shoulderWidth, reference: 53, product: 56, diff: 3),
+                    .init(measurement: .chestWidth, reference: 58, product: 60, diff: 2),
+                    .init(measurement: .totalLength, reference: 68, product: 70, diff: 2),
+                    .init(measurement: .sleeveLength, reference: 61, product: 63, diff: 2),
+                ]
+            ),
         ],
         partExplanations: [
             "어깨는 기준 옷보다 정확히 1cm 여유로워요.",
