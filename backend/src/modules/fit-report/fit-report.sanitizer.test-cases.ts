@@ -93,6 +93,58 @@ export const assertSanitizerContract = (
     );
   }
 
+  const directionalRow = reportInput.measurements.find((measurement) => measurement.diff !== 0);
+  assert.ok(directionalRow);
+  const directionalDescription = ["total_length", "sleeve_length", "rise", "outseam"].includes(
+    directionalRow.key
+  )
+    ? directionalRow.diff < 0 ? "더 짧아" : "더 길어"
+    : directionalRow.diff < 0 ? "더 타이트하게" : "더 여유 있게";
+  const directionalNarrative =
+    `${directionalRow.label}은 기준 ${directionalRow.ideal}cm와 상품 ${directionalRow.product}cm를 비교하면 ` +
+    `${directionalDescription} ${directionalRow.label}의 실루엣이 달라질 수 있습니다. ` +
+    "평소 입던 옷과 다른 지점을 고려해 착용 장면을 상상해 보세요.";
+  const directionalNarrativeSanitized = sanitizeGeneratedReport(
+    {
+      ...fallbackReport,
+      measurementAnalysis: fallbackReport.measurementAnalysis.map((item) =>
+        item.measurement === directionalRow.label
+          ? { ...item, measurement: `${directionalRow.label} 길이`, text: directionalNarrative }
+          : item
+      )
+    },
+    reportInput,
+    fallbackReport
+  );
+  assert.equal(
+    directionalNarrativeSanitized.measurementAnalysis.find(
+      (item) => item.measurement === directionalRow.label
+    )?.text,
+    directionalNarrative
+  );
+
+  const equivalentInput = {
+    ...reportInput,
+    measurements: reportInput.measurements.map((row) => ({ ...row, product: row.ideal, diff: 0 }))
+  };
+  const equivalentRow = equivalentInput.measurements[0];
+  assert.ok(equivalentRow);
+  const equivalentNarrative =
+    `${equivalentRow.label}은 기준과 상품이 모두 ${equivalentRow.ideal}cm라 차이가 없습니다. ` +
+    "이 수치는 해당 부위의 실루엣 기준을 그대로 유지하게 합니다.";
+  const equivalentSanitized = sanitizeGeneratedReport(
+    {
+      ...fallbackReport,
+      measurementAnalysis: equivalentInput.measurements.map((row, index) => ({
+        measurement: row.label,
+        text: index === 0 ? equivalentNarrative : fallbackReport.measurementAnalysis[index]?.text ?? ""
+      }))
+    },
+    equivalentInput,
+    fallbackReport
+  );
+  assert.equal(equivalentSanitized.measurementAnalysis[0]?.text, equivalentNarrative);
+
   const boundedListsSanitized = sanitizeGeneratedReport(
     {
       ...fallbackReport,

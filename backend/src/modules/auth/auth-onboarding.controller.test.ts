@@ -203,7 +203,8 @@ const tests: readonly {
           gender: null,
           birth_date: null,
           birth_year: null,
-          created_at: "2026-07-08T00:00:00.000Z", updated_at: "2026-07-08T00:00:00.000Z"
+          created_at: "2026-07-08T00:00:00.000Z", updated_at: "2026-07-08T00:00:00.000Z",
+          is_guest: false
         },
         consentStatus: {
           savedConsentKeys: ["terms_of_service", "privacy_policy"],

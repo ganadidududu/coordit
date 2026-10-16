@@ -63,11 +63,81 @@ export interface ReferenceVarianceInfo {
 
 export type ReferenceVarianceMap = Partial<Record<MeasurementKey, ReferenceVarianceInfo>>;
 export type MeasurementToleranceMap = Partial<Record<MeasurementKey, number>>;
+export type DirectionalToleranceMap = Partial<Record<MeasurementKey, {
+  readonly smaller: number;
+  readonly larger: number;
+}>>;
+export type FitInteractionSeverity = "none" | "mild" | "moderate" | "significant";
+
+export interface FitInteractionRule {
+  readonly id: string;
+  readonly measurements: readonly MeasurementKey[];
+  readonly semanticEffects: readonly string[];
+}
+
+export interface GarmentFitProfile {
+  readonly category: Category;
+  readonly weights: MeasurementWeights;
+  readonly baseTolerances: MeasurementToleranceMap;
+  readonly directionalTolerances: DirectionalToleranceMap;
+  readonly criticalMeasurements: readonly MeasurementKey[];
+  readonly secondaryMeasurements: readonly MeasurementKey[];
+  readonly interactionRules: readonly FitInteractionRule[];
+  readonly semanticProfile: {
+    readonly wearRole: string;
+    readonly primaryFitConcerns: readonly string[];
+    readonly layeringRelevant: boolean;
+    readonly mobilityRelevant: boolean;
+  };
+}
+
+export interface FitInteractionResult {
+  readonly id: string;
+  readonly severity: FitInteractionSeverity;
+  readonly direction?: "smaller" | "larger" | "mixed";
+  readonly involvedMeasurements: readonly MeasurementKey[];
+  readonly semanticEffects: readonly string[];
+  readonly scorePenalty: number;
+}
+
+export interface FitSemanticFact {
+  readonly measurement: MeasurementKey;
+  readonly reference: number;
+  readonly product: number;
+  readonly diff: number;
+  readonly normalizedDiff: number;
+  readonly direction: "smaller" | "larger" | "same";
+  readonly severity: "very_similar" | "mild" | "moderate" | "significant";
+  readonly importance: "critical" | "primary" | "secondary";
+  readonly semanticEffects: readonly string[];
+}
+
+export interface SizeTradeoffMeasurement {
+  readonly measurement: MeasurementKey;
+  readonly recommendedDiff: number;
+  readonly alternativeDiff: number;
+  readonly preferred: "recommended" | "alternative" | "equal";
+}
+
+export interface SizeTradeoffAnalysis {
+  readonly recommended: string;
+  readonly alternative: string;
+  readonly tradeoffs: readonly SizeTradeoffMeasurement[];
+}
+
+export type CategoryCompatibility = "exact" | "related" | "incompatible";
+export interface ReferenceCompatibilityMetadata {
+  readonly level: Exclude<CategoryCompatibility, "incompatible">;
+  readonly targetCategory: Category;
+  readonly usedReferenceIds: readonly string[];
+  readonly excludedReferenceIds: readonly string[];
+}
 export type WeightingStrategy =
   | "base_static"
   | "reference_variance_v1"
   | "reference_profile_v1"
-  | "feedback_adjusted_profile_v1";
+  | "feedback_adjusted_profile_v1"
+  | "category_profile_v2";
 export type RecommendationConfidence = "high" | "medium" | "low";
 export type FitScoreReasonCode =
   | "insufficient_comparable_measurements"
@@ -192,6 +262,10 @@ export interface SizeFitScore {
   confidenceBreakdown: ConfidenceBreakdown;
   measurementQuality?: ProductMeasurementQuality;
   algorithmVersion: string;
+  measurementSubscores: Partial<Record<MeasurementKey, number>>;
+  semanticSubscores: Readonly<Record<string, number>>;
+  semanticFacts: readonly FitSemanticFact[];
+  interactions: readonly FitInteractionResult[];
 }
 
 export interface BestSizeRecommendation {
@@ -203,6 +277,9 @@ export interface BestSizeRecommendation {
   weightingStrategy: WeightingStrategy;
   referenceProfile?: ReferenceFitProfile;
   feedbackProfile?: FeedbackFitProfile;
+  garmentProfile: GarmentFitProfile;
+  sizeTradeoff?: SizeTradeoffAnalysis;
+  referenceCompatibility?: ReferenceCompatibilityMetadata;
 }
 
 export interface FitRecommendationSizeScore {
@@ -214,6 +291,10 @@ export interface FitRecommendationSizeScore {
   readonly recommendationConfidence: RecommendationConfidence;
   readonly scoreExplanation?: FitScoreExplanation;
   readonly confidenceBreakdown?: ConfidenceBreakdown;
+  readonly measurementSubscores?: Partial<Record<MeasurementKey, number>>;
+  readonly semanticSubscores?: Readonly<Record<string, number>>;
+  readonly semanticFacts?: readonly FitSemanticFact[];
+  readonly interactions?: readonly FitInteractionResult[];
 }
 
 export interface FitRecommendationResult {
@@ -234,6 +315,15 @@ export interface FitRecommendationResult {
   readonly weightingStrategy: WeightingStrategy;
   readonly referenceProfile?: ReferenceFitProfile;
   readonly feedbackProfile?: FeedbackFitProfile;
+  readonly garmentProfile?: GarmentFitProfile;
+  readonly sizeTradeoff?: SizeTradeoffAnalysis;
+  readonly referenceCompatibility?: ReferenceCompatibilityMetadata;
+  readonly versions?: {
+    readonly fitEngineVersion: string;
+    readonly garmentProfileVersion: string;
+    readonly semanticRulesVersion: string;
+    readonly fitReportPromptVersion: string;
+  };
   readonly allSizeScores: readonly FitRecommendationSizeScore[];
   readonly algorithmVersion: string;
 }

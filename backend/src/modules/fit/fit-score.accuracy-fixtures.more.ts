@@ -24,7 +24,7 @@ export const fitAccuracyAdditionalFixtures: readonly AccuracyFixture[] = [
         measurements: { waist_width: 40.3, hip_width: 52.4, rise: 30.1, outseam: 100.5 }
       })
     ],
-    expectedSizeLabel: "M",
+    expectedSizeLabel: "L",
     expectedScoreBand: { min: 90, max: 100 },
     expectedComparedMeasurements: comparedBottom,
     expectedConfidence: "medium",
@@ -60,10 +60,10 @@ export const fitAccuracyAdditionalFixtures: readonly AccuracyFixture[] = [
     expectedSizeLabel: "Original M",
     expectedScoreBand: { min: 90, max: 100 },
     expectedComparedMeasurements: comparedBottom,
-    expectedConfidence: "high",
+    expectedConfidence: "medium",
     expectedWeightingStrategy: "reference_profile_v1",
     expectedFeedbackSampleCount: 4,
-    expectedReasonCodes: []
+    expectedReasonCodes: ["small_score_gap"]
   },
   {
     name: "low data confidence stays low when only two measurements are comparable",

@@ -55,6 +55,14 @@ struct CoorditFitLabHistoryDetailScreen: View {
                     recommendation: snapshot.recommendation,
                     metrics: metrics
                 )
+                CoorditFitLabPointScoreChart(
+                    scores: snapshot.report?.chartData.fitPointScores ?? [],
+                    metrics: metrics
+                )
+                CoorditFitLabMeasurementScoreChart(
+                    scores: snapshot.report?.chartData.measurementScores ?? [],
+                    metrics: metrics
+                )
                 CoorditFitLabDifferenceChart(measurements: scoreCard.measurements, metrics: metrics)
                 CoorditFitLabReportCard(report: snapshot.report, fallbackMessage: nil, metrics: metrics)
 

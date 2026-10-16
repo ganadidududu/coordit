@@ -5,7 +5,10 @@ import type {
   FitScoreExplanation,
   FitScoreReasonCode,
   RecommendationConfidence,
-  WeightingStrategy
+  WeightingStrategy,
+  FitInteractionResult,
+  FitSemanticFact,
+  SizeTradeoffAnalysis
 } from "../fit/fit.types";
 
 export type FeedbackReliabilityInput = {
@@ -61,6 +64,17 @@ export type ResultDetails = JsonObject & {
   readonly referenceClothingIds?: readonly string[];
   readonly allSizeScores?: readonly unknown[];
   readonly partStatuses?: Partial<Record<MeasurementKey, string>>;
+  readonly measurementSubscores?: Partial<Record<MeasurementKey, number>>;
+  readonly semanticSubscores?: Readonly<Record<string, number>>;
+  readonly semanticFacts?: readonly FitSemanticFact[];
+  readonly interactions?: readonly FitInteractionResult[];
+  readonly sizeTradeoff?: SizeTradeoffAnalysis;
+  readonly versions?: {
+    readonly fitEngineVersion?: string;
+    readonly garmentProfileVersion?: string;
+    readonly semanticRulesVersion?: string;
+    readonly fitReportPromptVersion?: string;
+  };
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

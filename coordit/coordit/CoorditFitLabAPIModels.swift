@@ -249,6 +249,8 @@ struct CoorditFitLabReportResponse: Codable, Equatable, Sendable {
         let title: String
         let summary: String
         let recommendationReason: String?
+        let garmentFitContext: String?
+        let sizeTradeoff: String?
         let fitDnaSummary: String?
         let measurementAnalysis: [MeasurementAnalysis]
         let feedbackPersonalization: String?
@@ -264,6 +266,8 @@ struct CoorditFitLabReportResponse: Codable, Equatable, Sendable {
             title: String = "핏 리포트",
             summary: String = "",
             recommendationReason: String? = nil,
+            garmentFitContext: String? = nil,
+            sizeTradeoff: String? = nil,
             fitDnaSummary: String? = nil,
             measurementAnalysis: [MeasurementAnalysis] = [],
             feedbackPersonalization: String? = nil,
@@ -273,6 +277,8 @@ struct CoorditFitLabReportResponse: Codable, Equatable, Sendable {
             self.title = title
             self.summary = summary
             self.recommendationReason = recommendationReason
+            self.garmentFitContext = garmentFitContext
+            self.sizeTradeoff = sizeTradeoff
             self.fitDnaSummary = fitDnaSummary
             self.measurementAnalysis = measurementAnalysis
             self.feedbackPersonalization = feedbackPersonalization
@@ -285,6 +291,8 @@ struct CoorditFitLabReportResponse: Codable, Equatable, Sendable {
             title = try values.decodeIfPresent(String.self, forKey: .title) ?? "핏 리포트"
             summary = try values.decodeIfPresent(String.self, forKey: .summary) ?? ""
             recommendationReason = try values.decodeIfPresent(String.self, forKey: .recommendationReason)
+            garmentFitContext = try values.decodeIfPresent(String.self, forKey: .garmentFitContext)
+            sizeTradeoff = try values.decodeIfPresent(String.self, forKey: .sizeTradeoff)
             fitDnaSummary = try values.decodeIfPresent(String.self, forKey: .fitDnaSummary)
             measurementAnalysis = (try? values.decode([MeasurementAnalysis].self, forKey: .measurementAnalysis)) ?? []
             feedbackPersonalization = try? values.decode(String.self, forKey: .feedbackPersonalization)
@@ -294,6 +302,20 @@ struct CoorditFitLabReportResponse: Codable, Equatable, Sendable {
     }
 
     struct ChartData: Codable, Equatable, Sendable {
+        struct FitPointScore: Codable, Equatable, Sendable {
+            let key: String
+            let label: String
+            let score: Double
+        }
+
+        struct MeasurementScore: Codable, Equatable, Sendable {
+            let measurement: CoorditFitLabMeasurementKey
+            let label: String
+            let score: Double
+            let diff: Double
+            let status: String?
+        }
+
         struct Comparison: Codable, Equatable, Sendable {
             let measurement: CoorditFitLabMeasurementKey
             let label: String
@@ -319,15 +341,21 @@ struct CoorditFitLabReportResponse: Codable, Equatable, Sendable {
             let recommendationConfidence: String
         }
 
+        let fitPointScores: [FitPointScore]
+        let measurementScores: [MeasurementScore]
         let idealVsProduct: [Comparison]
         let differenceBar: [Difference]
         let sizeScoreRanking: [SizeScore]
 
         nonisolated init(
+            fitPointScores: [FitPointScore] = [],
+            measurementScores: [MeasurementScore] = [],
             idealVsProduct: [Comparison] = [],
             differenceBar: [Difference] = [],
             sizeScoreRanking: [SizeScore] = []
         ) {
+            self.fitPointScores = fitPointScores
+            self.measurementScores = measurementScores
             self.idealVsProduct = idealVsProduct
             self.differenceBar = differenceBar
             self.sizeScoreRanking = sizeScoreRanking
@@ -335,9 +363,13 @@ struct CoorditFitLabReportResponse: Codable, Equatable, Sendable {
 
         init(from decoder: Decoder) throws {
             let values = try decoder.container(keyedBy: CodingKeys.self)
+            let fitPointRows = (try? values.decode([LossyDecodable<FitPointScore>].self, forKey: .fitPointScores)) ?? []
+            let measurementScoreRows = (try? values.decode([LossyDecodable<MeasurementScore>].self, forKey: .measurementScores)) ?? []
             let comparisonRows = (try? values.decode([LossyDecodable<Comparison>].self, forKey: .idealVsProduct)) ?? []
             let differenceRows = (try? values.decode([LossyDecodable<Difference>].self, forKey: .differenceBar)) ?? []
             let scoreRows = (try? values.decode([LossyDecodable<SizeScore>].self, forKey: .sizeScoreRanking)) ?? []
+            fitPointScores = fitPointRows.compactMap(\.value)
+            measurementScores = measurementScoreRows.compactMap(\.value)
             idealVsProduct = comparisonRows.compactMap(\.value)
             differenceBar = differenceRows.compactMap(\.value)
             sizeScoreRanking = scoreRows.compactMap(\.value)

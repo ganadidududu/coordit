@@ -1,5 +1,7 @@
 import type { Category, FitType, MeasurementKey } from "../../shared/types/database";
 import type { FitReportInput } from "./fit-report.types";
+import { getGarmentFitProfile } from "../fit/garment-fit-profiles";
+import { getCategoryMeasurementImpact } from "./fit-report.category-impact";
 
 type GarmentProfile = Pick<FitReportInput["targetProduct"], "category" | "fitType">;
 type MeasurementRow = FitReportInput["measurements"][number];
@@ -147,20 +149,29 @@ export const getGarmentCategoryLabel = (category: Category): string => CATEGORY_
 
 export const getFitTypeLabel = (fitType: FitType): string => FIT_TYPE_LABELS[fitType];
 
-export const buildGarmentNarrativeContext = (profile: GarmentProfile) => ({
-  category: profile.category,
-  categoryLabel: getGarmentCategoryLabel(profile.category),
-  fitType: profile.fitType,
-  fitTypeLabel: getFitTypeLabel(profile.fitType),
-  bodyArea: isLowerBodyCategory(profile.category) ? "하체" : "상체"
-});
+export const buildGarmentNarrativeContext = (profile: GarmentProfile): FitReportInput["garmentContext"] => {
+  const garmentProfile = getGarmentFitProfile(profile.category);
+  return {
+    category: profile.category,
+    categoryLabel: getGarmentCategoryLabel(profile.category),
+    fitType: profile.fitType,
+    fitTypeLabel: getFitTypeLabel(profile.fitType),
+    wearRole: garmentProfile.semanticProfile.wearRole,
+    primaryFitAreas: garmentProfile.criticalMeasurements,
+    secondaryFitAreas: garmentProfile.secondaryMeasurements,
+    fitConsiderations: garmentProfile.semanticProfile.primaryFitConcerns,
+    layeringRelevant: garmentProfile.semanticProfile.layeringRelevant,
+    mobilityRelevant: garmentProfile.semanticProfile.mobilityRelevant
+  };
+};
 
 export const buildMeasurementWearerImpact = (
   row: MeasurementRow,
   profile: GarmentProfile
-): string => isLowerBodyCategory(profile.category)
-  ? buildLowerBodyImpact(row)
-  : buildUpperBodyImpact(row);
+): string => {
+  return getCategoryMeasurementImpact(profile.category, row.key, row.diff)
+    ?? (isLowerBodyCategory(profile.category) ? buildLowerBodyImpact(row) : buildUpperBodyImpact(row));
+};
 
 export const buildMaterialAndLayeringCaution = (profile: GarmentProfile): string =>
   isLowerBodyCategory(profile.category)

@@ -177,6 +177,8 @@ export const buildChartData = (
   sizeScores: readonly SizeScoreReportRow[],
   details: ResultDetails
 ): FitReportChartData => ({
+  fitPointScores: [],
+  measurementScores: [],
   idealVsProduct: measurementRows.map((row) => ({
     measurement: row.key,
     label: row.label,

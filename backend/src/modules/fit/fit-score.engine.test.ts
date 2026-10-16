@@ -84,7 +84,7 @@ assert.equal(missingResult.referenceVariance.shoulder_width?.sampleCount, 3);
 assert.equal(missingResult.referenceVariance.chest_width, undefined);
 
 const bottomWeights = getWeightsByCategory("pants");
-assert.equal(bottomWeights.outseam, 0.25);
+assert.equal(bottomWeights.outseam, 0.2);
 assert.equal(Object.prototype.hasOwnProperty.call(bottomWeights, "inseam"), false);
 
 const bottomReferences: ReferenceClothingInput[] = [
