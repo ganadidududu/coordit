@@ -1,6 +1,0 @@
-
-> coordit-backend@0.1.0 typecheck
-> tsc --noEmit
-
-EXIT_STATUS: 0
-RESULT: PASS

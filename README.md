@@ -21,23 +21,39 @@ coordit is an AI-ready fashion fit recommendation MVP focused on reducing online
 ## Folder Structure
 
 ```text
-coordit/
-  docs/
-  frontend/
-  backend/
-  supabase/
+coordit-dev/
+  coordit/       # iOS app, Xcode project, share extension, and UI tests
+  android/       # Android app and Gradle project
+  frontend/      # Next.js web app and public assets
+  backend/       # Express API and tests
+  supabase/      # Database schema, migrations, and RLS
+  config/        # Shared development settings, including SimSlim
+  tools/         # Standalone development playgrounds
+  docs/          # Product, API, architecture, and deployment documentation
 ```
+
+Start with the [documentation index](docs/README.md), [Android guide](android/README.md),
+[backend guide](backend/README.md), or [web guide](frontend/README.md).
+For iOS, open `coordit/coordit.xcodeproj`; [DESIGN.md](DESIGN.md) describes its design system.
+The historical Fit Score playground lives in [tools/](tools/README.md).
+The web logo is kept at [frontend/public/logo.png](frontend/public/logo.png).
+
+Local agent records (`.omo/`), separate worktrees (`.worktrees/`), dependencies,
+and build outputs are not application source. Local videos and reports in
+`deliverables/` are user artifacts and should be kept out of source commits.
 
 ## Run Locally
 
+Run each command block from the repository root, in separate terminals.
+
 ```bash
-cd coordit/backend
+cd backend
 npm install
 npm run dev
 ```
 
 ```bash
-cd coordit/frontend
+cd frontend
 npm install
 npm run dev
 ```

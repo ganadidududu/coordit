@@ -15,10 +15,16 @@ docs/
   API_SPEC_MOBILE.md
   DATABASE_SCHEMA.md
   FIT_REPORT_OPENROUTER_SPEC.md
+  PRODUCT_URL_IMPORT.md
+  DEPLOYMENT_STAGING.md
+  DEPLOYMENT_PRODUCTION.md
+  RELEASE_READINESS.md
   ROADMAP.md
   fit-engine/
     FIT_ENGINE.md
     FIT_ENGINE_CHANGELOG.md
+    HYBRID_SCORING_READINESS.md
+  plans/
 ```
 
 ## 먼저 읽을 문서
@@ -30,9 +36,14 @@ docs/
 | OpenRouter 핏 리포트 설계 | `FIT_REPORT_OPENROUTER_SPEC.md` |
 | 추천 알고리즘 | `fit-engine/FIT_ENGINE.md` |
 | 추천 엔진 변경 이력 | `fit-engine/FIT_ENGINE_CHANGELOG.md` |
+| 하이브리드 점수 준비 상태 | [HYBRID_SCORING_READINESS.md](fit-engine/HYBRID_SCORING_READINESS.md) |
+| 상품 URL 가져오기 | [PRODUCT_URL_IMPORT.md](PRODUCT_URL_IMPORT.md) |
+| 스테이징 / 운영 배포 | [DEPLOYMENT_STAGING.md](DEPLOYMENT_STAGING.md), [DEPLOYMENT_PRODUCTION.md](DEPLOYMENT_PRODUCTION.md) |
+| 출시 준비 상태 | [RELEASE_READINESS.md](RELEASE_READINESS.md) |
 | DB, 관계, 인덱스, RLS, migration | `DATABASE_SCHEMA.md` |
 | 개발 계획 | `ROADMAP.md` |
 | 문서 리팩토링 판단 근거 | `REFACTOR_ANALYSIS.md` |
+| 기능별 설계·작업 계획 | [plans/](plans/) |
 
 ## 문서별 책임
 
