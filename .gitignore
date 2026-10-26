@@ -21,6 +21,7 @@ uploads/
 .omo/
 .omo.local-*/
 .worktrees/
+deliverables/
 
 # Generated local agent maps
 AGENTS.md
