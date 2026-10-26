@@ -38,6 +38,7 @@ docs/
 | 추천 엔진 변경 이력 | `fit-engine/FIT_ENGINE_CHANGELOG.md` |
 | 하이브리드 점수 준비 상태 | [HYBRID_SCORING_READINESS.md](fit-engine/HYBRID_SCORING_READINESS.md) |
 | 상품 URL 가져오기 | [PRODUCT_URL_IMPORT.md](PRODUCT_URL_IMPORT.md) |
+| 카메라 실측·AR 비교 개발 상태와 배포 호환성 | [CAMERA_FIT_DEVELOPMENT.md](CAMERA_FIT_DEVELOPMENT.md) |
 | 스테이징 / 운영 배포 | [DEPLOYMENT_STAGING.md](DEPLOYMENT_STAGING.md), [DEPLOYMENT_PRODUCTION.md](DEPLOYMENT_PRODUCTION.md) |
 | 출시 준비 상태 | [RELEASE_READINESS.md](RELEASE_READINESS.md) |
 | DB, 관계, 인덱스, RLS, migration | `DATABASE_SCHEMA.md` |

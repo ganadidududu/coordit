@@ -78,7 +78,7 @@ struct CoorditFitLabOCRInputView: View {
                     returnToPriorDraft()
                     return
                 }
-                pendingCropImage = image
+                recognize(image.jpegData(compressionQuality: 0.96) ?? Data())
             }
             .ignoresSafeArea()
         }
@@ -108,9 +108,7 @@ struct CoorditFitLabOCRInputView: View {
                     guard let image = UIImage(data: data) else {
                         throw CoorditFitLabError.transport("사진을 열지 못했어요.")
                     }
-                    invalidateOperation()
-                    phase = .chooser
-                    pendingCropImage = image
+                    recognize(image.jpegData(compressionQuality: 0.96) ?? data)
                 } catch {
                     guard !Task.isCancelled, generation == operationGeneration, phase == .processing else { return }
                     message = "사진을 읽지 못했어요. 다시 선택하거나 수동으로 입력해 주세요."
@@ -137,23 +135,23 @@ struct CoorditFitLabOCRInputView: View {
     private var chooser: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: metrics.value(14)) {
-                Text("사이즈표 이미지 가져오기")
+                Text(CoorditSizeChartCopy.heading)
                     .font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))
                     .foregroundStyle(Color.black)
                     .fitLabTutorialTarget(.review, message: "사이즈표 사진을 고르고 표 영역을 잘라주세요. 읽어 온 값을 확인·수정한 뒤 기준 옷 선택과 분석으로 이어져요. 화면을 자유롭게 스크롤하며 살펴보세요.")
-                Text("사진은 기기 안에서만 Vision으로 읽으며 서버에 업로드하지 않아요.")
+                Text(CoorditSizeChartCopy.instruction)
                     .font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .footnote))
                     .foregroundStyle(Color.black.opacity(0.66))
                     .fixedSize(horizontal: false, vertical: true)
 
                 PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                    sourceButton(title: "사진에서 선택", symbol: "photo.on.rectangle")
+                    sourceButton(title: CoorditSizeChartCopy.choosePhoto, symbol: "photo.on.rectangle")
                 }
                 .coorditPressFeedback()
                 .accessibilityIdentifier("fitlab-ocr-photo-library")
 
                 Button(action: requestCamera) {
-                    sourceButton(title: "카메라로 촬영", symbol: "camera")
+                    sourceButton(title: CoorditSizeChartCopy.camera, symbol: "camera")
                 }
                 .coorditPressFeedback()
                 .accessibilityIdentifier("fitlab-ocr-camera")
@@ -202,7 +200,7 @@ struct CoorditFitLabOCRInputView: View {
                 }
                 #endif
             }
-            .padding(.horizontal, metrics.value(33))
+            .padding(.horizontal, metrics.value(22))
             .padding(.bottom, metrics.value(120))
         }
         .accessibilityIdentifier("fitlab-ocr-source-chooser")
@@ -212,7 +210,7 @@ struct CoorditFitLabOCRInputView: View {
         VStack(spacing: metrics.value(16)) {
             ProgressView()
                 .accessibilityIdentifier("fitlab-ocr-processing")
-            Text("사이즈표를 기기에서 읽고 있어요")
+            Text("사이즈를 읽고 있어요")
                 .font(CoorditTypography.gmarketBold(size: metrics.value(16), relativeTo: .headline))
             Text("이미지는 업로드되지 않아요.")
                 .font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .footnote))
@@ -303,12 +301,7 @@ struct CoorditFitLabOCRInputView: View {
                 }
                 .panelStyle()
 
-                Picker("의류 구분", selection: kindBinding) {
-                    Text("상의").tag(CoorditFitLabGarmentKind.upper)
-                    Text("하의").tag(CoorditFitLabGarmentKind.lower)
-                }
-                .pickerStyle(.segmented)
-                .tint(CoorditFitLabPalette.ink)
+                CoorditGarmentCategorySelector(kind: kindBinding, category: categoryBinding, metrics: metrics, identifier: "fitlab-ocr")
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("상품 정보")
@@ -317,16 +310,6 @@ struct CoorditFitLabOCRInputView: View {
                         .fieldStyle()
                         .focused($focusedField, equals: "product-name")
                         .accessibilityIdentifier("fitlab-ocr-product-name")
-                    Picker("카테고리", selection: categoryBinding) {
-                        ForEach(availableCategories) { option in
-                            Text(option.ocrKoreanTitle)
-                                .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
-                                .tag(option)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
-                    .accessibilityIdentifier("fitlab-ocr-category-picker")
                 }
                 .panelStyle()
 
@@ -352,7 +335,7 @@ struct CoorditFitLabOCRInputView: View {
                 CoorditFitLabPrimaryButton(title: "수정한 사이즈표 확인", metrics: metrics, action: confirm)
                     .accessibilityIdentifier("fitlab-ocr-confirm")
             }
-            .padding(.horizontal, metrics.value(33))
+            .padding(.horizontal, metrics.value(22))
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
@@ -391,7 +374,7 @@ struct CoorditFitLabOCRInputView: View {
                 .accessibilityIdentifier("fitlab-ocr-continue-to-references")
             }
             .panelStyle()
-            .padding(.horizontal, metrics.value(33))
+            .padding(.horizontal, metrics.value(22))
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
@@ -424,7 +407,7 @@ struct CoorditFitLabOCRInputView: View {
                 .accessibilityIdentifier("fitlab-ocr-reopen-chooser")
             }
             .panelStyle()
-            .padding(.horizontal, metrics.value(33))
+            .padding(.horizontal, metrics.value(22))
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
@@ -643,7 +626,7 @@ struct CoorditFitLabOCRInputView: View {
         result = recognized
         kind = recognized.draft.garmentKind
         category = recognized.draft.category
-        productName = ""
+        productName = recognized.draft.productName.isEmpty ? "사진 속 상품" : recognized.draft.productName
         rows.removeAll(keepingCapacity: true)
         for source in recognized.draft.sizes {
             rows.append(EditableRow(source))
@@ -653,6 +636,8 @@ struct CoorditFitLabOCRInputView: View {
         globalError = nil
         message = nil
         phase = .review
+        if recognized.didFindTable, recognized.confidence >= 0.85,
+           CoorditFitLabImportAcceptance.canContinue(sizes: recognized.draft.sizes, kind: kind) { confirm() }
     }
 
     #if DEBUG
@@ -730,7 +715,7 @@ struct CoorditFitLabOCRInputView: View {
         draft.productURL = nil
         draft.sizes = parsed
         draft.ocrMetadata = result.map { CoorditFitLabOCRMetadata(extractedText: $0.rawText, confidence: $0.confidence) }
-        draft.isSourceConfirmed = false
+        draft.isSourceConfirmed = true
         draft.selectedReferenceIDs.removeAll()
         phase = .confirmed
     }

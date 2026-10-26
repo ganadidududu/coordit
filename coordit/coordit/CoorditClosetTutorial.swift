@@ -15,19 +15,19 @@ final class CoorditClosetTutorial: ObservableObject {
             case .analyze: "링크 분석하기"
             case .size: "내 사이즈 선택하기"
             case .register: "선택한 사이즈 등록하기"
-            case .score: "핏 스코어 확인하기"
+            case .score: "등록한 옷 확인하기"
             }
         }
 
         var message: String {
             switch self {
-            case .add: "보유 의류 추가하기 버튼으로 내 옷을 등록합니다. 등록한 옷 중 기준 의류로 선택한 데이터가 나의 ‘100점 핏 사이즈’ 계산에 반영됩니다."
-            case .method: "상품 링크, 사이즈표 사진, 직접 입력 중 가진 정보에 맞는 방식을 선택하세요. 선택한 방식으로 실측을 확인한 뒤 내 옷을 등록해요."
+            case .add: "잘 맞는 내 옷을 등록하면 다음 핏 비교에 바로 쓸 수 있어요."
+            case .method: "내 옷 촬영, 상품 링크, 사이즈표 캡처 중 편한 방법을 골라요. 캡처를 넣으면 내 사이즈를 선택해 등록할 수 있어요."
             case .link: "보유한 옷의 상품 링크를 아래 입력란에 붙여 넣습니다. 옷 종류도 실제 보유한 의류에 맞게 선택합니다."
             case .analyze: "링크 분석하기를 누르면 상품명과 사이즈별 실측 정보를 불러옵니다. 분석이 완료되면 사이즈를 선택합니다."
             case .size: "사이즈표에서 실제로 보유한 옷의 사이즈를 누릅니다. 선택한 사이즈의 실측 정보가 저장됩니다."
-            case .register: "선택한 사이즈로 등록을 누르면 이 옷을 Closet에 저장합니다. 저장이 완료되면 핏 스코어를 확인합니다."
-            case .score: "등록한 의류의 핏 스코어입니다. 나에게 잘 맞는 옷을 기준 의류로 선택하면, 그 실측 데이터로 ‘100점 핏 사이즈’를 계산합니다."
+            case .register: "선택한 사이즈로 등록하면 내 옷장에 저장돼요. 예시에서는 저장 없이 결과를 볼 수 있어요."
+            case .score: "등록한 옷의 치수를 확인해요. 촬영으로 등록한 옷은 사진도 자동으로 들어가요."
             }
         }
     }
@@ -47,9 +47,8 @@ final class CoorditClosetTutorial: ObservableObject {
             } else if !defaults.bool(forKey: seenKey) {
 #if DEBUG
                 let arguments = ProcessInfo.processInfo.arguments
-                if arguments.contains("--coordit-ui-testing") && !arguments.contains("--coordit-test-closet-tutorial") { return }
+                if arguments.contains("--coordit-test-closet-tutorial") { step = .add }
 #endif
-                step = .add
             }
         } else if step != nil {
             switch route {
@@ -60,7 +59,7 @@ final class CoorditClosetTutorial: ObservableObject {
                 } else {
                     updateLink(draft.productLink)
                 }
-            case .closetAddPhoto, .closetAddManual: step = .link
+            case .closetAddPhoto, .closetAddSizeChart, .closetAddManual: step = .link
             default: break
             }
         }
@@ -101,7 +100,7 @@ private struct CoorditClosetTutorialTarget: ViewModifier {
             message: message ?? step.message,
             identifier: "closet-tutorial",
             stepIdentifier: "closet-tutorial-step-\(step.rawValue)",
-            finishTitle: step == .score && canFinish ? "핏 스코어 확인 완료" : nil,
+            finishTitle: step == .score && canFinish ? "확인 완료" : nil,
             dismiss: tutorial.dismiss
         ))
     }

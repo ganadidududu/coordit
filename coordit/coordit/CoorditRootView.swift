@@ -98,7 +98,7 @@ struct CoorditRootView: View {
             CoorditFitLabFamilyView(
                 currentRoute: route,
                 onRouteChange: { navigate(to: $0) },
-                onManageReferences: { showsFitLabReferenceSelection = true },
+                onManageReferences: startFitLabReferenceRegistration,
                 coordinator: fitLabCoordinator,
                 threadBalance: $threadBalance,
                 sharedImportURL: $sharedFitLabImportURL,
@@ -131,6 +131,7 @@ struct CoorditRootView: View {
              .closetAddMethod,
              .closetAddLink,
              .closetAddPhoto,
+             .closetAddSizeChart,
              .closetAddManual,
              .closetAddLoading,
              .closetAddResult:
@@ -229,6 +230,32 @@ struct CoorditRootView: View {
         .onReceive(NotificationCenter.default.publisher(for: CoorditSharedFitLabImport.didRequestOpenNotification)) { notification in
             openSharedFitLabImport(notification.object as? URL)
         }
+        .onChange(of: fitLabCoordinator.cameraMeasurement) { _, measurement in
+            guard let measurement, measurement.id == fitLabCoordinator.cameraCapture.identifier,
+                  let receipt = fitLabCoordinator.cameraReference else { return }
+            let backendID = receipt.reference.clothingItemID
+            let photo = fitLabCoordinator.cameraCapture.garmentPhotoData
+            let chart = CoorditClosetSizeChart(sizeLabel: nil, measurements: measurement.clothingSizeRequest.measurements)
+            if let index = closetItems.firstIndex(where: { $0.backendClothingItemId == backendID }) {
+                if let photo { closetItems[index].imageData = photo }
+                closetItems[index].sizeChart = chart
+                closetItems[index].backendReferenceClothingId = receipt.reference.id
+            } else {
+                closetItems.insert(CoorditClosetItem(
+                    id: backendID,
+                    name: measurement.isLower ? "잘 맞는 바지" : "잘 맞는 티셔츠",
+                    category: measurement.isLower ? .bottom : .top,
+                    exactCategory: measurement.isLower ? .pants : .tshirt,
+                    score: 0,
+                    scoreColor: CoorditClosetColors.navy,
+                    route: measurement.isLower ? .closetDetailBottom : .closetDetailTop,
+                    imageData: photo,
+                    sizeChart: chart,
+                    backendClothingItemId: backendID,
+                    backendReferenceClothingId: receipt.reference.id
+                ), at: 0)
+            }
+        }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
             openPendingSharedFitLabImport()
@@ -325,8 +352,9 @@ struct CoorditRootView: View {
         closetDraft = CoorditClosetDraft()
         closetDraft.category = fitLabCoordinator.draft.category.garmentKind == .upper ? .top : .bottom
         closetDraft.exactCategory = fitLabCoordinator.draft.category
+        closetDraft.method = .link
         closetAddSaveState.reset()
-        navigate(to: .closetAddMethod)
+        navigate(to: .closetAddLink)
     }
 
     private static func initialClosetItems(
@@ -551,6 +579,8 @@ struct CoorditRootView: View {
     }
 
     private func handleAccountDeletion(userID: String) async -> Bool {
+        do { try CoorditGarmentPhotoStore.shared.removeAll(userID: userID) }
+        catch { return false }
         closetItems = []
         selectedClosetItemID = nil
         closetDraft = CoorditClosetDraft()

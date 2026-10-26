@@ -73,7 +73,9 @@ extension CoorditClosetDraft {
     }
 
     var clothingSizeRequest: ClothingSizeRequest {
-        switch category {
+        if let cameraMeasurement { return cameraMeasurement.clothingSizeRequest }
+        if let selectedSizeRow { return selectedSizeRow.clothingSizeRequest }
+        return switch category {
         case .top:
             ClothingSizeRequest(
                 sizeLabel: nil,

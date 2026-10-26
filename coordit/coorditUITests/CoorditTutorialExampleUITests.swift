@@ -4,70 +4,46 @@ import XCTest
 final class CoorditTutorialExampleUITests: XCTestCase {
     override func setUpWithError() throws { continueAfterFailure = false }
 
-    func testFitLabPrerequisiteAndGuideAllowFreeBrowsing() {
+    func testFitLabHelpContainsExampleAndDismissalKeepsInputsAvailable() {
         let app = launch(route: "fitlab-input")
-        let prerequisite = element("fitlab-reference-prerequisite", app)
-        XCTAssertTrue(prerequisite.waitForExistence(timeout: 5))
-        for _ in 0..<8 where !element("fitlab-source-example", app).isHittable { app.swipeUp() }
-        XCTAssertTrue(prerequisite.isHittable)
-        XCTAssertLessThan(element("fitlab-source-manual", app).frame.maxY, prerequisite.frame.minY)
-        XCTAssertLessThan(prerequisite.frame.maxY, element("fitlab-source-example", app).frame.minY)
-        capture("fitlab-prerequisite-above-example", app)
-        tap("fitlab-source-manage-references", app)
-        XCTAssertTrue(element("home-reference-done", app).waitForExistence(timeout: 5))
-        capture("fitlab-reference-management", app)
-        let cancel = app.buttons["취소"]
-        XCTAssertTrue(cancel.waitForExistence(timeout: 5))
-        cancel.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-        XCTAssertTrue(element("home-reference-done", app).waitForNonExistence(timeout: 5))
-
+        XCTAssertTrue(element("fitlab-source-url", app).waitForExistence(timeout: 5))
+        XCTAssertFalse(element("fitlab-source-example", app).exists)
+        XCTAssertFalse(element("fitlab-reference-prerequisite", app).exists)
+        XCTAssertLessThan(element("fitlab-tutorial-restart", app).frame.maxY, element("fitlab-source-url", app).frame.minY)
+        capture("unified-fitlab-input", app)
         tap("fitlab-tutorial-restart", app)
-        XCTAssertTrue(element("fitlab-tutorial-step-0", app).exists)
-        XCTAssertTrue(element("fitlab-tutorial-restart", app).isHittable,
-                      "도움말을 켜도 읽고 있던 위치가 강제로 이동하면 안 됩니다.")
-        capture("fitlab-help-bottom", app)
-        for _ in 0..<8 where !prerequisite.isHittable { app.swipeDown() }
-        XCTAssertTrue(prerequisite.isHittable)
-        XCTAssertTrue(element("fitlab-tutorial-step-0", app).exists)
-        capture("fitlab-help-top", app)
-
+        XCTAssertTrue(element("usage-guide-example", app).waitForExistence(timeout: 5))
+        capture("unified-fitlab-help", app)
+        tap("usage-guide-close", app)
+        XCTAssertTrue(element("usage-guide-example", app).waitForNonExistence(timeout: 5))
         tap("fitlab-source-manual", app)
-        let guide = element("fitlab-tutorial-step-3", app)
-        XCTAssertTrue(guide.waitForExistence(timeout: 5))
-        XCTAssertTrue(guide.isHittable)
-        let form = element("fitlab-manual-form", app)
-        for _ in 0..<4 { form.swipeUp() }
-        XCTAssertFalse(guide.isHittable, "도움말도 입력 폼과 함께 화면 밖으로 스크롤되어야 합니다.")
-        XCTAssertTrue(element("fitlab-manual-continue", app).isHittable)
-        capture("fitlab-manual-help-scrolled-away", app)
-        for _ in 0..<6 where !guide.isHittable { form.swipeDown() }
-        XCTAssertTrue(guide.isHittable)
-        capture("fitlab-manual-help-returned", app)
+        XCTAssertTrue(element("fitlab-manual-form", app).waitForExistence(timeout: 5))
+        XCTAssertFalse(element("tutorial-example-notice", app).exists)
     }
 
-    func testClosetGuideScrollsWithFormAndKeepsNavigationAvailable() {
+    func testClosetHelpAndCompactManualEntryRemainAvailable() {
         let app = launch(route: "closet-overview")
         tap("closet-tutorial-restart", app)
+        XCTAssertTrue(element("usage-guide-example", app).waitForExistence(timeout: 5))
+        capture("unified-closet-help", app)
+        tap("usage-guide-close", app)
         tap("closet-add-garment", app)
+        XCTAssertFalse(element("closet-method-example", app).exists)
+        XCTAssertTrue(element("closet-add-method-photo", app).exists)
+        XCTAssertTrue(element("closet-add-method-link", app).exists)
+        let manual = element("closet-add-method-manual", app)
+        XCTAssertTrue(manual.exists)
+        XCTAssertLessThan(manual.frame.width, element("closet-add-method-link", app).frame.width / 2)
+        capture("unified-closet-input", app)
         tap("closet-add-method-manual", app)
-        let guide = element("closet-tutorial-step-2", app)
-        XCTAssertTrue(guide.waitForExistence(timeout: 5))
-        for _ in 0..<5 where !guide.isHittable { app.swipeUp() }
-        XCTAssertTrue(guide.isHittable)
-        let originalY = guide.frame.minY
-        app.swipeUp()
-        XCTAssertLessThan(guide.frame.minY, originalY - 30)
-        capture("closet-help-scroll-down", app)
-        app.swipeDown()
-        XCTAssertGreaterThan(guide.frame.minY, originalY - 30)
-        capture("closet-help-scroll-up", app)
-        tap("closet-tutorial-dismiss", app)
-        XCTAssertFalse(guide.exists)
+        XCTAssertTrue(element("coordit-screen-closet-add-manual", app).waitForExistence(timeout: 5))
+        XCTAssertFalse(element("tutorial-example-notice", app).exists)
     }
 
     func testClosetExampleCompletesWithoutSaving() {
         let app = launch(route: "closet-add-method")
-        tap("closet-method-example", app)
+        tap("closet-tutorial-restart", app)
+        tap("usage-guide-example", app)
         XCTAssertTrue(element("tutorial-example-notice", app).waitForExistence(timeout: 5))
         XCTAssertEqual(app.staticTexts.matching(identifier: "tutorial-example-notice").count, 1)
         XCTAssertEqual(app.buttons.matching(identifier: "closet-tutorial-dismiss").count, 1)
@@ -89,12 +65,14 @@ final class CoorditTutorialExampleUITests: XCTestCase {
 
     func testFitLabExampleCompletesWithZeroThreadsWithoutHistory() {
         let app = launch(route: "fitlab-input")
-        tap("fitlab-source-example", app)
+        tap("fitlab-tutorial-restart", app)
+        tap("usage-guide-example", app)
         XCTAssertEqual(app.staticTexts.matching(identifier: "tutorial-example-notice").count, 1)
         capture("fitlab-example-single-notice", app)
         tap("fitlab-url-import", app)
-        tap("fitlab-url-confirm", app)
-        tap("fitlab-url-continue-to-references", app)
+        XCTAssertTrue(element("fitlab-reference-tutorial-reference", app).waitForExistence(timeout: 5))
+        XCTAssertFalse(element("fitlab-url-confirm", app).exists)
+        XCTAssertFalse(element("fitlab-url-continue-to-references", app).exists)
         XCTAssertEqual(app.staticTexts.matching(identifier: "tutorial-example-notice").count, 1)
         tap("fitlab-reference-tutorial-reference", app)
         tap("fitlab-submit-analysis", app)
@@ -103,33 +81,24 @@ final class CoorditTutorialExampleUITests: XCTestCase {
         XCTAssertFalse(element("fitlab-add-history", app).exists)
         tap("fitlab-example-finish", app)
         XCTAssertTrue(element("fitlab-history-empty", app).waitForExistence(timeout: 5))
-        XCTAssertTrue(element("fitlab-source-thread-balance", app).label.contains("0"))
+        XCTAssertEqual(element("coordit-thread-balance-probe", app).label, "0")
         tap("fitlab-source-manual", app)
         XCTAssertFalse(element("tutorial-example-notice", app).exists)
     }
 
-    func testPhotoAndManualKeepGuidanceInBothFlows() {
-        for method in ["photo", "manual"] {
-            let app = launch(route: "closet-overview")
-            tap("closet-tutorial-restart", app)
-            tap("closet-add-garment", app)
-            capture("closet-all-methods", app)
-            tap("closet-add-method-\(method)", app)
-            XCTAssertTrue(element("closet-tutorial-step-2", app).waitForExistence(timeout: 5))
-            XCTAssertEqual(app.buttons.matching(identifier: "closet-tutorial-dismiss").count, 1)
-            XCTAssertFalse(element("tutorial-example-notice", app).exists)
-            capture("closet-\(method)-guide", app)
-            app.terminate()
-        }
-        for method in ["ocr", "manual"] {
-            let app = launch(route: "fitlab-input")
-            tap("fitlab-tutorial-restart", app)
-            capture("fitlab-all-methods", app)
-            tap("fitlab-source-\(method)", app)
-            XCTAssertTrue(element("fitlab-tutorial-step-3", app).waitForExistence(timeout: 5))
-            capture("fitlab-\(method)-guide", app)
-            app.terminate()
-        }
+    func testHelpCanBeClosedAtAccessibilityTextSize() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--coordit-ui-testing", "--coordit-ui-testing-authenticated",
+            "--coordit-start-route", "fitlab-input",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXL",
+        ]
+        app.launch()
+        tap("fitlab-tutorial-restart", app)
+        XCTAssertTrue(element("usage-guide-close", app).waitForExistence(timeout: 5))
+        capture("unified-help-accessibility", app)
+        tap("usage-guide-example", app)
+        XCTAssertTrue(element("tutorial-example-notice", app).waitForExistence(timeout: 5))
     }
 
     private func launch(route: String) -> XCUIApplication {
@@ -149,10 +118,13 @@ final class CoorditTutorialExampleUITests: XCTestCase {
     private func tap(_ id: String, _ app: XCUIApplication) {
         let target = element(id, app)
         XCTAssertTrue(target.waitForExistence(timeout: 10), id)
-        for _ in 0..<16 where !target.isHittable {
+        for _ in 0..<16 {
+            let coveredByTabBar = !element("usage-guide-close", app).exists && target.frame.maxY > app.frame.maxY - 110
+            if target.isHittable && !coveredByTabBar { break }
             if target.frame.midY < app.frame.midY { app.swipeDown() } else { app.swipeUp() }
         }
         XCTAssertTrue(target.isHittable, id)
+        if id == "closet-example-finish" { capture("closet-example-finish-visible", app) }
         target.tap()
     }
 

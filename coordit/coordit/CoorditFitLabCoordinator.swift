@@ -47,6 +47,12 @@ final class CoorditFitLabCoordinator: ObservableObject {
     @Published private(set) var analysisState: CoorditFitLabAnalysisState = .idle
     @Published private(set) var isAnalysisNoticeVisible = false
     @Published private(set) var authoritativeThreadBalance: Int?
+    @Published private(set) var cameraMeasurement: CoorditGarmentMeasurement?
+    @Published private(set) var cameraReference: CoorditCameraReference?
+    @Published private(set) var cameraBundleAnalysisID: String?
+    private var cameraSessionUserID: String?
+    private var isPreparingCameraAnalysis = false
+    let cameraCapture = CoorditGarmentCaptureController()
 
     let userID: String?
     let fixtureName: String?
@@ -148,11 +154,88 @@ final class CoorditFitLabCoordinator: ObservableObject {
         return false
     }
 
+    func analyzeCameraMeasurement(
+        _ measurement: CoorditGarmentMeasurement,
+        using overrideAPI: (any CoorditFitLabAPI)? = nil,
+        authenticatedUserID: String? = nil
+    ) async throws {
+        guard CoorditGarmentCaptureController.featureEnabled else { throw CoorditFitLabError.invalidDraft("카메라 비교 기능을 준비하고 있어요.") }
+        guard !isPreparingCameraAnalysis, !isAnalysisRunning, loadState != .loading else { throw CoorditFitLabError.invalidDraft("현재 분석을 마친 뒤 다시 시도해주세요.") }
+        guard let owner = authenticatedUserID ?? userID else { throw CoorditFitLabError.loginRequired }
+        guard let selectedAPI = overrideAPI ?? api else { throw CoorditFitLabError.transport("분석 연결을 준비하지 못했어요.") }
+        guard (draft.category == .tshirt && !measurement.isLower || draft.category == .pants && measurement.isLower), !draft.isTutorialExample else { throw CoorditFitLabError.invalidDraft("상품과 같은 종류의 옷을 촬영해주세요.") }
+        _ = try CoorditGarmentMeasurement(id: measurement.id, method: measurement.method, measuredAt: measurement.measuredAt, segments: measurement.segments, lengthBasis: measurement.lengthBasis)
+        isPreparingCameraAnalysis = true
+        defer { isPreparingCameraAnalysis = false }
+        let generation = operationGeneration
+        if cameraMeasurement?.id != measurement.id || cameraReference == nil {
+            let existing = cameraReference
+            let receipt = try await selectedAPI.saveCameraReference(measurement: measurement, existing: existing)
+            guard generation == operationGeneration, (authenticatedUserID == nil || activeHistoryUserID == owner) else { throw CoorditFitLabError.cancelled }
+            cameraMeasurement = measurement
+            cameraReference = receipt
+            if let previousAnalysis = recommendation, existing != nil { cameraBundleAnalysisID = cameraBundleAnalysisID ?? previousAnalysis.fitAnalysisResultID }
+            recommendation = nil; report = nil; reportFailureMessage = nil
+            checkpoint.idempotencyKey = nil; checkpoint.reportIdempotencyKey = nil
+            references.removeAll { $0.id == receipt.reference.id }
+            references.append(receipt.reference)
+            draft.selectedReferenceIDs = [receipt.reference.id]
+            draft.isSourceConfirmed = true
+            cameraSessionUserID = owner
+            persistCameraSession()
+        }
+        if fixtureName == nil, let photo = cameraCapture.garmentPhotoData, let reference = cameraReference {
+            do {
+                try CoorditGarmentPhotoStore.shared.save(photo, userID: owner, clothingID: reference.reference.clothingItemID)
+            } catch {
+                throw CoorditFitLabError.transport("옷 사진을 기기에 보관하지 못했어요. 다시 시도해주세요.")
+            }
+        }
+        analysisState = .running
+        isAnalysisNoticeVisible = true
+        await submit(using: selectedAPI, authenticatedUserID: owner)
+        if let report { cameraBundleAnalysisID = cameraBundleAnalysisID ?? report.fitAnalysisResultID }
+        persistCameraSession()
+        finishBackgroundSubmission()
+        guard report != nil else { throw error ?? .transport(reportFailureMessage ?? "리포트를 준비하지 못했어요. 같은 분석에서 다시 시도할 수 있어요.") }
+    }
+
+    private func persistCameraSession() {
+        guard fixtureName == nil, let owner = cameraSessionUserID, let measurement = cameraMeasurement else { return }
+        let state = CoorditCameraAnalysisState(userID: owner, draft: draft, measurement: measurement, reference: cameraReference, checkpoint: checkpoint, recommendation: recommendation, report: report, bundleAnalysisID: cameraBundleAnalysisID)
+        do { UserDefaults.standard.set(try JSONEncoder().encode(state), forKey: cameraSessionKey(owner)) }
+        catch { self.error = .transport("측정 진행 상황을 기기에 저장하지 못했어요.") }
+    }
+
+    private func cameraSessionKey(_ owner: String) -> String {
+        "coordit.cameraAnalysis.v1." + SHA256.hash(data: Data(owner.utf8)).map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func restoreCameraSession(for owner: String?) {
+        guard CoorditGarmentCaptureController.featureEnabled else { return }
+        guard fixtureName == nil, cameraSessionUserID != owner else { return }
+        persistCameraSession()
+        if cameraSessionUserID != nil { discardAndRestart(clearCameraPersistence: false) }
+        cameraSessionUserID = owner
+        guard let owner, let data = UserDefaults.standard.data(forKey: cameraSessionKey(owner)) else { return }
+        do {
+            let state = try JSONDecoder().decode(CoorditCameraAnalysisState.self, from: data)
+            guard state.userID == owner, [.tshirt, .pants].contains(state.draft.category), CoorditFitLabDraftValidation.submissionError(for: state.draft) == nil else { throw CoorditFitLabError.malformedResponse }
+            _ = try CoorditGarmentMeasurement(id: state.measurement.id, method: state.measurement.method, measuredAt: state.measurement.measuredAt, segments: state.measurement.segments, lengthBasis: state.measurement.lengthBasis)
+            draft = state.draft; cameraMeasurement = state.measurement; cameraReference = state.reference
+            checkpoint = state.checkpoint; recommendation = state.recommendation; report = state.report
+            createdProductID = state.checkpoint.productID
+            createdSizeIDs = state.draft.sizes.compactMap { state.checkpoint.sizeIDsByDraftID[$0.id] }
+            cameraBundleAnalysisID = state.bundleAnalysisID
+            references = state.reference.map { [$0.reference] } ?? []
+        } catch { self.error = .transport("저장한 측정을 불러오지 못했어요. 다시 측정해주세요.") }
+    }
+
     func startSubmission(
         using overrideAPI: (any CoorditFitLabAPI)? = nil,
         authenticatedUserID: String? = nil
     ) {
-        guard submissionTask == nil, loadState != .loading else { return }
+        guard submissionTask == nil, !isPreparingCameraAnalysis, loadState != .loading else { return }
         analysisState = .running
         isAnalysisNoticeVisible = true
         screen = .loading
@@ -370,6 +453,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
                 try ensureActive(generation)
                 checkpoint.productID = product.id
                 createdProductID = product.id
+                persistCameraSession()
             }
 
             guard let productID = checkpoint.productID else {
@@ -385,6 +469,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
                     try ensureActive(generation)
                     checkpoint.sizeIDsByDraftID[row.id] = created.id
                     createdSizeIDs = draft.sizes.compactMap { checkpoint.sizeIDsByDraftID[$0.id] }
+                    persistCameraSession()
                 } catch {
                     let message = "\(row.label) 사이즈 저장에 실패했어요. 완료된 단계는 유지했어요."
                     throw CoorditFitLabError.transport(message)
@@ -401,7 +486,8 @@ final class CoorditFitLabCoordinator: ObservableObject {
                     CoorditFitLabRecommendationRequest(
                         referenceClothingIDs: draft.selectedReferenceIDs.sorted(),
                         externalProductID: productID,
-                        idempotencyKey: idempotencyKey
+                        idempotencyKey: idempotencyKey,
+                        comparisonBundleAnalysisID: cameraMeasurement == nil ? nil : cameraBundleAnalysisID
                     )
                 )
                 try ensureActive(generation)
@@ -419,7 +505,9 @@ final class CoorditFitLabCoordinator: ObservableObject {
                         request: CoorditFitLabReportRequest(
                             idempotencyKey: reportIdempotencyKey(),
                             selectedSizeLabel: recommendation.recommendedSize,
-                            style: nil
+                            style: nil,
+                            comparisonBundleAnalysisID: cameraBundleAnalysisID,
+                            cameraComparison: cameraMeasurement == nil ? nil : true
                         )
                     )
                     try ensureActive(generation)
@@ -450,7 +538,10 @@ final class CoorditFitLabCoordinator: ObservableObject {
         }
     }
 
-    func discardAndRestart() {
+    func discardAndRestart(clearCameraPersistence: Bool = true) {
+        if clearCameraPersistence, fixtureName == nil, let owner = cameraSessionUserID { UserDefaults.standard.removeObject(forKey: cameraSessionKey(owner)) }
+        cameraMeasurement = nil; cameraReference = nil; cameraBundleAnalysisID = nil
+        cameraCapture.clearCapture()
         submissionTask?.cancel()
         submissionTask = nil
         operationGeneration += 1
@@ -524,6 +615,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
 
         let idempotencyKey = UUID().uuidString
         checkpoint.idempotencyKey = idempotencyKey
+        persistCameraSession()
         Self.savePendingSubmissionKey(.init(fingerprint: fingerprint, idempotencyKey: idempotencyKey))
         return idempotencyKey
     }
@@ -532,6 +624,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
         if let idempotencyKey = checkpoint.reportIdempotencyKey { return idempotencyKey }
         let idempotencyKey = UUID().uuidString
         checkpoint.reportIdempotencyKey = idempotencyKey
+        persistCameraSession()
         return idempotencyKey
     }
 
@@ -594,11 +687,15 @@ final class CoorditFitLabCoordinator: ObservableObject {
     }
 
     func prepareHistory(userID: String?) async {
+        if activeHistoryUserID != userID { cameraCapture.clearCapture() }
+        restoreCameraSession(for: userID)
         await switchHistoryUser(to: userID)
     }
 
     @discardableResult
     func deleteLocalHistory(for userID: String) async -> Bool {
+        UserDefaults.standard.removeObject(forKey: cameraSessionKey(userID))
+        if cameraSessionUserID == userID { discardAndRestart(clearCameraPersistence: false); cameraSessionUserID = nil }
         historyGeneration += 1
         historyMutationGeneration += 1
         historyMutationTask?.cancel()
@@ -996,6 +1093,16 @@ final class CoorditFitLabCoordinator: ObservableObject {
     #if DEBUG
     private func seed(route: CoorditFrameRoute, fixture: String?) {
         guard fixture != nil else { return }
+        if fixture?.hasPrefix("camera-") == true {
+            if fixture == "camera-demo" { return }
+            if route == .fitLabInput, cameraMeasurement == nil {
+                draft = CoorditFitLabDraft(source: .url, garmentKind: .upper, category: .tshirt, productName: "코튼 크루넥 티셔츠", sizes: [
+                .init(label: "M", measurements: [.shoulderWidth: 48, .chestWidth: 54, .totalLength: 68, .sleeveLength: 22]),
+                .init(label: "L", measurements: [.shoulderWidth: 50, .chestWidth: 57, .totalLength: 71, .sleeveLength: 23])
+                ], isSourceConfirmed: true)
+            }
+            return
+        }
         switch route {
         case .fitLabLoading:
             submissionStep = .creatingSizes

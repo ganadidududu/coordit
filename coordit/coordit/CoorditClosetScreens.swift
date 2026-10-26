@@ -161,6 +161,7 @@ struct CoorditClosetFamilyView: View {
     @EnvironmentObject var tutorial: CoorditClosetTutorial
     @EnvironmentObject var backendSession: CoorditBackendSessionStore
     @State var selectedCategory: CoorditClosetCategory = .top
+    @State var activeGuide: CoorditUsageGuide?
     @State private var searchText = ""
     @State private var selectedExactCategory: CoorditFitLabCategory?
     @State var detailVariant: CoorditClosetCategory
@@ -241,6 +242,8 @@ struct CoorditClosetFamilyView: View {
                 addLinkScreen(metrics: metrics)
             case .closetAddPhoto:
                 addPhotoScreen(metrics: metrics)
+            case .closetAddSizeChart:
+                addSizeChartScreen(metrics: metrics)
             case .closetAddManual:
                 addManualScreen(metrics: metrics)
             case .closetAddLoading:
@@ -255,6 +258,9 @@ struct CoorditClosetFamilyView: View {
             default:
                 overviewScreen(metrics: metrics)
             }
+        }
+        .sheet(item: $activeGuide) { guide in
+            CoorditUsageGuideSheet(guide: guide, onExample: startClosetExample)
         }
         .onAppear { tutorial.visit(route, draft: draft) }
         .task(id: referenceProfileRefreshKey) {
@@ -274,7 +280,10 @@ struct CoorditClosetFamilyView: View {
 
     private func overviewScreen(metrics: CoorditResponsiveMetrics) -> some View {
         VStack(spacing: 0) {
-            CoorditClosetTitleBar(title: "CLOSET", metrics: metrics) {
+            CoorditFeatureTitleBar(
+                title: "CLOSET", metrics: metrics, accessibilityLabel: "CLOSET",
+                onHelp: { activeGuide = .closet }, helpIdentifier: "closet-tutorial-restart"
+            ) {
                 onRouteChange(.main04)
             }
             .padding(.horizontal, metrics.value(16))
@@ -317,17 +326,6 @@ struct CoorditClosetFamilyView: View {
                 searchField(metrics: metrics)
                 garmentGrid(metrics: metrics)
 
-                Button {
-                    tutorial.restart()
-                    scroll.scrollTo("closet-tutorial-add", anchor: .top)
-                } label: {
-                    Text("Closet 사용법 다시 보기")
-                        .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
-                        .foregroundStyle(CoorditClosetColors.navy)
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                        .contentShape(Rectangle())
-                }
-                .accessibilityIdentifier("closet-tutorial-restart")
                 }
                 .padding(.top, metrics.value(22))
                 .padding(.horizontal, metrics.value(16))
@@ -337,8 +335,12 @@ struct CoorditClosetFamilyView: View {
                 )
             }
             .coorditScrollEdgeTreatment(topFade: metrics.value(18))
+            .onChange(of: tutorial.step) { _, step in
+                if step == .add { scroll.scrollTo("closet-tutorial-add", anchor: .top) }
+            }
             }
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("coordit-screen-closet-overview")
     }
 
@@ -511,6 +513,9 @@ struct CoorditClosetFamilyView: View {
     private func commitDetailPhoto(_ data: Data, for itemID: String) {
         if let itemIndex = items.firstIndex(where: { $0.id == itemID }) {
             items[itemIndex].imageData = data
+            if let clothingID = items[itemIndex].backendClothingItemId {
+                backendSession.saveGarmentPhoto(data, clothingID: clothingID)
+            }
         } else if itemID == "closet-draft-preview" {
             draft.garmentImageData = data
         }

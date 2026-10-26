@@ -922,15 +922,15 @@ final class CoorditFitLabUITests: XCTestCase {
         let app = launchFitLab(fixture: "submission-success")
 
         XCTAssertTrue(element("fitlab-reference-selection", in: app).waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["비교할 기준 옷을 선택해 주세요"].exists)
-        XCTAssertTrue(element("fitlab-similar-reference-notice", in: app).exists)
-        XCTAssertFalse(element("fitlab-submit-analysis", in: app).isEnabled)
+        XCTAssertTrue(app.staticTexts["어떤 옷과 비교할까요?"].exists)
+        XCTAssertFalse(element("fitlab-similar-reference-notice", in: app).exists)
+        XCTAssertFalse(element("fitlab-submit-analysis", in: app).exists)
         capture("task-6-reference-selection", app: app)
 
         let reference = element("fitlab-reference-reference-fixture-hoodie", in: app)
         XCTAssertTrue(reference.waitForExistence(timeout: 5))
         reference.tap()
-        XCTAssertEqual(element("fitlab-selected-reference-count", in: app).label, "선택한 기준 옷 1개")
+        XCTAssertEqual(reference.value as? String, "선택됨")
         element("fitlab-submit-analysis", in: app).tap()
 
         let result = element("fitlab-fixture-result-upper", in: app)

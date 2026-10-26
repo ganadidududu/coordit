@@ -2,6 +2,7 @@ import Foundation
 
 #if os(iOS)
 protocol CoorditFitLabAPI: Sendable {
+    func saveCameraReference(measurement: CoorditGarmentMeasurement, existing: CoorditCameraReference?) async throws -> CoorditCameraReference
     func compatibleReferences(category: CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow]
     func prefillProduct(from request: CoorditFitLabURLPrefillRequest) async throws -> CoorditFitLabURLPrefillResponse
     func createProduct(_ request: CoorditFitLabProductRequest) async throws -> CoorditFitLabExternalProductRow
@@ -46,7 +47,7 @@ struct CoorditFitLabHTTPAPI: CoorditFitLabAPI {
         try await send(path: "/fit-analysis-results/\(analysisID)/report", method: "POST", body: request)
     }
 
-    private func send<Response: Decodable, Body: Encodable>(
+    func send<Response: Decodable, Body: Encodable>(
         path: String,
         method: String,
         body: Body?

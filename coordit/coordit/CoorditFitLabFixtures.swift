@@ -209,6 +209,7 @@ enum CoorditFitLabContractProbe {
 @MainActor
 final class CoorditFitLabFixtureAPI: CoorditFitLabAPI {
     private(set) var requestLedger: [String] = []
+    private(set) var recommendationRequests: [CoorditFitLabRecommendationRequest] = []
     private(set) var lastProductRequest: CoorditFitLabProductRequest?
     private let fixtureName: String?
     private var prefillAttempts = 0
@@ -221,8 +222,14 @@ final class CoorditFitLabFixtureAPI: CoorditFitLabAPI {
         self.fixtureName = fixtureName
     }
 
+    func saveCameraReference(measurement: CoorditGarmentMeasurement, existing: CoorditCameraReference?) async throws -> CoorditCameraReference {
+        requestLedger.append("camera-reference:\(measurement.method.rawValue)")
+        return .init(reference: .init(id: "reference-camera-fixture", clothingItemID: "clothing-camera-fixture", nickname: measurement.isLower ? "잘 맞는 바지" : "잘 맞는 티셔츠", category: measurement.isLower ? .pants : .tshirt, fitType: "regular", preferenceScore: 100, isActive: true), clothingSizeID: "size-camera-fixture")
+    }
+
     func compatibleReferences(category: CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow] {
         requestLedger.append("references:\(category.rawValue)")
+        if fixtureName?.hasPrefix("camera-") == true { return [] }
         if fixtureName == "url-category-race" {
             if category == .shirt {
                 try? await Task.sleep(for: .seconds(30))
@@ -322,6 +329,7 @@ final class CoorditFitLabFixtureAPI: CoorditFitLabAPI {
     }
 
     func recommend(_ request: CoorditFitLabRecommendationRequest) async throws -> CoorditFitLabRecommendationResponse {
+        recommendationRequests.append(request)
         requestLedger.append("recommend")
         if fixtureName == "submission-recommendation-race" {
             await withCheckedContinuation { continuation in

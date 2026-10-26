@@ -680,6 +680,7 @@ final class CoorditBackendSessionStore: ObservableObject {
         from draft: CoorditClosetDraft,
         idempotencyKey: String
     ) async -> CoorditClothingSaveResult? {
+        let photoOwner = session?.user.id
 #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--coordit-test-closet-save-success") {
             let clothingSizeRequest = await CoorditFitLabSizeExtractor.referenceClothingSizeRequest(from: draft)
@@ -716,6 +717,14 @@ final class CoorditBackendSessionStore: ObservableObject {
             }
             statusText = "보유 의류를 옷장에 저장했어요."
             isWarning = false
+            if let photoOwner, let photo = draft.garmentImageData {
+                do {
+                    try CoorditGarmentPhotoStore.shared.save(photo, userID: photoOwner, clothingID: saved.clothingItem.id)
+                } catch {
+                    statusText = "옷은 저장했지만 사진을 기기에 보관하지 못했어요. 옷장에서 사진을 다시 추가해주세요."
+                    isWarning = true
+                }
+            }
             return CoorditClothingSaveResult(
                 clothingItemId: saved.clothingItem.id,
                 sizeChart: CoorditClosetSizeChart(
@@ -731,7 +740,7 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
     func loadClosetSnapshot(preserving localItems: [CoorditClosetItem]) async -> CoorditClosetServerSnapshot? {
-        guard session != nil else { return nil }
+        guard let photoOwner = session?.user.id else { return nil }
         #if DEBUG
         if usesAuthenticatedUITestFixture { return nil }
         #endif
@@ -776,7 +785,7 @@ final class CoorditBackendSessionStore: ObservableObject {
                     score: local?.score ?? 0,
                     scoreColor: CoorditClosetColors.navy,
                     route: parent == .top ? .closetDetailTop : .closetDetailBottom,
-                    imageData: local?.imageData,
+                    imageData: local?.imageData ?? CoorditGarmentPhotoStore.shared.photo(userID: photoOwner, clothingID: response.id),
                     fitDiffs: local?.fitDiffs,
                     sizeChart: sizeChartByClothingID[response.id] ?? local?.sizeChart,
                     backendClothingItemId: response.id,
@@ -799,6 +808,7 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
     func deleteClothingItem(id: String) async -> Bool {
+        let photoOwner = session?.user.id
         guard session != nil else {
             statusText = "로그인되지 않은 로컬 의류를 삭제했어요."
             isWarning = false
@@ -810,11 +820,27 @@ final class CoorditBackendSessionStore: ObservableObject {
             }
             statusText = "옷장에서 의류를 삭제했어요."
             isWarning = false
+            if let photoOwner {
+                do { try CoorditGarmentPhotoStore.shared.remove(userID: photoOwner, clothingID: id) }
+                catch {
+                    statusText = "옷은 삭제했지만 기기에 남은 사진을 지우지 못했어요."
+                    isWarning = true
+                }
+            }
             return true
         } catch {
             statusText = error.localizedDescription
             isWarning = true
             return false
+        }
+    }
+
+    func saveGarmentPhoto(_ data: Data, clothingID: String) {
+        guard let owner = session?.user.id else { return }
+        do { try CoorditGarmentPhotoStore.shared.save(data, userID: owner, clothingID: clothingID) }
+        catch {
+            statusText = "사진을 기기에 보관하지 못했어요. 다시 추가해주세요."
+            isWarning = true
         }
     }
 

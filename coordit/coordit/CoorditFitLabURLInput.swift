@@ -52,7 +52,7 @@ struct CoorditFitLabURLInputView: View {
                 ledgerProbe
                 #endif
             }
-            .padding(.horizontal, metrics.value(33))
+            .padding(.horizontal, metrics.value(22))
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
@@ -90,10 +90,10 @@ struct CoorditFitLabURLInputView: View {
 
     private var entry: some View {
         VStack(alignment: .leading, spacing: metrics.value(12)) {
-            Text("상품 링크에서 사이즈표 가져오기")
+            Text("상품 링크를 넣어주세요")
                 .font(CoorditTypography.gmarketBold(size: metrics.value(18), relativeTo: .headline))
                 .foregroundStyle(Color.black)
-            Text("링크를 입력하고 옷 종류를 먼저 선택해 주세요.\n가져온 값은 저장 전에 수정할 수 있어요.")
+            Text("사이즈는 자동으로 불러와요.")
                 .font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .body))
                 .foregroundStyle(Color.black.opacity(0.65))
                 .fixedSize(horizontal: false, vertical: true)
@@ -115,39 +115,14 @@ struct CoorditFitLabURLInputView: View {
                     .accessibilityIdentifier("fitlab-url-field")
                     .disabled(isLoading)
 
-                HStack(spacing: metrics.value(12)) {
-                    PasteButton(payloadType: String.self) { values in
-                        guard let value = values.first else { return }
-                        focusedField = "url"
-                        urlText = value.trimmingCharacters(in: .whitespacesAndNewlines)
-                    }
-                    .tint(CoorditFitLabPalette.ink)
-                    .disabled(isLoading)
-                    .accessibilityIdentifier("fitlab-url-paste")
-
-                    if tutorial.step == .link {
-                        Button("다음", action: completeLinkEntry)
-                            .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary, height: 44))
-                            .disabled(isLoading || Self.validatedURL(from: urlText) == nil)
-                            .accessibilityIdentifier("fitlab-url-next")
-                    }
+                if tutorial.step == .link {
+                    Button("다음", action: completeLinkEntry)
+                        .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary, height: 44))
+                        .disabled(isLoading || Self.validatedURL(from: urlText) == nil)
+                        .accessibilityIdentifier("fitlab-url-next")
                 }
             }
             .fitLabTutorialTarget(.link)
-
-            Button("링크가 없나요? 예시 링크로 체험하기") {
-                urlText = CoorditTutorialExample.link
-                tutorial.restart()
-                tutorial.show(.link)
-                completeLinkEntry()
-            }
-            .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary, height: 44))
-            .disabled(isLoading)
-            .accessibilityIdentifier("fitlab-example-link")
-
-            Text("가져올 옷 분류")
-                .font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))
-                .foregroundStyle(Color.black)
 
             classificationControls
 
@@ -162,7 +137,7 @@ struct CoorditFitLabURLInputView: View {
             Button(action: startImport) {
                 HStack {
                     if isLoading { ProgressView().tint(.white) }
-                    Text(isLoading ? "가져오는 중" : "링크에서 가져오기")
+                    Text(isLoading ? "불러오는 중" : "다음")
                 }
                 .font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))
                 .foregroundStyle(.white)
@@ -317,7 +292,7 @@ struct CoorditFitLabURLInputView: View {
                     .accessibilityIdentifier("fitlab-url-validation-error")
             }
 
-            Button(action: confirm) {
+            Button { confirm() } label: {
                 Text("확인하고 기준 옷 선택으로")
                     .font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))
                     .foregroundStyle(.white)
@@ -478,25 +453,7 @@ struct CoorditFitLabURLInputView: View {
     }
 
     private var classificationControls: some View {
-        VStack(alignment: .leading, spacing: metrics.value(10)) {
-            Picker("상의 또는 하의", selection: kindBinding) {
-                Text("상의").tag(CoorditFitLabGarmentKind.upper)
-                Text("하의").tag(CoorditFitLabGarmentKind.lower)
-            }
-            .pickerStyle(.segmented)
-            .accessibilityIdentifier("fitlab-url-kind-picker")
-
-            Picker("세부 카테고리", selection: categoryBinding) {
-                ForEach(availableCategories) { option in
-                    Text(title(for: option))
-                        .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
-                        .tag(option)
-                }
-            }
-            .pickerStyle(.menu)
-            .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
-            .accessibilityIdentifier("fitlab-url-category-picker")
-        }
+        CoorditGarmentCategorySelector(kind: kindBinding, category: categoryBinding, metrics: metrics, identifier: "fitlab-url")
         .disabled(isLoading)
     }
 
@@ -594,6 +551,7 @@ struct CoorditFitLabURLInputView: View {
                 apply(response)
                 stage = .review
                 isLoading = false
+                confirm(automatically: true)
             } catch let error as CoorditFitLabError {
                 guard !Task.isCancelled, generation == importGeneration, stage == .entry else { return }
                 errorMessage = error.errorDescription ?? "상품 정보를 가져오지 못했어요."
@@ -650,7 +608,7 @@ struct CoorditFitLabURLInputView: View {
         validationMessage = nil
     }
 
-    private func confirm() {
+    private func confirm(automatically: Bool = false) {
         focusedField = nil
         let trimmedName = productName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty, !rows.isEmpty else {
@@ -687,6 +645,10 @@ struct CoorditFitLabURLInputView: View {
             parsedRows.append(CoorditFitLabSizeDraft(id: row.id, label: label, measurements: measurements))
         }
 
+        if automatically, !CoorditFitLabImportAcceptance.canContinue(sizes: parsedRows, kind: kind) {
+            validationMessage = "읽지 못한 치수만 확인해주세요."
+            return
+        }
         draft.source = .url
         draft.garmentKind = kind
         draft.category = category
@@ -695,7 +657,7 @@ struct CoorditFitLabURLInputView: View {
         draft.brand = trimmedBrand.isEmpty ? nil : trimmedBrand
         draft.sizes = parsedRows
         draft.ocrMetadata = nil
-        draft.isSourceConfirmed = false
+        draft.isSourceConfirmed = true
         draft.selectedReferenceIDs.removeAll()
         validationMessage = nil
         stage = .confirmed
