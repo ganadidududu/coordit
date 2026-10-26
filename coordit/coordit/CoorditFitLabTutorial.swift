@@ -9,7 +9,7 @@ final class CoorditFitLabTutorial: ObservableObject {
 
         var title: String {
             switch self {
-            case .source: "비교할 상품 불러오기"
+            case .source: "입력 방식 선택하기"
             case .link: "상품 링크 입력하기"
             case .importLink: "상품 정보 불러오기"
             case .review: "사이즈표 확인하기"
@@ -23,7 +23,7 @@ final class CoorditFitLabTutorial: ObservableObject {
 
         var message: String {
             switch self {
-            case .source: "구매하려는 옷과 내 기준 옷을 비교합니다. 링크로 불러오기를 누릅니다."
+            case .source: "실제 핏 분석에는 Closet에 등록하고 기준 의류로 선택한 옷이 필요해요. 준비됐다면 링크·사진·직접 입력 중 편한 방식을 고르세요. 예시 체험에는 샘플 기준 의류가 제공돼요."
             case .link: "상품 페이지 주소를 입력하거나 붙여넣고 다음을 누릅니다. 옷 종류도 상품에 맞게 선택합니다."
             case .importLink: "링크에서 가져오기를 누르면 상품 정보와 사이즈표를 불러옵니다. 아직 분석이나 실타래 사용은 진행되지 않습니다."
             case .review: "위의 상품명과 사이즈별 실측을 확인합니다. 잘못된 값은 수정하고 확인 버튼을 누릅니다."
@@ -82,7 +82,7 @@ private struct CoorditFitLabTutorialTarget: ViewModifier {
         if enabled {
             content.modifier(CoorditTutorialTarget(
                 isActive: enabled && tutorial.step == step,
-                progress: "FIT LAB 가이드 · \(step.rawValue + 1)/\(CoorditFitLabTutorial.Step.allCases.count)",
+                progress: "FIT LAB 가이드",
                 title: step.title,
                 message: message ?? step.message,
                 identifier: "fitlab-tutorial",
@@ -96,23 +96,6 @@ private struct CoorditFitLabTutorialTarget: ViewModifier {
     }
 }
 
-private struct CoorditFitLabTutorialScroll: ViewModifier {
-    @EnvironmentObject private var tutorial: CoorditFitLabTutorial
-
-    func body(content: Content) -> some View {
-        ScrollViewReader { scroll in
-            content
-                .closetTutorialViewport()
-                .task(id: tutorial.step) {
-                    guard let step = tutorial.step else { return }
-                    await Task.yield()
-                    guard !Task.isCancelled else { return }
-                    scroll.scrollTo(step, anchor: .top)
-                }
-        }
-    }
-}
-
 extension View {
     func fitLabTutorialTarget(
         _ step: CoorditFitLabTutorial.Step,
@@ -122,6 +105,5 @@ extension View {
         modifier(CoorditFitLabTutorialTarget(step: step, message: message, enabled: enabled))
     }
 
-    func fitLabTutorialScroll() -> some View { modifier(CoorditFitLabTutorialScroll()) }
 }
 #endif

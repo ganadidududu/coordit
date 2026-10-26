@@ -96,9 +96,19 @@ extension CoorditClosetFamilyView {
             onRouteChange(.closetOverview)
         } onSelect: { method in
             resetPendingSave()
+            if draft.isTutorialExample { draft = CoorditClosetDraft() }
             tutorial.advance(from: .method, to: .link)
             draft.method = method
             onRouteChange(method.route)
+        } onExample: {
+            resetPendingSave()
+            draft = CoorditClosetDraft()
+            draft.method = .link
+            draft.productLink = CoorditTutorialExample.link
+            tutorial.restart()
+            tutorial.advance(from: .add, to: .method)
+            tutorial.updateLink(draft.productLink)
+            onRouteChange(.closetAddLink)
         }
     }
 
@@ -156,6 +166,14 @@ extension CoorditClosetFamilyView {
         let submittedDraft = draft
         let trimmedName = submittedDraft.trimmedName
         guard !trimmedName.isEmpty else { return }
+        if submittedDraft.method != .link { tutorial.advance(from: .link, to: .register) }
+
+        if submittedDraft.isTutorialExample {
+            selectedItemID = nil
+            tutorial.advance(from: .register, to: .score)
+            onRouteChange(.closetAddResult)
+            return
+        }
 
         let item = CoorditClosetItem(
             id: UUID().uuidString,
@@ -214,6 +232,7 @@ private struct CoorditClosetAddMethodScreen: View {
     let metrics: CoorditResponsiveMetrics
     let onBack: () -> Void
     let onSelect: (CoorditClosetAddMethod) -> Void
+    let onExample: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
@@ -273,9 +292,12 @@ private struct CoorditClosetAddMethodScreen: View {
                         }
                         .coorditPressFeedback()
                         .accessibilityIdentifier("closet-add-method-\(method.rawValue)")
-                        .modifier(ClosetLinkMethodTutorialModifier(isLink: method == .link))
                     }
                 }
+                .closetTutorialTarget(.method)
+                Button("준비된 정보가 없나요? 예시 링크로 체험하기", action: onExample)
+                    .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary, height: 44))
+                    .accessibilityIdentifier("closet-method-example")
                 }
                 .padding(.top, metrics.value(18))
                 .padding(.horizontal, metrics.value(22))
@@ -285,7 +307,6 @@ private struct CoorditClosetAddMethodScreen: View {
                 )
             }
             .coorditScrollEdgeTreatment(topFade: metrics.value(18))
-            .closetTutorialViewport()
         }
         .accessibilityIdentifier("coordit-screen-closet-add-method")
     }
@@ -318,9 +339,11 @@ private struct CoorditClosetLinkInputScreen: View {
             CoorditClosetTitleBar(title: "LINK INPUT", metrics: metrics, horizontalOutset: 6, onBack: onBack)
                 .padding(.horizontal, metrics.value(22))
 
-            ScrollViewReader { scroll in
             ScrollView(showsIndicators: false) {
                 VStack(spacing: metrics.value(16)) {
+                if draft.isTutorialExample {
+                    CoorditExampleNotice()
+                }
                 CoorditClosetBasicsCard(draft: $draft, metrics: metrics, showsName: false)
 
                 CoorditClosetFormCard(title: "상품 링크", subtitle: "사이즈 정보가 있는 상품 페이지 주소를 붙여넣어 주세요.", metrics: metrics) {
@@ -347,6 +370,19 @@ private struct CoorditClosetLinkInputScreen: View {
 
                 .closetTutorialTarget(.link)
                 .id(CoorditClosetTutorial.Step.link)
+
+                if !draft.isTutorialExample {
+                Button("링크가 없나요? 예시 링크로 체험하기") {
+                    draft.productLink = CoorditTutorialExample.link
+                    isLinkFocused = false
+                    tutorial.restart()
+                    tutorial.advance(from: .add, to: .method)
+                    tutorial.updateLink(draft.productLink)
+                }
+                .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary, height: 44))
+                .disabled(isExtracting)
+                .accessibilityIdentifier("closet-example-link")
+                }
 
                 if let extractionError {
                     CoorditClosetFormCard(title: "링크에서 표를 찾지 못했어요", subtitle: extractionError, metrics: metrics) {
@@ -430,15 +466,7 @@ private struct CoorditClosetLinkInputScreen: View {
                 )
             }
             .coorditScrollEdgeTreatment(topFade: metrics.value(18))
-            .closetTutorialViewport()
             .scrollDismissesKeyboard(.immediately)
-            .onChange(of: tutorial.step) { _, step in
-                guard let step else { return }
-                if step == .analyze || step == .size || step == .register {
-                    scroll.scrollTo(step, anchor: .top)
-                }
-            }
-            }
         }
         .accessibilityIdentifier("coordit-screen-closet-add-link")
         .onChange(of: draft.productLink) { _, value in
@@ -483,10 +511,12 @@ private struct CoorditClosetLinkInputScreen: View {
             }
 #endif
             do {
-                let response = try await backendSession.prefillClosetProduct(
-                    from: url,
-                    category: draft.exactCategory
-                )
+                let response: CoorditFitLabURLPrefillResponse
+                if CoorditTutorialExample.matches(url) {
+                    response = CoorditTutorialExample.product(category: draft.exactCategory)
+                } else {
+                    response = try await backendSession.prefillClosetProduct(from: url, category: draft.exactCategory)
+                }
                 draft.name = response.productName
                 draft.category = response.category.garmentKind == .upper ? .top : .bottom
                 draft.exactCategory = response.category
@@ -633,6 +663,7 @@ private struct CoorditClosetPhotoInputScreen: View {
                         .accessibilityIdentifier("closet-size-chart-camera")
                     }
                 }
+                .closetTutorialTarget(.link, title: "사이즈표 사진으로 등록하기", message: "의류 이름을 입력하고 사이즈표 사진을 골라 표 부분을 잘라주세요. 읽어 온 사이즈 중 내 사이즈를 선택한 뒤 등록하면 결과를 확인할 수 있어요.")
 
                 if isRecognizing {
                     ProgressView("사이즈별 표를 읽는 중…")
@@ -942,6 +973,7 @@ private struct CoorditClosetManualInputScreen: View {
                         }
                     }
                 }
+                .closetTutorialTarget(.link, title: "실측 사이즈 직접 입력하기", message: "의류 이름과 종류를 선택하고 내 옷의 실측을 cm로 입력하세요. 보유 의류 등록하기를 누르면 등록 결과로 이어져요.")
 
                 CoorditClosetSubmitButton(title: "보유 의류 등록하기", isEnabled: isReady, metrics: metrics, action: onSubmit)
                 }

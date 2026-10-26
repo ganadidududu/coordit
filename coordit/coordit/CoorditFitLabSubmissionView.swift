@@ -16,6 +16,7 @@ struct CoorditFitLabSubmissionView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: metrics.value(14)) {
+                if coordinator.draft.isTutorialExample { CoorditExampleNotice() }
                 if coordinator.recommendation != nil {
                     resultPanel
                 } else {
@@ -27,7 +28,6 @@ struct CoorditFitLabSubmissionView: View {
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
-        .fitLabTutorialScroll()
         .onAppear { updateTutorialSelection() }
         .onChange(of: coordinator.draft.selectedReferenceIDs) { _, _ in updateTutorialSelection() }
         .onChange(of: coordinator.references) { _, _ in updateTutorialSelection() }
@@ -153,7 +153,7 @@ struct CoorditFitLabSubmissionView: View {
             .coorditPressFeedback()
             .disabled(!coordinator.canSubmit || coordinator.loadState == .loading)
             .accessibilityIdentifier(coordinator.retryStep == nil ? "fitlab-submit-analysis" : "fitlab-retry-submission")
-            .fitLabTutorialTarget(.analyze)
+            .fitLabTutorialTarget(.analyze, message: coordinator.draft.isTutorialExample ? "예시 기준 옷을 선택했어요. 핏 분석 시작을 눌러 예시 결과를 확인하세요. 실타래는 사용되지 않아요." : nil)
 
             Text("다른 탭으로 이동해도 계산은 계속돼요. 완료되면 앱에서 알려드릴게요.")
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))

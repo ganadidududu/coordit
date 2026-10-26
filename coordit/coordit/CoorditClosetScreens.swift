@@ -337,10 +337,6 @@ struct CoorditClosetFamilyView: View {
                 )
             }
             .coorditScrollEdgeTreatment(topFade: metrics.value(18))
-            .closetTutorialViewport()
-            .onChange(of: tutorial.step) { _, step in
-                if step == .add { scroll.scrollTo("closet-tutorial-add", anchor: .top) }
-            }
             }
         }
         .accessibilityIdentifier("coordit-screen-closet-overview")

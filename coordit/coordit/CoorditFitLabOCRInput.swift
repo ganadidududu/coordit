@@ -140,6 +140,7 @@ struct CoorditFitLabOCRInputView: View {
                 Text("사이즈표 이미지 가져오기")
                     .font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))
                     .foregroundStyle(Color.black)
+                    .fitLabTutorialTarget(.review, message: "사이즈표 사진을 고르고 표 영역을 잘라주세요. 읽어 온 값을 확인·수정한 뒤 기준 옷 선택과 분석으로 이어져요. 화면을 자유롭게 스크롤하며 살펴보세요.")
                 Text("사진은 기기 안에서만 Vision으로 읽으며 서버에 업로드하지 않아요.")
                     .font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .footnote))
                     .foregroundStyle(Color.black.opacity(0.66))
@@ -275,6 +276,7 @@ struct CoorditFitLabOCRInputView: View {
                     Text("저장 전 확인 필요")
                         .font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .caption))
                 }
+                .fitLabTutorialTarget(.review, message: "사진에서 읽은 상품명과 실측을 확인하고 잘못된 값을 수정하세요. 아래 확인 버튼을 누르면 기준 옷 선택으로 이어져요.")
 
                 if result?.didFindTable == false {
                     Text("표를 완전히 읽지 못했어요. 원문을 보며 값을 직접 채워 주세요.")

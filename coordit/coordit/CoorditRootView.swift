@@ -173,10 +173,6 @@ struct CoorditRootView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .overlayPreferenceValue(CoorditClosetSpotlightKey.self) { bounds in
-            CoorditClosetSpotlight(bounds: bounds)
-                .ignoresSafeArea()
-        }
         .buttonStyle(CoorditPressFeedbackButtonStyle())
         .task(id: backendSession.isAuthenticated) {
             if backendSession.isAuthenticated {
