@@ -8,7 +8,7 @@ type VerifyBearer = (token: string) => Promise<AuthUser | null>;
 const verifySupabaseBearer: VerifyBearer = async (token) => {
   const { data } = await supabase.auth.getUser(token);
   if (!data.user) return null;
-  return { id: data.user.id, email: data.user.email };
+  return { id: data.user.id, email: data.user.email, isAnonymous: data.user.is_anonymous !== false };
 };
 
 export const authenticateBearer = async (

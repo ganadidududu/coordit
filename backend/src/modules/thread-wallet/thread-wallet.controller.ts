@@ -41,10 +41,10 @@ export const getMonetizationReadinessController = (
   next: NextFunction
 ): void => {
   try {
-    requireUser(req);
+    const user = requireUser(req);
     res.json({
       rewardedAdsEnabled: env.admobRewardedEnabled,
-      iapEnabled: env.appleIapEnabled
+      iapEnabled: env.appleIapEnabled && user.isAnonymous === false
     });
   } catch (error) { // no-excuse-ok: catch -- Express forwards boundary errors centrally.
     next(error);
@@ -56,10 +56,14 @@ export const createAppleIapPurchaseController = (
 ) => {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const user = requireUser(req);
+      if (user.isAnonymous !== false) {
+        throw createHttpError(403, "실타래를 구매하려면 먼저 계정을 연결해 주세요.");
+      }
       const parsed = appleIapPurchaseRequestSchema.safeParse(req.body);
       if (!parsed.success) throw createHttpError(400, "signedTransaction is required");
       const result = await dependencies.submitAppleIapPurchase({
-        userId: requireUser(req).id,
+        userId: user.id,
         signedTransaction: parsed.data.signedTransaction
       });
       res.status(result.status === "credited" ? 201 : 200).json(result);

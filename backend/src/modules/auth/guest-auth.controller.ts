@@ -1,4 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
+import { z } from "zod";
+import { createHttpError } from "../../shared/utils/http-error";
 import { asRequiredString, requireUser } from "../../shared/utils/request";
 import { appleDeviceWelcomeRegistry } from "./apple-device-check";
 import {
@@ -35,7 +37,9 @@ export const createGuestWelcomeController = (
 ) => async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const user = requireUser(req);
-    const deviceToken = asRequiredString(req.body.deviceToken, "deviceToken");
+    const parsedToken = z.string().trim().min(1).max(8192).safeParse(asRequiredString(req.body.deviceToken, "deviceToken"));
+    if (!parsedToken.success) throw createHttpError(400, "DeviceCheck token is invalid");
+    const deviceToken = parsedToken.data;
     res.json(await dependencies.claimWelcome(user.id, deviceToken));
   } catch (error) {
     next(error);

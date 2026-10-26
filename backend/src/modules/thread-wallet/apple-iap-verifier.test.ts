@@ -81,12 +81,13 @@ const tests: readonly { readonly name: string; readonly run: () => Promise<void>
     }
   },
   {
-    name: "accepts Apple-verified Sandbox data after production verification rejects its environment",
+    name: "accepts Apple-verified Sandbox data only with explicit sandbox configuration",
     run: async () => {
       // Given: production verification rejects and Apple Sandbox verification succeeds.
       const sandboxTransaction = { ...productionTransaction, environment: "Sandbox" };
       const verifier = createAppleIapVerifier({
         configuration,
+        allowSandbox: true,
         decoders: {
           production: rejectingDecoder(),
           sandbox: decoderWith({}, sandboxTransaction)
@@ -98,6 +99,44 @@ const tests: readonly { readonly name: string; readonly run: () => Promise<void>
 
       // Then: the Apple-signed Sandbox environment is retained for the ledger.
       assert.equal(transaction.environment, "Sandbox");
+    }
+  },
+  {
+    name: "rejects Sandbox transactions by default",
+    run: async () => {
+      // Given: an authentic Sandbox transaction reaches the default verifier.
+      const verifier = createAppleIapVerifier({
+        configuration,
+        decoders: {
+          production: rejectingDecoder(),
+          sandbox: decoderWith({}, { ...productionTransaction, environment: "Sandbox" })
+        }
+      });
+      // When/Then: production settlement cannot mint paid threads from test purchases.
+      await expectHttpStatus(() => verifier.verifyTransaction("sandbox-purchase"), 400);
+    }
+  },
+  {
+    name: "verifies revoked nested claims for a refund notification",
+    run: async () => {
+      // Given: Apple verified a refund with a revoked consumable transaction.
+      const verifier = createAppleIapVerifier({
+        configuration,
+        decoders: {
+          production: decoderWith({
+            notificationType: "REFUND", notificationUUID, version: "2.0",
+            data: {
+              environment: "Production", appAppleId: configuration.appAppleId,
+              bundleId: configuration.bundleId, signedTransactionInfo: "revoked-transaction"
+            }
+          }, { ...productionTransaction, revocationDate: Date.parse("2026-08-22T00:00:00Z"), revocationReason: 1 }),
+          sandbox: rejectingDecoder()
+        }
+      });
+      // When: the verified refund crosses the settlement boundary.
+      const notification = await verifier.verifyNotification("refund-notification");
+      // Then: settlement receives a clawback rather than a record-only receipt.
+      assert.equal(notification.kind, "revoke");
     }
   },
   ...[

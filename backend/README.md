@@ -14,14 +14,33 @@ npm run typecheck
 
 `POST /auth/guest` creates a Supabase anonymous session without requiring a
 social login. `POST /auth/guest/welcome` verifies the iOS DeviceCheck token and
-issues the one-time three-thread welcome grant. The second endpoint fails closed
-when DeviceCheck is unavailable, so reinstalling cannot mint another grant.
+issues the one-time three-thread welcome grant. New profiles start at zero;
+account creation never credits a wallet. A database-wide fenced lease serializes
+Apple's query/update sequence across server instances. Apple failures or expired
+leases cannot credit the wallet. Replayed claims return the current spent balance.
+
+iOS keeps an anonymous recovery session in a separate device-only Keychain item.
+Logout clears the active session while retaining recovery; a reinstall with that
+Keychain item restores the same server account and balance. A damaged or rejected
+recovery record never silently creates a new guest. Explicit account deletion and
+successful guest-to-member merge remove the old guest recovery record.
+
+Apply the four `20261026` hardening migrations in filename order before deploying
+the matching backend and iOS build. Existing balances remain unchanged. Legacy
+guests mark DeviceCheck on their next welcome request without another award.
+See [wallet hardening and validation](../docs/THREAD_WALLET_HARDENING.md) for rollout
+requirements, regression scenarios, and physical-device limitations.
 
 Apple and Google login requests can include the current guest bearer token and
-refresh token. A new social identity is linked to the anonymous Supabase user in
-place. If that identity already belongs to a member, the backend atomically
-merges the guest's closet, Fit Lab history, and remaining thread balance into
-the existing account.
+refresh token. Native ID-token login resolves the verified social account, then
+atomically merges the guest's closet, Fit Lab history, balance, refund debt, and
+purchase/reward ownership into that account. Original provider identities remain
+available for pending purchase and reward callbacks.
+
+Paid thread purchases require a linked member account. The verified bearer identity
+controls HTTP eligibility; the purchase service and database independently verify
+membership. Guests retain free threads and rewarded ads. Apple server purchase
+notifications use the same database membership guard; refunds remain processable.
 
 `POST /fit/recommend` performs one metered MVP recommendation with Supabase persistence.
 It requires a UUID `idempotencyKey`; clients must reuse that key while retrying the same analysis.

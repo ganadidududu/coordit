@@ -8,6 +8,7 @@ import { env } from "../../config/env";
 import { createHttpError } from "../../shared/utils/http-error";
 import {
   parseAppleNotificationClaims,
+  parseAppleRevokedTransactionClaims,
   parseAppleTransactionClaims,
   type AppleIapEnvironment,
   type AppleIapVerifiedNotification,
@@ -26,6 +27,7 @@ type AppleEnvironmentDecoders = {
 };
 
 type AppleIapVerifierDependencies = {
+  readonly allowSandbox?: boolean;
   readonly configuration: AppleVerifierConfiguration;
   readonly decoders: AppleEnvironmentDecoders;
 };
@@ -47,7 +49,8 @@ const verificationFailure = (): never => {
 
 const decodeWithAppleSignature = async (
   decoders: AppleEnvironmentDecoders,
-  operation: (decoder: AppleSignedDataDecoder) => Promise<unknown>
+  operation: (decoder: AppleSignedDataDecoder) => Promise<unknown>,
+  allowSandbox: boolean
 ): Promise<DecodedAppleData> => {
   try {
     return {
@@ -58,6 +61,8 @@ const decodeWithAppleSignature = async (
   } catch (error) {
     if (!(error instanceof VerificationException)) throw error;
   }
+
+  if (!allowSandbox) return verificationFailure();
 
   try {
     return {
@@ -91,7 +96,8 @@ export const createAppleIapVerifier = (
   ): Promise<AppleIapVerifiedTransaction> => {
     const decoded = await decodeWithAppleSignature(
       dependencies.decoders,
-      (decoder) => decoder.verifyAndDecodeTransaction(signedTransaction)
+      (decoder) => decoder.verifyAndDecodeTransaction(signedTransaction),
+      dependencies.allowSandbox === true
     );
     const transaction = parseAppleTransactionClaims(
       decoded.payload,
@@ -108,7 +114,8 @@ export const createAppleIapVerifier = (
     ): Promise<AppleIapVerifiedNotification> => {
       const decoded = await decodeWithAppleSignature(
         dependencies.decoders,
-        (decoder) => decoder.verifyAndDecodeNotification(signedPayload)
+        (decoder) => decoder.verifyAndDecodeNotification(signedPayload),
+        dependencies.allowSandbox === true
       );
       const envelope = parseAppleNotificationClaims(
         decoded.payload,
@@ -117,8 +124,19 @@ export const createAppleIapVerifier = (
       if (envelope.environment !== decoded.environment) return verificationFailure();
 
       if (envelope.signedTransaction !== null) {
+        const nestedPayload = await decodeNestedTransaction(decoded.decoder, envelope.signedTransaction);
+        if (envelope.revokesPurchase) {
+          const revoked = parseAppleRevokedTransactionClaims(nestedPayload, dependencies.configuration);
+          if (revoked.transaction.environment !== envelope.environment) return verificationFailure();
+          if (envelope.notificationType !== "REFUND" && envelope.notificationType !== "REVOKE") return verificationFailure();
+          return {
+            kind: "revoke", notificationUUID: envelope.notificationUUID,
+            notificationType: envelope.notificationType, subtype: envelope.subtype,
+            environment: envelope.environment, ...revoked
+          };
+        }
         const transaction = parseAppleTransactionClaims(
-          await decodeNestedTransaction(decoded.decoder, envelope.signedTransaction),
+          nestedPayload,
           dependencies.configuration
         );
         if (transaction.environment !== envelope.environment) return verificationFailure();
@@ -153,6 +171,8 @@ const createProductionAppleVerifier = async (): Promise<AppleIapVerifier> => {
     env.appleIapRootCertificatePaths.map((path) => readFile(path))
   );
   return createAppleIapVerifier({
+    allowSandbox: (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test")
+      && process.env.APPLE_IAP_ALLOW_SANDBOX === "true",
     configuration: {
       appAppleId: env.appleIapAppAppleId,
       bundleId: env.appleIapBundleId

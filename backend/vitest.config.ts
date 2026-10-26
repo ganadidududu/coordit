@@ -16,6 +16,11 @@ export default defineConfig({
       "src/modules/auth/auth-apple.http.test.ts",
       "src/modules/auth/auth-google.http.test.ts",
       "src/modules/auth/auth-refresh.http.test.ts",
+      "src/modules/auth/guest-auth.service.test.ts",
+      "src/modules/auth/guest-auth.http.test.ts",
+      "src/modules/auth/apple-device-check.test.ts",
+      "src/modules/auth/social-auth-upgrade.service.test.ts",
+      "src/modules/thread-wallet/thread-purchase-membership.test.ts",
       "src/config/env.test.ts",
       "src/middleware/**/*.test.ts"
     ]

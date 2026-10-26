@@ -2,6 +2,7 @@ import { supabase, supabaseAuth } from "../../config/supabase";
 import { createHttpError } from "../../shared/utils/http-error";
 import { upsertUserProfile } from "../users/users.service";
 import type { AuthResponse } from "./auth.service";
+import { getThreadBalance } from "../thread-wallet/thread-wallet.service";
 import type {
   GuestClaimState,
   GuestSessionRepository,
@@ -44,12 +45,12 @@ export const guestSessionRepository: GuestSessionRepository = {
   },
 };
 
-const singleBalance = async (
-  functionName: "complete_guest_welcome_claim" | "deny_guest_welcome_claim",
-  userId: string
+const completeClaim = async (
+  userId: string,
+  leaseId: string
 ): Promise<number> => {
   const { data, error } = await supabase
-    .rpc(functionName, { p_user_id: userId })
+    .rpc("complete_guest_welcome_claim", { p_user_id: userId, p_lease_id: leaseId })
     .single<ThreadBalanceRow>();
   if (error || !data) {
     throw createHttpError(500, error?.message ?? "Guest welcome balance could not be updated");
@@ -58,23 +59,30 @@ const singleBalance = async (
 };
 
 export const guestWelcomeRepository: GuestWelcomeRepository = {
-  prepareClaim: async (userId): Promise<GuestClaimState> => {
+  prepareClaim: async (userId, leaseId): Promise<GuestClaimState> => {
     const { data, error } = await supabase
-      .rpc("prepare_guest_welcome_claim", { p_user_id: userId })
+      .rpc("prepare_guest_welcome_claim", { p_user_id: userId, p_lease_id: leaseId })
       .single<ClaimStateRow>();
     if (error || !data) {
-      throw createHttpError(500, error?.message ?? "Guest welcome claim could not be prepared");
+      throw createHttpError(error?.code === "55P03" ? 503 : 500, error?.message ?? "Guest welcome claim could not be prepared");
     }
     return data.status;
   },
-  markEligible: async (userId): Promise<void> => {
+  markEligible: async (userId, leaseId): Promise<void> => {
     const { error } = await supabase.rpc("mark_guest_welcome_eligible", {
       p_user_id: userId,
+      p_lease_id: leaseId,
     });
     if (error) throw createHttpError(500, error.message);
   },
-  completeClaim: async (userId): Promise<number> =>
-    singleBalance("complete_guest_welcome_claim", userId),
-  denyClaim: async (userId): Promise<number> =>
-    singleBalance("deny_guest_welcome_claim", userId),
+  completeClaim,
+  denyClaim: async (userId, leaseId): Promise<void> => {
+    const { error } = await supabase.rpc("deny_guest_welcome_claim", { p_user_id: userId, p_lease_id: leaseId });
+    if (error) throw createHttpError(500, error.message);
+  },
+  releaseLease: async (leaseId): Promise<void> => {
+    const { error } = await supabase.rpc("release_guest_welcome_lease", { p_lease_id: leaseId });
+    if (error) throw createHttpError(503, "Welcome verification release failed; retry shortly");
+  },
+  getBalance: getThreadBalance,
 };

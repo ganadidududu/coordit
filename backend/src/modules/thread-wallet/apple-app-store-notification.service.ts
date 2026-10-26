@@ -4,12 +4,18 @@ import { createHttpError } from "../../shared/utils/http-error";
 import { verifyAppleNotification } from "./apple-iap-verifier";
 import { threadAmountForAppleProduct } from "./apple-iap-products";
 import type { AppleIapVerifiedNotification } from "./apple-iap-policy";
+import { resolveAppleTransactionOwner } from "./thread-wallet.service";
 
 export type AppleAppStoreNotificationRequest = {
   readonly signedPayload: string;
 };
 
 export type AppleAppStoreNotificationResult =
+  | {
+      readonly kind: "revoke";
+      readonly availableThreads: number;
+      readonly status: "revoked" | "already_revoked";
+    }
   | {
       readonly kind: "record";
       readonly status: "processed" | "already_processed";
@@ -41,6 +47,27 @@ export const processVerifiedAppleNotification = async (
   notification: AppleIapVerifiedNotification
 ): Promise<AppleAppStoreNotificationResult> => {
   switch (notification.kind) {
+    case "revoke": {
+      const transaction = notification.transaction;
+      const { data, error } = await supabase.rpc("revoke_apple_iap_threads", {
+        p_notification_uuid: notification.notificationUUID,
+        p_notification_type: notification.notificationType,
+        p_subtype: notification.subtype,
+        p_environment: notification.environment,
+        p_transaction_id: transaction.transactionId,
+        p_original_transaction_id: transaction.originalTransactionId,
+        p_product_id: transaction.productId,
+        p_app_account_token: transaction.appAccountToken,
+        p_purchased_at: transaction.purchasedAt,
+        p_revoked_at: notification.revokedAt
+      }).single();
+      const parsed = z.object({
+        available_threads: z.number().int().nonnegative(),
+        status: z.enum(["revoked", "already_revoked"])
+      }).safeParse(data);
+      if (error || !parsed.success) throw createHttpError(500, "Failed to revoke Apple purchase threads");
+      return { kind: "revoke", availableThreads: parsed.data.available_threads, status: parsed.data.status };
+    }
     case "record": {
       const { data, error } = await supabase
         .rpc("record_apple_iap_notification", {
@@ -58,13 +85,14 @@ export const processVerifiedAppleNotification = async (
     }
     case "reconcile": {
       const transaction = notification.transaction;
+      const owner = await resolveAppleTransactionOwner(transaction);
       const { data, error } = await supabase
         .rpc("reconcile_apple_iap_notification", {
           p_notification_uuid: notification.notificationUUID,
           p_notification_type: notification.notificationType,
           p_subtype: notification.subtype,
           p_environment: notification.environment,
-          p_user_id: transaction.appAccountToken,
+          p_user_id: owner,
           p_transaction_id: transaction.transactionId,
           p_original_transaction_id: transaction.originalTransactionId,
           p_product_id: transaction.productId,

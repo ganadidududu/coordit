@@ -94,6 +94,7 @@ export type VerifiedAdMobCallback =
     readonly kind: "reward";
     readonly attemptId: string;
     readonly transactionId: string;
+    readonly signedUserId: string | null;
   };
 
 const rejectCallback = (
@@ -243,6 +244,7 @@ export const verifyAdMobSSVCallback = async (
   return {
     kind: "reward",
     attemptId: attemptResult.data,
-    transactionId: callback.transaction_id
+    transactionId: callback.transaction_id,
+    signedUserId: callback.user_id ?? null
   };
 };

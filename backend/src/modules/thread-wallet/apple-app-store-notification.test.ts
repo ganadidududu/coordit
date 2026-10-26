@@ -66,6 +66,40 @@ const closeServer = async (server: Server): Promise<void> => {
 
 const tests: readonly { readonly name: string; readonly run: () => Promise<void> }[] = [
   {
+    name: "returns a clawback result after a verified refund reaches settlement",
+    run: async () => {
+      // Given: Apple verification yields an authenticated refund for a known consumable.
+      let settlementCalls = 0;
+      const refund: AppleIapVerifiedNotification = {
+        ...verifiedNotification,
+        kind: "revoke",
+        notificationType: "REFUND",
+        revokedAt: "2026-08-22T00:00:00.000Z"
+      };
+      const server = await startServer((request) => settleAppleAppStoreNotification(request, {
+        verifyAppleNotification: async () => refund,
+        processVerifiedNotification: async (notification) => {
+          assert.equal(notification.kind, "revoke");
+          settlementCalls += 1;
+          return { kind: "revoke", availableThreads: 0, status: "revoked" };
+        }
+      }));
+      try {
+        // When: Apple posts its refund through the public webhook.
+        const response = await fetch(`${server.baseURL}/webhooks/apple/app-store-notifications`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ signedPayload: "signed-refund" })
+        });
+        // Then: the response acknowledges the completed clawback exactly once.
+        assert.equal(response.status, 200);
+        assert.deepEqual(await response.json(), { availableThreads: 0, status: "revoked" });
+        assert.equal(settlementCalls, 1);
+      } finally {
+        await closeServer(server.server);
+      }
+    }
+  },
+  {
     name: "returns 200 only after a verified one-time charge is reconciled once",
     run: async () => {
       // Given: verification yields a trusted production transaction and persistence can credit it.

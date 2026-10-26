@@ -16,7 +16,7 @@ type RewardSettlement = Awaited<ReturnType<typeof grantRewardForVerifiedCallback
 
 type RewardedSSVControllerDependencies = {
   readonly getVerifierKeys: () => Promise<readonly VerifierKey[]>;
-  readonly grantReward: (attemptId: string, transactionId: string) => Promise<RewardSettlement>;
+  readonly grantReward: (attemptId: string, transactionId: string, signedUserId: string | null) => Promise<RewardSettlement>;
   readonly now: () => number;
   readonly configuration: AdMobSSVConfiguration;
   readonly logRejection: (category: AdMobSSVRejectionCategory) => void;
@@ -43,7 +43,8 @@ export const createReceiveRewardedSSVController = (
         case "reward":
           res.status(200).json(await dependencies.grantReward(
             callback.attemptId,
-            callback.transactionId
+            callback.transactionId,
+            callback.signedUserId
           ));
           return;
         default:

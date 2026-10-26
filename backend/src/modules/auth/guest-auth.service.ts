@@ -1,6 +1,7 @@
+import { randomUUID } from "node:crypto";
 import type { AuthResponse } from "./auth.service";
 
-export const guestClaimStates = ["pending", "eligible", "granted", "denied"] as const;
+export const guestClaimStates = ["pending", "eligible", "granted", "denied", "legacy"] as const;
 export type GuestClaimState = (typeof guestClaimStates)[number];
 
 export interface GuestSessionRepository {
@@ -9,10 +10,12 @@ export interface GuestSessionRepository {
 }
 
 export interface GuestWelcomeRepository {
-  readonly prepareClaim: (userId: string) => Promise<GuestClaimState>;
-  readonly markEligible: (userId: string) => Promise<void>;
-  readonly completeClaim: (userId: string) => Promise<number>;
-  readonly denyClaim: (userId: string) => Promise<number>;
+  readonly prepareClaim: (userId: string, leaseId: string) => Promise<GuestClaimState>;
+  readonly markEligible: (userId: string, leaseId: string) => Promise<void>;
+  readonly completeClaim: (userId: string, leaseId: string) => Promise<number>;
+  readonly denyClaim: (userId: string, leaseId: string) => Promise<void>;
+  readonly releaseLease: (leaseId: string) => Promise<void>;
+  readonly getBalance: (userId: string) => Promise<number>;
 }
 
 export interface DeviceWelcomeRegistry {
@@ -43,37 +46,42 @@ export const claimGuestWelcome = async (
   deviceToken: string,
   dependencies: GuestWelcomeDependencies
 ): Promise<GuestWelcomeResult> => {
-  const claimState = await dependencies.repository.prepareClaim(userId);
+  const leaseId = randomUUID();
+  const repository = dependencies.repository;
+  const claimState = await repository.prepareClaim(userId, leaseId);
   switch (claimState) {
-    case "pending": {
+    case "legacy": try {
+      await dependencies.deviceRegistry.markWelcomeClaimed(deviceToken);
+      return {
+        availableThreads: await repository.completeClaim(userId, leaseId),
+        status: "already_claimed",
+      };
+    } finally {
+      await repository.releaseLease(leaseId);
+    }
+    case "eligible":
+    case "pending": try {
       const claimed = await dependencies.deviceRegistry.hasClaimedWelcome(deviceToken);
       if (claimed) {
+        await repository.denyClaim(userId, leaseId);
         return {
-          availableThreads: await dependencies.repository.denyClaim(userId),
+          availableThreads: await repository.getBalance(userId),
           status: "already_claimed",
         };
       }
-      await dependencies.repository.markEligible(userId);
+      await repository.markEligible(userId, leaseId);
       await dependencies.deviceRegistry.markWelcomeClaimed(deviceToken);
       return {
-        availableThreads: await dependencies.repository.completeClaim(userId),
+        availableThreads: await repository.completeClaim(userId, leaseId),
         status: "granted",
       };
+    } finally {
+      await repository.releaseLease(leaseId);
     }
-    case "eligible":
-      await dependencies.deviceRegistry.markWelcomeClaimed(deviceToken);
-      return {
-        availableThreads: await dependencies.repository.completeClaim(userId),
-        status: "granted",
-      };
     case "granted":
-      return {
-        availableThreads: await dependencies.repository.completeClaim(userId),
-        status: "already_claimed",
-      };
     case "denied":
       return {
-        availableThreads: await dependencies.repository.denyClaim(userId),
+        availableThreads: await repository.getBalance(userId),
         status: "already_claimed",
       };
     default: {
