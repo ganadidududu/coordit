@@ -10,6 +10,9 @@ const replayFitRecommendation = vi.fn();
 const findFitAnalysisThreadConsumption = vi.fn();
 const createFitAnalysisAndConsumeThread = vi.fn();
 const getThreadBalance = vi.fn();
+const remeasureCameraComparison = vi.fn();
+
+vi.mock("./fit.camera-remeasurement", () => ({ remeasureCameraComparison }));
 
 vi.mock("./fit.service", () => ({
   getFitAnalysisResult,
@@ -175,6 +178,24 @@ describe("recommendFitController", () => {
     expect(prepareFitRecommendation).not.toHaveBeenCalled();
     expect(createFitAnalysisAndConsumeThread).not.toHaveBeenCalled();
     expect(replayFitRecommendation).toHaveBeenCalledOnce();
+  });
+
+  it("routes only an explicit comparison bundle through the paid remeasurement path", async () => {
+    const { recommendFitController } = await import("./fit.controller");
+    const bundle = "88888888-8888-4888-8888-888888888888";
+    remeasureCameraComparison.mockResolvedValue({ fitAnalysisResultId: "revised", availableThreads: 0 });
+    const response = createResponse();
+    await recommendFitController(requestWith({
+      referenceClothingIds: [prepared.persistence.referenceClothingId], externalProductId: prepared.persistence.externalProductId,
+      idempotencyKey: validKey, comparisonBundleAnalysisId: bundle
+    }), response, ((error: unknown) => { throw error; }) as NextFunction);
+    expect(remeasureCameraComparison).toHaveBeenCalledWith({
+      userId: "11111111-1111-4111-8111-111111111111", bundleAnalysisId: bundle, idempotencyKey: validKey,
+      referenceClothingIds: [prepared.persistence.referenceClothingId], externalProductId: prepared.persistence.externalProductId
+    });
+    expect(createFitAnalysisAndConsumeThread).not.toHaveBeenCalled();
+    expect(prepareFitRecommendation).not.toHaveBeenCalled();
+    assert.equal(response.statusCode, 201);
   });
 
   it("keeps the unfunded batch route unavailable", async () => {

@@ -8,6 +8,7 @@ import {
   replayFitRecommendation
 } from "./fit.service";
 import { z } from "zod";
+import { remeasureCameraComparison } from "./fit.camera-remeasurement";
 import {
   CLOSET_GARMENT_KINDS,
   getClosetItemFitComparison,
@@ -40,6 +41,19 @@ export const recommendFitController = async (
       || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idempotencyKey)
     ) {
       res.status(400).json({ message: "A valid idempotencyKey is required" });
+      return;
+    }
+    if (req.body.comparisonBundleAnalysisId !== undefined) {
+      const bundle = z.uuid().safeParse(req.body.comparisonBundleAnalysisId);
+      const references = z.array(z.uuid()).min(1).safeParse(referenceClothingIds ?? (referenceClothingId ? [referenceClothingId] : []));
+      if (!bundle.success || !references.success) {
+        res.status(400).json({ message: "A valid comparison bundle and references are required" });
+        return;
+      }
+      res.status(201).json(await remeasureCameraComparison({
+        userId: user.id, bundleAnalysisId: bundle.data, idempotencyKey,
+        externalProductId: asRequiredString(externalProductId, "externalProductId"), referenceClothingIds: references.data
+      }));
       return;
     }
     const existingResultID = await findFitAnalysisThreadConsumption(user.id, idempotencyKey);

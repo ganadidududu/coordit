@@ -10,6 +10,8 @@ import {
 } from "./fit-report.fallback-observability";
 import { buildFitReportPrompt, FIT_REPORT_PROMPT_VERSION } from "./fit-report.prompt";
 import { loadFitResult, loadPersistedFitReport, persistFitReport } from "./fit-report.repository";
+import { authorizeComparisonBundle, completeCameraComparison, hasPaidCameraAnalysis } from "./fit-report.comparison-bundle";
+import { createHttpError } from "../../shared/utils/http-error";
 import {
   hasAcceptedCoreNarrative,
   sanitizeGeneratedReport
@@ -175,12 +177,16 @@ export const generateFitReport = async (
   const reportInput = await buildFitReportInput(userId, fitAnalysisResultId, options);
   const prompt = buildFitReportPrompt(reportInput);
   const modelName = env.openRouterModel;
-  const threadConsumption = await consumeFitReportThread(
-    userId,
-    options.idempotencyKey,
-    fitAnalysisResultId
-  );
   const fallbackReport = buildFallbackFitReport(reportInput);
+  const cameraBalance = options.cameraComparison && !options.comparisonBundleAnalysisId ? await getThreadBalance(userId) : null;
+  if (cameraBalance !== null && cameraBalance <= 0 && !await hasPaidCameraAnalysis(userId, fitAnalysisResultId)) {
+    throw createHttpError(402, "실타래가 부족해요. 충전 후 다시 시도해주세요.");
+  }
+  const threadConsumption = options.comparisonBundleAnalysisId
+    ? { availableThreads: await authorizeComparisonBundle(userId, options.comparisonBundleAnalysisId, fitAnalysisResultId), status: "bundle_reused" }
+    : cameraBalance !== null
+      ? { availableThreads: cameraBalance, status: "camera_pending" }
+      : await consumeFitReportThread(userId, options.idempotencyKey, fitAnalysisResultId);
 
   if (threadConsumption.status === "already_consumed") {
     if (!options.includeDebug) {
@@ -240,6 +246,9 @@ export const generateFitReport = async (
     };
   }
 
+  if (options.cameraComparison && !options.comparisonBundleAnalysisId) {
+    return completeCameraComparison(userId, options.idempotencyKey, generated);
+  }
   if (!options.includeDebug) {
     const fitResult = await loadFitResult(userId, fitAnalysisResultId);
     await persistFitReport(userId, fitResult, generated);
