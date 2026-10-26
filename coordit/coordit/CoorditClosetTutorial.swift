@@ -10,7 +10,7 @@ final class CoorditClosetTutorial: ObservableObject {
         var title: String {
             switch self {
             case .add: "보유 의류 추가하기"
-            case .method: "링크로 불러오기"
+            case .method: "등록 방식 선택하기"
             case .link: "상품 링크 입력하기"
             case .analyze: "링크 분석하기"
             case .size: "내 사이즈 선택하기"
@@ -22,7 +22,7 @@ final class CoorditClosetTutorial: ObservableObject {
         var message: String {
             switch self {
             case .add: "보유 의류 추가하기 버튼으로 내 옷을 등록합니다. 등록한 옷 중 기준 의류로 선택한 데이터가 나의 ‘100점 핏 사이즈’ 계산에 반영됩니다."
-            case .method: "링크로 불러오기를 누르면 상품 페이지에서 의류 정보와 사이즈표를 가져옵니다."
+            case .method: "상품 링크, 사이즈표 사진, 직접 입력 중 가진 정보에 맞는 방식을 선택하세요. 선택한 방식으로 실측을 확인한 뒤 내 옷을 등록해요."
             case .link: "보유한 옷의 상품 링크를 아래 입력란에 붙여 넣습니다. 옷 종류도 실제 보유한 의류에 맞게 선택합니다."
             case .analyze: "링크 분석하기를 누르면 상품명과 사이즈별 실측 정보를 불러옵니다. 분석이 완료되면 사이즈를 선택합니다."
             case .size: "사이즈표에서 실제로 보유한 옷의 사이즈를 누릅니다. 선택한 사이즈의 실측 정보가 저장됩니다."
@@ -60,7 +60,7 @@ final class CoorditClosetTutorial: ObservableObject {
                 } else {
                     updateLink(draft.productLink)
                 }
-            case .closetAddPhoto, .closetAddManual: step = nil
+            case .closetAddPhoto, .closetAddManual: step = .link
             default: break
             }
         }
@@ -89,14 +89,15 @@ final class CoorditClosetTutorial: ObservableObject {
 private struct CoorditClosetTutorialTarget: ViewModifier {
     @EnvironmentObject private var tutorial: CoorditClosetTutorial
     let step: CoorditClosetTutorial.Step
+    let title: String?
     let message: String?
     let canFinish: Bool
 
     func body(content: Content) -> some View {
         content.modifier(CoorditTutorialTarget(
             isActive: tutorial.step == step,
-            progress: "CLOSET 가이드 · \(step.rawValue + 1)/7",
-            title: step.title,
+            progress: "CLOSET 가이드",
+            title: title ?? step.title,
             message: message ?? step.message,
             identifier: "closet-tutorial",
             stepIdentifier: "closet-tutorial-step-\(step.rawValue)",
@@ -124,7 +125,7 @@ struct CoorditTutorialTarget: ViewModifier {
                         Text(progress)
                             .font(CoorditTypography.gmarketMedium(size: 11))
                         Spacer()
-                        Button("나중에", action: dismiss)
+                        Button("도움말 닫기", action: dismiss)
                             .font(CoorditTypography.gmarketMedium(size: 12))
                             .frame(minWidth: 44, minHeight: 44)
                             .accessibilityIdentifier("\(identifier)-dismiss")
@@ -163,81 +164,17 @@ struct CoorditTutorialTarget: ViewModifier {
                     }
                 }
         }
-        .anchorPreference(key: CoorditClosetSpotlightKey.self, value: .bounds) { anchor in
-            CoorditClosetSpotlightBounds(target: isActive ? anchor : nil)
-        }
-    }
-}
-
-struct CoorditClosetSpotlightBounds {
-    var target: Anchor<CGRect>?
-    var viewport: Anchor<CGRect>?
-}
-
-struct CoorditClosetSpotlightKey: PreferenceKey {
-    static var defaultValue: CoorditClosetSpotlightBounds { CoorditClosetSpotlightBounds() }
-
-    static func reduce(value: inout CoorditClosetSpotlightBounds, nextValue: () -> CoorditClosetSpotlightBounds) {
-        let next = nextValue()
-        if let target = next.target { value.target = target }
-        if let viewport = next.viewport { value.viewport = viewport }
-    }
-}
-
-struct CoorditClosetSpotlight: View {
-    let bounds: CoorditClosetSpotlightBounds
-
-    var body: some View {
-        GeometryReader { proxy in
-            if let target = bounds.target, let viewport = bounds.viewport {
-                let screen = CGRect(origin: .zero, size: proxy.size)
-                let navHeight = Main01DesignTokens.Metrics.navHeight * proxy.size.width / 402
-                let visibleContent = proxy[viewport].intersection(
-                    CGRect(x: 0, y: 0, width: screen.width, height: max(0, screen.height - navHeight))
-                )
-                let spotlight = proxy[target].insetBy(dx: -6, dy: -6).intersection(visibleContent)
-                Path { path in
-                    path.addRect(screen)
-                    if !spotlight.isNull && !spotlight.isEmpty {
-                        path.addRoundedRect(in: spotlight, cornerSize: CGSize(width: 10, height: 10))
-                    }
-                }
-                .fill(Color.black.opacity(0.26), style: FillStyle(eoFill: true))
-            }
-        }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 }
 
 extension View {
-    func closetTutorialViewport() -> some View {
-        transformAnchorPreference(key: CoorditClosetSpotlightKey.self, value: .bounds) { bounds, anchor in
-            bounds.viewport = anchor
-        }
-    }
-
     func closetTutorialTarget(
         _ step: CoorditClosetTutorial.Step,
+        title: String? = nil,
         message: String? = nil,
         canFinish: Bool = false
     ) -> some View {
-        modifier(CoorditClosetTutorialTarget(step: step, message: message, canFinish: canFinish))
-    }
-}
-#endif
-
-#if os(iOS)
-struct ClosetLinkMethodTutorialModifier: ViewModifier {
-    let isLink: Bool
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if isLink {
-            content.closetTutorialTarget(.method)
-        } else {
-            content
-        }
+        modifier(CoorditClosetTutorialTarget(step: step, title: title, message: message, canFinish: canFinish))
     }
 }
 #endif

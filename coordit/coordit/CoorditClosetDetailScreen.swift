@@ -16,9 +16,9 @@ extension CoorditClosetFamilyView {
             }
             .padding(.horizontal, metrics.value(27))
 
-            ScrollViewReader { scroll in
             ScrollView(showsIndicators: false) {
                 VStack(spacing: metrics.value(20)) {
+                if isExampleResult { CoorditExampleNotice() }
                 HStack(alignment: .top, spacing: metrics.value(13)) {
                     CoorditClosetGarmentArtwork(imageData: item.imageData, category: item.category, metrics: metrics)
                         .frame(width: metrics.value(126), height: metrics.value(168))
@@ -33,6 +33,7 @@ extension CoorditClosetFamilyView {
                             .minimumScaleFactor(0.82)
                             .frame(maxWidth: .infinity, minHeight: metrics.value(45), alignment: .topLeading)
 
+                        if !isExampleResult {
                         detailAction("옷 이름 수정하기", metrics: metrics) {
                             beginDetailRename(item)
                         }
@@ -58,6 +59,7 @@ extension CoorditClosetFamilyView {
                         }
                         .accessibilityIdentifier("closet-detail-delete")
                         .disabled(isDeletingDetailItem)
+                        }
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: metrics.value(168), alignment: .top)
@@ -111,6 +113,16 @@ extension CoorditClosetFamilyView {
                 }
                 .padding(.top, metrics.value(6))
 
+                if isExampleResult {
+                    Button("체험 마치고 내 옷 등록하기") {
+                        tutorial.dismiss()
+                        draft = CoorditClosetDraft()
+                        onRouteChange(.closetAddMethod)
+                    }
+                    .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary, height: 48))
+                    .accessibilityIdentifier("closet-example-finish")
+                }
+
                 }
                 .padding(.top, metrics.value(20))
                 .padding(.horizontal, metrics.value(27))
@@ -120,14 +132,6 @@ extension CoorditClosetFamilyView {
                 )
             }
             .coorditScrollEdgeTreatment(topFade: metrics.value(18))
-            .closetTutorialViewport()
-            .onAppear {
-                if tutorial.step == .score { scroll.scrollTo("closet-tutorial-score", anchor: .top) }
-            }
-            .onChange(of: detailFitComparison?.fitScore) { _, _ in
-                if tutorial.step == .score { scroll.scrollTo("closet-tutorial-score", anchor: .top) }
-            }
-            }
         }
         .accessibilityIdentifier("coordit-screen-\(screenIdentifier)")
         .onAppear {
@@ -167,7 +171,12 @@ extension CoorditClosetFamilyView {
         detailFitComparison?.fitScore?.isFinite == true && detailFitComparison?.bestFitGap?.isFinite == true
     }
 
+    private var isExampleResult: Bool {
+        route == .closetAddResult && draft.isTutorialExample
+    }
+
     private var tutorialScoreMessage: String? {
+        if isExampleResult { return "선택한 사이즈의 실측과 예시 핏 스코어를 확인하세요. 아래에서 체험을 마치고 내 옷 등록으로 돌아갈 수 있어요." }
         if hasTutorialScore { return nil }
         if detailFitComparison != nil {
             return "의류 등록이 완료되었습니다. 아직 비교할 기준 의류가 없어 점수가 표시되지 않습니다. 홈에서 나에게 잘 맞는 기준 의류를 선택하면 ‘100점 핏 사이즈’와 핏 스코어가 계산됩니다."
@@ -412,6 +421,12 @@ extension CoorditClosetFamilyView {
 
     private func loadDetailFitComparison(for item: CoorditClosetItem) async {
         detailFitComparison = nil
+        if isExampleResult {
+            detailFitComparison = .init(status: "ready", garmentKind: draft.exactCategory.garmentKind.rawValue,
+                                        referenceCount: 1, fitScore: 95, bestFitGap: 1, diff: nil,
+                                        reason: "예시 체험 점수")
+            return
+        }
         guard let clothingItemID = item.backendClothingItemId else { return }
         detailFitComparison = await backendSession.closetFitComparison(clothingItemID: clothingItemID)
     }

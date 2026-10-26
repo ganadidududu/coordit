@@ -7,15 +7,14 @@ struct CoorditFitLabHistoryDetailScreen: View {
     let delete: () async -> Void
     let onRouteChange: (CoorditFrameRoute) -> Void
     @State private var isDeleting = false
+    @State private var selectedSizeLabel: String?
 
     var body: some View {
         let variant = CoorditFitLabResultVariant.history(snapshot.garmentKind)
-        let scoreCard = CoorditFitLabScoreCard(
-            variant: variant,
-            recommendation: snapshot.recommendation,
-            report: snapshot.report,
-            metrics: metrics
-        )
+        let options = CoorditFitLabSizeOption.makeOptions(variant: variant, recommendation: snapshot.recommendation, report: snapshot.report, sizeDrafts: [])
+        let selected = options.first { $0.sizeLabel == selectedSizeLabel } ?? options.first { $0.isRecommended }
+        let scoreCard = CoorditFitLabScoreCard(variant: variant, selectedSize: selected, metrics: metrics)
+        let selection = CoorditFitLabScoreSelection(selected: selected, recommendation: snapshot.recommendation, report: snapshot.report)
         ScrollView {
             VStack(spacing: metrics.value(15)) {
                 VStack(alignment: .leading, spacing: metrics.value(7)) {
@@ -51,20 +50,21 @@ struct CoorditFitLabHistoryDetailScreen: View {
                 .frame(height: metrics.value(270))
                 CoorditFitLabOverlayLegend(metrics: metrics)
                 CoorditFitLabSizeScoreChart(
-                    report: snapshot.report,
-                    recommendation: snapshot.recommendation,
+                    options: options,
+                    selectedSizeLabel: $selectedSizeLabel,
                     metrics: metrics
                 )
+                CoorditFitLabComparisonNote(selected: selection.sizeLabel, recommended: snapshot.recommendation.recommendedSize, missingScores: !selection.isRecommended && selection.measurementScores.isEmpty, metrics: metrics)
                 CoorditFitLabPointScoreChart(
-                    scores: snapshot.report?.chartData.fitPointScores ?? [],
+                    scores: selection.fitPointScores,
                     metrics: metrics
                 )
                 CoorditFitLabMeasurementScoreChart(
-                    scores: snapshot.report?.chartData.measurementScores ?? [],
+                    scores: selection.measurementScores,
                     metrics: metrics
                 )
                 CoorditFitLabDifferenceChart(measurements: scoreCard.measurements, metrics: metrics)
-                CoorditFitLabReportCard(report: snapshot.report, fallbackMessage: nil, metrics: metrics)
+                CoorditFitLabReportCard(report: snapshot.report, fallbackMessage: nil, metrics: metrics, recommendedSize: snapshot.recommendation.recommendedSize)
 
                 Button(isDeleting ? "삭제 중..." : "이 히스토리 삭제") {
                     guard !isDeleting else { return }

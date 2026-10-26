@@ -339,6 +339,26 @@ struct CoorditFitLabReportResponse: Codable, Equatable, Sendable {
             let fitLabel: String
             let weightedFitDistance: Double
             let recommendationConfidence: String
+            let measurementSubscores: [String: Double]?
+            let semanticSubscores: [String: Double]?
+            let semanticFacts: [CoorditFitLabSizeFact]?
+
+            nonisolated init(
+                sizeLabel: String, fitScore: Double, fitLabel: String,
+                weightedFitDistance: Double, recommendationConfidence: String,
+                measurementSubscores: [String: Double]? = nil,
+                semanticSubscores: [String: Double]? = nil,
+                semanticFacts: [CoorditFitLabSizeFact]? = nil
+            ) {
+                self.sizeLabel = sizeLabel
+                self.fitScore = fitScore
+                self.fitLabel = fitLabel
+                self.weightedFitDistance = weightedFitDistance
+                self.recommendationConfidence = recommendationConfidence
+                self.measurementSubscores = measurementSubscores
+                self.semanticSubscores = semanticSubscores
+                self.semanticFacts = semanticFacts
+            }
         }
 
         let fitPointScores: [FitPointScore]

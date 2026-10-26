@@ -102,6 +102,18 @@ class FitLabFlowTest {
             captureAt("fitlab-report-context", "08b-context")
             captureAt("fitlab-report-tradeoff", "08b-tradeoff")
             captureAt("fitlab-report-measurement-어깨", "08b-measurement")
+            tap("fitlab-score-L")
+            compose.onNodeWithTag("fitlab-selected-size").assertTextEquals("L")
+            compose.onNodeWithTag("fitlab-selected-score").assertTextEquals("82.0점")
+            compose.onNodeWithTag("fitlab-report-basis").assertTextEquals("추천 M 사이즈 기준 상세 리포트")
+            compose.onNodeWithText("80.0").assertExists()
+            captureAt("fitlab-score-L", "08d-alternative-selection")
+            captureAt("fitlab-fit-point-silhouette", "08e-alternative-profile")
+            tap("fitlab-score-S")
+            compose.onNodeWithTag("fitlab-selected-score").assertTextEquals("78.0점")
+            compose.onNodeWithTag("fitlab-fit-profile").assertDoesNotExist()
+            captureAt("fitlab-comparison-basis", "08f-legacy-alternative")
+            tap("fitlab-score-M")
             captureBottom("08c-actions")
             tap("fitlab-save-history")
             compose.waitUntil(5_000) { model.state.value.history.size == 1 || model.state.value.error != null }
@@ -113,6 +125,10 @@ class FitLabFlowTest {
             assertEquals(FitLabRoute.HistoryDetail, model.state.value.screen)
             capture("09-history-detail")
             captureFitProfile("09a-history-fit-profile")
+            tap("fitlab-score-L")
+            compose.onNodeWithTag("fitlab-selected-score").assertTextEquals("82.0점")
+            compose.onNodeWithText("80.0").assertExists()
+            captureAt("fitlab-fit-point-silhouette", "09c-history-alternative-profile")
             captureBottom("09b-history-actions")
             tap("fitlab-delete-history")
             compose.waitUntil(5_000) { model.state.value.screen == FitLabRoute.Sources || model.state.value.error != null }
@@ -350,7 +366,12 @@ private class FitLabFixture : FitLabApi {
         return FitLabRecommendation(
             "analysis-1", "M", 93.5, "잘 맞아요", "기준 옷과 가장 비슷한 핏이에요.", "high",
             mapOf("shoulder_width" to 0.5, "chest_width" to 1.0),
-            listOf(FitLabSizeScore("S", 78.0), FitLabSizeScore("M", 93.5), FitLabSizeScore("L", 82.0)),
+            listOf(FitLabSizeScore("S", 78.0), FitLabSizeScore("M", 93.5), FitLabSizeScore(
+                "L", 82.0,
+                measurementSubscores = mapOf("shoulder_width" to 70.0, "chest_width" to 90.0),
+                semanticSubscores = mapOf("silhouette" to 80.0, "mobility" to 78.0),
+                semanticFacts = listOf(FitLabSizeFact("shoulder_width", 44.5, 47.0, 2.5), FitLabSizeFact("chest_width", 51.0, 55.0, 4.0)),
+            )),
             availableThreads = 6,
         )
     }
