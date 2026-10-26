@@ -33,6 +33,10 @@
          <TestableReference skipped = "NO" parallelizable = "NO">
             <BuildableReference BuildableIdentifier = "primary" BlueprintIdentifier = "C0D170000000000000000005" BuildableName = "coorditTests.xctest" BlueprintName = "coorditTests" ReferencedContainer = "container:coordit.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test Identifier = "CoorditGuestReinstallProbeTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
          <TestableReference
             skipped = "NO"

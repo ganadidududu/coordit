@@ -13,6 +13,35 @@ final class CoorditThreadChargePurchaseUITests: XCTestCase {
         runningApp = nil
     }
 
+    func testGuestMustLinkAccountBeforeOpeningStoreKit() throws {
+        try assertGuestAccountGate(appearance: "Light")
+    }
+
+    func testGuestAccountConnectionInDarkAppearance() throws {
+        try assertGuestAccountGate(appearance: "Dark")
+    }
+
+    private func assertGuestAccountGate(appearance: String) throws {
+        let app = launchChargeScreen(readiness: "enabled", purchaseScenario: "credited", balance: 2, isGuest: true, appearance: appearance)
+        let link = app.buttons["coordit-thread-charge-link-account"]
+        XCTAssertTrue(link.waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["2 실타래"].label, "2 실타래")
+        XCTAssertFalse(app.buttons["coordit-thread-charge-pack-10"].isEnabled)
+        let receipt = app.descendants(matching: .any).matching(identifier: "coordit-thread-purchase-fixture-receipt").firstMatch
+        XCTAssertFalse((receipt.value as? String ?? "").contains("purchase-request:"))
+        attachScreenshot(named: "guest-purchase-account-required-\(appearance)", from: app)
+        link.tap()
+        XCTAssertTrue(app.staticTexts["구매 전 계정 연결"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["splash-auth-apple"].exists)
+        XCTAssertTrue(app.buttons["splash-auth-google"].exists)
+        XCTAssertFalse(app.buttons["splash-auth-guest"].exists)
+        XCTAssertFalse(app.buttons["splash-auth-email"].exists)
+        attachScreenshot(named: "guest-purchase-account-link-\(appearance)", from: app)
+        app.buttons["purchase-account-link-cancel"].tap()
+        XCTAssertTrue(link.waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["2 실타래"].label, "2 실타래")
+    }
+
     func testStoreKitConfigurationContainsOnlyThreeConsumables() throws {
         let bundle = Bundle(for: Self.self)
         let configurationURL = try XCTUnwrap(
@@ -271,7 +300,9 @@ final class CoorditThreadChargePurchaseUITests: XCTestCase {
     private func launchChargeScreen(
         readiness: String,
         purchaseScenario: String? = nil,
-        balance: Int = 36
+        balance: Int = 36,
+        isGuest: Bool = false,
+        appearance: String = "Light"
     ) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -289,6 +320,8 @@ final class CoorditThreadChargePurchaseUITests: XCTestCase {
         if let purchaseScenario {
             app.launchArguments += ["--coordit-storekit-fixture", purchaseScenario]
         }
+        if isGuest { app.launchArguments.append("--coordit-ui-testing-guest") }
+        app.launchArguments += ["-AppleInterfaceStyle", appearance]
         app.launch()
         runningApp = app
         XCTAssertTrue(

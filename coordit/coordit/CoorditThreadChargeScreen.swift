@@ -12,7 +12,7 @@ extension CoorditMyPageFamilyView {
         let rewardedAdVisible = backendSession.canUseRewardedAds
             && rewardedAdService.isChargeControlVisible
         let purchasesEnabled = backendSession.canUseInAppPurchases && threadPurchaseService.isReady
-        let purchaseMessage = backendSession.canUseInAppPurchases
+        let purchaseMessage = !backendSession.isMember ? nil : backendSession.canUseInAppPurchases
             ? threadPurchaseService.state.message
             : "패키지 구매는 출시 준비 중이에요."
 
@@ -155,6 +155,30 @@ extension CoorditMyPageFamilyView {
                         .accessibilityIdentifier("coordit-thread-charge-ad-status")
                         .padding(.bottom, contentMetrics.value(10))
                 }
+            }
+
+            if !backendSession.isMember {
+                VStack(spacing: contentMetrics.value(10)) {
+                    Text("구매한 실타래를 안전하게 보관하세요")
+                        .font(CoorditTypography.gmarketBold(size: contentMetrics.value(13), relativeTo: .subheadline))
+                        .foregroundStyle(CoorditSettingsStyle.ink)
+                    Text("기기를 바꿔도 사용할 수 있도록 계정을 연결해 주세요.\n지금 실타래와 옷장, 분석 기록은 그대로 이어져요.")
+                        .font(CoorditTypography.gmarketMedium(size: contentMetrics.value(11), relativeTo: .caption))
+                        .foregroundStyle(CoorditDesignTokens.ColorToken.purchaseStatus)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                    CoorditSettingsPrimaryButton(
+                        title: "계정 연결하고 구매하기",
+                        identifier: "coordit-thread-charge-link-account",
+                        metrics: contentMetrics,
+                        isEnabled: !backendSession.isWorking
+                    ) {
+                        showsPurchaseAccountLink = true
+                    }
+                }
+                .padding(.vertical, contentMetrics.value(14))
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("coordit-thread-charge-member-required")
             }
 
             if let purchaseMessage {

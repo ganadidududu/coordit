@@ -653,7 +653,7 @@ final class CoorditFitLabUITests: XCTestCase {
 
         element("fitlab-history-seed-retention", in: app).tap()
         XCTAssertTrue(waitForLabel(
-            "count=50|unique=50|newest=analysis-51|oldest=analysis-2",
+            "count=51|unique=51|newest=analysis-51|oldest=analysis-1",
             element: element("fitlab-history-edge-probe", in: app),
             timeout: 8
         ))
@@ -664,14 +664,14 @@ final class CoorditFitLabUITests: XCTestCase {
         element("fitlab-history-switch-user-a", in: app).tap()
         let userAProbe = element("fitlab-history-user-probe", in: app)
         XCTAssertTrue(waitForLabel(
-            "user=history-user-a|count=50",
+            "user=history-user-a|count=51",
             element: userAProbe,
             timeout: 8
         ), "Unexpected user A probe: \(userAProbe.label)")
 
         element("fitlab-history-save-duplicate", in: app).tap()
         XCTAssertTrue(waitForLabel(
-            "count=50|unique=50|newest=analysis-51|oldest=analysis-2",
+            "count=51|unique=51|newest=analysis-51|oldest=analysis-1",
             element: element("fitlab-history-edge-probe", in: app),
             timeout: 5
         ))

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme LastUpgradeVersion="2660" version="1.7">
+   <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES">
+      <BuildActionEntries>
+         <BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="NO" buildForArchiving="NO" buildForAnalyzing="YES">
+            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="E1ED09022FFCE8A70048FDDE" BuildableName="coordit.app" BlueprintName="coordit" ReferencedContainer="container:coordit.xcodeproj"/>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" shouldUseLaunchSchemeArgsEnv="NO">
+      <Testables>
+         <TestableReference skipped="NO" parallelizable="NO">
+            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="C0D170000000000000000005" BuildableName="coorditTests.xctest" BlueprintName="coorditTests" ReferencedContainer="container:coordit.xcodeproj"/>
+            <SelectedTests>
+               <Test Identifier="CoorditGuestReinstallProbeTests"/>
+            </SelectedTests>
+         </TestableReference>
+      </Testables>
+   </TestAction>
+</Scheme>

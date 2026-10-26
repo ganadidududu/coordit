@@ -145,7 +145,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
         return CoorditFitLabCoordinator(
             route: route,
             configuration: configuration,
-            historyStore: CoorditFitLabFileHistoryStore()
+            historyStore: CoorditFitLabFileHistoryStore.shared
         )
     }
 
@@ -733,11 +733,18 @@ final class CoorditFitLabCoordinator: ObservableObject {
     private func reloadHistory(userID: String, generation: Int) async {
         guard let historyStore else { return }
         do {
+            let transferNotice: String?
+            do {
+                try await historyStore.completePendingGuestTransfers(to: userID)
+                transferNotice = nil
+            } catch {
+                transferNotice = "비회원 기록을 아직 모두 옮기지 못했어요. 원본은 보관 중이며 다시 열면 재시도해요."
+            }
             let snapshots = try await historyStore.load(userID: userID)
             let recoveryNotice = await historyStore.recoveryNotice(userID: userID)
             guard generation == historyGeneration, activeHistoryUserID == userID else { return }
             savedHistory = snapshots
-            historyRecoveryNotice = recoveryNotice
+            historyRecoveryNotice = transferNotice ?? recoveryNotice
             if selectedHistory == nil,
                screen == .historyDetail || screen == .historyRegister {
                 selectedHistory = snapshots.first

@@ -66,9 +66,12 @@ final class CoorditBackendSessionStore: ObservableObject {
 
     private let client: CoorditBackendClient
     private let tokenStore: CoorditBackendTokenStore
+    private let deviceTokenProvider: () async throws -> String
     private var monetizationReadinessRequestID = UUID()
     private var refreshTask: Task<CoorditAuthSession, Error>?
+    private var refreshTaskID: UUID?
     private var scheduledRefreshTask: Task<Void, Never>?
+    private var authenticationGeneration = UUID()
 
 #if DEBUG
     private let usesAuthenticatedUITestFixture: Bool
@@ -77,6 +80,7 @@ final class CoorditBackendSessionStore: ObservableObject {
     init() {
         self.client = CoorditBackendClient(baseURL: CoorditBackendConfig.baseURL())
         self.tokenStore = CoorditBackendTokenStore()
+        self.deviceTokenProvider = { try await CoorditDeviceCheck.token() }
 #if DEBUG
         Self.configurePersistedSessionFixture(in: tokenStore)
         if Self.shouldUseAuthenticatedUITestFixture {
@@ -84,7 +88,7 @@ final class CoorditBackendSessionStore: ObservableObject {
             session = CoorditAuthSession(
                 accessToken: Self.uiTestingAccessToken ?? "",
                 refreshToken: "",
-                user: CoorditAuthUser(id: Self.uiTestingUserID, email: "ui-test@coordit.invalid")
+                user: CoorditAuthUser(id: Self.uiTestingUserID, email: "ui-test@coordit.invalid", isAnonymous: ProcessInfo.processInfo.arguments.contains("--coordit-ui-testing-guest"))
             )
             profile = CoorditUserProfile(
                 id: Self.uiTestingUserID,
@@ -110,9 +114,14 @@ final class CoorditBackendSessionStore: ObservableObject {
         scheduleRefreshIfPossible()
     }
 
-    init(client: CoorditBackendClient, tokenStore: CoorditBackendTokenStore) {
+    init(
+        client: CoorditBackendClient,
+        tokenStore: CoorditBackendTokenStore,
+        deviceTokenProvider: @escaping () async throws -> String = { try await CoorditDeviceCheck.token() }
+    ) {
         self.client = client
         self.tokenStore = tokenStore
+        self.deviceTokenProvider = deviceTokenProvider
 #if DEBUG
         usesAuthenticatedUITestFixture = false
 #endif
@@ -150,7 +159,7 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
     var canUseInAppPurchases: Bool {
-        monetizationReadinessState.iapEnabled
+        isMember && monetizationReadinessState.iapEnabled
     }
 
     var emailText: String {
@@ -168,11 +177,14 @@ final class CoorditBackendSessionStore: ObservableObject {
         if usesAuthenticatedUITestFixture { return }
 #endif
         guard session != nil else { return }
+        let generation = authenticationGeneration
         do {
             _ = try await refreshCurrentSession()
+            guard generation == authenticationGeneration else { return }
             statusText = "로그인 상태를 복구했어요."
             isWarning = false
         } catch {
+            guard generation == authenticationGeneration else { return }
             statusText = "로그인은 유지 중이에요. 연결되면 자동으로 다시 확인할게요."
             isWarning = true
         }
@@ -199,12 +211,19 @@ final class CoorditBackendSessionStore: ObservableObject {
         do {
             return try await refreshCurrentSession().accessToken
         } catch {
-            return session?.accessToken ?? activeSession.accessToken
+            guard let currentSession = session, currentSession.user.id == activeSession.user.id else {
+                throw CoorditBackendSessionError.loginRequired
+            }
+            return currentSession.accessToken
         }
     }
 
-    func bootstrapGuestIfNeeded() async -> Int? {
+    func bootstrapGuestIfNeeded(existingGuestUserID: String? = nil) async -> Int? {
         guard !isWorking else { return nil }
+        if let existingGuestUserID {
+            guard session?.user.id == existingGuestUserID, session?.user.isAnonymous == true else { return nil }
+        }
+        let generation = authenticationGeneration
         isWorking = true
         defer { isWorking = false }
 
@@ -231,7 +250,20 @@ final class CoorditBackendSessionStore: ObservableObject {
 
         if session == nil {
             do {
-                let guestSession = try await client.createGuestSession()
+                // A refresh already sent before logout may have rotated the archived token.
+                if let refreshTask { _ = try? await refreshTask.value }
+                guard generation == authenticationGeneration else { return nil }
+                let guestSession: CoorditAuthSession
+                if let archivedSession = try tokenStore.loadGuestRecovery() {
+                    guestSession = try await client.refreshSession(refreshToken: archivedSession.refreshToken)
+                    guard guestSession.user.id == archivedSession.user.id else {
+                        throw CoorditBackendSessionError.guestRecoveryMismatch
+                    }
+                    try updateGuestRecovery(guestSession, replacing: archivedSession)
+                } else {
+                    guestSession = try await client.createGuestSession()
+                }
+                guard generation == authenticationGeneration else { return nil }
                 try persistSession(guestSession)
             } catch {
                 statusText = error.localizedDescription
@@ -254,17 +286,21 @@ final class CoorditBackendSessionStore: ObservableObject {
                 )
             }
 #endif
-            let deviceToken = try await CoorditDeviceCheck.token()
+            let deviceToken = try await deviceTokenProvider()
+            guard generation == authenticationGeneration, session?.user.id == activeSession.user.id else { return nil }
             let welcome = try await authenticatedValue { token in
                 try await client.claimGuestWelcome(token: token, deviceToken: deviceToken)
             }
+            guard generation == authenticationGeneration, session?.user.id == activeSession.user.id else { return nil }
             statusText = welcome.status == "granted"
                 ? "첫 이용 실타래 3개를 받았어요."
                 : "비회원으로 시작했어요."
             isWarning = false
             return welcome.availableThreads
         } catch {
+            guard generation == authenticationGeneration, session?.user.id == activeSession.user.id else { return nil }
             let availableThreads = await fetchThreadBalance() ?? 0
+            guard generation == authenticationGeneration, session?.user.id == activeSession.user.id else { return nil }
             statusText = "비회원 로그인은 완료됐어요. 실타래 지급만 잠시 후 다시 시도해주세요."
             isWarning = true
             return availableThreads
@@ -281,22 +317,25 @@ final class CoorditBackendSessionStore: ObservableObject {
         }
 #endif
         let startingUserID = session?.user.id
+        let generation = authenticationGeneration
         do {
             try await refreshPersistedSession()
             let health = try await client.health()
-            guard session?.user.id == startingUserID else { return }
+            guard generation == authenticationGeneration, session?.user.id == startingUserID else { return }
             statusText = health.ok ? "\(health.service) 연결됨" : "백엔드 응답이 불안정해요."
             isWarning = !health.ok
             if session != nil {
                 try await refreshAccount()
-                if session?.user.isAnonymous == true {
+                guard generation == authenticationGeneration, session?.user.id == startingUserID else { return }
+                if let guestUserID = session?.user.id, session?.user.isAnonymous == true {
                     onboardingComplete = false
+                    _ = await bootstrapGuestIfNeeded(existingGuestUserID: guestUserID)
                 } else {
                     try await refreshOnboardingStatus()
                 }
             }
         } catch {
-            guard session?.user.id == startingUserID else { return }
+            guard generation == authenticationGeneration, session?.user.id == startingUserID else { return }
             statusText = error.localizedDescription
             isWarning = true
         }
@@ -305,20 +344,17 @@ final class CoorditBackendSessionStore: ObservableObject {
     private func refreshPersistedSession() async throws {
         guard let currentSession = session, !currentSession.refreshToken.isEmpty else { return }
         do {
-            let refreshedSession = try await client.refreshSession(
-                refreshToken: currentSession.refreshToken
-            )
-            try tokenStore.save(refreshedSession)
-            session = refreshedSession
+            _ = try await refreshCurrentSession()
         } catch let error as CoorditBackendClientError where error.invalidatesSession {
-            if let userID = session?.user.id {
-                Self.clearCachedOnboardingComplete(for: userID)
+            if !currentSession.user.isAnonymous, session?.accessToken == currentSession.accessToken {
+                Self.clearCachedOnboardingComplete(for: currentSession.user.id)
+                cancelRefreshWork()
+                tokenStore.delete()
+                session = nil
+                profile = nil
+                latestBodyMeasurement = nil
+                onboardingComplete = false
             }
-            tokenStore.delete()
-            session = nil
-            profile = nil
-            latestBodyMeasurement = nil
-            onboardingComplete = false
             throw error
         }
     }
@@ -404,6 +440,9 @@ final class CoorditBackendSessionStore: ObservableObject {
     func settleAppleIapPurchase(
         signedTransaction: String
     ) async throws -> CoorditAppleIapSettlement {
+        guard isMember else {
+            throw CoorditBackendClientError.server(statusCode: 403, message: "실타래를 구매하려면 먼저 계정을 연결해 주세요.")
+        }
 #if DEBUG
         if usesAuthenticatedUITestFixture,
            let scenario = CoorditThreadPurchaseFixtureScenario.launch()
@@ -479,7 +518,7 @@ final class CoorditBackendSessionStore: ObservableObject {
 
     func loginWithGoogle() async {
         let guestSession = session?.user.isAnonymous == true ? session : nil
-        await authenticate {
+        await authenticate(mergingGuest: true) {
             let credential = try await CoorditGoogleSignIn.signInCredential()
             return try await client.loginWithGoogle(
                 idToken: credential.idToken,
@@ -492,7 +531,7 @@ final class CoorditBackendSessionStore: ObservableObject {
     func loginWithApple() async {
         #if DEBUG
         if Self.shouldSimulateAppleAuthenticationWithHydrationFailure {
-            await authenticate {
+            await authenticate(mergingGuest: true) {
                 CoorditAuthSession(
                     accessToken: "coordit-ui-test-apple-access-token",
                     refreshToken: "coordit-ui-test-apple-refresh-token",
@@ -517,7 +556,7 @@ final class CoorditBackendSessionStore: ObservableObject {
             return
         }
         #endif
-        await authenticate {
+        await authenticate(mergingGuest: true) {
             let credential = try await CoorditAppleSignIn.signInCredential()
             return try await client.loginWithApple(
                 idToken: credential.idToken,
@@ -531,7 +570,7 @@ final class CoorditBackendSessionStore: ObservableObject {
         _ result: Result<ASAuthorization, Error>,
         rawNonce: String
     ) async {
-        await authenticate {
+        await authenticate(mergingGuest: true) {
             let credential = try CoorditAppleSignIn.credential(from: result, rawNonce: rawNonce)
             return try await client.loginWithApple(
                 idToken: credential.idToken,
@@ -542,6 +581,20 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
     func logout() {
+        if let activeSession = session, activeSession.user.isAnonymous {
+            do {
+                if try tokenStore.loadGuestRecovery()?.user.id != activeSession.user.id {
+                    try tokenStore.saveGuestRecovery(activeSession)
+                }
+            } catch {
+                statusText = error.localizedDescription
+                isWarning = true
+                return
+            }
+        }
+        authenticationGeneration = UUID()
+        scheduledRefreshTask?.cancel()
+        scheduledRefreshTask = nil
         monetizationReadinessRequestID = UUID()
         if let userID = session?.user.id {
             Self.clearCachedOnboardingComplete(for: userID)
@@ -558,7 +611,7 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
     func deleteAccount() async -> Bool {
-        guard session != nil else {
+        guard let deletingSession = session else {
             statusText = "회원 탈퇴는 로그인 후 진행할 수 있어요."
             isWarning = true
             return false
@@ -570,6 +623,12 @@ final class CoorditBackendSessionStore: ObservableObject {
             try await authenticatedValue { token in
                 try await client.deleteAccount(token: token)
             }
+            if try tokenStore.loadGuestRecovery()?.user.id == deletingSession.user.id {
+                try tokenStore.deleteGuestRecovery()
+            }
+            guard session?.user.id == deletingSession.user.id else { return true }
+            authenticationGeneration = UUID()
+            cancelRefreshWork()
             if let userID = session?.user.id {
                 Self.clearCachedOnboardingComplete(for: userID)
             }
@@ -1099,11 +1158,24 @@ final class CoorditBackendSessionStore: ObservableObject {
         }
     }
 
-    private func authenticate(_ action: () async throws -> CoorditAuthSession) async {
+    private func authenticate(
+        mergingGuest: Bool = false,
+        _ action: () async throws -> CoorditAuthSession
+    ) async {
+        guard !isWorking else { return }
+        let generation = authenticationGeneration
+        let upgradingGuestID = session?.user.isAnonymous == true ? session?.user.id : nil
         await run {
             let nextSession = try await action()
-            try tokenStore.save(nextSession)
-            session = nextSession
+            guard generation == authenticationGeneration else { return }
+            if mergingGuest, upgradingGuestID != nil, !nextSession.user.isAnonymous {
+                if let upgradingGuestID {
+                    try await CoorditFitLabFileHistoryStore.shared.scheduleGuestTransfer(from: upgradingGuestID, to: nextSession.user.id)
+                }
+                guard generation == authenticationGeneration else { return }
+                try tokenStore.deleteGuestRecovery()
+            }
+            try persistSession(nextSession)
             try await refreshAccount()
             try await refreshOnboardingStatus()
             statusText = onboardingComplete ? "백엔드 로그인 완료" : "초기 설정을 완료해 주세요."
@@ -1195,13 +1267,22 @@ final class CoorditBackendSessionStore: ObservableObject {
             requestSession = initialSession
         }
 
+        guard session?.user.id == initialSession.user.id else {
+            throw CoorditBackendSessionError.loginRequired
+        }
         do {
             return try await action(requestSession.accessToken)
         } catch {
             guard isUnauthorized(error), !requestSession.refreshToken.isEmpty else { throw error }
+            guard session?.user.id == initialSession.user.id else {
+                throw CoorditBackendSessionError.loginRequired
+            }
             let refreshed = try await refreshCurrentSession(
                 afterFailureWith: requestSession.accessToken
             )
+            guard refreshed.user.id == initialSession.user.id else {
+                throw CoorditBackendSessionError.loginRequired
+            }
             return try await action(refreshed.accessToken)
         }
     }
@@ -1218,11 +1299,13 @@ final class CoorditBackendSessionStore: ObservableObject {
         guard !activeSession.refreshToken.isEmpty else {
             throw CoorditBackendSessionError.refreshUnavailable
         }
+        let generation = authenticationGeneration
         if let refreshTask {
             let refreshed = try await refreshTask.value
             return try publishRefreshedSession(
                 refreshed,
-                replacingAccessToken: activeSession.accessToken
+                replacing: activeSession,
+                generation: generation
             )
         }
 
@@ -1231,41 +1314,81 @@ final class CoorditBackendSessionStore: ObservableObject {
             let response = try await client.refreshSession(
                 refreshToken: activeSession.refreshToken
             )
-            return CoorditAuthSession(
-                accessToken: response.accessToken,
-                refreshToken: response.refreshToken,
-                user: activeSession.user
-            )
+            guard response.user.id == activeSession.user.id else {
+                throw CoorditBackendSessionError.guestRecoveryMismatch
+            }
+            try self.updateGuestRecovery(response, replacing: activeSession)
+            return response
         }
+        let taskID = UUID()
         refreshTask = task
+        refreshTaskID = taskID
         do {
             let refreshed = try await task.value
-            refreshTask = nil
+            if refreshTaskID == taskID {
+                refreshTask = nil
+                refreshTaskID = nil
+            }
             return try publishRefreshedSession(
                 refreshed,
-                replacingAccessToken: activeSession.accessToken
+                replacing: activeSession,
+                generation: generation
             )
         } catch {
-            refreshTask = nil
+            if refreshTaskID == taskID {
+                refreshTask = nil
+                refreshTaskID = nil
+            }
             throw error
         }
     }
 
     private func publishRefreshedSession(
         _ refreshed: CoorditAuthSession,
-        replacingAccessToken accessToken: String
+        replacing previousSession: CoorditAuthSession,
+        generation: UUID
     ) throws -> CoorditAuthSession {
+        guard refreshed.user.id == previousSession.user.id else {
+            throw CoorditBackendSessionError.guestRecoveryMismatch
+        }
+        try updateGuestRecovery(refreshed, replacing: previousSession)
+        guard generation == authenticationGeneration else {
+            throw CoorditBackendSessionError.loginRequired
+        }
         guard let currentSession = session else {
             throw CoorditBackendSessionError.loginRequired
         }
-        guard currentSession.accessToken == accessToken else {
+        guard currentSession.user.id == previousSession.user.id,
+              currentSession.accessToken == previousSession.accessToken else {
             return currentSession
         }
         try persistSession(refreshed)
         return refreshed
     }
 
+    private func updateGuestRecovery(
+        _ refreshed: CoorditAuthSession,
+        replacing previousSession: CoorditAuthSession
+    ) throws {
+        if previousSession.user.isAnonymous,
+           let archivedSession = try tokenStore.loadGuestRecovery(),
+           archivedSession.user.id == previousSession.user.id,
+           archivedSession.refreshToken == previousSession.refreshToken
+        {
+            if refreshed.user.isAnonymous {
+                try tokenStore.saveGuestRecovery(refreshed)
+            } else {
+                try tokenStore.deleteGuestRecovery()
+            }
+        }
+    }
+
     private func persistSession(_ nextSession: CoorditAuthSession) throws {
+        if nextSession.user.isAnonymous {
+            try tokenStore.saveGuestRecovery(nextSession)
+        } else if try tokenStore.loadGuestRecovery()?.user.id == nextSession.user.id {
+            try tokenStore.deleteGuestRecovery()
+        }
         try tokenStore.save(nextSession)
         session = nextSession
         scheduleRefreshIfPossible()
@@ -1274,6 +1397,7 @@ final class CoorditBackendSessionStore: ObservableObject {
     private func cancelRefreshWork() {
         refreshTask?.cancel()
         refreshTask = nil
+        refreshTaskID = nil
         scheduledRefreshTask?.cancel()
         scheduledRefreshTask = nil
     }
@@ -1401,6 +1525,7 @@ final class CoorditBackendSessionStore: ObservableObject {
                 clearCachedOnboardingComplete(for: userID)
             }
             tokenStore.delete()
+            try? tokenStore.deleteGuestRecovery()
         }
         if arguments.contains("--coordit-ui-testing-seed-persisted-session") {
             let fixture = CoorditAuthSession(
@@ -1486,6 +1611,7 @@ final class CoorditBackendSessionStore: ObservableObject {
 private enum CoorditBackendSessionError: LocalizedError {
     case loginRequired
     case refreshUnavailable
+    case guestRecoveryMismatch
 
     var errorDescription: String? {
         switch self {
@@ -1493,6 +1619,8 @@ private enum CoorditBackendSessionError: LocalizedError {
             "로그인이 필요해요."
         case .refreshUnavailable:
             "저장된 로그인 정보를 갱신할 수 없어요."
+        case .guestRecoveryMismatch:
+            "기존 비회원 계정을 복구하지 못했어요. 다시 시도해 주세요."
         }
     }
 }

@@ -4,6 +4,7 @@ import SwiftUI
 struct CoorditSplashAuthenticationSheet: View {
     let onAuthenticated: () -> Void
     let onGuestAuthenticated: (Int) -> Void
+    var requiresAccountLink = false
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -16,13 +17,15 @@ struct CoorditSplashAuthenticationSheet: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                Text("coordit 시작하기")
+                Text(requiresAccountLink ? "구매 전 계정 연결" : "coordit 시작하기")
                     .font(CoorditTypography.gmarketBold(size: CoorditSplashAuthenticationDesign.titleSize, relativeTo: .title2))
                     .foregroundStyle(Main01DesignTokens.Colors.chrome)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier("coordit-splash-auth-sheet")
 
-                Text(mode == .providers ? "비회원으로 시작하거나 계정을 연결하세요." : "이메일과 비밀번호를 입력하세요.")
+                Text(requiresAccountLink
+                     ? "실타래와 옷장, 분석 기록을 그대로 이어가요.\nApple 또는 Google 계정을 연결해 주세요."
+                     : mode == .providers ? "비회원으로 시작하거나 계정을 연결하세요." : "이메일과 비밀번호를 입력하세요.")
                     .font(CoorditTypography.gmarketMedium(size: CoorditSplashAuthenticationDesign.subtitleSize, relativeTo: .subheadline))
                     .foregroundStyle(Main01DesignTokens.Colors.chrome.opacity(0.6))
                     .multilineTextAlignment(.center)
@@ -67,6 +70,13 @@ struct CoorditSplashAuthenticationSheet: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, CoorditSplashAuthenticationDesign.footerMinimumSpacing)
                     .accessibilityIdentifier("splash-auth-legal")
+
+                if requiresAccountLink {
+                    secondaryActionButton(title: "나중에 연결하기", identifier: "purchase-account-link-cancel") {
+                        dismiss()
+                    }
+                        .padding(.top, CoorditSplashAuthenticationDesign.providerStackSpacing)
+                }
             }
             .padding(.horizontal, CoorditSplashAuthenticationDesign.horizontalInset)
             .padding(.top, CoorditSplashAuthenticationDesign.topInset)
@@ -106,18 +116,20 @@ struct CoorditSplashAuthenticationSheet: View {
                 Task { await authenticate { await backendSession.loginWithApple() } }
             }
 
-            providerButton(title: "비회원으로 계속하기", identifier: "splash-auth-guest", mark: .guest) {
-                Task {
-                    guard let balance = await backendSession.bootstrapGuestIfNeeded() else { return }
-                    onGuestAuthenticated(balance)
-                    dismiss()
+            if !requiresAccountLink {
+                providerButton(title: "비회원으로 계속하기", identifier: "splash-auth-guest", mark: .guest) {
+                    Task {
+                        guard let balance = await backendSession.bootstrapGuestIfNeeded() else { return }
+                        onGuestAuthenticated(balance)
+                        dismiss()
+                    }
                 }
-            }
 
-            secondaryActionButton(title: "이메일로 로그인", identifier: "splash-auth-email") {
-                backendSession.clearStatus()
-                mode = .email
-                focusedField = .email
+                secondaryActionButton(title: "이메일로 로그인", identifier: "splash-auth-email") {
+                    backendSession.clearStatus()
+                    mode = .email
+                    focusedField = .email
+                }
             }
         }
     }
