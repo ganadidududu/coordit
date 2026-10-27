@@ -22,6 +22,7 @@ class Sample(NamedTuple):
     mask: Tensor
     points: Tensor
     visibility: Tensor
+    mask_supervision: Tensor
 
 
 class Prediction(NamedTuple):
@@ -78,6 +79,7 @@ class ApprovedDataset(Dataset[Sample]):
             torch.tensor(np.array(mask, dtype=np.float32) / 255).unsqueeze(0),
             points,
             visibility,
+            torch.tensor(float(record.segmentation_supervised)),
         )
 
 
@@ -143,10 +145,20 @@ def loss(prediction: Prediction, target: Sample) -> Tensor:
     ).sum() / known.sum().clamp_min(1)
     return (
         F.cross_entropy(prediction.category, target.category)
-        + F.binary_cross_entropy_with_logits(prediction.mask, target.mask)
+        + segmentation_loss(prediction.mask, target)
         + 5 * landmark_loss
         + 0.2 * visibility_loss
     )
+
+
+def segmentation_loss(logits: Tensor, target: Sample, *, dice: bool = False) -> Tensor:
+    """Missing masks produce zero supervision, never an all-background pseudo ground truth."""
+    bce = F.binary_cross_entropy_with_logits(logits, target.mask, reduction="none").mean(dim=(1, 2, 3))
+    if dice:
+        probability = logits.sigmoid()
+        overlap = (probability * target.mask).sum(dim=(1, 2, 3))
+        bce = bce + 1 - (2 * overlap + 1) / (probability.sum(dim=(1, 2, 3)) + target.mask.sum(dim=(1, 2, 3)) + 1)
+    return (bce * target.mask_supervision).sum() / target.mask_supervision.sum().clamp_min(1)
 
 
 def batch(dataset: ApprovedDataset, indices: list[int], device: str) -> Sample:

@@ -1,0 +1,86 @@
+[
+  {
+    "path": "data/test-00000-of-00001.parquet",
+    "size": 255615031,
+    "sha256": "30d0d4e167f06b5c49fadeb9126de53bdaf270ba00ed12fdd34c43d72d287624",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/test-00000-of-00001.parquet"
+  },
+  {
+    "path": "data/train-00000-of-00013.parquet",
+    "size": 374007859,
+    "sha256": "2e61cbea05252b869a0a54834ffd04df5ef65b76977f0054f80797e64dd9c369",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00000-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00001-of-00013.parquet",
+    "size": 173244030,
+    "sha256": "38ecb22352e8455ca1ccd22714f77efcbf7a35f943d16c7294529d443a3b7cec",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00001-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00002-of-00013.parquet",
+    "size": 201648716,
+    "sha256": "cfb1490c52600106b593605bf943a54db08aa4c902c9d512a6317e0c45aa7127",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00002-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00003-of-00013.parquet",
+    "size": 199512238,
+    "sha256": "1ba471bd26106f04a0d806c25ab60e8866c2dc62f1af4af9edaacfa070179124",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00003-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00004-of-00013.parquet",
+    "size": 195745525,
+    "sha256": "d4b310aa0d01356827ebbb67d7a91562b32a8124860763a5bf5cdf120080cce3",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00004-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00005-of-00013.parquet",
+    "size": 197214413,
+    "sha256": "ea2da3c8489c6941bde81ddb6f15599d54cd8cb8b0fb14b8a246093a2feaaa76",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00005-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00006-of-00013.parquet",
+    "size": 191292294,
+    "sha256": "0429fc8d93bc396de2678f52eb09968932f1d6894ad20775ed36f3021212b37b",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00006-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00007-of-00013.parquet",
+    "size": 173599967,
+    "sha256": "5802cc827b1fa504df4ffd9f4949e1cb146df6fa7053251ca7ef61a8772ed66a",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00007-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00008-of-00013.parquet",
+    "size": 187706457,
+    "sha256": "ae619c962ccaad62558b4ef660f72447ec7249966ba8dfec3ca66bad1b9f15a0",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00008-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00009-of-00013.parquet",
+    "size": 180644662,
+    "sha256": "1253fc6edb0ced6263aa16e14960be1cb2e4cbc1f03f009695de6bfc18c221ca",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00009-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00010-of-00013.parquet",
+    "size": 167653267,
+    "sha256": "17489121d2f70ade481ecfbbc848d7e642ed39dd87327098042ea19af3cd696c",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00010-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00011-of-00013.parquet",
+    "size": 177542302,
+    "sha256": "3554d345cf1754d203ef0fde8f63468bad576aca502345cbbfa857bba34acff8",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00011-of-00013.parquet"
+  },
+  {
+    "path": "data/train-00012-of-00013.parquet",
+    "size": 168243556,
+    "sha256": "60861f4b417f3f0f0ae5f1ff9f66f2de34d6253e6b0e256db07b42c0c65e2fea",
+    "url": "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb/resolve/b2559ac0157ea9b6913a65062877f487952e690b/data/train-00012-of-00013.parquet"
+  }
+]

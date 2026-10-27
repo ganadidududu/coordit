@@ -131,6 +131,8 @@ class Acquisition(BoundaryModel):
     occlusion: str = "unknown"
     wrinkles: str = "unknown"
     difficulty: str = "unknown"
+    source_category: str | None = None
+    label_provenance: str = "publisher_or_authored"
 
 
 class Record(BoundaryModel):
@@ -148,6 +150,7 @@ class Record(BoundaryModel):
     split: Literal["train", "validation", "test"]
     file_name: str
     sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
+    original_sha256: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")] | None = None
     perceptual_hash: Annotated[str, Field(pattern=r"^[0-9a-f]{16}$")]
     width: Annotated[int, Field(gt=0)]
     height: Annotated[int, Field(gt=0)]
@@ -155,6 +158,7 @@ class Record(BoundaryModel):
     source_bbox: list[float] | None = None
     segmentation: list[list[float]]
     keypoints: list[Landmark]
+    segmentation_supervised: bool = True
     mask_file_name: str | None = None
     mask_sha256: str | None = None
     source_keypoints: list[Landmark] = Field(default_factory=list)
@@ -187,6 +191,8 @@ class Record(BoundaryModel):
                 py < y - 0.01 or py > y + height + 0.01 for py in polygon[1::2]
             ):
                 raise PipelineError("Bounding box does not cover segmentation")
+        if not self.segmentation_supervised and (self.segmentation or self.mask_file_name or self.mask_sha256):
+            raise PipelineError("Classification-only records cannot claim segmentation truth")
         names = [point.landmark_type for point in self.keypoints]
         permitted = {point for pair in dimension_landmarks(self.category).values() for point in pair}
         if len(set(names)) != len(names) or not set(names) <= permitted:

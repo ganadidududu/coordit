@@ -17,11 +17,28 @@ uv run python -m coordit_ml validate artifacts/synthetic-v2/records.jsonl
 uv run python -m coordit_ml audit-inventory reports/SOURCE_FILES.jsonl
 ```
 
-These refuse to overwrite existing outputs. Data/weights live under ignored `artifacts/`, never regular Git. A fresh checkout can download the public archive without an account; inaccessible sources remain pending, not fabricated. The approved real set is 524 images: 210 T-shirts, 104 shorts, 210 auxiliary towels. All 980 publisher test-family images, including the old 16-image development fixtures, are excluded. Real source garment IDs are unavailable, so none of these real images is represented as independent validation/test. Original `artf:` keypoints are retained without pretending they label Coordit seams.
+These refuse to overwrite existing outputs. Data/weights live under ignored `artifacts/`, never regular Git. A fresh checkout can download the public archive without an account; inaccessible sources remain pending, not fabricated. The earlier approved real set contained 524 images: 210 T-shirts, 104 shorts, 210 auxiliary towels. All 980 publisher test-family images, including the old 16-image development fixtures, are excluded. Real source garment IDs are unavailable, so none of these real images is represented as independent validation/test. Original `artf:` keypoints are retained without pretending they label Coordit seams.
 
 The v2 generator produces 1,320 new project-authored identities across 11 categories, with masks, semantic 2D/3D points, camera matrices, visibility, synthetic cm and construction details. It uses no third-party asset. These are flat procedural scenes with wrinkle shading, not physically simulated cloth. Train/validation/test split is 1,108/110/102. Their high scores do not validate real photographs.
 
 `registry/DATASET_MANIFEST.json` is the approval authority. Image copyright, annotation license, source/terms evidence, scope and attribution are separate fields. `approve-dataset review.json` requires a complete typed review, reviewer, original evidence URLs and the exact registry hash. Pending, blocked, unknown or NC sources fail before training. Each loader audits actual SHA-256, perceptual hashes, image/mask geometry, semantic schemas and cross-corpus group/near-duplicate leakage. CI audits the tracked per-file source inventory and optionally a full curated corpus. Model loading checks the checkpoint hash, pinned manifests, current registry hash and current source approval; revocation fails closed.
+
+## Additional original-author real photographs
+
+[2026-10-27 acquisition and accuracy update](../docs/CARDLESS_ACCURACY_AND_REAL_DATA.md) records 14,101 additional training-only photos, the rights chain and exact class counts. These have **classification labels only**, no mask/seam/cm truth. Coat (9) and sweatshirt (4) labels are explicitly weak visual curation. The loader excludes their absent supervision from mask/landmark losses and their absent annotations from corresponding evaluation denominators. Publisher test (3,390) is excluded. Do not turn a photograph's image extent into garment-mask/bbox truth.
+
+```sh
+uv run python -m coordit_ml download-secondhand artifacts/secondhand-v3-source
+uv run python -m coordit_ml convert-secondhand config-secondhand-conversion.json
+uv run python -m coordit_ml validate artifacts/secondhand-v3-training/records.jsonl
+uv run python -m coordit_ml audit-inventory reports/SOURCE_FILES.jsonl
+# Actually executed: 2 CPU steps / 8 real photo exposures, operational check only.
+uv run python -m coordit_ml train config-secondhand-smoke.json
+```
+
+The public source is pinned to the original author's revision and 14 reviewed LFS SHA-256 values; resume checks exact ranges, byte counts and checksums. Conversion refuses an unreviewed mirror, normalizes upright metadata-free pixels, preserves original photo SHA and expert/weak-label provenance, and rejects exact duplicates. Since conservative source-day/near-duplicate grouping connects this pool, it is explicitly training-only; no real holdout metric is reported. The optional `balance_real_categories` sampler balances exposures, not unique garments. Its default is false.
+
+The dataset registry changed after the earlier MPS experiments. Their checkpoints remain historical artifacts and **fail the current registry identity check** until reviewed/retrained. Do not bypass this gate or overwrite their metadata. The new CPU smoke has current registry pins but is not a useful landmark checkpoint. No new full model training or real-photo accuracy claim is made.
 
 ## Training, resume and evaluation
 

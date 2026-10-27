@@ -20,6 +20,9 @@ class InventoryEntry(BoundaryModel):
     split: str
     sha256: str
     perceptual_hash: str
+    original_sha256: str | None = None
+    segmentation_supervised: bool = True
+    label_provenance: str | None = None
 
 
 def audit_inventory(path: Path, registry: Registry) -> int:
@@ -38,6 +41,10 @@ def audit_inventory(path: Path, registry: Registry) -> int:
             or not record.source_url
         ):
             raise PipelineError("Inventory rights/category mismatch")
+        if record.segmentation_supervised and not {"mask", "polygon", "segmentation"}.intersection(
+            entry.annotation_types
+        ):
+            raise PipelineError("Inventory claims unprovided mask supervision")
         if record.sha256 in hashes or record.sha256 in excluded:
             raise PipelineError("Duplicate or excluded inventory image")
         if record.source_dataset.startswith("artf-") and any(

@@ -11,6 +11,7 @@ from coordit_ml.artifacts import Artifact, ManifestPin, read_checkpoint
 from coordit_ml.model_factory import Architecture, PerceptionModel, create_model, model_loss
 from coordit_ml.network import ApprovedDataset, batch
 from coordit_ml.provenance import REGISTRY_ROOT, approved_entry, read_records, sha256
+from coordit_ml.sampling import balance_categories
 from coordit_ml.schema import BoundaryModel, PipelineError, read_registry
 
 
@@ -29,6 +30,7 @@ class TrainingConfig(BoundaryModel):
     max_steps: int | None = None
     resume: bool = False
     synthetic_fraction: float = 0.5
+    balance_real_categories: bool = False
 
 
 def fingerprint(config: TrainingConfig) -> str:
@@ -44,6 +46,11 @@ def fingerprint(config: TrainingConfig) -> str:
         str(config.batch_size),
         str(config.learning_rate),
         str(config.synthetic_fraction),
+        str(config.balance_real_categories),
+        sha256(Path(__file__).with_name("schema.py")),
+        sha256(Path(__file__).with_name("sampling.py")),
+        sha256(Path(__file__).with_name("provenance.py")),
+        sha256(Path(__file__).with_name("similarity.py")),
         sha256(Path(__file__).with_name("network.py")),
         sha256(Path(__file__)),
         sha256(REGISTRY_ROOT.parent / "uv.lock"),
@@ -96,17 +103,22 @@ def train(config: TrainingConfig) -> Path:
         real = sorted(real)
         rng.shuffle(synthetic)
         rng.shuffle(real)
+        real_epoch = (
+            balance_categories(real, [record.category for _, record in dataset.samples], rng)
+            if config.balance_real_categories
+            else real
+        )
         if synthetic and real:
             total = min(
                 len(synthetic) / max(config.synthetic_fraction, 0.000001),
-                len(real) / max(1 - config.synthetic_fraction, 0.000001),
+                len(real_epoch) / max(1 - config.synthetic_fraction, 0.000001),
             )
             indices = (
                 synthetic[: int(total * config.synthetic_fraction)]
-                + real[: int(total * (1 - config.synthetic_fraction))]
+                + real_epoch[: int(total * (1 - config.synthetic_fraction))]
             )
         else:
-            indices = synthetic + real
+            indices = synthetic + real_epoch
         rng.shuffle(indices)
         losses: list[float] = []
         used: list[int] = []

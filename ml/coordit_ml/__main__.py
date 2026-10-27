@@ -11,11 +11,14 @@ from typing import Literal, assert_never
 
 from coordit_ml.acquisition import convert_artf, download_artf
 from coordit_ml.approval import approve_dataset
+from coordit_ml.category_review import prepare_review
 from coordit_ml.centimeter_evaluation import evaluate_centimeters
 from coordit_ml.evaluation import evaluate
 from coordit_ml.inventory import audit_inventory
 from coordit_ml.provenance import REGISTRY_ROOT, approved_entry, audit_records
 from coordit_ml.schema import read_registry
+from coordit_ml.secondhand_conversion import ConversionConfig, convert_secondhand
+from coordit_ml.secondhand_download import download_secondhand
 from coordit_ml.synthetic import generate
 from coordit_ml.synthetic_v2 import generate_v2
 from coordit_ml.training import TrainingConfig, load_model, train
@@ -29,6 +32,9 @@ class Arguments(argparse.Namespace):
         "approve-dataset",
         "audit-inventory",
         "download-artf",
+        "download-secondhand",
+        "convert-secondhand",
+        "review-secondhand",
         "convert-artf",
         "synthetic",
         "validate",
@@ -40,6 +46,7 @@ class Arguments(argparse.Namespace):
     ] = "registry"
     output: Path = Path()
     archive: Path = Path()
+    source: Path = Path()
     per_category: int = 30
     seed: int = 17
     version: str = "v1"
@@ -62,6 +69,13 @@ def main() -> None:
     _ = review.add_argument("config", type=Path)
     fetch = commands.add_parser("download-artf")
     _ = fetch.add_argument("output", type=Path)
+    secondhand = commands.add_parser("download-secondhand")
+    _ = secondhand.add_argument("output", type=Path)
+    secondhand_conversion = commands.add_parser("convert-secondhand")
+    _ = secondhand_conversion.add_argument("config", type=Path)
+    secondhand_review = commands.add_parser("review-secondhand")
+    _ = secondhand_review.add_argument("source", type=Path)
+    _ = secondhand_review.add_argument("output", type=Path)
     convert = commands.add_parser("convert-artf")
     _ = convert.add_argument("archive", type=Path)
     _ = convert.add_argument("output", type=Path)
@@ -102,6 +116,12 @@ def main() -> None:
             print(audit_inventory(args.manifest, registry))
         case "download-artf":
             print(download_artf(args.output, registry))
+        case "download-secondhand":
+            print(download_secondhand(args.output, registry))
+        case "convert-secondhand":
+            print(convert_secondhand(ConversionConfig.model_validate_json(args.config.read_bytes()), registry))
+        case "review-secondhand":
+            print(prepare_review(args.source, args.output))
         case "convert-artf":
             print(convert_artf(args.archive, args.output, registry))
         case "synthetic":

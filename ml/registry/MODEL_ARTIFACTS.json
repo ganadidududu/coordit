@@ -33,6 +33,14 @@
       "training_registry_sha256": "e96bdb578f19128fa72eb1cb3a918dcceef7667067416abf8db630597fcff2f9",
       "deployment_approved": false,
       "weights_license": "Internal development; source attribution obligations apply"
+    },
+    {
+      "path": "artifacts/secondhand-supervision-smoke/checkpoint.pt",
+      "sha256": "bc00f78f3b88d83e1a24aae05d37e5b74c792062cebe08774e9f06c4a3d9cc72",
+      "training_registry_sha256": "5464f66f667788709a8a1b26370cbead9026f00fa8854d158990127ade7d6513",
+      "deployment_approved": false,
+      "purpose": "classification_only_ingestion_cpu_smoke_not_landmark_training",
+      "weights_license": "Internal development; source attribution obligations apply"
     }
   ]
 }

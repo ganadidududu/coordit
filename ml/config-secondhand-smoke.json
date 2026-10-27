@@ -1,0 +1,17 @@
+{
+  "manifests": [
+    "artifacts/secondhand-v3-training/records.jsonl"
+  ],
+  "output": "artifacts/secondhand-supervision-smoke",
+  "epochs": 1,
+  "batch_size": 4,
+  "learning_rate": 0.001,
+  "seed": 42,
+  "device": "cpu",
+  "architecture": "coordit-spatial-multitask-v2",
+  "category_heads": false,
+  "max_steps": 2,
+  "resume": false,
+  "synthetic_fraction": 0,
+  "balance_real_categories": false
+}

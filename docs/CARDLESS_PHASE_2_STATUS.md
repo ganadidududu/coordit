@@ -1,5 +1,7 @@
 # Cardless measurement: Phase 0–2 checkpoint (2026-10-27)
 
+Subsequent update: [AR accuracy fixes and original-author real-photo acquisition](CARDLESS_ACCURACY_AND_REAL_DATA.md). That update supersedes the real-photo counts and test totals below, records the registry change that invalidates historical checkpoints, and keeps mathematical tests separate from real sensor accuracy. The following remains the historical training/integration checkpoint.
+
 Work stays on `codex/camera-auto-guides`. The audited remote starting revision is `cad9318ae0c6f54f84cea4665390f3fe2c01e863`. No production migration, deployment, push or feature activation was performed. Phase 3 source changes are parked outside the tracked implementation in `.omo/deferred-phase3/2026-10-27/`; single-photo metric-depth work is deferred at the user's request.
 
 ## Status and architecture

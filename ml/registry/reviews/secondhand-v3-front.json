@@ -1,0 +1,54 @@
+{
+  "expected_registry_sha256": "297688b14ada01b4f058b744658fd68d0998cdd78b0bb5a11faa90ba56269e36",
+  "reviewer": "Coordit source evidence review by Codex (original publisher documents; release legal review remains required)",
+  "original_evidence_urls": [
+    "https://zenodo.org/records/13788681",
+    "https://fnauman.com/second-hand-fashion/posts/2025-02-06-data-exploration/",
+    "https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb",
+    "https://creativecommons.org/licenses/by/4.0/legalcode.en",
+    "https://huggingface.co/terms-of-service"
+  ],
+  "dataset": {
+    "id": "secondhand-fashion-v3-front",
+    "name": "Clothing Dataset for Second-Hand Fashion v3 — official author front-only RGB",
+    "original_url": "https://zenodo.org/records/13788681",
+    "publisher": "Farrukh Nauman / RISE Research Institutes of Sweden AB; Wargön Innovation AB; Myrorna AB",
+    "image_rightsholder": "Original institutional data collectors RISE/Wargön/Myrorna, represented by the original depositor and original-author mirror",
+    "data_license": "CC-BY-4.0",
+    "annotation_license": "CC-BY-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/legalcode.en",
+    "checked_at": "2026-10-27",
+    "terms_url": "https://huggingface.co/terms-of-service",
+    "commercial_basis": "Original Zenodo deposit explicitly licenses photographs/annotations CC BY 4.0 and identifies sorting-facility collection, not web scraping. Original depositor links his official front-only RGB Hub dataset and reiterates CC BY 4.0 and Zenodo attribution. Public download, no gated service/model terms. Scope: original-author front photos only, exclude brand closeups, no fabricated masks/seams or cm.",
+    "permissions": [
+      "train",
+      "modify",
+      "redistribute_with_attribution",
+      "internal_deploy"
+    ],
+    "attribution": "Nauman, F. (2024). Clothing Dataset for Second-Hand Fashion (Version 3) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.13788681. RISE, Wargön Innovation and Myrorna. CC BY 4.0. Official front-only RGB conversion by Farrukh Nauman; Coordit category filtering, normalization and grouping.",
+    "published_image_count": 31638,
+    "approved_image_count": 0,
+    "categories": [
+      "tshirt",
+      "shirt",
+      "sweatshirt",
+      "hoodie",
+      "knit",
+      "jacket",
+      "coat",
+      "pants",
+      "jeans",
+      "shorts",
+      "skirt"
+    ],
+    "annotation_types": [
+      "classification"
+    ],
+    "provenance_manifest": "artifacts/secondhand-v3/records.jsonl",
+    "status": "approved",
+    "approval_reason": "Original-photo origin and CC BY 4.0 confirmed in original institutional deposit, original depositor project page and his official front-only mirror. Commercial training/modification allowed subject to attribution. Approval covers image rights, not nonexistent seam/mask/cm labels or release accuracy.",
+    "download_url": null,
+    "archive_md5": null
+  }
+}

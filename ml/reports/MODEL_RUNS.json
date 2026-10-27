@@ -236,5 +236,61 @@
     "unique_images_seen_total": 1632,
     "total_exposures": 55370,
     "selection": "comparison_only"
+  },
+  {
+    "architecture": "coordit-spatial-multitask-v2",
+    "fingerprint": "cbb93700eabec575b9a30c8199be955a4f0f575457713feda38b0df20936562b",
+    "checkpoint_sha256": "bc00f78f3b88d83e1a24aae05d37e5b74c792062cebe08774e9f06c4a3d9cc72",
+    "epoch": 0,
+    "device": "cpu",
+    "category_heads": false,
+    "input_size": 128,
+    "deployment_approved": false,
+    "purpose": "classification_only_ingestion_cpu_smoke_not_landmark_training",
+    "app_artifact": null,
+    "server_artifact": "artifacts/secondhand-supervision-smoke/checkpoint.pt",
+    "manifests": [
+      {
+        "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/secondhand-v3-training/records.jsonl",
+        "sha256": "4d85aecf62764b999de7a649da30a06ea9cb1236d0907a76b2edba43c58c29e4"
+      }
+    ],
+    "registry_sha256": "5464f66f667788709a8a1b26370cbead9026f00fa8854d158990127ade7d6513",
+    "dataset_images": 14101,
+    "images_seen_this_epoch": 8,
+    "unique_images_seen_this_epoch": 8,
+    "seen_image_ids": [
+      "secondhand-fashion-v3-front:train-00001-of-00013:114",
+      "secondhand-fashion-v3-front:train-00001-of-00013:129",
+      "secondhand-fashion-v3-front:train-00003-of-00013:1163",
+      "secondhand-fashion-v3-front:train-00008-of-00013:77",
+      "secondhand-fashion-v3-front:train-00009-of-00013:729",
+      "secondhand-fashion-v3-front:train-00009-of-00013:770",
+      "secondhand-fashion-v3-front:train-00010-of-00013:2143",
+      "secondhand-fashion-v3-front:train-00011-of-00013:363"
+    ],
+    "steps": 2,
+    "loss": 2.657504677772522,
+    "categories_seen": {
+      "tshirt": 2,
+      "shirt": 0,
+      "sweatshirt": 0,
+      "hoodie": 0,
+      "knit": 1,
+      "jacket": 2,
+      "coat": 0,
+      "pants": 1,
+      "jeans": 1,
+      "shorts": 0,
+      "skirt": 1
+    },
+    "synthetic_images_seen": 0,
+    "code_license": "Coordit repository",
+    "weights_license": "Internal development; source attribution obligations apply",
+    "training_config_json": "{\"manifests\":[\"artifacts/secondhand-v3-training/records.jsonl\"],\"output\":\"artifacts/secondhand-supervision-smoke\",\"epochs\":1,\"batch_size\":4,\"learning_rate\":0.001,\"seed\":42,\"device\":\"cpu\",\"architecture\":\"coordit-spatial-multitask-v2\",\"category_heads\":false,\"max_steps\":2,\"resume\":false,\"synthetic_fraction\":0.0,\"balance_real_categories\":false}",
+    "artifact_directory": "artifacts/secondhand-supervision-smoke",
+    "performance": "not_evaluated",
+    "unique_images_seen_total": 8,
+    "total_exposures": 8
   }
 ]

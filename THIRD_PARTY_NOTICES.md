@@ -4,6 +4,10 @@ No new third-party model weights or dataset archives are distributed in the app 
 
 aRTF Clothes dataset — Thomas Lips, Victor-Louis De Gusseme and Francis wyffels, Ghent University. [Original deposit](https://zenodo.org/records/14501499), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Learning Keypoints for Robotic Cloth Manipulation using Synthetic Data (2024). Dataset conversions/resizing are modifications. Existing evaluation fixtures retain their own `CameraDataset/ATTRIBUTION.md`.
 
+Clothing Dataset for Second-Hand Fashion v3 — Farrukh Nauman and the credited RISE Research Institutes of Sweden / Wargön Innovation / Myrorna contributors. [Original v3 deposit and full creator attribution](https://zenodo.org/records/13788681); [author's front-only RGB derivative](https://huggingface.co/datasets/fnauman/fashion-second-hand-front-only-rgb), revision `b2559ac0157ea9b6913a65062877f487952e690b`; [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Coordit changes: front-photo selection, upright resizing/JPEG re-encoding, duplicate/type exclusions, training-only grouping, and 13 explicitly weak fine-category labels. Original photographs and derived dataset binaries are not included in Git or the app. Full publisher credits and source rights are retained in the dataset review record.
+
+Polars — Ritchie Vink and Polars contributors, [MIT license](https://github.com/pola-rs/polars/blob/main/LICENSE). Used for local parquet conversion, separately from source data rights; exact package versions are fixed by `ml/uv.lock`.
+
 ARKit/Vision are Apple platform frameworks. Android ARCore is subject to [Google APIs terms](https://developers.google.com/ar/develop/terms). SDK/sample code licensing and service terms are separate. Ruler was inspected as a reference (MIT); no Ruler source is copied.
 
 Python dependencies and Android SDK dependencies retain their upstream notices. This file covers additions for this project, not a replacement for existing application dependency notices. See DATASET_LICENSES.md and MODEL_LICENSES.md for quarantine decisions.

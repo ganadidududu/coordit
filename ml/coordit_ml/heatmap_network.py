@@ -6,7 +6,7 @@ import torch
 from torch import Tensor, nn
 from torch.nn import functional as F
 
-from coordit_ml.network import Prediction, Sample
+from coordit_ml.network import Prediction, Sample, segmentation_loss
 from coordit_ml.schema import CLASSES, LANDMARKS, PipelineError
 
 
@@ -87,9 +87,6 @@ class GarmentHeatmapNet(nn.Module):
 
 def spatial_loss(prediction: Prediction, target: Sample) -> Tensor:
     """Balance foreground masks and supervise only explicitly visible semantic landmarks."""
-    probability = prediction.mask.sigmoid()
-    overlap = (probability * target.mask).sum(dim=(1, 2, 3))
-    dice = 1 - (2 * overlap + 1) / (probability.sum(dim=(1, 2, 3)) + target.mask.sum(dim=(1, 2, 3)) + 1)
     visible = (target.visibility > 0).float()
     known = (target.visibility >= 0).float()
     point_loss = (
@@ -112,8 +109,7 @@ def spatial_loss(prediction: Prediction, target: Sample) -> Tensor:
     ).sum() / known.sum().clamp_min(1)
     return (
         F.cross_entropy(prediction.category, target.category)
-        + F.binary_cross_entropy_with_logits(prediction.mask, target.mask)
-        + dice.mean()
+        + segmentation_loss(prediction.mask, target, dice=True)
         + 10 * point_loss
         + heatmap_loss
         + 0.2 * visibility_loss
