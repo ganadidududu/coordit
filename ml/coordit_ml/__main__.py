@@ -14,6 +14,7 @@ from coordit_ml.approval import approve_dataset
 from coordit_ml.category_review import prepare_review
 from coordit_ml.centimeter_evaluation import evaluate_centimeters
 from coordit_ml.evaluation import evaluate
+from coordit_ml.field_evaluation import field_report
 from coordit_ml.inventory import audit_inventory
 from coordit_ml.provenance import REGISTRY_ROOT, approved_entry, audit_records
 from coordit_ml.schema import read_registry
@@ -41,6 +42,7 @@ class Arguments(argparse.Namespace):
         "train",
         "evaluate",
         "evaluate-cm",
+        "field-report",
         "infer",
         "export-onnx",
     ] = "registry"
@@ -96,6 +98,9 @@ def main() -> None:
     _ = scoring.add_argument("--split", choices=("train", "validation", "test"), default="test")
     cm = commands.add_parser("evaluate-cm")
     _ = cm.add_argument("csv", type=Path)
+    field = commands.add_parser("field-report")
+    _ = field.add_argument("source", type=Path)
+    _ = field.add_argument("output", type=Path)
     infer = commands.add_parser("infer")
     _ = infer.add_argument("model", type=Path)
     _ = infer.add_argument("image", type=Path)
@@ -144,6 +149,8 @@ def main() -> None:
             print(evaluate(args.model, args.manifest, args.split))
         case "evaluate-cm":
             print(json.dumps(evaluate_centimeters(args.csv), indent=2))
+        case "field-report":
+            print(field_report(args.source, args.output))
         case "infer":
             from coordit_ml.inference import infer_image
 
