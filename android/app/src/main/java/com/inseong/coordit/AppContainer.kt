@@ -32,5 +32,6 @@ class AppContainer(context: Context) {
     val fitLabHistory = com.inseong.coordit.data.fitlab.FitLabHistoryStore(context.applicationContext, com.inseong.coordit.data.model.CoorditJson.create())
     val fitLabSubmission = com.inseong.coordit.data.fitlab.FitLabSubmissionStore(context.applicationContext, com.inseong.coordit.data.model.CoorditJson.create())
     val welcome = com.inseong.coordit.auth.DeviceWelcomeStore(context)
+    val sharedImports = com.inseong.coordit.sharing.SharedProductImports(context.applicationContext)
     val repository = SessionRepository(api, SecureSessionStore(context.applicationContext))
 }

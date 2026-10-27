@@ -19,6 +19,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        (application as CoorditApplication).container.sharedImports.accept(intent)
+    }
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) WindowInsetsControllerCompat(window, window.decorView).hide(WindowInsetsCompat.Type.systemBars())
@@ -32,6 +37,7 @@ class MainActivity : ComponentActivity() {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
         val container = (application as CoorditApplication).container
+        if (savedInstanceState == null) container.sharedImports.accept(intent)
         val model = ViewModelProvider(this, object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T =
@@ -73,6 +79,7 @@ class MainActivity : ComponentActivity() {
                 onDeleteAccount = { model.deleteAccount { identity.clear() } },
                 closetModel = closet,
                 fitLabModel = fitLab,
+                sharedImports = container.sharedImports,
             )
         }
     }

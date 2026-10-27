@@ -7,7 +7,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +26,8 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -39,6 +43,7 @@ import com.inseong.coordit.ui.theme.*
 import java.util.Locale
 import java.util.UUID
 import java.util.Date
+import kotlinx.coroutines.launch
 
 private object FitLabDesign {
     const val canvas = 402f
@@ -53,54 +58,85 @@ private object FitLabDesign {
 }
 
 @Composable
-fun FitLabScreen(model: FitLabViewModel, onHome: () -> Unit, onCloset: () -> Unit, onProfile: () -> Unit) {
+fun FitLabScreen(model: FitLabViewModel, onHome: () -> Unit, onCloset: () -> Unit, onProfile: () -> Unit, onThreadCharge: () -> Unit = {}) {
     val state by model.state.collectAsStateWithLifecycle()
-    fun back() { if (!state.busy && !model.back()) onHome() }
+    var urlConfirmed by rememberSaveable(state.draft.productUrl) { mutableStateOf(false) }
+    var compared by rememberSaveable(state.recommendation?.fitAnalysisResultId) { mutableStateOf(false) }
+    val scroll = key(state.screen) { rememberScrollState() }
+    val scope = rememberCoroutineScope()
+    val tutorialTarget = when (state.screen) {
+        FitLabRoute.Sources -> "source"
+        FitLabRoute.Url -> if (state.draft.sizes.any { it.measurements.isNotEmpty() }) "review" else if (urlConfirmed) "import" else "link"
+        FitLabRoute.Review -> "continue"
+        FitLabRoute.References -> if (state.draft.selectedReferenceIds.isEmpty()) "references" else "analyze"
+        FitLabRoute.Result -> if (compared) "save" else "result"
+        else -> null
+    }
+    fun back() { if (state.busy) onHome() else if (!model.back()) onHome() }
     BackHandler { back() }
+    GuidedScreen("fitlab", tutorialTarget) {
+    val dismissTutorial = tutorialDismissAction()
+    var previousScreen by remember { mutableStateOf(state.screen) }
+    var previousHistoryCount by remember { mutableIntStateOf(state.history.size) }
+    LaunchedEffect(state.screen, state.history.size) {
+        if (previousScreen == FitLabRoute.Result && state.screen == FitLabRoute.Sources && state.history.size > previousHistoryCount) dismissTutorial()
+        previousScreen = state.screen
+        previousHistoryCount = state.history.size
+    }
     BoxWithConstraints(Modifier.fillMaxSize().testTag("fitlab-${state.screen.name.lowercase()}")) {
         val s = maxWidth.value / FitLabDesign.canvas
         SharedAppBackground(s)
         Column(Modifier.fillMaxSize().imePadding().padding(top = (FitLabDesign.contentTop * s).dp, bottom = (104 * s).dp)) {
             BackTitleCard(if (state.screen == FitLabRoute.Result || state.screen == FitLabRoute.HistoryDetail) "FIT DETAIL" else "FIT LAB", s, ::back, Modifier.align(Alignment.CenterHorizontally).testTag("fitlab-back"))
-            Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).testTag("fitlab-scroll")
+            Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(scroll).testTag("fitlab-scroll")
                 .padding(horizontal = ((if (state.screen == FitLabRoute.Result || state.screen == FitLabRoute.HistoryDetail) 24f else FitLabDesign.inset) * s).dp)
                 .padding(top = (22 * s).dp, bottom = (180 * s).dp), verticalArrangement = Arrangement.spacedBy((FitLabDesign.gap * s).dp)) {
                 when (state.screen) {
-                    FitLabRoute.Sources -> Sources(state, s, model::chooseSource, model::openHistory)
+                    FitLabRoute.Sources -> { Sources(state, s, model::chooseSource, model::openHistory, model::startExample, onThreadCharge); GuideReplay(s) { scope.launch { scroll.scrollTo(0) } } }
                     FitLabRoute.Manual -> DraftEditor(state, s, model, "", "")
-                    FitLabRoute.Url -> UrlEditor(state, s, model)
+                    FitLabRoute.Url -> UrlEditor(state, s, model) { urlConfirmed = true }
                     FitLabRoute.Ocr -> OcrEditor(state, s, model)
                     FitLabRoute.Review -> Review(state, s, model)
                     FitLabRoute.References -> References(state, s, model, onCloset)
                     FitLabRoute.Loading -> Loading(state, s, model::submit)
-                    FitLabRoute.Result -> Result(state, s, model::restart, model::saveHistory, model::retryReport)
+                    FitLabRoute.Result -> Result(state, s, model::restart, model::saveHistory, model::retryReport) { compared = true }
                     FitLabRoute.HistoryDetail -> HistoryDetail(state, s, model::deleteHistory)
                 }
             }
         }
-        CoorditHeader(s, onProfile, Modifier.align(Alignment.TopCenter).padding(top = (55 * s).dp))
-        CoorditBottomNavigation(CoorditTab.FitLab, s, { tab -> if (!state.busy) when (tab) { CoorditTab.Home -> onHome(); CoorditTab.FitLab -> Unit; CoorditTab.Closet -> onCloset() } }, Modifier.align(Alignment.BottomCenter))
+        CoorditHeader(s, onProfile, Modifier.align(Alignment.TopCenter).padding(top = (59 * s).dp))
+        CoorditBottomNavigation(CoorditTab.FitLab, s, { tab -> when (tab) { CoorditTab.Home -> onHome(); CoorditTab.FitLab -> Unit; CoorditTab.Closet -> onCloset() } }, Modifier.align(Alignment.BottomCenter))
+    }
     }
 }
 
 @Composable
-private fun Sources(state: FitLabState, s: Float, choose: (FitLabSource) -> Unit, openHistory: (FitLabHistorySnapshot) -> Unit) {
+private fun Sources(state: FitLabState, s: Float, choose: (FitLabSource) -> Unit, openHistory: (FitLabHistorySnapshot) -> Unit, example: () -> Unit, onThreadCharge: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy((5*s).dp)) {
         FitText("사이즈표를 어떻게 가져올까요?",18f,s,true,Color.Black)
         FitText("입력한 값은 확인 전까지 저장되거나 분석되지 않아요.",12f,s,color=Color.Black.copy(alpha=.64f),light=true)
     }
     Panel(s, dark = true) {
         Row(verticalAlignment=Alignment.CenterVertically) {
-            Box(Modifier.size((30*s).dp).background(AppColors.loadingSparkle,CircleShape),contentAlignment=Alignment.Center){ FitText("✦",15f,s,true,FitLabDesign.ink) }
+            Image(painterResource(R.drawable.coordit_yarn),null,Modifier.size((30*s).dp),colorFilter=ColorFilter.colorMatrix(ColorMatrix(floatArrayOf(
+                0f,0f,0f,0f,255f,
+                0f,0f,0f,0f,255f,
+                0f,0f,0f,0f,255f,
+                -1f,0f,0f,1f,0f,
+            ))))
             Spacer(Modifier.width((11*s).dp)); FitText("실타래 사용 안내",14f,s,true,Color.White); Spacer(Modifier.weight(1f)); FitText("현재 ${state.threadBalance}개",12f,s,true,AppColors.loadingSparkle)
         }
         FitText("핏 분석을 시작할 때 실타래 1개가 사용돼요.",12f,s,color=Color.White.copy(alpha=.86f))
+        CoorditButton("실타래 충전하기",onThreadCharge,Modifier.testTag("fitlab-source-thread-charge"),secondary=true)
     }
+    GuideTarget("source", s) {
     Column(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(90,104,164),Color(21,35,98),FitLabDesign.ink)),RoundedCornerShape((8*s).dp)).padding((8*s).dp),verticalArrangement=Arrangement.spacedBy((8*s).dp)) {
         SourceCard("링크로 불러오기","링크에서 베타 추출",FitLabSource.Url,s,choose)
         SourceCard("사진으로 첨부하기","캡처를 읽고 수정",FitLabSource.Ocr,s,choose)
         SourceCard("직접 입력하기","표를 직접 작성",FitLabSource.Manual,s,choose)
     }
+    }
+    Secondary("준비된 정보가 없나요? 예시 링크로 체험하기", s, "fitlab-source-example", example)
     Panel(s) {
         FitText("최근 핏 분석",15f,s,true,Color.Black)
         if (state.history.isEmpty()) Column(Modifier.fillMaxWidth().padding(vertical=(20*s).dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy((8*s).dp)) {
@@ -169,7 +205,7 @@ private fun DraftEditor(state: FitLabState,s:Float,model:FitLabViewModel,title:S
         Secondary("+ 사이즈 행 추가",s,"fitlab-add-size") { model.edit { it.copy(sizes=it.sizes+FitLabSizeDraft(UUID.randomUUID().toString())) } }
     }
     state.error?.let { Error(it,s) }
-    if(showConfirm) Primary("입력값 확인",s,"fitlab-confirm-draft",!state.busy){focus.clearFocus(force = true); keyboard?.hide(); model.confirmDraft()}
+    if(showConfirm) GuideTarget("review", s) { Primary("입력값 확인",s,"fitlab-confirm-draft",!state.busy){focus.clearFocus(force = true); keyboard?.hide(); model.confirmDraft()} }
     pendingCategory?.let { category ->
         Dialog(onDismissRequest = { pendingCategory = null }) {
             Panel(s) {
@@ -182,11 +218,26 @@ private fun DraftEditor(state: FitLabState,s:Float,model:FitLabViewModel,title:S
     }
 }
 
-@Composable private fun UrlEditor(state:FitLabState,s:Float,model:FitLabViewModel){
-    if(state.draft.sizes.none{it.measurements.isNotEmpty()}) Panel(s){FitText("상품 링크 입력",19f,s,true,Color.Black);FitText("링크를 입력하고 옷 종류를 먼저 선택해 주세요.\n가져온 값은 저장 전에 수정할 수 있어요.",12f,s,color=Color.Black.copy(alpha=.65f),light=true);Field(state.draft.productUrl,{v->model.edit{it.copy(productUrl=v)}},"https://shop.example/product","fitlab-product-url",s);Segment(state.draft.upper,s){model.setCategory(if(it)HomeCategory.Tshirt else HomeCategory.Pants)};CategoryRow(state.draft.category,s){model.setCategory(it)}}
+@Composable private fun UrlEditor(state:FitLabState,s:Float,model:FitLabViewModel,onDone:()->Unit){
+    val focus = LocalFocusManager.current
+    val clipboard = LocalClipboardManager.current
+    if (state.draft.isTutorialExample) ExampleNotice(s)
+    if(state.draft.sizes.none{it.measurements.isNotEmpty()}) GuideTarget("link", s) { Panel(s){
+        FitText("상품 링크 입력",19f,s,true,Color.Black)
+        FitText("링크를 입력하고 옷 종류를 먼저 선택해 주세요.\n가져온 값은 저장 전에 수정할 수 있어요.",12f,s,color=Color.Black.copy(alpha=.65f),light=true)
+        Field(state.draft.productUrl,{v->model.edit{it.copy(productUrl=v)}},"https://shop.example/product","fitlab-product-url",s,
+            keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Uri,imeAction=ImeAction.Done),
+            keyboardActions=KeyboardActions(onDone={focus.clearFocus();onDone()}))
+        Row(horizontalArrangement=Arrangement.spacedBy((8*s).dp)) {
+            CoorditButton("붙여넣기", { clipboard.getText()?.text?.let { value -> model.edit { it.copy(productUrl=value.trim()) } } }, Modifier.weight(1f).testTag("fitlab-url-paste"), secondary=true)
+            CoorditButton("다음", { focus.clearFocus(); onDone() }, Modifier.weight(1f).testTag("fitlab-url-next"), enabled=state.draft.productUrl.isNotBlank())
+        }
+        Segment(state.draft.upper,s){model.setCategory(if(it)HomeCategory.Tshirt else HomeCategory.Pants)}
+        CategoryRow(state.draft.category,s){model.setCategory(it)}
+    } }
     state.error?.let{Error(it,s)}
     if(state.draft.sizes.any{it.measurements.isNotEmpty()}) DraftEditor(state,s,model,"추출 결과 · 저장 전 확인 필요","사이즈표를 확인하고 필요한 값을 수정해 주세요.")
-    else Primary(if(state.busy)"가져오는 중" else "링크에서 가져오기",s,"fitlab-url-import",state.draft.productUrl.isNotBlank()&&!state.busy){model.prefill()}
+    else GuideTarget("import",s) { Primary(if(state.busy)"가져오는 중" else "링크에서 가져오기",s,"fitlab-url-import",state.draft.productUrl.isNotBlank()&&!state.busy){focus.clearFocus();model.prefill()} }
 }
 
 @Composable private fun OcrEditor(state:FitLabState,s:Float,model:FitLabViewModel){
@@ -237,6 +288,8 @@ private fun References(state: FitLabState, s: Float, model: FitLabViewModel, onC
                 FitText("반팔↔반팔 · 긴팔↔긴팔 · 아우터↔아우터", 10.5f, s, true, AppColors.loadingSparkle)
             }
         }
+        GuideTarget("references",s) {
+        Column(verticalArrangement=Arrangement.spacedBy((8*s).dp)) {
         if (state.references.isEmpty()) {
             FitText(state.error ?: "선택할 수 있는 기준 옷이 없어요.", 13f, s, color = Color.Black)
         } else state.references.forEach { reference ->
@@ -249,13 +302,17 @@ private fun References(state: FitLabState, s: Float, model: FitLabViewModel, onC
                 }
             }
         }
+        }
+        }
         FitText("선택한 기준 옷 ${state.draft.selectedReferenceIds.size}개", 12f, s, color = Color.Black)
         FitText("분석을 시작하면 다른 탭으로 이동해도 백그라운드에서 계속 진행돼요.", 10f, s, color = Color.Black.copy(alpha=.58f), light = true)
         Pressable(onCloset, Modifier.fillMaxWidth().testTag("fitlab-manage-references"), enabled = !state.busy, cornerRadius = 7*s) {
             Box(Modifier.fillMaxWidth().heightIn(min=(42*s).dp).background(FitLabDesign.field, RoundedCornerShape((7*s).dp)), contentAlignment = Alignment.Center) { FitText("옷장에서 기준 옷 관리", 11f, s, true, FitLabDesign.ink) }
         }
         state.error?.let { Error(it, s) }
-        Primary("핏 분석 시작", s, "fitlab-submit", state.draft.selectedReferenceIds.isNotEmpty() && !state.busy) { model.submit() }
+        GuideTarget("analyze",s, message = if (state.draft.isTutorialExample) "예시 체험에서는 실제 분석이나 실타래 사용 없이 결과 화면을 확인합니다." else null) {
+            Primary("핏 분석 시작", s, "fitlab-submit", state.draft.selectedReferenceIds.isNotEmpty() && !state.busy) { model.submit() }
+        }
     }
 }
 
@@ -267,14 +324,21 @@ private fun Review(state: FitLabState, s: Float, model: FitLabViewModel) {
         FitText("${if (state.draft.upper) "상의" else "하의"} · ${state.draft.sizes.size}개 사이즈 · ${state.draft.category.title}", 12f, s, true, Color.Black)
         FitText("아직 저장하거나 분석을 시작하지 않았어요. 다음 단계에서 비교할 기준 옷을 선택하게 됩니다.", 11f, s, color = Color.Black.copy(alpha=.6f), light = true)
         Secondary("사이즈표 다시 편집", s, "fitlab-review-edit") { model.back() }
-        Primary("기준 옷 선택으로", s, "fitlab-review-continue", !state.busy) { model.continueToReferences() }
+        GuideTarget("continue",s) { Primary("기준 옷 선택으로", s, "fitlab-review-continue", !state.busy) { model.continueToReferences() } }
     }
 }
 
-@Composable private fun Loading(state:FitLabState,s:Float,retry:()->Unit){Panel(s){FitText(if(state.error==null)"핏 분석을 만들고 있어요" else "핏 분석을 완료하지 못했어요",20f,s,true,Color.Black);FitText(stepText(state.step),12f,s,color=Color.Black.copy(alpha=.66f));Box(Modifier.fillMaxWidth().height((6*s).dp).background(FitLabDesign.empty,CircleShape)){Box(Modifier.fillMaxWidth(progress(state.step)).fillMaxHeight().background(FitLabDesign.ink,CircleShape))};state.error?.let{Error(it,s);Primary("완료된 단계부터 다시 시도",s,"fitlab-retry",!state.busy,retry)}}}
+@Composable private fun Loading(state:FitLabState,s:Float,retry:()->Unit){Panel(s){
+    OrbitLoadingIndicator(s, state.busy, Modifier.align(Alignment.CenterHorizontally))
+    FitText(if(state.error==null)"핏 분석을 만들고 있어요" else "핏 분석을 완료하지 못했어요",20f,s,true,Color.Black)
+    FitText(stepText(state.step),12f,s,color=Color.Black.copy(alpha=.66f))
+    FitText("상세 리포트 1개에 실타래 1개를 사용해요. 다른 탭을 이용해도 계속 진행돼요.",11f,s,color=AppColors.muted)
+    Box(Modifier.fillMaxWidth().height((6*s).dp).background(FitLabDesign.empty,CircleShape)){Box(Modifier.fillMaxWidth(progress(state.step)).fillMaxHeight().background(FitLabDesign.ink,CircleShape))}
+    state.error?.let{Error(it,s);Primary("완료된 단계부터 다시 시도",s,"fitlab-retry",!state.busy,retry)}
+}}
 
 @Composable
-private fun ResultComparison(result: FitLabRecommendation, report: FitLabReportResponse?, upper: Boolean, s: Float, basis: String = "현재 베스트 스코어 기준") {
+private fun ResultComparison(result: FitLabRecommendation, report: FitLabReportResponse?, upper: Boolean, s: Float, basis: String = "현재 베스트 스코어 기준", onCompared: () -> Unit = {}) {
     var selected by remember(result.fitAnalysisResultId) { mutableStateOf(result.recommendedSize) }
     val selection = selectFitLabScore(result, report, selected)
     val differences = selection.comparisons.associate { it.measurement to it.diff }
@@ -285,7 +349,9 @@ private fun ResultComparison(result: FitLabRecommendation, report: FitLabReportR
         selected = !selection.isRecommended,
     )
     ClosetMannequin(upper, differences.mapValues { it.value as Double? }, s)
-    ScoreBars((report?.chartData?.sizeScoreRanking.orEmpty() + result.allSizeScores).distinctBy { it.sizeLabel }, result.recommendedSize, s, selected) { selected = it }
+    GuideTarget("result",s) {
+        ScoreBars((report?.chartData?.sizeScoreRanking.orEmpty() + result.allSizeScores).distinctBy { it.sizeLabel }, result.recommendedSize, s, selected) { selected = it; onCompared() }
+    }
     Column(Modifier.fillMaxWidth().testTag("fitlab-comparison-basis"), verticalArrangement = Arrangement.spacedBy((6 * s).dp)) {
         FitText("비교 중 $selected · 추천 ${result.recommendedSize}", 12f, s, true, FitLabDesign.ink)
         FitText("사이즈를 선택하면 점수와 실측 비교가 함께 바뀌어요.", 10f, s, color = Color.Black.copy(alpha = .55f))
@@ -301,13 +367,18 @@ private fun ResultComparison(result: FitLabRecommendation, report: FitLabReportR
 }
 
 @Composable
-private fun Result(state: FitLabState, s: Float, restart: () -> Unit, saveHistory: () -> Unit, retryReport: () -> Unit) {
+private fun Result(state: FitLabState, s: Float, restart: () -> Unit, saveHistory: () -> Unit, retryReport: () -> Unit, onCompared: () -> Unit) {
     val result = state.recommendation ?: return
-    ResultComparison(result, state.report, state.draft.upper, s)
+    val dismissTutorial = tutorialDismissAction()
+    if (state.draft.isTutorialExample) ExampleNotice(s)
+    ResultComparison(result, state.report, state.draft.upper, s, onCompared = onCompared)
     ReportDetails(state.report?.report, state.report?.chartData, state.reportError, s, result.recommendedSize)
     if (state.reportError != null) Primary(if (state.busy) "리포트 다시 만드는 중..." else "상세 리포트 다시 만들기", s, "fitlab-retry-report", !state.busy, retryReport)
     state.error?.let { Error(it, s) }
-    if (state.report != null) Primary(if (state.historySaved) "히스토리에 저장됨" else if (state.busy) "저장 중..." else "히스토리에 추가", s, "fitlab-save-history", !state.busy && !state.historySaved, saveHistory)
+    if (state.draft.isTutorialExample) GuideTarget("save",s,message="실제 분석에서는 히스토리에 추가를 눌러 결과를 저장할 수 있어요. 예시 결과는 저장하지 않고 체험을 마칩니다.",finish=true) {
+        Primary("예시 체험 마치기",s,"fitlab-example-finish",true) { dismissTutorial(); restart() }
+    }
+    else if (state.report != null) GuideTarget("save",s) { Primary(if (state.busy) "저장 중..." else "히스토리에 추가", s, "fitlab-save-history", !state.busy, saveHistory) }
     else FitText("기준 옷 비교를 완성한 뒤 히스토리에 저장할 수 있어요.", 10f, s, color = Color.Black.copy(alpha=.62f))
     Secondary("확인하기", s, "fitlab-restart", restart)
     FitText(
@@ -633,7 +704,7 @@ private fun measurementName(key:String)=when(key){"shoulder_width"->"어깨";"ch
 
 @Composable private fun Panel(s:Float,dark:Boolean=false,content:@Composable ColumnScope.()->Unit){val shape=RoundedCornerShape((FitLabDesign.panelRadius*s).dp);Column(Modifier.fillMaxWidth().background(if(dark)FitLabDesign.ink else AppColors.panel,shape).border((.8f*s).dp,Color.Black.copy(alpha=if(dark)0f else .12f),shape).padding((15*s).dp),verticalArrangement=Arrangement.spacedBy((11*s).dp),content=content)}
 @Composable private fun FitText(text:String,size:Float,s:Float,bold:Boolean=false,color:Color=FitLabDesign.ink,light:Boolean=false){CoorditText(text,(if(bold)CoorditTypography.gmarketBold(size*s)else if(light)CoorditTypography.gmarketLight(size*s)else CoorditTypography.gmarketMedium(size*s)).copy(color=color,lineBreak=CoorditTypography.koreanParagraph,localeList=CoorditTypography.koreanLocale))}
-@Composable private fun Field(value:String,onChange:(String)->Unit,hint:String,tag:String,s:Float){BasicTextField(value,onChange,Modifier.fillMaxWidth().heightIn(min=(45*s).dp).background(FitLabDesign.field,RoundedCornerShape((7*s).dp)).padding((11*s).dp).testTag(tag),singleLine=true,textStyle=CoorditTypography.gmarketMedium(12*s),decorationBox={inner->Box{if(value.isBlank())FitText(hint,12f,s,color=Color.Black.copy(alpha=.3f));inner()}})}
+@Composable private fun Field(value:String,onChange:(String)->Unit,hint:String,tag:String,s:Float,keyboardOptions:KeyboardOptions=KeyboardOptions.Default,keyboardActions:KeyboardActions=KeyboardActions.Default){BasicTextField(value,onChange,Modifier.fillMaxWidth().heightIn(min=(45*s).dp).background(FitLabDesign.field,RoundedCornerShape((7*s).dp)).padding((11*s).dp).testTag(tag),singleLine=true,keyboardOptions=keyboardOptions,keyboardActions=keyboardActions,textStyle=CoorditTypography.gmarketMedium(12*s),decorationBox={inner->Box{if(value.isBlank())FitText(hint,12f,s,color=Color.Black.copy(alpha=.3f));inner()}})}
 @Composable private fun MeasureField(label:String,value:Double?,tag:String,s:Float,modifier:Modifier,onChange:(Double?)->Unit){Row(modifier,verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy((9*s).dp)){FitText(label.removeSuffix(" 단면"),10f,s,color=Color.Black.copy(alpha=.66f));Spacer(Modifier.width((28*s).dp));BasicTextField(value?.let(::number).orEmpty(),{onChange(it.toDoubleOrNull()?.takeIf{v->v.isFinite()&&v>0})},Modifier.weight(1f).height((42*s).dp).background(FitLabDesign.field,RoundedCornerShape((7*s).dp)).padding((10*s).dp).testTag(tag),singleLine=true,keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Decimal),textStyle=CoorditTypography.gmarketBold(14*s),decorationBox={inner->Box{if(value==null)FitText("cm",11f,s,color=Color.Black.copy(alpha=.3f));inner()}})}}
 @Composable private fun Segment(upper:Boolean,s:Float,onChange:(Boolean)->Unit){Row(Modifier.fillMaxWidth().background(FitLabDesign.field,CircleShape).padding((5*s).dp),horizontalArrangement=Arrangement.spacedBy((7*s).dp)){listOf(true,false).forEach{u->Pressable({onChange(u)},Modifier.weight(1f).testTag(if(u)"fitlab-upper" else "fitlab-lower"),cornerRadius=30f){Box(Modifier.fillMaxWidth().height((28*s).dp).background(if(upper==u)FitLabDesign.ink else Color.White.copy(alpha=.65f),CircleShape),contentAlignment=Alignment.Center){FitText(if(u)"상의" else "하의",11f,s,color=if(upper==u)Color.White else FitLabDesign.ink)}}}}}
 @Composable private fun CategoryRow(selected:HomeCategory,s:Float,onChange:(HomeCategory)->Unit){Row(Modifier.horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy((7*s).dp)){HomeCategory.entries.filter{it.upper==selected.upper}.forEach{c->Pressable({onChange(c)},Modifier.testTag("fitlab-category-${c.wireName}"),cornerRadius=30f){Box(Modifier.background(if(c==selected)FitLabDesign.ink else FitLabDesign.field,CircleShape).padding(horizontal=(10*s).dp,vertical=(8*s).dp)){FitText(c.title,10f,s,color=if(c==selected)Color.White else FitLabDesign.ink)}}}}}
