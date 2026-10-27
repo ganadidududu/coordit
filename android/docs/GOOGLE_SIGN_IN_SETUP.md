@@ -7,11 +7,11 @@ Google Cloud Console → Google Auth Platform → 클라이언트에서 기존 i
 | 값 | 현재 개발 빌드 |
 |---|---|
 | 이름 | Coordit Android Debug |
-| package | `com.inseong.coordit.debug` |
+| package | `com.coordit.app.debug` |
 | SHA-1 | `A2:60:95:4D:EC:ED:B2:D0:83:96:46:7F:BF:95:FC:28:7C:96:DD:3D` |
 | Web client | `789827940031-omahjmi6eepp4rpf5ue7kjqndf8rhjr7.apps.googleusercontent.com` |
 
-SHA-1은 이 Mac의 debug keystore에서 `./gradlew :app:signingReport`로 확인한 값이다. 다른 개발 환경은 자신의 서명을 등록해야 한다. 배포 package는 `com.inseong.coordit`이며 Play App Signing 인증서는 별도 Android OAuth 클라이언트로 등록한다. Android client ID를 GOOGLE_WEB_CLIENT_ID에 넣지 않는다. Supabase 허용 Google audience도 이 Web client와 일치해야 한다.
+SHA-1은 이 Mac의 debug keystore에서 `./gradlew :app:signingReport`로 확인한 값이다. 다른 개발 환경은 자신의 서명을 등록해야 한다. 배포 package는 Play Console에 등록된 `com.coordit.app`이며 Play App Signing 인증서는 별도 Android OAuth 클라이언트로 등록한다. Android client ID를 GOOGLE_WEB_CLIENT_ID에 넣지 않는다. Supabase 허용 Google audience도 이 Web client와 일치해야 한다.
 
 Google Credential Manager의 명시적 버튼 로그인으로 ID token을 받고 기존 POST /auth/google에 전달한다. 기존 iOS와 동일하게 보안 난수 raw nonce의 SHA-256을 Google 요청에 넣고 raw nonce를 backend에 보낸다. 취소/오류/오래된 콜백은 인증 성공으로 취급하지 않는다. logout은 로컬 암호화 세션을 삭제하고 credential provider 상태도 해제한다.
 
