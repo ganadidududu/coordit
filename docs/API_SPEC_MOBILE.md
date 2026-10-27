@@ -962,3 +962,11 @@ category-specific context, deterministic semantic facts, interactions, subscore,
 | 필수 입력 | 없음 또는 Authorization header |
 | 주요 반환값 | 카테고리, fit type, 측정 필드 |
 | 사용 화면 | Closet, Fit Lab |
+
+## Research garment landmarks (default disabled, Phase 2)
+
+`POST /garment-landmarks` requires the existing user `Authorization: Bearer <access token>` and JSON `{ "image_base64": "<metadata-free upright JPEG>", "processing_consent": true, "training_consent": false }`. The centralized `imageRoutes` router authenticates before its isolated 4.1 MB parser. Existing routes keep their smaller parser. There is no wallet debit or wardrobe mutation at this endpoint.
+
+This endpoint forwards only to the separately configured private ML service using a server-held secret. It is disabled unless explicitly configured for research and hard-blocked in `NODE_ENV=production`. A successful reply has schema 1, model version, `upright_rgb_normalized_top_left` coordinates, category, per-point visibility/raw confidence/source/correction status, a segmentation mask, empty `centimeter_values`, and `deployment_approved: false`. `needs_calibration` means a landmark proposal requires an independently established AR/card scale; `failed` means retain local/manual measurement. Raw confidence is not a calibrated error guarantee. Release apps refuse research proposals; deliberate DEBUG builds require a separate research-proposal opt-in and photo-specific processing consent. Photos are not retained or used for training.
+
+Errors: 401 invalid session, 400 invalid body/consent (training collection is refused), 413 oversized body, 429 capacity busy, 503 disabled/unavailable/invalid upstream. Clients preserve previous measurements and offer the existing local/manual path. All responses from the handler use `Cache-Control: no-store`. See [Phase 2 evidence and activation gates](CARDLESS_PHASE_2_STATUS.md).

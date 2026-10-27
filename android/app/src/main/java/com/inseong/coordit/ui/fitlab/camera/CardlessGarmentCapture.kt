@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
+import com.inseong.coordit.data.fitlab.camera.GarmentLandmarkClient
+import com.inseong.coordit.BuildConfig
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -48,7 +51,11 @@ private data class PhotoPoint(val x: Float, val y: Float)
 
 @Composable
 internal fun CardlessGarmentCapture(category: String, onCancel: () -> Unit, onMeasured: (CardlessGarmentResult) -> Unit,
-    initialCapture: FrozenGarmentCapture? = null) {
+    initialCapture: FrozenGarmentCapture? = null,
+    inferLandmarks: (suspend (Bitmap, String) -> GarmentLandmarkClient.Outcome)? = null) {
+    val scope = rememberCoroutineScope()
+    var aiBusy by remember { mutableStateOf(false) }
+    var showsConsent by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var permission by remember { mutableStateOf(context.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) }
     val permissionRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { permission = it }
@@ -57,6 +64,7 @@ internal fun CardlessGarmentCapture(category: String, onCancel: () -> Unit, onMe
     var message by remember { mutableStateOf("옷을 바닥에 평평하게 펴주세요.") }
     var shutter by remember { mutableStateOf<(() -> Unit)?>(null) }
     var points by remember(frozen) { mutableStateOf<List<PhotoPoint>>(emptyList()) }
+    var aiResponse by remember(frozen) { mutableStateOf<GarmentLandmarkClient.Response?>(null) }
     var confirmed by remember(frozen, points) { mutableStateOf(false) }
     val dimensions = remember(category) { GarmentMeasurementPolicy.dimensions(category) }
     val current = frozen
@@ -79,6 +87,34 @@ internal fun CardlessGarmentCapture(category: String, onCancel: () -> Unit, onMe
                     onShutter = { shutter = it }, onCapture = { frozen = it; message = "측정 부위의 두 끝점을 차례로 눌러주세요. 점을 끌어 보정할 수 있어요." })
                 CoorditButton("평면 위의 옷 촬영", { shutter?.invoke() }, enabled = ready, modifier = Modifier.testTag("camera-ar-shutter"))
             } else {
+                if (BuildConfig.AI_LANDMARKS_ENABLED && inferLandmarks != null) {
+                    CoorditButton("AI로 측정점 제안받기 · 실험 기능", { showsConsent = true }, enabled = !aiBusy, secondary = true)
+                    if (showsConsent) {
+                        CoorditText("위치정보를 제거한 사진을 Coordit 독립 AI 서버에서 일시 처리해요. 처리 후 보관하거나 학습에 사용하지 않아요. 제안된 점은 직접 확인하고 보정해주세요.", CoorditTypography.gmarketMedium(13f).copy(color = AppColors.ink))
+                        CoorditButton("동의하고 이번 사진 처리", {
+                            showsConsent = false; aiBusy = true
+                            val captured = current
+                            val originalPoints = points
+                            scope.launch {
+                                try {
+                                    val result = inferLandmarks(captured.bitmap, category)
+                                    if (frozen !== captured || points != originalPoints) return@launch
+                                    val response = (result as? GarmentLandmarkClient.Outcome.Proposal)?.response
+                                    val proposed = response?.validatedEndpoints(category, BuildConfig.DEBUG && BuildConfig.AI_LANDMARKS_DEVELOPMENT_ENABLED)
+                                    val world = proposed?.map { captured.geometry.worldPoint(it.x, it.y) }
+                                    val valid = world != null && world.size == dimensions.size * 2 && world.all { it != null } &&
+                                        dimensions.indices.all { index -> GarmentMeasurementPolicy.plausible(dimensions[index],
+                                            GarmentMeasurementPolicy.centimeters(requireNotNull(world[index * 2]), requireNotNull(world[index * 2 + 1]))) }
+                                    if (valid && proposed != null) {
+                                        points = proposed.map { PhotoPoint(it.x, it.y) }; aiResponse = response
+                                        message = "AI가 제안한 점이에요. 봉제선과 측정 기준을 확인하고 보정해주세요."
+                                    } else message = "AI 측정점을 사용할 수 없어요. 현재 점을 유지했어요. 직접 맞춰주세요."
+                                } finally { aiBusy = false }
+                            }
+                        }, enabled = !aiBusy)
+                        CoorditButton("사진 전송 취소", { showsConsent = false }, secondary = true)
+                    }
+                }
                 val next = dimensions.getOrNull(points.size / 2)
                 CoorditText(next?.let { "${dimensionTitle(it)} · ${points.size % 2 + 1}/2 끝점" } ?: "모든 측정점을 확인해주세요.",
                     CoorditTypography.gmarketMedium(14f).copy(color = AppColors.ink))
@@ -86,7 +122,7 @@ internal fun CardlessGarmentCapture(category: String, onCancel: () -> Unit, onMe
                     Image(current.bitmap.asImageBitmap(), "측정 사진", modifier = Modifier.fillMaxSize())
                     Canvas(Modifier.fillMaxSize().testTag("camera-ar-frozen-photo")
                         .pointerInput(current, points) { detectTapGestures { location ->
-                            if (points.size < dimensions.size * 2) {
+                            if (!aiBusy && points.size < dimensions.size * 2) {
                                 val point = PhotoPoint(location.x / size.width, location.y / size.height)
                                 if (current.geometry.worldPoint(point.x, point.y) != null) points = points + point
                                 else message = "인식된 바닥 안의 측정점을 눌러주세요. 평면이 부족하면 다시 촬영해주세요."
@@ -99,7 +135,7 @@ internal fun CardlessGarmentCapture(category: String, onCancel: () -> Unit, onMe
                                 }?.takeIf { index -> (Offset(points[index].x * size.width, points[index].y * size.height) - position).getDistance() <= 32.dp.toPx() }
                             }, onDragEnd = { dragging = null }, onDragCancel = { dragging = null }) { change, _ ->
                                 val index = dragging
-                                if (index != null) {
+                                if (index != null && !aiBusy) {
                                     val point = PhotoPoint(change.position.x / size.width, change.position.y / size.height)
                                     if (current.geometry.worldPoint(point.x, point.y) != null) {
                                         points = points.mapIndexed { i, previous -> if (i == index) point else previous }
@@ -129,17 +165,19 @@ internal fun CardlessGarmentCapture(category: String, onCancel: () -> Unit, onMe
                             "ar_frame_timestamp_ns" to current.timestamp.toString(), "tracking_quality" to "tracking",
                             "ar_plane_stable_seconds" to current.stableSeconds.toString(),
                             "ar_camera_motion_baseline_meters" to current.cameraBaselineMeters.toString(),
-                            "coordinate_system" to "upright_rgb_normalized_top_left", "correction_status" to "manual_landmarks"),
+                            "coordinate_system" to "upright_rgb_normalized_top_left", "correction_status" to "user_reviewed",
+                            "ai_model_version" to aiResponse?.modelVersion.orEmpty(),
+                            "ai_landmarks" to (aiResponse?.landmarks?.let { com.google.gson.Gson().toJson(it) } ?: "[]")),
                             dimensions.mapIndexed { index, key -> ARCoreGarmentMeasurement.Segment(key,
                                 requireNotNull(current.geometry.worldPoint(points[index * 2].x, points[index * 2].y)),
                                 requireNotNull(current.geometry.worldPoint(points[index * 2 + 1].x, points[index * 2 + 1].y)),
                                 requireNotNull(values[key])) }))
-                    }, enabled = confirmed, modifier = Modifier.testTag("camera-ar-apply"))
+                    }, enabled = confirmed && !aiBusy, modifier = Modifier.testTag("camera-ar-apply"))
                 } else if (points.size == dimensions.size * 2) {
                     CoorditText("측정 범위를 벗어났어요. 점을 끌어서 다시 맞춰주세요.", CoorditTypography.gmarketMedium(13f).copy(color = AppColors.danger))
                 }
-                CoorditButton("마지막 점 취소", { points = points.dropLast(1) }, secondary = true, enabled = points.isNotEmpty())
-                CoorditButton("다시 촬영", { frozen = null; ready = false }, secondary = true)
+                CoorditButton("마지막 점 취소", { points = points.dropLast(1) }, secondary = true, enabled = points.isNotEmpty() && !aiBusy)
+                CoorditButton("다시 촬영", { frozen = null; ready = false; showsConsent = false }, secondary = true, enabled = !aiBusy)
             }
             CoorditButton("닫기 · 직접 입력으로 돌아가기", onCancel, secondary = true)
         }

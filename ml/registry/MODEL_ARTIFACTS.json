@@ -19,6 +19,20 @@
       "sha256": "977fb9938cb8c6ff65a86592b3dc968b189b0f104cd0d3f93af4aebd1e4fde2b",
       "training_registry_sha256": "69c156dcfcf8ac28f306dc1549403a18b29e20303cfd6b7c743b9cf326d70717",
       "deployment_approved": false
+    },
+    {
+      "path": "artifacts/spatial-v2-shared/checkpoint.pt",
+      "sha256": "bc5992b7572b5f451a3e2389fef3f9de915c4f540ec6cb66d2b84a141ed17798",
+      "training_registry_sha256": "e96bdb578f19128fa72eb1cb3a918dcceef7667067416abf8db630597fcff2f9",
+      "deployment_approved": false,
+      "weights_license": "Internal development; source attribution obligations apply"
+    },
+    {
+      "path": "artifacts/spatial-v2-category/checkpoint.pt",
+      "sha256": "78892d145d3e5db36666f2b27cb4586c03ac193c05c8de8634aa556b14cd504b",
+      "training_registry_sha256": "e96bdb578f19128fa72eb1cb3a918dcceef7667067416abf8db630597fcff2f9",
+      "deployment_approved": false,
+      "weights_license": "Internal development; source attribution obligations apply"
     }
   ]
 }

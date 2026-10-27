@@ -98,3 +98,7 @@ iOS 검증 대상은 `CoorditGarmentMeasurementTests`, `CoorditCameraAnalysisTes
 - Debug 실행 및 Release 시뮬레이터 컴파일 통과. Release 기능 플래그 false 확인. 운영 배포와 DB 변경은 수행하지 않았다.
 
 이는 선택한 시나리오 검증이다. 기존 필수 확인 화면을 기대하는 모든 과거 UI 테스트를 갱신하거나 전체 UI 테스트 묶음을 실행한 것은 아니다. 실제 의류 사진 인식률과 LiDAR 정확도, 실제 상품 크롤링 및 운영 결제 검증은 포함하지 않는다.
+
+## Cardless AR and Phase 2 development checkpoint (2026-10-27)
+
+See [CARDLESS_PHASE_2_STATUS.md](CARDLESS_PHASE_2_STATUS.md) for the current implementation, approved data counts, actual Metal training/evaluation, authenticated consent-based inference, regression evidence and unresolved real-device/legal release gates. New AR/AI flags remain false; single-RGB metric depth is deferred. Simulator keychain tests require a signed build (`CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=-`) after the required SimSlim preparation; unsigned test-host failures do not demonstrate production auth behavior.

@@ -91,6 +91,16 @@ struct CoorditARMeasurementEvidence: Codable, Equatable, Sendable {
     let imageHeight: Int
     let orientation: String
     var corrected: Bool
+
+    var isValid: Bool {
+        timestamp.isFinite && timestamp > 0 && trackingQuality == "normal" &&
+        stablePlaneSeconds.isFinite && stablePlaneSeconds >= 1 &&
+        cameraMotionBaselineMeters.isFinite && cameraMotionBaselineMeters >= 0.03 &&
+        imageWidth > 0 && imageHeight > 0 && ["up", "right", "down", "left"].contains(orientation) &&
+        cameraIntrinsics.count == 9 && cameraPose.count == 16 && planePose.count == 16 &&
+        (cameraIntrinsics + cameraPose + planePose).allSatisfy(\.isFinite) &&
+        cameraIntrinsics[0] > 0 && cameraIntrinsics[4] > 0
+    }
 }
 
 // Quality gates are rejection heuristics, not a statistical error bound or proof of cm accuracy.

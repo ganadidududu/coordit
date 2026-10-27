@@ -53,6 +53,18 @@ final class CoorditFitLabCoordinator: ObservableObject {
     private var cameraSessionUserID: String?
     private var isPreparingCameraAnalysis = false
     let cameraCapture = CoorditGarmentCaptureController()
+    @Published private(set) var landmarkGateway: CoorditRemoteLandmarkProvider?
+
+    func configureLandmarkGateway(using api: CoorditFitLabHTTPAPI?) {
+        guard let api, CoorditRemoteLandmarkProvider.enabled else {
+            if landmarkGateway != nil { cameraCapture.cancelInference() }
+            landmarkGateway = nil; return
+        }
+        if landmarkGateway?.bearerToken != api.accessToken { cameraCapture.cancelInference() }
+        landmarkGateway = CoorditRemoteLandmarkProvider(endpoint: api.baseURL.appending(path: "garment-landmarks"),
+            bearerToken: api.accessToken, processingConsent: true,
+            allowDevelopmentProposals: CoorditRemoteLandmarkProvider.developmentEnabled)
+    }
 
     let userID: String?
     let fixtureName: String?
@@ -221,7 +233,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
         do {
             let state = try JSONDecoder().decode(CoorditCameraAnalysisState.self, from: data)
             guard state.userID == owner, state.draft.category == state.measurement.resolvedCategory, CoorditFitLabDraftValidation.submissionError(for: state.draft) == nil else { throw CoorditFitLabError.malformedResponse }
-            _ = try CoorditGarmentMeasurement(id: state.measurement.id, method: state.measurement.method, measuredAt: state.measurement.measuredAt, segments: state.measurement.segments, lengthBasis: state.measurement.lengthBasis, category: state.measurement.category)
+            _ = try CoorditGarmentMeasurement(id: state.measurement.id, method: state.measurement.method, measuredAt: state.measurement.measuredAt, segments: state.measurement.segments, lengthBasis: state.measurement.lengthBasis, category: state.measurement.category, arEvidence: state.measurement.arEvidence)
             draft = state.draft; cameraMeasurement = state.measurement; cameraReference = state.reference
             checkpoint = state.checkpoint; recommendation = state.recommendation; report = state.report
             createdProductID = state.checkpoint.productID
@@ -314,6 +326,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
             return
         }
         guard (authenticatedUserID ?? userID) != nil else {
+            configureLandmarkGateway(using: nil)
             error = .loginRequired
             retryStep = .idle
             loadState = .failed(.loginRequired)
@@ -321,11 +334,13 @@ final class CoorditFitLabCoordinator: ObservableObject {
             return
         }
         guard let selectedAPI = overrideAPI ?? api else {
+            configureLandmarkGateway(using: nil)
             error = .transport("핏 분석 API를 준비할 수 없어요.")
             loadState = .failed(error ?? .malformedResponse)
             return
         }
 
+        configureLandmarkGateway(using: selectedAPI as? CoorditFitLabHTTPAPI)
         operationGeneration += 1
         let generation = operationGeneration
         error = nil

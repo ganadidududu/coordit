@@ -181,11 +181,11 @@ struct CoorditRootView: View {
                 return
             }
 
+            guard !permitsUnauthenticatedUITestRoute else { return }
             showsAuthenticationEntry = false
             threadBalance = 0
             showsFitLabReferenceSelection = false
             showsThreadRechargePrompt = false
-            guard !permitsUnauthenticatedUITestRoute else { return }
 
             if route != .splash {
                 navigate(to: .splash)
@@ -548,6 +548,9 @@ struct CoorditRootView: View {
     }
 
     private func reloadFitLabReferences() async {
+        fitLabCoordinator.configureLandmarkGateway(using: backendSession.session.map {
+            CoorditFitLabHTTPAPI(baseURL: CoorditBackendConfig.baseURL(), accessToken: $0.accessToken)
+        })
         #if DEBUG
         if fitLabCoordinator.fixtureName != nil {
             await fitLabCoordinator.loadCompatibleReferences()

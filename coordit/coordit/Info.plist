@@ -165,6 +165,8 @@
 	<string>잘 맞는 옷의 치수를 측정하고 구매할 옷과 비교하기 위해 카메라를 사용해요.</string>
 	<key>CoorditCardlessAREnabled</key>
 	<false/>
+	<key>CoorditAILandmarksDevelopmentEnabled</key>
+	<false/>
 	<key>CoorditAILandmarksEnabled</key>
 	<false/>
 	<key>CoorditRGBEstimateEnabled</key>

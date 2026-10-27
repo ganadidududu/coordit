@@ -2,6 +2,7 @@
 import SwiftUI
 
 struct CoorditClosetCameraRegistration: View {
+    @EnvironmentObject private var backendSession: CoorditBackendSessionStore
     @Binding var draft: CoorditClosetDraft
     let metrics: CoorditResponsiveMetrics
     let onBack: () -> Void
@@ -28,16 +29,14 @@ struct CoorditClosetCameraRegistration: View {
             Spacer()
         }
         .padding(.horizontal, metrics.value(22))
+        .task(id: backendSession.session?.accessToken) {
+            coordinator.configureLandmarkGateway(using: backendSession.session.map {
+                CoorditFitLabHTTPAPI(baseURL: CoorditBackendConfig.baseURL(), accessToken: $0.accessToken)
+            })
+        }
         .fullScreenCover(isPresented: $showsCapture) {
             CoorditFitLabCameraComparison(coordinator: coordinator, analyze: { measurement in
-                draft.method = .photo
-                draft.name = measurement.garmentName
-                let dimensions = measurement.isLower ? CoorditGarmentDimension.lower : CoorditGarmentDimension.upper
-                let values = dimensions.map { dimension in measurement.measurementValues[dimension.measurementKey].map { String($0) } ?? "" }
-                draft.measurement1 = values[0]; draft.measurement2 = values[1]
-                draft.measurement3 = values[2]; draft.measurement4 = values[3]
-                draft.cameraMeasurement = measurement
-                draft.garmentImageData = coordinator.cameraCapture.garmentPhotoData
+                draft.applyCameraMeasurement(measurement, photo: coordinator.cameraCapture.garmentPhotoData)
                 showsCapture = false
                 onSubmit()
             }, capture: coordinator.cameraCapture, savesReferenceOnly: true)

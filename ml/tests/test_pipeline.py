@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from coordit_ml.acquisition import convert_artf
 from coordit_ml.approval import Approval, approve_dataset
-from coordit_ml.evaluation import evaluate_centimeters
+from coordit_ml.centimeter_evaluation import evaluate_centimeters
 from coordit_ml.network import ApprovedDataset
 from coordit_ml.provenance import REGISTRY_ROOT, approved_entry, audit_records, read_records, sha256, write_records
 from coordit_ml.schema import PipelineError, Status, dimension_landmarks, read_registry

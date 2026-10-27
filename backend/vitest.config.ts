@@ -10,6 +10,7 @@ export default defineConfig({
     include: [
       "src/modules/product-import/tests/**/*.test.ts",
       "src/modules/clothing-items/clothing-items.service.test.ts",
+      "src/modules/garment-landmarks/**/*.test.ts",
       "src/modules/fit/fit.controller.test.ts",
       "src/modules/fit/fit.camera-remeasurement.test.ts",
       "src/modules/fit-report/fit-report.controller.test.ts",

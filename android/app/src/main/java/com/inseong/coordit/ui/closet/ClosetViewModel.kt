@@ -30,6 +30,15 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
             }
         }
     }
+    suspend fun inferGarment(bitmap: android.graphics.Bitmap, category: String): com.inseong.coordit.data.fitlab.camera.GarmentLandmarkClient.Outcome {
+        val client = com.inseong.coordit.data.fitlab.camera.GarmentLandmarkClient()
+        val session = sessions.session.value ?: return com.inseong.coordit.data.fitlab.camera.GarmentLandmarkClient.Outcome.Fallback("login_required")
+        val endpoint = com.inseong.coordit.BuildConfig.API_BASE_URL.trimEnd('/') + "/garment-landmarks"
+        val result = client.infer(com.inseong.coordit.data.fitlab.camera.GarmentLandmarkClient.Input(bitmap, category, endpoint, session.accessToken, true))
+        return if (sessions.session.value?.user?.id == session.user.id) result
+        else com.inseong.coordit.data.fitlab.camera.GarmentLandmarkClient.Outcome.Fallback("session_changed")
+    }
+
     private fun runOperation(block: suspend (String, Long) -> Unit) {
         if (state.value.busy) return
         val session = sessions.session.value ?: run { mutableState.value = state.value.copy(loading = false, error = "로그인이 필요해요."); return }

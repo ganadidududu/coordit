@@ -1,5 +1,6 @@
 #if os(iOS)
 import Foundation
+import UIKit
 
 struct CoorditGarmentInferenceInput: Sendable {
     let image: Data
@@ -31,8 +32,8 @@ struct CoorditLandmarkResponse: Decodable, Sendable {
     let deploymentApproved: Bool
     let landmarks: [CoorditGarmentLandmark]
 
-    func endpoints(for category: CoorditFitLabCategory) throws -> [CoorditMeasurementPoint] {
-        guard schemaVersion == 1, !modelVersion.isEmpty, deploymentApproved, self.category == category.rawValue,
+    func endpoints(for category: CoorditFitLabCategory, allowDevelopment: Bool = false) throws -> [CoorditMeasurementPoint] {
+        guard schemaVersion == 1, !modelVersion.isEmpty, (deploymentApproved || allowDevelopment), self.category == category.rawValue,
               coordinateSystem == "upright_rgb_normalized_top_left", status == "needs_calibration",
               Set(landmarks.map(\.landmarkType)).count == landmarks.count else {
             throw CoorditGarmentMeasurementError.invalidPoint
@@ -61,11 +62,41 @@ struct CoorditRemoteLandmarkProvider: Sendable {
     // Supplied by an authenticated gateway, never embedded as a shared app API key.
     let bearerToken: String
     let processingConsent: Bool
+    var allowDevelopmentProposals = false
+    var session: URLSession = URLSession(configuration: .ephemeral, delegate: CoorditLandmarkNoRedirect(), delegateQueue: nil)
 
-    func infer(_ image: Data) async throws -> CoorditLandmarkResponse {
-        guard processingConsent, endpoint.scheme == "https", image.count <= 3_000_000 else {
+    static var enabled: Bool {
+        Bundle.main.object(forInfoDictionaryKey: "CoorditAILandmarksEnabled") as? Bool == true
+    }
+
+    static var developmentEnabled: Bool {
+        #if DEBUG
+        return Bundle.main.object(forInfoDictionaryKey: "CoorditAILandmarksDevelopmentEnabled") as? Bool == true
+        #else
+        return false
+        #endif
+    }
+
+    private static func metadataFreeJPEG(_ data: Data) throws -> Data {
+        guard let image = UIImage(data: data), image.size.width > 0, image.size.height > 0,
+              image.size.width * image.size.height <= 24_000_000 else {
             throw CoorditGarmentMeasurementError.invalidPoint
         }
+        let ratio = min(1, 1600 / max(image.size.width, image.size.height))
+        let size = CGSize(width: image.size.width * ratio, height: image.size.height * ratio)
+        let format = UIGraphicsImageRendererFormat(); format.scale = 1; format.opaque = true
+        let pixels = UIGraphicsImageRenderer(size: size, format: format).image { _ in image.draw(in: CGRect(origin: .zero, size: size)) }
+        guard let result = pixels.jpegData(compressionQuality: 0.85), result.count <= 3_000_000 else {
+            throw CoorditGarmentMeasurementError.invalidPoint
+        }
+        return result
+    }
+
+    func infer(_ image: Data) async throws -> CoorditLandmarkResponse {
+        guard processingConsent, endpoint.scheme == "https", !bearerToken.isEmpty, image.count <= 40_000_000 else {
+            throw CoorditGarmentMeasurementError.invalidPoint
+        }
+        let pixels = try Self.metadataFreeJPEG(image)
         struct Body: Encodable {
             let image_base64: String
             let processing_consent = true
@@ -76,14 +107,22 @@ struct CoorditRemoteLandmarkProvider: Sendable {
         request.timeoutInterval = 10
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(bearerToken)", forHTTPHeaderField: "Authorization")
-        request.httpBody = try JSONEncoder().encode(Body(image_base64: image.base64EncodedString()))
-        let (data, response) = try await URLSession.shared.data(for: request)
+        request.httpBody = try JSONEncoder().encode(Body(image_base64: pixels.base64EncodedString()))
+        let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200, data.count <= 1_000_000 else {
             throw CoorditGarmentMeasurementError.invalidPoint
         }
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return try decoder.decode(CoorditLandmarkResponse.self, from: data)
+    }
+}
+
+final class CoorditLandmarkNoRedirect: NSObject, URLSessionTaskDelegate {
+    func urlSession(_ session: URLSession, task: URLSessionTask,
+                    willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest,
+                    completionHandler: @escaping @Sendable (URLRequest?) -> Void) {
+        completionHandler(nil)
     }
 }
 

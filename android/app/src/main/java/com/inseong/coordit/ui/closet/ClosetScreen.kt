@@ -54,7 +54,7 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
     fun back() { focus.clearFocus(); if (!state.busy) { if (state.screen == ClosetScreenRoute.Overview) onHome() else model.back() } }
     BackHandler { back() }
     if (showsCardlessCapture) com.inseong.coordit.ui.fitlab.camera.CardlessGarmentCapture(
-        category = state.draft.category.wireName, onCancel = { showsCardlessCapture = false }, onMeasured = { capture ->
+        category = state.draft.category.wireName, inferLandmarks = model::inferGarment, onCancel = { showsCardlessCapture = false }, onMeasured = { capture ->
             val keys = com.inseong.coordit.data.fitlab.camera.GarmentMeasurementPolicy.dimensions(capture.category)
             val values = keys.map { capture.centimeters[it]?.let { value -> String.format(java.util.Locale.US, "%.1f", value) }.orEmpty() }
             photos.images["draft"] = capture.bitmap

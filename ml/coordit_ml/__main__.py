@@ -11,11 +11,13 @@ from typing import Literal, assert_never
 
 from coordit_ml.acquisition import convert_artf, download_artf
 from coordit_ml.approval import approve_dataset
-from coordit_ml.evaluation import evaluate, evaluate_centimeters
+from coordit_ml.centimeter_evaluation import evaluate_centimeters
+from coordit_ml.evaluation import evaluate
 from coordit_ml.inventory import audit_inventory
 from coordit_ml.provenance import REGISTRY_ROOT, approved_entry, audit_records
 from coordit_ml.schema import read_registry
 from coordit_ml.synthetic import generate
+from coordit_ml.synthetic_v2 import generate_v2
 from coordit_ml.training import TrainingConfig, load_model, train
 
 
@@ -40,6 +42,7 @@ class Arguments(argparse.Namespace):
     archive: Path = Path()
     per_category: int = 30
     seed: int = 17
+    version: str = "v1"
     manifest: Path = Path()
     config: Path = Path()
     model: Path = Path()
@@ -64,6 +67,7 @@ def main() -> None:
     _ = convert.add_argument("output", type=Path)
     synth = commands.add_parser("synthetic")
     _ = synth.add_argument("output", type=Path)
+    _ = synth.add_argument("--version", choices=("v1", "v2"), default="v1")
     _ = synth.add_argument("--per-category", type=int, default=30)
     _ = synth.add_argument("--seed", type=int, default=17)
     validate = commands.add_parser("validate")
@@ -101,7 +105,8 @@ def main() -> None:
         case "convert-artf":
             print(convert_artf(args.archive, args.output, registry))
         case "synthetic":
-            print(generate(args.output, args.per_category, args.seed))
+            generator = generate_v2 if args.version == "v2" else generate
+            print(generator(args.output, args.per_category, args.seed))
         case "validate":
             records = audit_records(args.manifest, registry)
             print(
@@ -126,12 +131,14 @@ def main() -> None:
         case "export-onnx":
             import torch
 
+            model = load_model(args.model)
             _ = torch.onnx.export(
-                load_model(args.model),
-                (torch.zeros(1, 3, 64, 64),),
+                model,
+                (torch.zeros(1, 3, model.input_size, model.input_size),),
                 args.output,
                 input_names=["rgb"],
-                output_names=["category", "mask", "landmarks", "visibility"],
+                output_names=["category", "mask", "landmarks", "visibility"]
+                + (["heatmaps"] if model.input_size == 128 else []),
                 opset_version=18,
             )
             print(args.output)

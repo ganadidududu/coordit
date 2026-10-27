@@ -1,7 +1,7 @@
 """Small from-scratch multi-task baseline; no pretrained weights or external model code."""
 
 from pathlib import Path
-from typing import NamedTuple, final, override
+from typing import ClassVar, NamedTuple, final, override
 
 import numpy as np
 import torch
@@ -31,6 +31,7 @@ class Prediction(NamedTuple):
     mask: Tensor
     points: Tensor
     visibility: Tensor
+    heatmaps: Tensor | None = None
 
 
 class ApprovedDataset(Dataset[Sample]):
@@ -39,6 +40,7 @@ class ApprovedDataset(Dataset[Sample]):
     def __init__(self, manifests: list[Path], registry: Registry, split: str) -> None:
         """Audit all corpora before exposing a tensor sample."""
         self.samples: list[tuple[Path, Record]] = []
+        self.image_size: int = 64
         all_records: list[Record] = []
         for manifest in manifests:
             records = audit_records(manifest, registry)
@@ -55,15 +57,15 @@ class ApprovedDataset(Dataset[Sample]):
     def __getitem__(self, index: int) -> Sample:
         root, record = self.samples[index]
         with Image.open(root / record.file_name) as image:
-            pixels = image_tensor(image)
+            pixels = image_tensor(image, self.image_size)
         if record.mask_file_name:
             with Image.open(root / record.mask_file_name) as image:
-                mask = image.convert("L").resize((64, 64), Image.Resampling.NEAREST)
+                mask = image.convert("L").resize((self.image_size, self.image_size), Image.Resampling.NEAREST)
         else:
             mask = Image.new("L", (record.width, record.height))
             for polygon in record.segmentation:
                 ImageDraw.Draw(mask).polygon(list(zip(polygon[::2], polygon[1::2], strict=True)), fill=255)
-            mask = mask.resize((64, 64), Image.Resampling.NEAREST)
+            mask = mask.resize((self.image_size, self.image_size), Image.Resampling.NEAREST)
         points = torch.zeros(len(LANDMARKS), 2)
         visibility = torch.full((len(LANDMARKS),), -1.0)
         for point in record.keypoints:
@@ -79,15 +81,18 @@ class ApprovedDataset(Dataset[Sample]):
         )
 
 
-def image_tensor(image: Image.Image) -> Tensor:
-    """The model contract is upright RGB, top-left normalized, resized to 64x64."""
-    pixels = np.array(image.convert("RGB").resize((64, 64)), dtype=np.float32) / 255
+def image_tensor(image: Image.Image, size: int = 64) -> Tensor:
+    """The model contract is upright RGB, top-left normalized, resized to the versioned architecture input."""
+    pixels = np.array(image.convert("RGB").resize((size, size)), dtype=np.float32) / 255
     return torch.tensor(pixels).permute(2, 0, 1)
 
 
 @final
 class GarmentNet(nn.Module):
     """Compare shared or per-category landmark heads with identical backbone and masks."""
+
+    input_size: ClassVar[int] = 64
+    model_version: ClassVar[str] = "coordit-tiny-multitask-v1"
 
     def __init__(self, category_heads: bool = False) -> None:
         """Initialize every parameter randomly with the recorded architecture."""

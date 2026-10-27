@@ -22,6 +22,7 @@ android {
         versionName = "0.2.0"
         buildConfigField("boolean", "CARDLESS_AR_ENABLED", "false")
         buildConfigField("boolean", "AI_LANDMARKS_ENABLED", "false")
+        buildConfigField("boolean", "AI_LANDMARKS_DEVELOPMENT_ENABLED", "false")
         buildConfigField("boolean", "RGB_ESTIMATE_ENABLED", "false")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", quoted(providers.gradleProperty("GOOGLE_WEB_CLIENT_ID").orElse("").get()))

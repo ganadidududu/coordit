@@ -205,7 +205,7 @@ struct CoorditGarmentMeasurement: Codable, Equatable, Sendable, Identifiable {
     var dimensions: [CoorditGarmentDimension] { resolvedCategory.cameraDimensions }
 
     init(id: UUID = UUID(), method: Method, measuredAt: Date = Date(), segments: [CoorditGarmentDimension: CoorditMeasurementSegment], lengthBasis: String, category: CoorditFitLabCategory? = nil, arEvidence: CoorditARMeasurementEvidence? = nil) throws {
-        if method == .arPlane, arEvidence == nil { throw CoorditGarmentMeasurementError.unstableTracking }
+        if method == .arPlane, arEvidence?.isValid != true { throw CoorditGarmentMeasurementError.unstableTracking }
         // Metric estimates require a separate calibrated result contract and cannot enter measured storage.
         if method == .metricDepthEstimate { throw CoorditGarmentMeasurementError.invalidPoint }
         let resolved = category ?? (segments[.waist] != nil ? .pants : .tshirt)

@@ -272,4 +272,21 @@ final class CoorditGarmentMeasurementTests: XCTestCase {
         let invalid = CoorditMeasurementSegment(start: .init(x: .nan, y: 0), end: .init(x: 0.5, y: 0))
         XCTAssertNil(invalid.resized(centimeters: 50, centered: true))
     }
+    func testSkirtCameraRegistrationPreservesLengthAndClearsTrouserFields() throws {
+        let segment: (Double) -> CoorditMeasurementSegment = { .init(start: .init(x: 0, y: 0), end: .init(x: $0 / 100, y: 0)) }
+        let measurement = try CoorditGarmentMeasurement(method: .card, segments: [
+            .waist: segment(35), .hip: segment(48), .length: segment(72)
+        ], lengthBasis: "waist_to_hem", category: .skirt)
+        var draft = CoorditClosetDraft()
+        draft.measurement4 = "old-trouser-outseam"
+        draft.applyCameraMeasurement(measurement, photo: Data([1, 2]))
+        XCTAssertEqual(draft.exactCategory, .skirt)
+        XCTAssertEqual(Double(draft.measurement3), 72)
+        XCTAssertEqual(draft.measurement4, "")
+        XCTAssertNil(measurement.clothingSizeRequest.rise)
+        XCTAssertNil(measurement.clothingSizeRequest.outseam)
+        XCTAssertEqual(measurement.clothingSizeRequest.totalLength, 72)
+        XCTAssertEqual(draft.garmentImageData, Data([1, 2]))
+    }
+
 }

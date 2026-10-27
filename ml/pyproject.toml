@@ -31,6 +31,10 @@ ignore = ["COM812", "ISC001", "D203", "D213", "CPY001", "TRY003", "EM101", "EM10
 "coordit_ml/training.py" = ["S311", "C901", "PLR0912", "PLR0915"]
 "coordit_ml/provenance.py" = ["C901", "PLR0912"]
 "coordit_ml/network.py" = ["N812", "FBT001", "FBT002"]
+"coordit_ml/heatmap_network.py" = ["N812", "FBT001", "FBT002"]
+"coordit_ml/synthetic_details.py" = ["S311", "C901", "PLR0912", "PLR0915"]
+"coordit_ml/proposal_validation.py" = ["PLR0911"]
+"coordit_ml/model_factory.py" = ["FBT001"]
 "coordit_ml/service.py" = ["PLC0415", "FAST001"]
 [tool.ruff.lint.mccabe]
 max-complexity = 15

@@ -138,5 +138,103 @@
     "training_config_json": "{\"manifests\":[\"artifacts/artf-v1.1/records.jsonl\",\"artifacts/synthetic-v1.1/records.jsonl\"],\"output\":\"artifacts/tiny-category-mps-final-data\",\"epochs\":20,\"batch_size\":16,\"learning_rate\":0.001,\"seed\":42,\"device\":\"mps\",\"category_heads\":true,\"max_steps\":null,\"resume\":false,\"synthetic_fraction\":0.5}",
     "artifact_directory": "artifacts/tiny-category-mps-final-data",
     "metrics_report": "reports/tiny-category-mps-final-data-validation.json"
+  },
+  {
+    "architecture": "coordit-spatial-multitask-v2",
+    "fingerprint": "06b85559ac09c94b1b566ae2b1b78fb834126d34eb6f08f10f1024aad858ae14",
+    "checkpoint_sha256": "bc5992b7572b5f451a3e2389fef3f9de915c4f540ec6cb66d2b84a141ed17798",
+    "epoch": 34,
+    "device": "mps",
+    "category_heads": false,
+    "input_size": 128,
+    "deployment_approved": false,
+    "purpose": "development_training",
+    "app_artifact": null,
+    "server_artifact": "artifacts/spatial-v2-shared/checkpoint.pt",
+    "manifests": [
+      {
+        "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/artf-v1.1/records.jsonl",
+        "sha256": "65953f260639f7fa038e5230d29b456790e92e444d4aab2889648afe001a87f8"
+      },
+      {
+        "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/synthetic-v2/records.jsonl",
+        "sha256": "3d6cd938f359c4e89d45c9843634630bfced1bf83628412a47bbf5730460ac5d"
+      }
+    ],
+    "registry_sha256": "e96bdb578f19128fa72eb1cb3a918dcceef7667067416abf8db630597fcff2f9",
+    "dataset_images": 1632,
+    "images_seen_this_epoch": 1582,
+    "unique_images_seen_this_epoch": 1582,
+    "steps": 132,
+    "loss": 3.843903351913799,
+    "categories_seen": {
+      "tshirt": 286,
+      "shirt": 95,
+      "sweatshirt": 103,
+      "hoodie": 99,
+      "knit": 97,
+      "jacket": 103,
+      "coat": 96,
+      "pants": 103,
+      "jeans": 101,
+      "shorts": 206,
+      "skirt": 100
+    },
+    "synthetic_images_seen": 1108,
+    "code_license": "Coordit repository",
+    "weights_license": "Internal development; source attribution obligations apply",
+    "training_config_json": "{\"manifests\":[\"artifacts/artf-v1.1/records.jsonl\",\"artifacts/synthetic-v2/records.jsonl\"],\"output\":\"artifacts/spatial-v2-shared\",\"epochs\":35,\"batch_size\":12,\"learning_rate\":0.001,\"seed\":42,\"device\":\"mps\",\"architecture\":\"coordit-spatial-multitask-v2\",\"category_heads\":false,\"max_steps\":null,\"resume\":false,\"synthetic_fraction\":0.7}",
+    "unique_images_seen_total": 1632,
+    "total_exposures": 55370,
+    "selection": "development_candidate_by_validation"
+  },
+  {
+    "architecture": "coordit-spatial-multitask-v2",
+    "fingerprint": "e193727997f67490f3dc8fb6378973b550acc89affcfce880c9f1c9d237cdeac",
+    "checkpoint_sha256": "78892d145d3e5db36666f2b27cb4586c03ac193c05c8de8634aa556b14cd504b",
+    "epoch": 34,
+    "device": "mps",
+    "category_heads": true,
+    "input_size": 128,
+    "deployment_approved": false,
+    "purpose": "development_training",
+    "app_artifact": null,
+    "server_artifact": "artifacts/spatial-v2-category/checkpoint.pt",
+    "manifests": [
+      {
+        "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/artf-v1.1/records.jsonl",
+        "sha256": "65953f260639f7fa038e5230d29b456790e92e444d4aab2889648afe001a87f8"
+      },
+      {
+        "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/synthetic-v2/records.jsonl",
+        "sha256": "3d6cd938f359c4e89d45c9843634630bfced1bf83628412a47bbf5730460ac5d"
+      }
+    ],
+    "registry_sha256": "e96bdb578f19128fa72eb1cb3a918dcceef7667067416abf8db630597fcff2f9",
+    "dataset_images": 1632,
+    "images_seen_this_epoch": 1582,
+    "unique_images_seen_this_epoch": 1582,
+    "steps": 132,
+    "loss": 3.9051964210741446,
+    "categories_seen": {
+      "tshirt": 286,
+      "shirt": 95,
+      "sweatshirt": 103,
+      "hoodie": 99,
+      "knit": 97,
+      "jacket": 103,
+      "coat": 96,
+      "pants": 103,
+      "jeans": 101,
+      "shorts": 206,
+      "skirt": 100
+    },
+    "synthetic_images_seen": 1108,
+    "code_license": "Coordit repository",
+    "weights_license": "Internal development; source attribution obligations apply",
+    "training_config_json": "{\"manifests\":[\"artifacts/artf-v1.1/records.jsonl\",\"artifacts/synthetic-v2/records.jsonl\"],\"output\":\"artifacts/spatial-v2-category\",\"epochs\":35,\"batch_size\":12,\"learning_rate\":0.001,\"seed\":42,\"device\":\"mps\",\"architecture\":\"coordit-spatial-multitask-v2\",\"category_heads\":true,\"max_steps\":null,\"resume\":false,\"synthetic_fraction\":0.7}",
+    "unique_images_seen_total": 1632,
+    "total_exposures": 55370,
+    "selection": "comparison_only"
   }
 ]

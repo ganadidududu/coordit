@@ -1,6 +1,5 @@
 """Per-category perception metrics and an independent tape-measure release gate."""
 
-import csv
 import json
 import math
 import time
@@ -37,6 +36,7 @@ def evaluate(directory: Path, manifest: Path, split: str = "test") -> Path:
     if not len(dataset):
         raise PipelineError("Requested evaluation split is empty")
     model = load_model(directory)
+    dataset.image_size = model.input_size
     metrics: dict[str, list[tuple[float, float, float, float, float, float]]] = defaultdict(list)
     confusion = [[0 for _ in CLASSES] for _ in CLASSES]
     with torch.inference_mode():
@@ -128,48 +128,3 @@ def evaluate(directory: Path, manifest: Path, split: str = "test") -> Path:
     output = directory / f"metrics-{split}.json"
     _ = output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
     return output
-
-
-class TapeMeasurement(BoundaryModel):
-    """Independent tape measurement and one prediction attempt."""
-
-    garment_id: str
-    category: str
-    method: str
-    dimension: str
-    ground_truth_cm: float
-    predicted_cm: float | None
-    independent: bool
-    synthetic: bool
-
-
-def evaluate_centimeters(csv_path: Path) -> dict[str, dict[str, float | int | bool | None]]:
-    """A release gate needs >=20 independent real garments for EACH category/method/part."""
-    groups: dict[str, list[TapeMeasurement]] = defaultdict(list)
-    with csv_path.open() as stream:
-        for row in csv.DictReader(stream):
-            parsed = TapeMeasurement.model_validate({**row, "predicted_cm": row["predicted_cm"] or None})
-            if not parsed.independent or parsed.synthetic or parsed.category not in CATEGORIES:
-                raise PipelineError("Centimeter gate requires independent REAL tape-measured garments")
-            groups[f"{parsed.method}/{parsed.category}/{parsed.dimension}"].append(parsed)
-    if not groups:
-        raise PipelineError("No tape measurements supplied")
-    report: dict[str, dict[str, float | int | bool | None]] = {}
-    for key, rows in groups.items():
-        errors = [r.predicted_cm - r.ground_truth_cm for r in rows if r.predicted_cm is not None]
-        absolute = [abs(error) for error in errors]
-        garments = len({r.garment_id for r in rows})
-        mae = float(np.mean(absolute)) if absolute else None
-        p95 = float(np.percentile(absolute, 95)) if absolute else None
-        report[key] = {
-            "garments": garments,
-            "attempts": len(rows),
-            "success_rate": len(errors) / len(rows),
-            "recapture_rate": 1 - len(errors) / len(rows),
-            "mae_cm": mae,
-            "median_absolute_error_cm": float(np.median(absolute)) if absolute else None,
-            "p95_absolute_error_cm": p95,
-            "bias_cm": float(np.mean(errors)) if errors else None,
-            "accuracy_target_met": garments >= 20 and mae is not None and mae <= 1 and p95 is not None and p95 <= 2,
-        }
-    return report

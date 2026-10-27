@@ -1,0 +1,272 @@
+{
+  "split": "validation",
+  "manifest_sha256": "3d6cd938f359c4e89d45c9843634630bfced1bf83628412a47bbf5730460ac5d",
+  "checkpoint_sha256": "78892d145d3e5db36666f2b27cb4586c03ac193c05c8de8634aa556b14cd504b",
+  "macro_f1_present_classes": 0.8236665691211145,
+  "segmentation_miou_present_groups": 0.9629623649328889,
+  "parameter_bytes": 1664240,
+  "cm_accuracy": "unverified: no independent tape-measured evaluation",
+  "deployment_approved": false,
+  "rows": {
+    "real/tshirt": {
+      "images": 0,
+      "classification_accuracy": null,
+      "segmentation_iou": null,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": null,
+      "status": "unverified"
+    },
+    "real/shirt": {
+      "images": 0,
+      "classification_accuracy": null,
+      "segmentation_iou": null,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": null,
+      "status": "unverified"
+    },
+    "real/sweatshirt": {
+      "images": 0,
+      "classification_accuracy": null,
+      "segmentation_iou": null,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": null,
+      "status": "unverified"
+    },
+    "real/hoodie": {
+      "images": 0,
+      "classification_accuracy": null,
+      "segmentation_iou": null,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": null,
+      "status": "unverified"
+    },
+    "real/knit": {
+      "images": 0,
+      "classification_accuracy": null,
+      "segmentation_iou": null,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": null,
+      "status": "unverified"
+    },
+    "real/jacket": {
+      "images": 0,
+      "classification_accuracy": null,
+      "segmentation_iou": null,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": null,
+      "status": "unverified"
+    },
+    "real/coat": {
+      "images": 0,
+      "classification_accuracy": null,
+      "segmentation_iou": null,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": null,
+      "status": "unverified"
+    },
+    "real/pants": {
+      "images": 0,
+      "classification_accuracy": null,
+      "segmentation_iou": null,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": null,
+      "status": "unverified"
+    },
+    "real/jeans": {
+      "images": 0,
+      "classification_accuracy": null,
+      "segmentation_iou": null,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": null,
+      "status": "unverified"
+    },
+    "real/shorts": {
+      "images": 0,
+      "classification_accuracy": null,
+      "segmentation_iou": null,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": null,
+      "status": "unverified"
+    },
+    "real/skirt": {
+      "images": 0,
+      "classification_accuracy": null,
+      "segmentation_iou": null,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": null,
+      "status": "unverified"
+    },
+    "synthetic/tshirt": {
+      "images": 10,
+      "classification_accuracy": 1.0,
+      "segmentation_iou": 0.9728715384503742,
+      "landmark_pck_005": 0.975,
+      "landmark_nme": 0.006369985942728818,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 7.606595598554122,
+      "status": "development_only"
+    },
+    "background/procedural_color": {
+      "images": 110,
+      "classification_accuracy": 0.8272727272727273,
+      "segmentation_iou": 0.9653073219194428,
+      "landmark_pck_005": 0.9875,
+      "landmark_nme": 0.006509786135178398,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 7.109563618161536,
+      "status": "development_only"
+    },
+    "occlusion/none": {
+      "images": 85,
+      "classification_accuracy": 0.8117647058823529,
+      "segmentation_iou": 0.9713312599691019,
+      "landmark_pck_005": 0.9882352941176471,
+      "landmark_nme": 0.006191719975322485,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 7.119725976586136,
+      "status": "development_only"
+    },
+    "wrinkles/shading_only": {
+      "images": 110,
+      "classification_accuracy": 0.8272727272727273,
+      "segmentation_iou": 0.9653073219194428,
+      "landmark_pck_005": 0.9875,
+      "landmark_nme": 0.006509786135178398,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 7.109563618161536,
+      "status": "development_only"
+    },
+    "occlusion/partial": {
+      "images": 25,
+      "classification_accuracy": 0.88,
+      "segmentation_iou": 0.9448259325506021,
+      "landmark_pck_005": 0.985,
+      "landmark_nme": 0.007591211078688502,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 7.075011599517893,
+      "status": "development_only"
+    },
+    "synthetic/shirt": {
+      "images": 14,
+      "classification_accuracy": 0.21428571428571427,
+      "segmentation_iou": 0.9676494888468226,
+      "landmark_pck_005": 1.0,
+      "landmark_nme": 0.004489946910845382,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 7.03249099959586,
+      "status": "development_only"
+    },
+    "synthetic/sweatshirt": {
+      "images": 7,
+      "classification_accuracy": 0.7142857142857143,
+      "segmentation_iou": 0.9270707124834644,
+      "landmark_pck_005": 1.0,
+      "landmark_nme": 0.005077288752155644,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 6.988874857467765,
+      "status": "development_only"
+    },
+    "synthetic/hoodie": {
+      "images": 14,
+      "classification_accuracy": 1.0,
+      "segmentation_iou": 0.9661895735536652,
+      "landmark_pck_005": 1.0,
+      "landmark_nme": 0.005895659344137779,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 7.0077408579111635,
+      "status": "development_only"
+    },
+    "synthetic/knit": {
+      "images": 11,
+      "classification_accuracy": 0.9090909090909091,
+      "segmentation_iou": 0.9542078229344523,
+      "landmark_pck_005": 1.0,
+      "landmark_nme": 0.0042885986410758714,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 6.869541636247463,
+      "status": "development_only"
+    },
+    "synthetic/jacket": {
+      "images": 6,
+      "classification_accuracy": 0.6666666666666666,
+      "segmentation_iou": 0.9188362307937745,
+      "landmark_pck_005": 1.0,
+      "landmark_nme": 0.0037125854287296534,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 6.982535000133794,
+      "status": "development_only"
+    },
+    "synthetic/coat": {
+      "images": 13,
+      "classification_accuracy": 1.0,
+      "segmentation_iou": 0.9788853925504389,
+      "landmark_pck_005": 1.0,
+      "landmark_nme": 0.004213306873750228,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 7.692577000013373,
+      "status": "development_only"
+    },
+    "synthetic/pants": {
+      "images": 10,
+      "classification_accuracy": 0.9,
+      "segmentation_iou": 0.9649582865323454,
+      "landmark_pck_005": 1.0,
+      "landmark_nme": 0.004855009517632425,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 7.05915839971567,
+      "status": "development_only"
+    },
+    "synthetic/jeans": {
+      "images": 11,
+      "classification_accuracy": 0.8181818181818182,
+      "segmentation_iou": 0.9795061687438763,
+      "landmark_pck_005": 0.8977272727272727,
+      "landmark_nme": 0.020970372567799957,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 6.91476536435816,
+      "status": "development_only"
+    },
+    "synthetic/shorts": {
+      "images": 5,
+      "classification_accuracy": 1.0,
+      "segmentation_iou": 0.9822033226031557,
+      "landmark_pck_005": 1.0,
+      "landmark_nme": 0.004463936109095812,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 6.876108200231101,
+      "status": "development_only"
+    },
+    "synthetic/skirt": {
+      "images": 9,
+      "classification_accuracy": 1.0,
+      "segmentation_iou": 0.9802074767694102,
+      "landmark_pck_005": 1.0,
+      "landmark_nme": 0.0050744606285459464,
+      "landmark_missing_rate": 0.0,
+      "inference_ms_mean": 6.88916211098937,
+      "status": "development_only"
+    }
+  }
+}

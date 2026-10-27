@@ -18,6 +18,7 @@ struct CoorditFitLabCameraComparison: View {
     @State private var selectedSize: String?
     @State private var showsCloseConfirmation = false
     @State private var showsDiscardMeasurement = false
+    @State private var showsAIProcessingConsent = false
     @State private var cameraAuthorized = AVCaptureDevice.authorizationStatus(for: .video) == .authorized
     @State private var photoScale: CGFloat = 1
     @State private var accumulatedPhotoScale: CGFloat = 1
@@ -58,6 +59,11 @@ struct CoorditFitLabCameraComparison: View {
                     }
                     captureSurface(metrics)
                     if capture.image != nil || capture.method.usesAR { measurementControls(metrics) }
+                    if capture.image != nil, !isUnlocked, coordinator.landmarkGateway != nil {
+                        Button("AI로 측정점 제안받기 · 실험 기능") { showsAIProcessingConsent = true }
+                            .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+                            .disabled(capture.isDetecting || isAnalyzing)
+                    }
                     if isUnlocked { comparisonControls(metrics) }
                     if !isUnlocked, capture.isComplete { measurementConfirmation(metrics) }
                     #if DEBUG
@@ -144,6 +150,14 @@ struct CoorditFitLabCameraComparison: View {
             photoScale = 1; accumulatedPhotoScale = 1; photoOffset = .zero; accumulatedPhotoOffset = .zero
         }
         .onDisappear { capture.stop(); cameraMotion.stop() }
+        .alert("AI 측정점 처리를 위해 사진을 전송할까요?", isPresented: $showsAIProcessingConsent) {
+            Button("동의하고 이번 사진 처리") {
+                if let gateway = coordinator.landmarkGateway { capture.requestAILandmarks(using: gateway) }
+            }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("위치정보를 제거한 사진을 Coordit 독립 AI 서버에서 일시 처리해요. 처리 후 사진을 보관하지 않으며 학습에 사용하지 않아요. 제안된 점은 직접 확인하고 보정해주세요.")
+        }
         .alert("분석은 계속 진행돼요", isPresented: $showsCloseConfirmation) {
             Button("화면에 머물기", role: .cancel) {}
             Button("닫기") { dismiss() }
@@ -176,7 +190,10 @@ struct CoorditFitLabCameraComparison: View {
     }
 
     private func methodPicker(_ metrics: CoorditResponsiveMetrics) -> some View {
-        VStack(spacing: metrics.value(8)) {
+        let layout = CoorditGarmentCaptureController.supportsCardlessAR
+            ? AnyLayout(VStackLayout(spacing: metrics.value(8)))
+            : AnyLayout(HStackLayout(spacing: metrics.value(8)))
+        return layout {
             if CoorditGarmentCaptureController.supportsCardlessAR {
                 Button("카드 없이 촬영 · 실험 기능") { capture.selectMethod(.arPlane); Task { await requestCameraPermission() } }
                     .buttonStyle(CoorditContentActionButtonStyle(prominence: capture.method == .arPlane ? .primary : .secondary))
@@ -227,6 +244,7 @@ struct CoorditFitLabCameraComparison: View {
             GeometryReader { geometry in
                 ZStack {
                     CoorditLiDARCameraView(controller: capture)
+                        .id(capture.method.rawValue)
                     measurementOverlay(size: geometry.size)
                         .allowsHitTesting(false)
                     if !capture.trackingReady {

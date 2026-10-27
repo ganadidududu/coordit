@@ -15,7 +15,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-/** Disabled adapter only: a future authenticated gateway must supply URL/token and explicit consent.
+/** Authenticated, explicitly consented proposal adapter, disabled by default.
  * It never writes photos, EXIF, measurements, wallet balances or model-training records.
  */
 class GarmentLandmarkClient {
@@ -30,8 +30,8 @@ class GarmentLandmarkClient {
                         @SerializedName("coordinate_system") val coordinateSystem: String?,
                         @SerializedName("deployment_approved") val deploymentApproved: Boolean?,
                         val landmarks: List<Landmark?>?) {
-        fun validatedEndpoints(expectedCategory: String): List<NormalizedPoint>? {
-            if (schemaVersion != 1 || modelVersion.isNullOrBlank() || deploymentApproved != true || category != expectedCategory ||
+        fun validatedEndpoints(expectedCategory: String, allowDevelopment: Boolean = false): List<NormalizedPoint>? {
+            if (schemaVersion != 1 || modelVersion.isNullOrBlank() || (deploymentApproved != true && !allowDevelopment) || category != expectedCategory ||
                 coordinateSystem != "upright_rgb_normalized_top_left" || status != "needs_calibration") return null
             val decoded = landmarks ?: return null
             if (decoded.any { it == null }) return null
@@ -59,7 +59,7 @@ class GarmentLandmarkClient {
         data class Fallback(val reason: String) : Outcome
     }
     private val http = OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.SECONDS).callTimeout(10, TimeUnit.SECONDS).build()
+        .readTimeout(10, TimeUnit.SECONDS).callTimeout(10, TimeUnit.SECONDS).followRedirects(false).followSslRedirects(false).build()
 
     suspend fun infer(input: Input): Outcome = withContext(Dispatchers.IO) {
         if (!BuildConfig.AI_LANDMARKS_ENABLED) return@withContext Outcome.Fallback("feature_disabled")
@@ -77,11 +77,13 @@ class GarmentLandmarkClient {
         try {
             http.newCall(request).execute().use { result ->
                 val body = result.body
-                if (!result.isSuccessful || body == null || body.contentLength() !in 1L..1_000_000L) {
+                if (!result.isSuccessful || body == null || body.contentLength() > 1_000_000L) {
                     return@withContext Outcome.Fallback("server_unavailable")
                 }
-                val parsed: Response? = Gson().fromJson(body.string(), Response::class.java)
-                if (parsed?.validatedEndpoints(input.category) == null) Outcome.Fallback("model_or_landmarks_unapproved")
+                val raw = body.byteStream().use { it.readNBytes(1_000_001) }
+                if (raw.size > 1_000_000) return@withContext Outcome.Fallback("response_too_large")
+                val parsed: Response? = Gson().fromJson(raw.toString(Charsets.UTF_8), Response::class.java)
+                if (parsed?.validatedEndpoints(input.category, BuildConfig.DEBUG && BuildConfig.AI_LANDMARKS_DEVELOPMENT_ENABLED) == null) Outcome.Fallback("model_or_landmarks_unapproved")
                 else Outcome.Proposal(parsed)
             }
         } catch (error: IOException) {

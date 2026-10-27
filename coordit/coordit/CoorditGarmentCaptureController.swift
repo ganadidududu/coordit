@@ -102,6 +102,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
         guard method != .arPlane || Self.supportsCardlessAR else { return }
         guard method != .metricDepthEstimate else { return }
         self.method = method
+        trackingReady = false
         reset()
         image = nil
         sceneView?.session.pause()
@@ -208,6 +209,52 @@ final class CoorditGarmentCaptureController: ObservableObject {
         }
     }
 
+    func cancelInference() {
+        detectionTask?.cancel(); detectionRevision = UUID(); isDetecting = false
+    }
+
+    func requestAILandmarks(using provider: CoorditRemoteLandmarkProvider) {
+        guard CoorditRemoteLandmarkProvider.enabled, let data = image?.pngData(), !isDetecting,
+              method == .card || isFrozenAR else { return }
+        detectionTask?.cancel(); detectionRevision = UUID()
+        let revision = detectionRevision
+        let requestedCategory = category
+        isDetecting = true
+        detectionTask = Task {
+            defer { if revision == detectionRevision { isDetecting = false } }
+            do {
+                let result = try await provider.infer(data)
+                let endpoints = try result.endpoints(for: requestedCategory,
+                    allowDevelopment: provider.allowDevelopmentProposals && CoorditRemoteLandmarkProvider.developmentEnabled)
+                guard !Task.isCancelled, revision == detectionRevision, category == requestedCategory else { return }
+                if isFrozenAR {
+                    guard let geometry = planeCapture?.geometry,
+                          endpoints.allSatisfy({ (try? geometry.worldPoint($0)) != nil }) else {
+                        throw CoorditGarmentMeasurementError.invalidPoint
+                    }
+                }
+                let validatedPoints: [CoorditMeasurementVector]?
+                if let geometry = planeCapture?.geometry { validatedPoints = try endpoints.map(geometry.worldPoint) }
+                else if let calibration { validatedPoints = try endpoints.map(calibration.worldPoint) }
+                else { validatedPoints = nil }
+                if let validatedPoints {
+                    let segments = Dictionary(uniqueKeysWithValues: dimensions.enumerated().map { index, dimension in
+                        (dimension, CoorditMeasurementSegment(start: validatedPoints[index * 2], end: validatedPoints[index * 2 + 1]))
+                    })
+                    _ = try CoorditGarmentMeasurement(method: method, segments: segments, lengthBasis: lengthBasis,
+                        category: category, arEvidence: measurementEvidence)
+                    points = validatedPoints; hasAutomaticProposal = true; refreshProjection()
+                }
+                proposedEndpoints = endpoints
+                basisConfirmed = false
+                message = "AI가 제안한 점이에요. 봉제선과 측정 기준을 확인하고 보정해주세요."
+            } catch {
+                guard !Task.isCancelled, revision == detectionRevision else { return }
+                message = "AI 측정점을 사용할 수 없어요. 현재 측정값을 유지했어요. 직접 점을 맞춰주세요."
+            }
+        }
+    }
+
     private func replaceCard(_ newCorners: [CoorditMeasurementPoint]) throws {
         guard let image else { return }
         let replacement = try CoorditCardCalibration(corners: newCorners, imageWidth: image.size.width, imageHeight: image.size.height)
@@ -274,6 +321,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
         image = nil
         reset()
         stop()
+        resume()
     }
 
     func reset() {

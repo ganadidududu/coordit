@@ -13,10 +13,33 @@ struct CoorditCameraWardrobeRequest: Encodable {
     let idempotencyKey: String
 }
 
+extension CoorditClosetDraft {
+    mutating func applyCameraMeasurement(_ measurement: CoorditGarmentMeasurement, photo: Data?) {
+        method = .photo; name = measurement.garmentName
+        exactCategory = measurement.resolvedCategory
+        category = measurement.isLower ? .bottom : .top
+        let values = measurement.resolvedCategory.cameraDimensions.map {
+            measurement.measurementValues[$0.measurementKey].map { String($0) } ?? ""
+        }
+        measurement1 = values[0]; measurement2 = values[1]; measurement3 = values[2]
+        measurement4 = values.count > 3 ? values[3] : ""
+        cameraMeasurement = measurement; garmentImageData = photo
+    }
+}
+
 extension CoorditGarmentMeasurement {
     var clothingSizeRequest: ClothingSizeRequest {
         let values = measurementValues
-        return .init(sizeLabel: nil, rawMeasurements: ["source": method.source, "length_basis": lengthBasis, "sleeve_basis": "shoulder_seam_to_cuff", "measured_at": measuredAt.ISO8601Format()], totalLength: values["total_length"], shoulderWidth: values["shoulder_width"], chestWidth: values["chest_width"], sleeveLength: values["sleeve_length"], waistWidth: values["waist_width"], hipWidth: values["hip_width"], rise: values["rise"], outseam: values["outseam"])
+        var metadata = ["source": method.source, "length_basis": lengthBasis, "sleeve_basis": "shoulder_seam_to_cuff", "measured_at": measuredAt.ISO8601Format()]
+        if let evidence = arEvidence {
+            metadata["ar_frame_id"] = evidence.frameID.uuidString
+            metadata["tracking_quality"] = evidence.trackingQuality
+            metadata["ar_plane_stable_seconds"] = String(evidence.stablePlaneSeconds)
+            metadata["ar_camera_motion_baseline_meters"] = String(evidence.cameraMotionBaselineMeters)
+            metadata["correction_status"] = evidence.corrected ? "user_corrected" : "original"
+            metadata["measurement_status"] = "measured"
+        }
+        return .init(sizeLabel: nil, rawMeasurements: metadata, totalLength: values["total_length"], shoulderWidth: values["shoulder_width"], chestWidth: values["chest_width"], sleeveLength: values["sleeve_length"], waistWidth: values["waist_width"], hipWidth: values["hip_width"], rise: values["rise"], outseam: values["outseam"])
     }
 }
 

@@ -9,6 +9,8 @@ import torch
 from PIL import Image, ImageOps
 
 from coordit_ml.network import image_tensor
+from coordit_ml.proposal_validation import rejection_reason
+from coordit_ml.provenance import sha256
 from coordit_ml.schema import CLASSES, LANDMARKS, BoundaryModel, Landmark, PipelineError, dimension_landmarks
 from coordit_ml.training import load_model
 
@@ -46,7 +48,7 @@ def infer_image(directory: Path, content: bytes) -> InferenceResult:
             raise PipelineError("Image exceeds pixel budget")
         image = ImageOps.exif_transpose(decoded).convert("RGB")
     with torch.inference_mode():
-        prediction = model.forward(image_tensor(image).unsqueeze(0))
+        prediction = model.forward(image_tensor(image, model.input_size).unsqueeze(0))
     probabilities = prediction.category.softmax(1)[0]
     category_index = int(probabilities.argmax())
     category = CLASSES[category_index]
@@ -67,15 +69,21 @@ def infer_image(directory: Path, content: bytes) -> InferenceResult:
                 source="development_model",
             )
         )
+    failure = rejection_reason(category, landmarks, prediction.mask[0, 0].sigmoid().ge(0.5))
+    if float(probabilities[category_index]) < 0.5:
+        failure = "category_score_too_low"
     values: list[int] = prediction.mask[0, 0].sigmoid().ge(0.5).to(torch.uint8).mul(255).flatten().tolist()
-    mask = Image.frombytes("L", (64, 64), bytes(values))
+    mask_height, mask_width = prediction.mask.shape[-2:]
+    mask = Image.frombytes("L", (mask_width, mask_height), bytes(values))
     output = io.BytesIO()
     mask.save(output, format="PNG")
     # A thresholded mask is available via the model; do not fabricate a polygon from its bounding box.
     return InferenceResult(
-        status="needs_calibration",
-        reason="absolute_scale_unavailable_and_model_unvalidated",
-        model_version="coordit-tiny-multitask-v1",
+        status="failed" if failure else "needs_calibration",
+        reason=failure or "absolute_scale_unavailable_and_model_unvalidated",
+        model_version=f"{model.model_version}@{sha256(directory / 'checkpoint.pt')}",
+        segmentation_mask_width=mask_width,
+        segmentation_mask_height=mask_height,
         category=category,
         category_confidence=float(probabilities[category_index]),
         width=image.width,

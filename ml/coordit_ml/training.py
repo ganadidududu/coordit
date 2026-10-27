@@ -8,8 +8,9 @@ from typing import Literal
 import torch
 
 from coordit_ml.artifacts import Artifact, ManifestPin, read_checkpoint
-from coordit_ml.network import ApprovedDataset, GarmentNet, batch, loss
-from coordit_ml.provenance import REGISTRY_ROOT, sha256
+from coordit_ml.model_factory import Architecture, PerceptionModel, create_model, model_loss
+from coordit_ml.network import ApprovedDataset, batch
+from coordit_ml.provenance import REGISTRY_ROOT, approved_entry, read_records, sha256
 from coordit_ml.schema import BoundaryModel, PipelineError, read_registry
 
 
@@ -23,6 +24,7 @@ class TrainingConfig(BoundaryModel):
     learning_rate: float = 0.001
     seed: int = 42
     device: Literal["cpu", "cuda", "mps"] = "cpu"
+    architecture: Architecture = "coordit-tiny-multitask-v1"
     category_heads: bool = False
     max_steps: int | None = None
     resume: bool = False
@@ -34,7 +36,10 @@ def fingerprint(config: TrainingConfig) -> str:
     payload = [sha256(p) for p in config.manifests] + [
         sha256(REGISTRY_ROOT / "DATASET_MANIFEST.json"),
         sha256(REGISTRY_ROOT / "EVALUATION_DENYLIST.json"),
+        config.architecture,
         str(config.category_heads),
+        sha256(Path(__file__).with_name("heatmap_network.py")),
+        sha256(Path(__file__).with_name("model_factory.py")),
         str(config.seed),
         str(config.batch_size),
         str(config.learning_rate),
@@ -61,7 +66,8 @@ def train(config: TrainingConfig) -> Path:
     if not len(dataset):
         raise PipelineError("No approved training images")
     run_fingerprint = fingerprint(config)
-    model = GarmentNet(config.category_heads).to(config.device)
+    model = create_model(config.architecture, config.category_heads).to(config.device)
+    dataset.image_size = model.input_size
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
     config.output.mkdir(parents=True, exist_ok=True)
     checkpoint, metadata_path = config.output / "checkpoint.pt", config.output / "artifact.json"
@@ -110,7 +116,7 @@ def train(config: TrainingConfig) -> Path:
             selected = indices[offset : offset + config.batch_size]
             target = batch(dataset, selected, config.device)
             optimizer.zero_grad()
-            objective = loss(model.forward(target.pixels, target.category), target)
+            objective = model_loss(config.architecture, model.forward(target.pixels, target.category), target)
             if not objective.isfinite():
                 raise PipelineError("Nonfinite training objective")
             _ = objective.backward()
@@ -132,7 +138,8 @@ def train(config: TrainingConfig) -> Path:
         _ = temporary.replace(checkpoint)
         seen_ids.update(dataset.samples[i][1].image_id for i in used)
         metadata = Artifact(
-            architecture="coordit-tiny-multitask-v1",
+            architecture=config.architecture,
+            input_size=model.input_size,
             fingerprint=run_fingerprint,
             checkpoint_sha256=sha256(checkpoint),
             epoch=epoch,
@@ -162,14 +169,23 @@ def train(config: TrainingConfig) -> Path:
     return checkpoint
 
 
-def load_model(directory: Path) -> GarmentNet:
+def load_model(directory: Path) -> PerceptionModel:
     """Local artifacts only; verify recorded hash and use restricted torch loader."""
     metadata = Artifact.model_validate_json((directory / "artifact.json").read_bytes())
-    if metadata.architecture != "coordit-tiny-multitask-v1" or metadata.checkpoint_sha256 != sha256(
-        directory / "checkpoint.pt"
-    ):
+    if metadata.checkpoint_sha256 != sha256(directory / "checkpoint.pt"):
         raise PipelineError("Untrusted or incompatible model artifact")
-    model = GarmentNet(metadata.category_heads)
+    if metadata.registry_sha256 != sha256(REGISTRY_ROOT / "DATASET_MANIFEST.json"):
+        raise PipelineError("Model rights registry changed; review or retrain before inference")
+    registry = read_registry(REGISTRY_ROOT / "DATASET_MANIFEST.json")
+    for pin in metadata.manifests:
+        manifest = Path(pin.path)
+        if not manifest.is_file() or sha256(manifest) != pin.sha256:
+            raise PipelineError("Model training manifest changed or is unavailable")
+        for record in read_records(manifest):
+            _ = approved_entry(registry, record.source_dataset)
+    model = create_model(metadata.architecture, metadata.category_heads)
+    if metadata.input_size != model.input_size:
+        raise PipelineError("Model input dimensions disagree with its architecture")
     state = read_checkpoint(directory / "checkpoint.pt")
     _ = model.load_state_dict(state.model)
     _ = model.eval()

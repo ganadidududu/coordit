@@ -1,0 +1,17 @@
+{
+  "manifests": [
+    "artifacts/artf-v1.1/records.jsonl",
+    "artifacts/synthetic-v2/records.jsonl"
+  ],
+  "output": "artifacts/spatial-v2-category",
+  "epochs": 35,
+  "batch_size": 12,
+  "learning_rate": 0.001,
+  "seed": 42,
+  "device": "mps",
+  "architecture": "coordit-spatial-multitask-v2",
+  "category_heads": true,
+  "max_steps": null,
+  "resume": false,
+  "synthetic_fraction": 0.7
+}

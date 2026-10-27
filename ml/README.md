@@ -1,74 +1,79 @@
-# Coordit garment research (disabled for production)
+# Coordit garment perception (Phase 2, production disabled)
 
-This is executable research infrastructure, not a released 11-category measurement model. New app flags and server deployment approval remain false. Real centimeter accuracy has **not** been measured. Production backend, wallet, SQL/RLS and report routes are unchanged.
+Actual code, data conversion, training and inference are implemented. This is a research system; real garment centimeter accuracy has not been established. See [the phase checkpoint](../docs/CARDLESS_PHASE_2_STATUS.md) for exact counts, results, constraints and device requirements. Phase 3 is deferred.
 
-## Reproduce
+## Locked environment and data
 
-Run commands from `ml/`. Python 3.12 and uv 0.10.9 were used; `uv.lock` pins dependencies.
+Run from `ml/` with Python 3.12 and uv (tested with 0.10.9):
 
 ```sh
 uv sync --locked
 uv run python -m coordit_ml registry
 uv run python -m coordit_ml download-artf artifacts/download-20261027
 uv run python -m coordit_ml convert-artf artifacts/download-20261027/aRTFClothes-resized-paper-splits.zip artifacts/artf-v1.1
-uv run python -m coordit_ml synthetic artifacts/synthetic-v1.1 --per-category 30
+uv run python -m coordit_ml synthetic artifacts/synthetic-v2 --version v2 --per-category 120 --seed 257
 uv run python -m coordit_ml validate artifacts/artf-v1.1/records.jsonl
-uv run python -m coordit_ml validate artifacts/synthetic-v1.1/records.jsonl
+uv run python -m coordit_ml validate artifacts/synthetic-v2/records.jsonl
+uv run python -m coordit_ml audit-inventory reports/SOURCE_FILES.jsonl
+```
+
+These refuse to overwrite existing outputs. Data/weights live under ignored `artifacts/`, never regular Git. A fresh checkout can download the public archive without an account; inaccessible sources remain pending, not fabricated. The approved real set is 524 images: 210 T-shirts, 104 shorts, 210 auxiliary towels. All 980 publisher test-family images, including the old 16-image development fixtures, are excluded. Real source garment IDs are unavailable, so none of these real images is represented as independent validation/test. Original `artf:` keypoints are retained without pretending they label Coordit seams.
+
+The v2 generator produces 1,320 new project-authored identities across 11 categories, with masks, semantic 2D/3D points, camera matrices, visibility, synthetic cm and construction details. It uses no third-party asset. These are flat procedural scenes with wrinkle shading, not physically simulated cloth. Train/validation/test split is 1,108/110/102. Their high scores do not validate real photographs.
+
+`registry/DATASET_MANIFEST.json` is the approval authority. Image copyright, annotation license, source/terms evidence, scope and attribution are separate fields. `approve-dataset review.json` requires a complete typed review, reviewer, original evidence URLs and the exact registry hash. Pending, blocked, unknown or NC sources fail before training. Each loader audits actual SHA-256, perceptual hashes, image/mask geometry, semantic schemas and cross-corpus group/near-duplicate leakage. CI audits the tracked per-file source inventory and optionally a full curated corpus. Model loading checks the checkpoint hash, pinned manifests, current registry hash and current source approval; revocation fails closed.
+
+## Training, resume and evaluation
+
+```sh
+# These two actual Metal runs completed 35 epochs each:
+uv run python -m coordit_ml train config-spatial-v2-shared.json
+uv run python -m coordit_ml train config-spatial-v2-category.json
+uv run python -m coordit_ml evaluate artifacts/spatial-v2-shared artifacts/synthetic-v2/records.jsonl --split validation
+uv run python -m coordit_ml evaluate artifacts/spatial-v2-category artifacts/synthetic-v2/records.jsonl --split validation
+uv run python -m coordit_ml evaluate artifacts/spatial-v2-shared artifacts/synthetic-v2/records.jsonl --split test
+# CPU smoke uses v1 for a cheap operational check:
 uv run python -m coordit_ml train config-smoke.json
-# Apple Metal GPU (actually run, 20 epochs each):
-uv run python -m coordit_ml train config-mps-shared.json
-uv run python -m coordit_ml train config-mps-category.json
-# CUDA GPU command provided; CUDA was unavailable on this host:
+# CUDA alternative: copy a v2 config, change device to cuda and output to a fresh directory.
 uv run python -m coordit_ml train config-gpu.json
-uv run python -m coordit_ml evaluate artifacts/tiny-shared-mps-final-data artifacts/synthetic-v1.1/records.jsonl --split validation
 uv run pytest
 uv run ruff check coordit_ml tests
 uv run basedpyright
 ```
 
-Commands refuse to overwrite corpora/checkpoints. On this workspace the outputs already exist: choose a new output directory in a copied config, or set `resume: true` and a larger absolute epoch count. Resume requires identical data, registry, network/training source, seed and hyperparameters. Checkpoints are saved atomically at epoch boundaries (not mid-batch). JSONL training logs and `artifact.json` retain hashes, actual seen image IDs/counts and category exposure. Keep model files and datasets outside regular Git; `artifacts/` is ignored.
+To run again, copy a config and select a new output directory; do not overwrite evidence. To resume, set `resume: true` and a larger absolute epoch count. Registry/data/architecture/training source/seed/batch/lr/sampling fingerprints must match; legitimate code or registry changes require a new run. Atomic checkpoints include model, AdamW and RNG state at epoch boundaries. Logs record actual seen IDs, category exposures and source mix. A CPU smoke is not a complete training run; a missing GPU or empty corpus fails honestly.
 
-## Rights, normalization and leakage
+The project-owned randomly initialized spatial v2 model has a convolutional encoder, spatial category head, skip mask decoder, Gaussian landmark heatmaps, visibility and optional category heads. Input is upright RGB 128×128; output points are top-left normalized, with 64×64 heatmaps. BCE/Dice balances segmentation; visibility/coordinate losses use only known visible semantic labels. Real aRTF data supervises classification and segmentation, not fabricated seam points. The older 64×64 v1 remains a versioned comparison.
 
-- Dataset approval authority: `registry/DATASET_MANIFEST.json`. `approve-dataset review.json` requires a complete typed `Approval` record, reviewer, original HTTPS rights evidence and the exact registry SHA. It cannot auto-approve NC/unknown rights or silently override a blocked record. Approval does not constitute legal advice.
-- The loader **always** audits every source, original image rights, hash, file dimensions, mask, category, COCO polygon/bbox, semantic schema, exact duplicates and cross-corpus group/near-duplicate leakage before tensor construction. Unknown/pending/blocked data fails training and CI. `reports/SOURCE_FILES.jsonl` inventories accepted files without distributing pixels.
-- aRTF original source keypoints retain the `artf:` namespace. They are **not** supervised as Coordit shoulder seams. Real images train classification/segmentation; only authored synthetic semantics supervise the current landmark head.
-- All 980 publisher test images in this resized archive are excluded, including the existing 16-image development evaluation set and associated garments/scenes. Publisher train/validation pools are combined into **training only** because per-garment identities are unavailable. No real holdout accuracy is claimed.
-- COCO boxes are normalized to cover their polygons; original boxes are retained as `source_bbox`. No original masks or images are changed by that normalization. The resized archive contains 104 training-pool shorts, versus 112 in the full dataset's publication table; missing files are not fabricated.
-- Procedural assets use only project-authored polygons, camera math, colors and lines. Masks, visibility, 2D/3D landmarks, camera matrices and synthetic cm are emitted. Occlusion and wrinkle **shading** are simulated. There is no Blender cloth simulation, physical wrinkle displacement, third-party mesh or texture asset. This limits realism and classification coverage; it is not evidence of real garment performance.
+Both v2 runs saw 1,632 distinct train images across 35 epochs, 55,370 sample exposures each. Shared heads won synthetic validation (macro-F1 .8891, mIoU .9709), versus per-category .8237/.9630. The selected shared candidate's held-out **synthetic** test is .8920/.9767. Full per-category PCK/NME/missing/condition/latency/parameter metrics are tracked in `reports/`. Real holdout and centimeter performance remain unverified for every category. Do not use synthetic cm as real accuracy evidence.
 
-## Training and evaluation
+`evaluate-cm measurements.csv` requires columns `garment_id,category,method,dimension,ground_truth_cm,predicted_cm,independent,synthetic`. An empty prediction records failure. It emits all 43 category/part groups for each supplied card/lidar/arPlane method; missing groups fail. Each needs 20 successful independent real garments, MAE ≤1 cm, P95 ≤2 cm, and the conservative project policy of ≥95% success. Skirt rise/outseam, non-independent or synthetic rows are refused. There is no passing real cm report yet.
 
-`GarmentNet` is randomly initialized: category classifier, mask branch, shared or per-category landmark branch, visibility branch. There are 13 internal classes (11 product categories plus auxiliary towel/boxers). Resizing is upright RGB 64x64 with normalized top-left landmarks. Auxiliary classes are not converted to ordinary garments. No pretrained weights are downloaded.
-
-`synthetic_fraction` controls each epoch's mixed-domain sampling without duplicating images. Both Metal runs actually used all 799 unique training images (524 real + 275 synthetic), 20 epochs × 550 exposures/epoch. Synthetic validation/test remain separate. The current measured scores are poor; neither head is adopted for deployment. See `reports/` for exact metrics. All 11 categories' **real seam and centimeter accuracy remain unverified**; nine categories have zero accepted real training photos.
-
-Metrics include per-category classification accuracy, macro-F1, mask IoU/mIoU, landmark PCK@0.05 of image diagonal, NME using the same normalization, omission rate, background/occlusion/wrinkle groupings, inference time and parameter bytes. Parameter storage is not peak process memory. Evaluating with `--split train` is explicitly training-set diagnostics, never an independent accuracy claim.
-
-`evaluate-cm tape.csv` expects columns:
-`garment_id,category,method,dimension,ground_truth_cm,predicted_cm,independent,synthetic`.
-Blank predictions count as failed/recapture attempts. Synthetic/nonindependent rows are rejected. Each reported category/method/dimension needs >=20 independent real garments, MAE <=1cm and P95 <=2cm for the accuracy target. This is a necessary accuracy gate, not automatic legal/production authorization; omitted categories, success-rate requirements and calibrated error analyses must also be reviewed. No such real dataset was available here.
-
-## Isolated inference
+## Independent service and authenticated mobile integration
 
 ```sh
-# Closed by default: /health works, /v1/landmarks returns 503.
-uv run python -m uvicorn coordit_ml.service:app --host 127.0.0.1 --port 8001
-# For local research only: set COORDIT_ML_DEVELOPMENT=true,
-# COORDIT_ML_MODEL_DIRECTORY=<absolute local artifact directory>, and a fresh
-# COORDIT_ML_API_TOKEN of at least 32 random characters via your secret manager.
-uv run python -m coordit_ml infer artifacts/tiny-shared-mps-final-data artifacts/synthetic-v1.1/images/<image-id>.png
+# Set these in the research host's protected environment, never an app or Git:
+# COORDIT_ML_DEVELOPMENT=true
+# COORDIT_ML_API_TOKEN=<random-secret-at-least-32-characters>
+# COORDIT_ML_MODEL_DIRECTORY=<absolute-path-to-ignored-model-directory>
+uv run python -m uvicorn coordit_ml.service:app --host 127.0.0.1 --port 8100
+uv run python -m coordit_ml infer artifacts/spatial-v2-shared <upright-photo-path>
 ```
 
-`POST /v1/landmarks`: bearer authentication, explicit `processing_consent`, bounded base64 image, upright coordinates, model version, uncalibrated confidence, actual predicted mask PNG, landmarks, and **empty cm values**. Training consent is refused: this service retains no images and collects no training data. Inference is serialized to protect resource usage. The service is independent of Express and cannot debit credits. It has not been deployed. The development switch cannot assert production model approval.
+The default service returns 503 until explicitly configured; health does not claim approval. POST `/v1/landmarks` uses a private bearer token, `image_base64`, `processing_consent: true`, `training_consent: false`. It never returns cm, saves photos or collects training examples. Mask/landmark geometry and raw visibility scores can reject proposals. `status: needs_calibration` still requires a known AR/card scale; `failed` means use manual/local detection. Confidence is uncalibrated, not an error bound.
 
-Mobile adapters reject unapproved models, bad/missing/duplicate/occluded points, mismatched category/coordinates, HTTP, missing consent, timeouts and outages. iOS uses the existing Vision contour detector on fallback. Android keeps its manual captured-plane points. No remote endpoint, shared API key, photo upload consent screen or production identity gateway is configured. Those are release blockers; never embed the development service token in an app.
+The existing Express backend mounts `/garment-landmarks` with the existing user authentication before its scoped image parser. Protected server variables are `COORDIT_LANDMARKS_RESEARCH_ENABLED=true`, `COORDIT_ML_URL=https://<private-service>/v1/landmarks`, and the same private service token. Only local upstream loopback may use HTTP. The gateway is hard-blocked in `NODE_ENV=production`, bounds concurrency, payload, response, timeout and redirect handling, returns no-store, and never forwards a user's bearer token upstream. No wallet/report/SQL operation is part of inference.
 
-## Export
+Mobile AI buttons are hidden by default. Deliberate research builds need both the AI flag and the **separate DEBUG-only development-proposal opt-in** (`CoorditAILandmarksEnabled` / `CoorditAILandmarksDevelopmentEnabled`, Android `AI_LANDMARKS_ENABLED` / `AI_LANDMARKS_DEVELOPMENT_ENABLED`) plus a reachable HTTPS Coordit backend and a user session. The photo-specific consent dialog explains purpose, temporary independent-server processing, metadata removal, no retention and no training. Each upload is re-encoded upright JPEG; no EXIF location is sent. Replies must match the selected category, semantic endpoints and coordinate contract; valid frozen AR/card geometry is applied only after user review. Failure keeps the old measurements/manual path. Release builds cannot accept development weights. No flag is enabled by these instructions or this commit.
+
+## Export and release
 
 ```sh
 uv sync --group export
-uv run python -m coordit_ml export-onnx artifacts/tiny-shared-mps-final-data artifacts/tiny-shared-mps-final-data/model.onnx
+uv run python -m coordit_ml export-onnx artifacts/spatial-v2-shared artifacts/spatial-v2-shared/model.onnx
+uv run python -c 'import onnx; onnx.checker.check_model("artifacts/spatial-v2-shared/model.onnx")'
 ```
 
-A CPU smoke ONNX export and `onnx.checker` were actually run successfully. Core ML conversion and ONNX Runtime device inference have not been performed. An export is still an unapproved development artifact and inherits source-data attribution. No weights are in the app bundle or deployed server list.
+V2 export and checker actually passed. Core ML conversion and ONNX Runtime device execution remain untested. All checkpoints and ONNX inherit data attribution and remain unapproved research artifacts; `registry/MODEL_ARTIFACTS.json` has empty app/server deployment lists. No external pretrained weight is bundled.
+
+Production requires original rights/terms clearance, lawful real seam labels across all categories, independent real evaluation, device/sensor reliability and the cm gate. Keep flags off until evidence exists. See `../DATASET_LICENSES.md`, `../MODEL_LICENSES.md`, `../THIRD_PARTY_NOTICES.md` and the checkpoint document.
