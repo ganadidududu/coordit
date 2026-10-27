@@ -28,7 +28,7 @@ const toAuthResponse = async (
 ): Promise<AuthResponse> => {
   const isAnonymous = authUser.is_anonymous === true;
   const email = authUser.email
-    ?? (isAnonymous ? `guest+${authUser.id}@guest.coordit.invalid` : undefined);
+    || (isAnonymous ? `guest+${authUser.id}@guest.coordit.invalid` : undefined);
   if (!email) throw createHttpError(400, "Auth user email is missing");
   if (!session?.access_token || !session.refresh_token) {
     throw createHttpError(401, "Supabase did not return an active session");
