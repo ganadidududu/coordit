@@ -38,9 +38,9 @@ enum CoorditDesignTokens {
     }
 
     enum HomeReferenceMetrics {
-        static let cardWidth: CGFloat = 361
-        static let cardPadding: CGFloat = 13
-        static let cardRadius: CGFloat = 10
+        static let cardWidth: CGFloat = 366
+        static let cardPadding: CGFloat = 16
+        static let cardRadius: CGFloat = 12
         static let sheetPadding: CGFloat = 16
         static let sectionSpacing: CGFloat = 14
         static let sectionRadius: CGFloat = 9

@@ -15,6 +15,7 @@ struct Main01Header: View {
             profileIcon
             Spacer(minLength: 0)
             Main01BrandLogo(scale: scale)
+                .dynamicTypeSize(.large)
             Spacer(minLength: 0)
             headerIcon(assetName: "FigmaTopSun", label: "Weather")
         }
