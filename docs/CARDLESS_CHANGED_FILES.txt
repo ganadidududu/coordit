@@ -28,6 +28,9 @@ backend/src/modules/garment-landmarks/garment-landmarks.gateway.test.ts
 backend/src/modules/garment-landmarks/garment-landmarks.gateway.ts
 backend/src/routes.ts
 backend/vitest.config.ts
+coordit/coordit/ContentView.swift
+coordit/coordit/CoorditARFieldTestScreen.swift
+coordit/coordit/CoorditARFieldTestSession.swift
 coordit/coordit/CoorditARPlaneMeasurement.swift
 coordit/coordit/CoorditCameraReference.swift
 coordit/coordit/CoorditClosetCameraRegistration.swift
@@ -38,11 +41,15 @@ coordit/coordit/CoorditGarmentInference.swift
 coordit/coordit/CoorditGarmentMeasurementGeometry.swift
 coordit/coordit/CoorditRootView.swift
 coordit/coordit/Info.plist
+coordit/coordit/coorditApp.swift
+coordit/coorditTests/CoorditARFieldTestSessionTests.swift
 coordit/coorditTests/CoorditARPlaneMeasurementTests.swift
 coordit/coorditTests/CoorditGarmentInferenceTests.swift
 coordit/coorditTests/CoorditGarmentMeasurementTests.swift
+coordit/coorditUITests/CoorditARFieldUITests.swift
 coordit/coorditUITests/CoorditCameraComparisonUITests.swift
 docs/API_SPEC_MOBILE.md
+docs/AR_FIELD_TEST_GUIDE.md
 docs/CAMERA_FIT_DEVELOPMENT.md
 docs/CARDLESS_ACCURACY_AND_REAL_DATA.md
 docs/CARDLESS_AR_ACCURACY_NOTES.md
@@ -68,6 +75,7 @@ ml/coordit_ml/artifacts.py
 ml/coordit_ml/category_review.py
 ml/coordit_ml/centimeter_evaluation.py
 ml/coordit_ml/evaluation.py
+ml/coordit_ml/field_evaluation.py
 ml/coordit_ml/heatmap_network.py
 ml/coordit_ml/inference.py
 ml/coordit_ml/inventory.py
@@ -98,6 +106,7 @@ ml/registry/source-pins/secondhand-v3-front.json
 ml/reports/DATA_COUNTS.json
 ml/reports/MODEL_RUNS.json
 ml/reports/SOURCE_FILES.jsonl
+ml/reports/SPATIAL_V2_LANDMARK_SUMMARY.json
 ml/reports/ar-mathematical-geometry.json
 ml/reports/secondhand-conversion.json
 ml/reports/spatial-v2-category-validation.json
@@ -105,7 +114,9 @@ ml/reports/spatial-v2-shared-test.json
 ml/reports/spatial-v2-shared-validation.json
 ml/reports/tiny-category-mps-final-data-validation.json
 ml/reports/tiny-shared-mps-final-data-validation.json
+ml/tests/test_field_evaluation.py
 ml/tests/test_pipeline.py
 ml/tests/test_real_photo_supervision.py
 ml/tests/test_spatial_and_release.py
 ml/uv.lock
+scripts/run-ar-field-test-ios.sh

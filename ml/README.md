@@ -2,6 +2,8 @@
 
 Actual code, data conversion, training and inference are implemented. This is a research system; real garment centimeter accuracy has not been established. See [the phase checkpoint](../docs/CARDLESS_PHASE_2_STATUS.md) for exact counts, results, constraints and device requirements. Phase 3 is deferred.
 
+For the standalone iPhone field-test app, tape protocol, exact synthetic PCK/NME and local JSON evaluation, see [AR_FIELD_TEST_GUIDE](../docs/AR_FIELD_TEST_GUIDE.md). `uv run python -m coordit_ml field-report <export.json-or-directory> <new-output-directory>` separates automatic and corrected cm metrics, preserves failures, rejects simulator/non-independent/duplicate trials and never approves deployment.
+
 ## Locked environment and data
 
 Run from `ml/` with Python 3.12 and uv (tested with 0.10.9):

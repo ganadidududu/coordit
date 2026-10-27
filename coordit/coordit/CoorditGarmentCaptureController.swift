@@ -48,7 +48,10 @@ final class CoorditGarmentCaptureController: ObservableObject {
         return evidence
     }
     static var cardlessEnabled: Bool {
-        Bundle.main.object(forInfoDictionaryKey: "CoorditCardlessAREnabled") as? Bool == true
+        #if DEBUG
+        if CoorditARFieldTestMode.enabled { return true }
+        #endif
+        return Bundle.main.object(forInfoDictionaryKey: "CoorditCardlessAREnabled") as? Bool == true
     }
     static var supportsCardlessAR: Bool { ARWorldTrackingConfiguration.isSupported && cardlessEnabled }
     var identifier: UUID { measurementID }

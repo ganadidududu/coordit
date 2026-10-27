@@ -11,6 +11,9 @@ struct CoorditFitLabCameraComparison: View {
     @ObservedObject var capture: CoorditGarmentCaptureController
     @StateObject private var cameraMotion = CoorditCameraMotion()
     var savesReferenceOnly = false
+    #if DEBUG
+    var fieldTestSession: CoorditARFieldTestSession?
+    #endif
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var showsCamera = false
     @State private var isAnalyzing = false
@@ -93,7 +96,7 @@ struct CoorditFitLabCameraComparison: View {
                             .fixedSize(horizontal: false, vertical: true)
                             .accessibilityIdentifier("camera-fit-error")
                     }
-                    actionButton(metrics)
+                    bottomAction(metrics)
                 }
                 .padding(.horizontal, metrics.value(16))
                 .padding(.vertical, metrics.value(10))
@@ -583,6 +586,16 @@ struct CoorditFitLabCameraComparison: View {
         .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary))
         .disabled(isAnalyzing || capture.isDetecting || (!isUnlocked && !capture.canReview))
         .accessibilityIdentifier("camera-fit-analyze")
+    }
+
+    @ViewBuilder private func bottomAction(_ metrics: CoorditResponsiveMetrics) -> some View {
+        #if DEBUG
+        if let fieldTestSession {
+            CoorditARFieldTestControls(capture: capture, session: fieldTestSession)
+        } else { actionButton(metrics) }
+        #else
+        actionButton(metrics)
+        #endif
     }
 
     private func requestCameraPermission() async {
