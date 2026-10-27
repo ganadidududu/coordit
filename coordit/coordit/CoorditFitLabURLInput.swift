@@ -36,6 +36,9 @@ struct CoorditFitLabURLInputView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: metrics.value(14)) {
+                if CoorditTutorialExample.matches(URL(string: urlText)) {
+                    CoorditExampleNotice()
+                }
                 switch stage {
                 case .entry:
                     entry
@@ -54,7 +57,6 @@ struct CoorditFitLabURLInputView: View {
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
         .id(stage)
-        .fitLabTutorialScroll()
         .scrollDismissesKeyboard(.interactively)
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
@@ -132,6 +134,16 @@ struct CoorditFitLabURLInputView: View {
                 }
             }
             .fitLabTutorialTarget(.link)
+
+            Button("링크가 없나요? 예시 링크로 체험하기") {
+                urlText = CoorditTutorialExample.link
+                tutorial.restart()
+                tutorial.show(.link)
+                completeLinkEntry()
+            }
+            .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary, height: 44))
+            .disabled(isLoading)
+            .accessibilityIdentifier("fitlab-example-link")
 
             Text("가져올 옷 분류")
                 .font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))
@@ -572,7 +584,12 @@ struct CoorditFitLabURLInputView: View {
         isLoading = true
         importRequest = Task { @MainActor in
             do {
-                let response = try await prefill(url, category)
+                let response: CoorditFitLabURLPrefillResponse
+                if CoorditTutorialExample.matches(url) {
+                    response = CoorditTutorialExample.product(category: category)
+                } else {
+                    response = try await prefill(url, category)
+                }
                 guard !Task.isCancelled, generation == importGeneration, stage == .entry else { return }
                 apply(response)
                 stage = .review

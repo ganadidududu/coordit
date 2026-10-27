@@ -1,6 +1,6 @@
 {
   "name": "coordit-dev",
-  "description": "Slim COORDIT development simulators while preserving authentication, StoreKit, links, photos, and DeviceCheck.",
+  "description": "Slim COORDIT development simulators while preserving authentication, StoreKit, links, photos, DeviceCheck, and keyboard dictation availability callbacks via assistantd.",
   "except": [
     "icloud",
     "store",
@@ -8,5 +8,8 @@
     "photos",
     "telemetry",
     "other"
+  ],
+  "keep": [
+    "com.apple.assistantd"
   ]
 }

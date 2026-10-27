@@ -425,6 +425,7 @@ struct CoorditFitLabReportCard: View {
     let report: CoorditFitLabReportResponse?
     let fallbackMessage: String?
     let metrics: CoorditResponsiveMetrics
+    var recommendedSize: String? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: metrics.value(14)) {
@@ -443,6 +444,11 @@ struct CoorditFitLabReportCard: View {
             }
 
             if let report {
+                if let recommendedSize {
+                    Text("추천 \(recommendedSize) 사이즈 기준 상세 리포트")
+                        .font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .body))
+                        .accessibilityIdentifier("fitlab-report-basis")
+                }
                 reportSection(
                     eyebrow: "OVERALL VERDICT",
                     title: report.report.title,

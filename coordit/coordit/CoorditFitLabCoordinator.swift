@@ -231,6 +231,13 @@ final class CoorditFitLabCoordinator: ObservableObject {
         authenticatedUserID: String? = nil
     ) async {
         guard loadState != .loading else { return }
+        if draft.isTutorialExample {
+            references = CoorditTutorialExample.references(category: draft.category)
+            draft.selectedReferenceIDs.formIntersection(Set(references.map(\.id)))
+            loadState = .loaded
+            error = nil
+            return
+        }
         guard (authenticatedUserID ?? userID) != nil else {
             error = .loginRequired
             retryStep = .idle
@@ -315,6 +322,21 @@ final class CoorditFitLabCoordinator: ObservableObject {
         authenticatedUserID: String? = nil
     ) async {
         guard loadState != .loading else { return }
+        if draft.isTutorialExample {
+            guard canSubmit, CoorditFitLabDraftValidation.submissionError(for: draft) == nil else {
+                fail(.invalidDraft("사이즈표를 확인하고 예시 기준 옷을 선택해 주세요."), at: .idle)
+                return
+            }
+            let example = CoorditTutorialExample.recommendation(for: draft)
+            recommendation = example
+            report = CoorditTutorialExample.report(for: example)
+            reportFailureMessage = nil
+            error = nil
+            submissionStep = .complete
+            loadState = .loaded
+            screen = draft.garmentKind == .upper ? .resultUpper : .resultLower
+            return
+        }
         guard (authenticatedUserID ?? userID) != nil else {
             fail(.loginRequired, at: .idle)
             screen = .loginRequired
@@ -639,6 +661,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
 
     @discardableResult
     func saveCurrentAnalysis(authenticatedUserID: String? = nil) async -> Bool {
+        guard !draft.isTutorialExample else { return false }
         guard
             let historyStore,
             let userID = authorizedHistoryUser(authenticatedUserID),

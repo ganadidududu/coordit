@@ -49,6 +49,15 @@ Text scales through SwiftUI relative text styles. Feature titles use `.headline`
 
 ## 5. Components
 
+### Splash authentication sheet
+
+- Structure: centered title and description, three equal provider actions, a secondary email action, inline status, and a two-line legal footer. Email entry reuses the same fields and action geometry.
+- Tokens: white surface, shared ink/line/field colors; 24 pt page inset, 28 pt top inset, 20 pt bottom inset, 24 pt section gap, 12 pt row gap, 56 pt minimum control height, 14 pt control radius, 28 pt sheet radius, and 480 pt maximum content width.
+- Typography: Gmarket Sans Bold 22 pt title; Medium 14 pt action labels, 13 pt description, and 11 pt footer. All use relative Dynamic Type styles. Provider marks occupy equal 24 pt leading slots with a matching trailing slot to keep labels centered.
+- States: every provider uses the same white outlined control. Email submission uses solid ink; disabled actions use 45% opacity. Errors use a 12 pt padded, softly tinted red notice with an icon and readable wrapping text. Loading includes a progress indicator and Korean status copy.
+- Accessibility: controls grow with text, secondary actions have 44 pt minimum targets, and scroll content keeps fields, errors, and the footer reachable with the keyboard or accessibility text sizes. The sheet expands to large for accessibility sizes. It intentionally retains the app's light authentication surface in both system appearances.
+- Provider behavior: the Apple action uses the existing authorization coordinator and Korean label; provider authentication, nonce handling, and session transitions remain owned by the existing session store.
+
 ### Feature title bar
 
 - **Structure**: full-width plain `Button` containing a leading bold `chevron.left`, the uppercase title, and a trailing spacer.
@@ -121,6 +130,8 @@ Text scales through SwiftUI relative text styles. Feature titles use `.headline`
 - **Size score comparison**: every available size uses a shared 0–100 horizontal scale. The recommended size uses solid `ink`; alternatives use the existing `blue` token at reduced opacity. The chart must never hide lower-scoring candidates.
 - **Fit-point score breakdown**: show only engine-provided 0–100 semantic scores. Use the shared Korean labels `실루엣`, `활동성`, and `레이어링`, with a common scale and tabular numeric values. Never infer a missing dimension or present these values as confidence.
 - **Measurement score breakdown**: show only engine-provided 0–100 measurement similarity scores, paired with the signed centimeter difference and a textual `타이트`/`비슷`/`여유` status. A higher value means closer to the user's reference garment for that measurement; it is not body-shape quality or confidence. Missing measurements stay hidden, and legacy reports without this series remain readable.
+- **Size selection**: the selected size owns the score hero, mannequin, comparison rows, and available engine-provided subscores. Its label is shown beside the comparison controls. Recommendation prose remains explicitly labelled with the recommended size, and changing a comparison never requests another paid report. When a legacy result has no alternative subscores, show a short unavailable message instead of reusing the recommended size's scores. Saved-report detail uses the same selection behavior.
+- **Score explanation**: the score breakdown states that 100 means a closer match to the reference garment, and that category and intended fit affect the comparison. Semantic scores describe the measured shape, not a probability or a guarantee of comfort. Reuse existing 10–12 pt body/caption typography, ink/muted colors, and panel spacing for these notes.
 - **Difference chart**: the midpoint is always 0 cm. Each row uses a status-colored yarn ball that rolls from that midpoint to the signed endpoint, leaving an uneven, unwound thread behind it; negative values finish left and positive values finish right, including within-tolerance values. Tight values use `red`, roomy values use `blue`, and similar values use `green`; an exact zero uses a compact centered yarn coil. Each row also states reference, product, and signed difference values.
 - **Mannequin annotations**: pills show the measurement name and signed centimeter difference directly; raw plus/minus glyphs without a measurement label are prohibited.
 - **Narrative hierarchy**: major narrative sections use visible English eyebrow labels plus large Korean headings. The garment context explains which fit points matter for the selected clothing category; the size tradeoff states what the alternative improves and what the recommended size preserves. These sections appear only when the report contains supported V7 content, so older saved reports remain readable. Each body-part analysis occupies its own bordered panel with a semantic color rail.

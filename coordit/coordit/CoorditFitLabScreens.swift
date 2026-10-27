@@ -165,6 +165,7 @@ struct CoorditFitLabFamilyView: View {
                 sizeDrafts: coordinator.draft.sizes,
                 fallbackMessage: coordinator.reportFailureMessage,
                 canSaveHistory: coordinator.report != nil,
+                isExample: coordinator.draft.isTutorialExample,
                 isSaved: coordinator.savedHistory.contains {
                     $0.analysisID == coordinator.recommendation?.fitAnalysisResultID
                 },
@@ -215,6 +216,9 @@ struct CoorditFitLabFamilyView: View {
     }
 
     private func compatibleReferences(for category: CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow] {
+        if coordinator.draft.isTutorialExample {
+            return CoorditTutorialExample.references(category: category)
+        }
         #if DEBUG
         if coordinator.fixtureName != nil {
             return try await coordinator.fetchCompatibleReferences(category: category)
@@ -253,6 +257,7 @@ struct CoorditFitLabFamilyView: View {
                 historyRecoveryNotice: coordinator.historyRecoveryNotice,
                 threadBalance: threadBalance,
                 onThreadRecharge: onOpenThreadRecharge,
+                onManageReferences: onManageReferences,
                 onOpenHistory: { snapshot in
                     coordinator.selectHistory(snapshot)
                     onRouteChange(.fitLabHistoryDetail)
@@ -262,6 +267,12 @@ struct CoorditFitLabFamilyView: View {
     }
 
     private func handleTitleBack() {
+        if coordinator.draft.isTutorialExample {
+            coordinator.discardAndRestart()
+            inputDestination = .sources
+            onRouteChange(.fitLabInput)
+            return
+        }
         if currentRoute == .fitLabInput, inputDestination != .sources {
             navigateInput(to: .sources)
         } else if currentRoute == .fitLabInput {
@@ -496,6 +507,10 @@ struct CoorditFitLabFamilyView: View {
     #endif
 
     private func loadSubmissionReferences() async {
+        if coordinator.draft.isTutorialExample {
+            await coordinator.loadCompatibleReferences()
+            return
+        }
         #if DEBUG
         if coordinator.fixtureName != nil {
             await coordinator.loadCompatibleReferences()
@@ -515,6 +530,11 @@ struct CoorditFitLabFamilyView: View {
     }
 
     private func submitAnalysis() {
+        if coordinator.draft.isTutorialExample {
+            coordinator.startSubmission()
+            onRouteChange(.fitLabLoading)
+            return
+        }
         #if DEBUG
         if coordinator.fixtureName != nil {
             guard consumeThreadIfNeededForNewSubmission() else {
@@ -766,6 +786,7 @@ private struct CoorditFitLabResultScreen: View {
     let sizeDrafts: [CoorditFitLabSizeDraft]
     let fallbackMessage: String?
     let canSaveHistory: Bool
+    let isExample: Bool
     let isSaved: Bool
     let metrics: CoorditResponsiveMetrics
     let saveHistory: () async -> Bool
@@ -794,6 +815,7 @@ private struct CoorditFitLabResultScreen: View {
             selectedSize: selectedSize,
             metrics: metrics
         )
+        let selection = CoorditFitLabScoreSelection(selected: selectedSize, recommendation: recommendation, report: report)
         ScrollView {
             VStack(spacing: metrics.value(11)) {
                 scoreCard
@@ -817,14 +839,20 @@ private struct CoorditFitLabResultScreen: View {
                     recommendationReason: report?.report.recommendationReason,
                     metrics: metrics
                 )
+                CoorditFitLabComparisonNote(
+                    selected: selection.sizeLabel,
+                    recommended: recommendation?.recommendedSize ?? "-",
+                    missingScores: !selection.isRecommended && selection.measurementScores.isEmpty,
+                    metrics: metrics
+                )
 
                 CoorditFitLabPointScoreChart(
-                    scores: report?.chartData.fitPointScores ?? [],
+                    scores: selection.fitPointScores,
                     metrics: metrics
                 )
 
                 CoorditFitLabMeasurementScoreChart(
-                    scores: report?.chartData.measurementScores ?? [],
+                    scores: selection.measurementScores,
                     metrics: metrics
                 )
 
@@ -836,7 +864,8 @@ private struct CoorditFitLabResultScreen: View {
                 CoorditFitLabReportCard(
                     report: report,
                     fallbackMessage: fallbackMessage,
-                    metrics: metrics
+                    metrics: metrics,
+                    recommendedSize: recommendation?.recommendedSize
                 )
 
                 if fallbackMessage != nil {
@@ -861,7 +890,15 @@ private struct CoorditFitLabResultScreen: View {
                     .fitLabTutorialTarget(.save, message: "상세 리포트를 불러오지 못했습니다. 리포트 다시 시도를 누르면 완료된 분석으로 리포트를 다시 요청합니다.")
                 }
 
-                if canSaveHistory {
+                if isExample {
+                    CoorditExampleNotice()
+                    CoorditFitLabPrimaryButton(title: "체험 마치고 내 상품 분석하기", metrics: metrics) {
+                        tutorial.dismiss()
+                        finishReport()
+                    }
+                    .accessibilityIdentifier("fitlab-example-finish")
+                    .fitLabTutorialTarget(.save, message: "실제 분석에서는 히스토리에 추가를 눌러 결과를 저장할 수 있어요. 예시 결과는 저장하지 않고 체험을 마칩니다.")
+                } else if canSaveHistory {
                     CoorditFitLabPrimaryButton(
                         title: didSave || isSaved ? "히스토리에 저장됨" : (isSaving ? "저장 중..." : "히스토리에 추가"),
                         metrics: metrics
@@ -933,7 +970,6 @@ private struct CoorditFitLabResultScreen: View {
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
-        .fitLabTutorialScroll()
         .onAppear {
             if tutorial.step != .save { tutorial.show(.result) }
         }

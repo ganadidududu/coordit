@@ -25,6 +25,7 @@ struct CoorditFitLabInputScreen: View {
     let historyRecoveryNotice: String?
     let threadBalance: Int
     let onThreadRecharge: () -> Void
+    let onManageReferences: () -> Void
     let onOpenHistory: (CoorditFitLabHistorySnapshot) -> Void
 
     init(
@@ -46,6 +47,7 @@ struct CoorditFitLabInputScreen: View {
         historyRecoveryNotice: String? = nil,
         threadBalance: Int = 0,
         onThreadRecharge: @escaping () -> Void = {},
+        onManageReferences: @escaping () -> Void = {},
         onOpenHistory: @escaping (CoorditFitLabHistorySnapshot) -> Void = { _ in }
     ) {
         self.metrics = metrics
@@ -62,6 +64,7 @@ struct CoorditFitLabInputScreen: View {
         self.historyRecoveryNotice = historyRecoveryNotice
         self.threadBalance = threadBalance
         self.onThreadRecharge = onThreadRecharge
+        self.onManageReferences = onManageReferences
         self.onOpenHistory = onOpenHistory
     }
 
@@ -76,7 +79,7 @@ struct CoorditFitLabInputScreen: View {
         .clipped()
         .compositingGroup()
         .onChange(of: destination) { _, destination in
-            if destination == .manual || destination == .ocr { tutorial.pause() }
+            if destination == .manual || destination == .ocr { tutorial.show(.review) }
         }
     }
 
@@ -108,10 +111,12 @@ struct CoorditFitLabInputScreen: View {
                     loadReferences: urlReferences,
                     initialURL: sharedImportURL,
                     onSwitchToOCR: {
+                        if draft.isTutorialExample { draft = CoorditFitLabDraft() }
                         draft.source = .ocr
                         destination = .ocr
                     },
                     onSwitchToManual: {
+                        if draft.isTutorialExample { draft = CoorditFitLabDraft() }
                         draft.source = .manual
                         destination = .manual
                     }
@@ -145,17 +150,18 @@ struct CoorditFitLabInputScreen: View {
                         symbol: "link",
                         identifier: "fitlab-source-url"
                     ) {
+                        if draft.isTutorialExample { draft = CoorditFitLabDraft() }
                         draft.source = .url
                         tutorial.advance(from: .source, to: .link)
                         destination = .url
                     }
-                    .fitLabTutorialTarget(.source)
                     sourceCard(
                         title: "사진으로 첨부하기",
                         subtitle: "캡처를 읽고 수정",
                         symbol: "viewfinder",
                         identifier: "fitlab-source-ocr"
                     ) {
+                        if draft.isTutorialExample { draft = CoorditFitLabDraft() }
                         draft.source = .ocr
                         destination = .ocr
                     }
@@ -165,6 +171,7 @@ struct CoorditFitLabInputScreen: View {
                         symbol: "tablecells",
                         identifier: "fitlab-source-manual"
                     ) {
+                        if draft.isTutorialExample { draft = CoorditFitLabDraft() }
                         draft.source = .manual
                         destination = .manual
                     }
@@ -172,6 +179,20 @@ struct CoorditFitLabInputScreen: View {
                 .padding(metrics.value(8))
                 .background(CoorditFitLabTexturedPanel(cornerRadius: metrics.value(8), intensity: 1))
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(8), style: .continuous))
+                .fitLabTutorialTarget(.source)
+
+                referencePrerequisite
+
+                Button("준비된 정보가 없나요? 예시 링크로 체험하기") {
+                    draft = CoorditFitLabDraft()
+                    draft.source = .url
+                    draft.productURL = URL(string: CoorditTutorialExample.link)
+                    tutorial.restart()
+                    tutorial.show(.link)
+                    destination = .url
+                }
+                .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary, height: 44))
+                .accessibilityIdentifier("fitlab-source-example")
 
                 VStack(alignment: .leading, spacing: metrics.value(11)) {
                     Text("최근 핏 분석")
@@ -238,8 +259,29 @@ struct CoorditFitLabInputScreen: View {
             .padding(.bottom, metrics.value(120))
         }
         .scrollDismissesKeyboard(.interactively)
-        .fitLabTutorialScroll()
+        .defaultScrollAnchor(.bottom, for: .sizeChanges)
         .onAppear { tutorial.visitSources() }
+    }
+
+    private var referencePrerequisite: some View {
+        VStack(alignment: .leading, spacing: metrics.value(10)) {
+            Text("핏 분석 전, 기준 의류가 필요해요")
+                .font(CoorditTypography.gmarketBold(size: metrics.value(16), relativeTo: .headline))
+            Text("나에게 잘 맞는 옷을 Closet에 등록하고 기준 의류로 선택해주세요. 분석할 상품과 종류·길이가 맞는 기준 의류가 1개 이상 있어야 핏을 비교할 수 있어요.")
+                .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
+                .fixedSize(horizontal: false, vertical: true)
+            Button("기준 의류 등록·선택하기", action: onManageReferences)
+                .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+                .accessibilityIdentifier("fitlab-source-manage-references")
+            Text("먼저 둘러보고 싶다면 아래 예시 링크로 체험해보세요. 샘플 기준 의류가 함께 제공돼요.")
+                .font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .footnote))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(CoorditFitLabPalette.ink)
+        .padding(metrics.value(14))
+        .background(CoorditFitLabPalette.surface, in: RoundedRectangle(cornerRadius: metrics.value(8)))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("fitlab-reference-prerequisite")
     }
 
     private var sourceThreadCostNotice: some View {
@@ -454,6 +496,7 @@ private struct CoorditFitLabManualDraftView: View {
                     .pickerStyle(.segmented)
                     .accessibilityIdentifier("fitlab-kind-picker")
                 }
+                .fitLabTutorialTarget(.review, message: "상품명과 사이즈별 실측을 cm로 입력하세요. 입력 확인 후 기준 옷을 선택하고 분석 결과를 볼 수 있어요. 화면을 위아래로 움직이며 자유롭게 살펴보세요.")
 
                 section(title: "2. 카테고리와 상품") {
                     Picker("카테고리", selection: categoryBinding) {
@@ -560,6 +603,7 @@ private struct CoorditFitLabManualDraftView: View {
                 Text("사이즈표 입력을 확인했어요")
                     .font(CoorditTypography.gmarketBold(size: metrics.value(20), relativeTo: .title3))
                     .foregroundStyle(Color.black)
+                    .fitLabTutorialTarget(.review, message: "입력한 사이즈표를 확인했어요. 아래에서 기준 옷 선택으로 이동하거나 돌아가서 실측을 수정할 수 있어요.")
                 Text("\(kind.koreanTitle) · \(rows.count)개 사이즈 · \(category.koreanTitle)")
                     .font(CoorditTypography.gmarketMedium(size: metrics.value(15), relativeTo: .body))
                     .foregroundStyle(Color.black)

@@ -25,6 +25,7 @@ struct CoorditFitLabHistoryDetailScreen: View {
             selectedSize: selectedSize,
             metrics: metrics
         )
+        let selection = CoorditFitLabScoreSelection(selected: selectedSize, recommendation: snapshot.recommendation, report: snapshot.report)
         ScrollView {
             VStack(spacing: metrics.value(15)) {
                 VStack(alignment: .leading, spacing: metrics.value(7)) {
@@ -63,16 +64,17 @@ struct CoorditFitLabHistoryDetailScreen: View {
                     metrics: metrics
                 )
                 CoorditFitLabSizeReason(size: selectedSize, recommendationReason: snapshot.report?.report.recommendationReason, metrics: metrics)
+                CoorditFitLabComparisonNote(selected: selection.sizeLabel, recommended: snapshot.recommendation.recommendedSize, missingScores: !selection.isRecommended && selection.measurementScores.isEmpty, metrics: metrics)
                 CoorditFitLabPointScoreChart(
-                    scores: snapshot.report?.chartData.fitPointScores ?? [],
+                    scores: selection.fitPointScores,
                     metrics: metrics
                 )
                 CoorditFitLabMeasurementScoreChart(
-                    scores: snapshot.report?.chartData.measurementScores ?? [],
+                    scores: selection.measurementScores,
                     metrics: metrics
                 )
                 CoorditFitLabDifferenceChart(measurements: scoreCard.measurements, metrics: metrics)
-                CoorditFitLabReportCard(report: snapshot.report, fallbackMessage: nil, metrics: metrics)
+                CoorditFitLabReportCard(report: snapshot.report, fallbackMessage: nil, metrics: metrics, recommendedSize: snapshot.recommendation.recommendedSize)
 
                 Button(isDeleting ? "삭제 중..." : "이 히스토리 삭제") {
                     guard !isDeleting else { return }
