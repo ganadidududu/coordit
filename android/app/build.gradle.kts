@@ -20,6 +20,9 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.2.0"
+        buildConfigField("boolean", "CARDLESS_AR_ENABLED", "false")
+        buildConfigField("boolean", "AI_LANDMARKS_ENABLED", "false")
+        buildConfigField("boolean", "RGB_ESTIMATE_ENABLED", "false")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", quoted(providers.gradleProperty("GOOGLE_WEB_CLIENT_ID").orElse("").get()))
     }
@@ -49,6 +52,7 @@ android {
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
 }
 dependencies {
+    implementation("com.google.ar:core:1.57.0")
     val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
     implementation(composeBom)
     androidTestImplementation(composeBom)

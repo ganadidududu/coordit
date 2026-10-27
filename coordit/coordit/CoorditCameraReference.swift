@@ -16,7 +16,7 @@ struct CoorditCameraWardrobeRequest: Encodable {
 extension CoorditGarmentMeasurement {
     var clothingSizeRequest: ClothingSizeRequest {
         let values = measurementValues
-        return .init(sizeLabel: nil, rawMeasurements: ["source": method == .lidar ? "lidar_ar" : "card_camera", "length_basis": lengthBasis, "sleeve_basis": "shoulder_seam_to_cuff", "measured_at": measuredAt.ISO8601Format()], totalLength: values["total_length"], shoulderWidth: values["shoulder_width"], chestWidth: values["chest_width"], sleeveLength: values["sleeve_length"], waistWidth: values["waist_width"], hipWidth: values["hip_width"], rise: values["rise"], outseam: values["outseam"])
+        return .init(sizeLabel: nil, rawMeasurements: ["source": method.source, "length_basis": lengthBasis, "sleeve_basis": "shoulder_seam_to_cuff", "measured_at": measuredAt.ISO8601Format()], totalLength: values["total_length"], shoulderWidth: values["shoulder_width"], chestWidth: values["chest_width"], sleeveLength: values["sleeve_length"], waistWidth: values["waist_width"], hipWidth: values["hip_width"], rise: values["rise"], outseam: values["outseam"])
     }
 }
 
@@ -31,7 +31,7 @@ extension CoorditFitLabHTTPAPI {
             sizeID = updated.id
             itemID = existing.reference.clothingItemID
         } else {
-            let saved: CoorditClothingItemWithSizeResponse = try await send(path: "/clothing-items/with-size", method: "POST", body: CoorditCameraWardrobeRequest(item: .init(name: name, category: category, fitType: "regular", sizeLabel: nil, rawProductData: ["source": measurement.method == .lidar ? "lidar_ar" : "card_camera"]), size: measurement.clothingSizeRequest, idempotencyKey: measurement.id.uuidString))
+            let saved: CoorditClothingItemWithSizeResponse = try await send(path: "/clothing-items/with-size", method: "POST", body: CoorditCameraWardrobeRequest(item: .init(name: name, category: category, fitType: "regular", sizeLabel: nil, rawProductData: ["source": measurement.method.source]), size: measurement.clothingSizeRequest, idempotencyKey: measurement.id.uuidString))
             sizeID = saved.clothingSize.id
             itemID = saved.clothingItem.id
         }

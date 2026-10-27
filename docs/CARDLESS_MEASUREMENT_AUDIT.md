@@ -2,7 +2,7 @@
 
 Audit date: 2026-10-27 (Asia/Seoul). Remote fetched before changes.
 Base: origin/codex/camera-auto-guides = cad9318ae0c6f54f84cea4665390f3fe2c01e863.
-Working branch: codex/cardless-garment-measurement. No push or production migration authorized/performed.
+Working branch: codex/camera-auto-guides (user explicitly requested continuing here after initial isolation). No push or production migration authorized/performed.
 
 ## Current behavior and compatibility boundaries
 
@@ -34,6 +34,14 @@ Working branch: codex/cardless-garment-measurement. No push or production migrat
 ## Baseline
 
 Backend `npm run typecheck`, `test:camera-comparison`, `test:report`, `test:fit`: passed on unmodified base (including local fixture DB billing/ACL/rollback checks).
-iOS full unit baseline running in `/tmp/coordit-cardless-evidence/baseline.xcresult`; final outcome recorded in implementation report.
+iOS full unit baseline: 42 executed, 27 passed, 15 existing GuestSessionRecovery failures (`unavailable` at line 267), recorded in `/tmp/coordit-cardless-evidence/baseline.xcresult`; final outcome recorded in implementation report.
 SimSlim list/on/verify and doctor push,storekit,universal-links,keychain-sync,photos completed for iPhone 17e `5223FFAB-50AF-4410-926A-5C4506E34937`, iOS 26.5; 96 services matched, 5/5 capabilities passed. Xcode 26.6. Simulator cannot validate camera, physical scale or depth.
 Android SDK 35/36 available, host Java 25; Gradle/JDK compatibility must be checked before claiming build success.
+
+## Phase 1 implementation evidence
+
+- iOS non-LiDAR AR uses horizontal plane geometry without sceneDepth. A captured sensor bitmap, intrinsics, camera/plane poses, orientation and plane polygon are immutable during Vision/manual editing. Rays intersect that captured plane; points outside its polygon or behind/grazing the camera are rejected. Live plane history requires >1s, >3cm camera motion, then >0.3s stillness. These are engineering rejection gates, **not** validated accuracy statistics.
+- Existing card/LiDAR values and optional Codable metadata retained. `ar_plane` is distinct from `card_camera`/`lidar_ar`. RGB estimates are prohibited from the measured initializer. New flags all false, including DEBUG.
+- iOS targeted unit run: 27/27 passed in `/tmp/coordit-cardless-evidence/phase1.xcresult` (5 new plane tests, 17 garment tests, 5 camera analysis tests). Full base had 15 existing guest recovery failures; these were not rewritten.
+- Android: optional ARCore 1.57.0 dependency; runtime session factory and same-frame endpoint hit-test adapter with plane/tracking/scale rejection, complete 11-category dimension policy. `testDebugUnitTest assembleDebug` passed with Android Studio bundled JDK. **Adapter only:** Android camera renderer/capture/correction UI and reference-save integration are not yet implemented; no unsupported parity claim or new product-size source is exposed.
+- Hardware tests still required: real world scale, temporal scale drift, all phone orientations, plane reacquisition, physical measurement vs tape, glass/textured/occluded surfaces and thin garment offset from table.

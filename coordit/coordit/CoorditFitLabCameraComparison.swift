@@ -41,14 +41,14 @@ struct CoorditFitLabCameraComparison: View {
                         if isAnalyzing { showsCloseConfirmation = true } else { dismiss() }
                     }
                     introduction(metrics)
-                    if CoorditGarmentCaptureController.supportsLiDAR, capture.image == nil {
+                    if CoorditGarmentCaptureController.supportsLiDAR || CoorditGarmentCaptureController.supportsCardlessAR, capture.image == nil {
                         methodPicker(metrics).disabled(isAnalyzing || isUnlocked)
                     }
                     if capture.method == .card, capture.image == nil {
                         cardSourceControls(metrics)
                             .disabled(isAnalyzing || isUnlocked)
                     }
-                    if capture.image != nil || capture.method == .lidar { measurementReadout(metrics) }
+                    if capture.image != nil || capture.method.usesAR { measurementReadout(metrics) }
                     if capture.image != nil, !isUnlocked {
                         recognitionControls
                         Text(capture.instruction)
@@ -57,7 +57,7 @@ struct CoorditFitLabCameraComparison: View {
                             .accessibilityIdentifier("camera-fit-instruction")
                     }
                     captureSurface(metrics)
-                    if capture.image != nil || capture.method == .lidar { measurementControls(metrics) }
+                    if capture.image != nil || capture.method.usesAR { measurementControls(metrics) }
                     if isUnlocked { comparisonControls(metrics) }
                     if !isUnlocked, capture.isComplete { measurementConfirmation(metrics) }
                     #if DEBUG
@@ -128,17 +128,17 @@ struct CoorditFitLabCameraComparison: View {
             } catch { failureMessage = error.localizedDescription }
         }
         .task {
-            if capture.method == .lidar { cameraMotion.start(); await requestCameraPermission() }
+            if capture.method.usesAR { cameraMotion.start(); await requestCameraPermission() }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { capture.stop(); cameraMotion.stop() }
             else if cameraAuthorized {
                 capture.resume()
-                if capture.method == .lidar { cameraMotion.start() }
+                if capture.method.usesAR { cameraMotion.start() }
             }
         }
         .onChange(of: capture.method) { _, method in
-            if method == .lidar { cameraMotion.start() } else { cameraMotion.stop() }
+            if method.usesAR { cameraMotion.start() } else { cameraMotion.stop() }
         }
         .onChange(of: capture.image) { _, _ in
             photoScale = 1; accumulatedPhotoScale = 1; photoOffset = .zero; accumulatedPhotoOffset = .zero
@@ -176,7 +176,12 @@ struct CoorditFitLabCameraComparison: View {
     }
 
     private func methodPicker(_ metrics: CoorditResponsiveMetrics) -> some View {
-        HStack(spacing: metrics.value(8)) {
+        VStack(spacing: metrics.value(8)) {
+            if CoorditGarmentCaptureController.supportsCardlessAR {
+                Button("카드 없이 촬영 · 실험 기능") { capture.selectMethod(.arPlane); Task { await requestCameraPermission() } }
+                    .buttonStyle(CoorditContentActionButtonStyle(prominence: capture.method == .arPlane ? .primary : .secondary))
+                    .accessibilityIdentifier("camera-fit-ar-plane-method")
+            }
             if CoorditGarmentCaptureController.supportsLiDAR {
                 Button("LiDAR로 측정") { capture.selectMethod(.lidar); Task { await requestCameraPermission() } }
                     .buttonStyle(CoorditContentActionButtonStyle(prominence: capture.method == .lidar ? .primary : .secondary))
@@ -218,7 +223,7 @@ struct CoorditFitLabCameraComparison: View {
 
     @ViewBuilder
     private func captureSurface(_ metrics: CoorditResponsiveMetrics) -> some View {
-        if capture.method == .lidar, cameraAuthorized {
+        if capture.method.usesAR, capture.image == nil, cameraAuthorized {
             GeometryReader { geometry in
                 ZStack {
                     CoorditLiDARCameraView(controller: capture)
@@ -286,17 +291,19 @@ struct CoorditFitLabCameraComparison: View {
 
     private var recognitionControls: some View {
         HStack(spacing: 8) {
-            Button { capture.select(.card) } label: {
-                Label("카드", systemImage: capture.selection == .card ? "hand.tap.fill" : "creditcard")
+            if capture.method == .card {
+                Button { capture.select(.card) } label: {
+                    Label("카드", systemImage: capture.selection == .card ? "hand.tap.fill" : "creditcard")
+                }
+                .accessibilityIdentifier("camera-fit-select-card")
             }
-            .accessibilityIdentifier("camera-fit-select-card")
             Button { capture.select(.garment) } label: {
                 Label("옷", systemImage: capture.selection == .garment ? "hand.tap.fill" : "tshirt")
             }
             .accessibilityIdentifier("camera-fit-select-garment")
             Spacer(minLength: 0)
             Menu {
-                Button("카드 모서리 직접 지정") { capture.beginManualCard() }
+                if capture.method == .card { Button("카드 모서리 직접 지정") { capture.beginManualCard() } }
                 Button("옷 측정점 직접 지정") { capture.beginManualGarment() }
             } label: {
                 Label("직접 보정", systemImage: "slider.horizontal.3")
@@ -406,6 +413,15 @@ struct CoorditFitLabCameraComparison: View {
                 }
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))
                 .accessibilityIdentifier("camera-fit-detection-status")
+            }
+            if capture.method == .arPlane, capture.image == nil, !isUnlocked {
+                Text(capture.instruction)
+                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
+                    .fixedSize(horizontal: false, vertical: true)
+                Button("평면 위의 옷 촬영") { capture.captureARPlane() }
+                    .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary))
+                    .disabled(!capture.trackingReady || capture.isDetecting)
+                    .accessibilityIdentifier("camera-fit-ar-plane-shutter")
             }
             if capture.method == .lidar, !isUnlocked {
                 Button("자동으로 측정선 찾기") { capture.detectLiDAROutline() }

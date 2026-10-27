@@ -177,20 +177,37 @@ struct CoorditCardCalibration: Sendable {
 }
 
 struct CoorditGarmentMeasurement: Codable, Equatable, Sendable, Identifiable {
-    enum Method: String, Codable, Sendable { case lidar, card }
+    enum Method: String, Codable, Sendable {
+        case lidar, card, arPlane, metricDepthEstimate
+        var source: String {
+            switch self {
+            case .lidar: "lidar_ar"
+            case .card: "card_camera"
+            case .arPlane: "ar_plane"
+            case .metricDepthEstimate: "metric_depth_estimate"
+            }
+        }
+        var usesAR: Bool { self == .lidar || self == .arPlane }
+    }
+    enum ValidationStatus: String, Codable, Sendable { case measured, estimated, needsCalibration = "needs_calibration", failed }
     let id: UUID
     let method: Method
     let measuredAt: Date
     let segments: [CoorditGarmentDimension: CoorditMeasurementSegment]
     let lengthBasis: String
     let category: CoorditFitLabCategory?
+    let arEvidence: CoorditARMeasurementEvidence?
+    var validationStatus: ValidationStatus { method == .metricDepthEstimate ? .estimated : .measured }
 
     var isLower: Bool { segments[.waist] != nil }
     var resolvedCategory: CoorditFitLabCategory { category ?? (isLower ? .pants : .tshirt) }
     var garmentName: String { "잘 맞는 \(resolvedCategory.koreanTitle)" }
     var dimensions: [CoorditGarmentDimension] { resolvedCategory.cameraDimensions }
 
-    init(id: UUID = UUID(), method: Method, measuredAt: Date = Date(), segments: [CoorditGarmentDimension: CoorditMeasurementSegment], lengthBasis: String, category: CoorditFitLabCategory? = nil) throws {
+    init(id: UUID = UUID(), method: Method, measuredAt: Date = Date(), segments: [CoorditGarmentDimension: CoorditMeasurementSegment], lengthBasis: String, category: CoorditFitLabCategory? = nil, arEvidence: CoorditARMeasurementEvidence? = nil) throws {
+        if method == .arPlane, arEvidence == nil { throw CoorditGarmentMeasurementError.unstableTracking }
+        // Metric estimates require a separate calibrated result contract and cannot enter measured storage.
+        if method == .metricDepthEstimate { throw CoorditGarmentMeasurementError.invalidPoint }
         let resolved = category ?? (segments[.waist] != nil ? .pants : .tshirt)
         let dimensions = resolved.cameraDimensions
         guard Set(segments.keys) == Set(dimensions) else { throw CoorditGarmentMeasurementError.invalidPoint }
@@ -199,7 +216,7 @@ struct CoorditGarmentMeasurement: Codable, Equatable, Sendable, Identifiable {
                   dimension.validRange.contains(segment.centimeters) else { throw CoorditGarmentMeasurementError.invalidDimension(dimension.title) }
         }
         guard (segments[.waist] != nil ? ["waist_to_hem"] : ["high_shoulder_to_hem", "back_neck_to_hem"]).contains(lengthBasis) else { throw CoorditGarmentMeasurementError.invalidDimension("총장 기준") }
-        self.id = id; self.method = method; self.measuredAt = measuredAt; self.segments = segments; self.lengthBasis = lengthBasis; self.category = category
+        self.id = id; self.method = method; self.measuredAt = measuredAt; self.segments = segments; self.lengthBasis = lengthBasis; self.category = category; self.arEvidence = arEvidence
     }
 
     var measurementValues: [String: Double] {
