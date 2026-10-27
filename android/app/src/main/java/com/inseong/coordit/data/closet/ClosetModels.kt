@@ -2,6 +2,7 @@ package com.inseong.coordit.data.closet
 
 import com.google.gson.annotations.SerializedName
 import com.inseong.coordit.data.home.HomeCategory
+import com.inseong.coordit.data.fitlab.camera.GarmentMeasurementPolicy
 
 enum class ClosetMethod { Manual, Link, Photo }
 enum class ClosetScreen { Overview, Method, Manual, Link, Photo, Saving, Detail }
@@ -20,9 +21,10 @@ data class ClosetDraft(
     val selectedSizeRowId: String? = null,
     val hasGarmentImage: Boolean = false,
     val hasSizeChartImage: Boolean = false,
+    val cameraMetadata: Map<String, String> = emptyMap(),
 ) {
     val selectedSizeRow get() = sizeRows.firstOrNull { it.id == selectedSizeRowId }
-    val measurementKeys get() = if (category.upper) listOf("shoulder_width", "chest_width", "total_length", "sleeve_length") else listOf("waist_width", "hip_width", "rise", "outseam")
+    val measurementKeys get() = GarmentMeasurementPolicy.dimensions(category.wireName)
     fun measurements(): Map<String, Double> {
         if (method != ClosetMethod.Manual) {
             val row = requireNotNull(selectedSizeRow) { "사이즈 행을 선택해 주세요." }
@@ -30,7 +32,7 @@ data class ClosetDraft(
             require(row.measurements.keys.any { it in measurementKeys }) { "선택한 카테고리의 실측값을 확인해 주세요." }
             return row.measurements
         }
-        val values = listOf(measurement1, measurement2, measurement3, measurement4).map {
+        val values = listOf(measurement1, measurement2, measurement3, measurement4).take(measurementKeys.size).map {
             requireNotNull(it.trim().toDoubleOrNull()?.takeIf { value -> value.isFinite() && value > 0 }) { "네 가지 실측값을 양수로 입력해 주세요." }
         }
         return measurementKeys.zip(values).toMap()
@@ -40,14 +42,14 @@ data class ClosetDraft(
         require(method != ClosetMethod.Photo || hasSizeChartImage) { "사이즈표 사진을 선택해 주세요." }
         require(name.trim().isNotEmpty()) { "의류 이름을 입력해 주세요." }
         val values = measurements()
-        val source = method.name.lowercase()
+        val source = cameraMetadata["source"] ?: method.name.lowercase()
         val metadata = buildMap {
             put("source", "android-closet-add"); put("method", source)
             if (productLink.isNotBlank()) put("productUrl", productLink.trim())
             if (hasGarmentImage) put("hasGarmentImage", "true")
             if (hasSizeChartImage) put("hasSizeChartImage", "true")
         }
-        return ClosetCreateRequest(ClosetCreateItem(name.trim(), category.wireName, sizeLabel = selectedSizeRow?.label, rawProductData = metadata), ClosetSizeRequest(selectedSizeRow?.label, mapOf("source" to source), values["total_length"], values["shoulder_width"], values["chest_width"], values["sleeve_length"], values["waist_width"], values["hip_width"], values["rise"], values["outseam"]), key)
+        return ClosetCreateRequest(ClosetCreateItem(name.trim(), category.wireName, sizeLabel = selectedSizeRow?.label, rawProductData = metadata), ClosetSizeRequest(selectedSizeRow?.label, mapOf("source" to source) + cameraMetadata, values["total_length"], values["shoulder_width"], values["chest_width"], values["sleeve_length"], values["waist_width"], values["hip_width"], values["rise"], values["outseam"]), key)
     }
 }
 data class ClosetCreateItem(val name: String, val category: String, val fitType: String = "regular", val sizeLabel: String?, val rawProductData: Map<String, String>)

@@ -80,7 +80,12 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
     fun editDraft(edit: (ClosetDraft) -> ClosetDraft) {
         if (state.value.busy) return
         val previous = state.value.draft
-        val edited = edit(previous)
+        val proposed = edit(previous)
+        val changedMeasurements = proposed.category != previous.category || proposed.method != previous.method ||
+            listOf(proposed.measurement1, proposed.measurement2, proposed.measurement3, proposed.measurement4) !=
+            listOf(previous.measurement1, previous.measurement2, previous.measurement3, previous.measurement4)
+        val edited = if (changedMeasurements && proposed.cameraMetadata == previous.cameraMetadata)
+            proposed.copy(cameraMetadata = emptyMap()) else proposed
         val draft = if (edited.productLink != previous.productLink || edited.category != previous.category) edited.copy(sizeRows = emptyList(), selectedSizeRowId = null) else edited
         if (draft != state.value.draft) pendingKey = null
         mutableState.value = state.value.copy(draft = draft, error = null)

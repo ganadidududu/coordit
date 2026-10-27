@@ -50,8 +50,19 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
     var search by rememberSaveable { mutableStateOf("") }
     var rename by remember { mutableStateOf<String?>(null) }
     var confirmDelete by remember { mutableStateOf(false) }
+    var showsCardlessCapture by remember { mutableStateOf(false) }
     fun back() { focus.clearFocus(); if (!state.busy) { if (state.screen == ClosetScreenRoute.Overview) onHome() else model.back() } }
     BackHandler { back() }
+    if (showsCardlessCapture) com.inseong.coordit.ui.fitlab.camera.CardlessGarmentCapture(
+        category = state.draft.category.wireName, onCancel = { showsCardlessCapture = false }, onMeasured = { capture ->
+            val keys = com.inseong.coordit.data.fitlab.camera.GarmentMeasurementPolicy.dimensions(capture.category)
+            val values = keys.map { capture.centimeters[it]?.let { value -> String.format(java.util.Locale.US, "%.1f", value) }.orEmpty() }
+            photos.images["draft"] = capture.bitmap
+            model.editDraft { it.copy(measurement1 = values.getOrElse(0) { "" }, measurement2 = values.getOrElse(1) { "" },
+                measurement3 = values.getOrElse(2) { "" }, measurement4 = values.getOrElse(3) { "" },
+                hasGarmentImage = true, cameraMetadata = capture.metadata) }
+            showsCardlessCapture = false
+        })
     LaunchedEffect(state.screen, state.detail?.item?.id) {
         if (state.screen == ClosetScreenRoute.Overview) photos.images.remove("draft")
         if (state.screen == ClosetScreenRoute.Detail) {
@@ -145,9 +156,13 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                                 } }
                             }
                         }
+                        if (state.screen == ClosetScreenRoute.Manual && com.inseong.coordit.BuildConfig.CARDLESS_AR_ENABLED) {
+                            CoorditButton("카드 없이 촬영 · 실험 기능", { showsCardlessCapture = true },
+                                Modifier.testTag("closet-cardless-capture"), enabled = !state.busy, secondary = true)
+                        }
                         if (state.screen == ClosetScreenRoute.Manual) ClosetPanel(s, "실측 사이즈", "단위는 cm로 입력해주세요.") {
                             val values = listOf(draft.measurement1,draft.measurement2,draft.measurement3,draft.measurement4)
-                            Column(verticalArrangement = Arrangement.spacedBy((8 * s).dp)) { fields(draft.category.upper).chunked(2).forEachIndexed { row, pair ->
+                            Column(verticalArrangement = Arrangement.spacedBy((8 * s).dp)) { categoryFields(draft.category).chunked(2).forEachIndexed { row, pair ->
                                 Row(horizontalArrangement = Arrangement.spacedBy((8 * s).dp)) { pair.forEachIndexed { col, field ->
                                     val i = row * 2 + col
                                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy((5 * s).dp)) {
@@ -186,7 +201,7 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                                     Column(Modifier.fillMaxWidth().background(if (draft.selectedSizeRowId == row.id) AppColors.ink else AppColors.closetField).padding(12.dp)) {
                                         val color = if (draft.selectedSizeRowId == row.id) Color.White else AppColors.ink
                                         CoorditText(row.label,CoorditTypography.gmarketBold(ClosetDesign.measurementFont*s).copy(color=color))
-                                        CoorditText(fields(draft.category.upper).mapNotNull { (key,label) -> row.measurements[key]?.let { "$label ${number(it)}" } }.joinToString("  "),CoorditTypography.gmarketMedium(10*s).copy(color=color))
+                                        CoorditText(categoryFields(draft.category).mapNotNull { (key,label) -> row.measurements[key]?.let { "$label ${number(it)}" } }.joinToString("  "),CoorditTypography.gmarketMedium(10*s).copy(color=color))
                                     }
                                 }
                             }
@@ -222,7 +237,7 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                                     ClosetAction("내 옷장에서 삭제하기",s,"closet-delete",secondary=true,font=10f,enabled=!state.busy) { confirmDelete=true }
                                 }
                             }
-                            detail.sizes.firstOrNull()?.let { row -> DetailSizeChart(row.label, row.measurements, detail.item.category.upper, s) }
+                            detail.sizes.firstOrNull()?.let { row -> DetailSizeChart(row.label, row.measurements, detail.item.category, s) }
                             ClosetMannequin(detail.item.category.upper, detail.comparison?.diff.orEmpty(), s)
                             ClosetFitScore(detail.comparison,detail.item.category.upper,s)
                             detail.analysisError?.let { ClosetError(it,s) }
@@ -302,7 +317,7 @@ private fun MeasurementGrid(values:Map<String,Double?>,upper:Boolean,s:Float,dif
     }}} } }
 }
 @Composable
-private fun DetailSizeChart(label:String,values:Map<String,Double?>,upper:Boolean,s:Float) {
+private fun DetailSizeChart(label:String,values:Map<String,Double?>,category:HomeCategory,s:Float) {
     Column(Modifier.fillMaxWidth().background(AppColors.panel,ContinuousRoundedShape((ClosetDesign.panelRadius*s).dp)).padding((ClosetDesign.cardPadding*s).dp),verticalArrangement=Arrangement.spacedBy((12*s).dp)) {
         Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
             ClosetText("등록 사이즈표",14f,s,bold=true)
@@ -310,7 +325,7 @@ private fun DetailSizeChart(label:String,values:Map<String,Double?>,upper:Boolea
             CoorditText(label.ifBlank { "단일 사이즈" },CoorditTypography.gmarketMedium(11*s).copy(color=AppColors.ink.copy(alpha=.62f)))
         }
         Column(verticalArrangement=Arrangement.spacedBy((ClosetDesign.smallGap*s).dp)) {
-            fields(upper).chunked(2).forEach { pair ->
+            categoryFields(category).chunked(2).forEach { pair ->
                 Row(horizontalArrangement=Arrangement.spacedBy((ClosetDesign.smallGap*s).dp)) {
                     pair.forEach { (key,title) ->
                         Column(Modifier.weight(1f).background(Color.White.copy(alpha=.72f),ContinuousRoundedShape((7*s).dp)).padding((10*s).dp),verticalArrangement=Arrangement.spacedBy((3*s).dp)) {
@@ -413,3 +428,7 @@ private fun LinkGlyph(s:Float,color:Color) {
         drawPath(path,color,style=stroke)
     }
 }
+
+internal fun categoryFields(category: HomeCategory): List<Pair<String, String>> =
+    if (category == HomeCategory.Skirt) listOf("waist_width" to "허리단면", "hip_width" to "엉덩이단면", "total_length" to "총장")
+    else fields(category.upper)
