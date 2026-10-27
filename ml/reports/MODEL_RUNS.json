@@ -1,0 +1,142 @@
+[
+  {
+    "architecture": "coordit-tiny-multitask-v1",
+    "fingerprint": "520ca07f7dd10ccf72e354b5450f0c7a07089f4a48e43855b5c10818e5a4c625",
+    "checkpoint_sha256": "911cc7d4f1607f7ab3aeb786857f74ba883914ae0327837ab961278cd821e4aa",
+    "epoch": 1,
+    "device": "cpu",
+    "category_heads": false,
+    "deployment_approved": false,
+    "purpose": "cpu_smoke",
+    "app_artifact": null,
+    "server_artifact": "artifacts/tiny-shared-cpu-final/checkpoint.pt",
+    "manifests": [
+      {
+        "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/artf-v1.1/records.jsonl",
+        "sha256": "65953f260639f7fa038e5230d29b456790e92e444d4aab2889648afe001a87f8"
+      },
+      {
+        "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/synthetic-v1.1/records.jsonl",
+        "sha256": "1e4ef664e8bdbac99b70615728080ce838f18e61b23e0bd57cf6eef11a3db1b7"
+      }
+    ],
+    "registry_sha256": "69c156dcfcf8ac28f306dc1549403a18b29e20303cfd6b7c743b9cf326d70717",
+    "dataset_images": 799,
+    "images_seen_this_epoch": 128,
+    "unique_images_seen_this_epoch": 128,
+    "steps": 8,
+    "loss": 3.2382384538650513,
+    "categories_seen": {
+      "tshirt": 32,
+      "shirt": 4,
+      "sweatshirt": 4,
+      "hoodie": 2,
+      "knit": 4,
+      "jacket": 10,
+      "coat": 6,
+      "pants": 5,
+      "jeans": 4,
+      "shorts": 24,
+      "skirt": 7
+    },
+    "synthetic_images_seen": 55,
+    "code_license": "Coordit repository",
+    "weights_license": "Internal development; source attribution obligations apply",
+    "training_config_json": "{\"manifests\":[\"artifacts/artf-v1.1/records.jsonl\",\"artifacts/synthetic-v1.1/records.jsonl\"],\"output\":\"artifacts/tiny-shared-cpu-final\",\"epochs\":2,\"batch_size\":16,\"learning_rate\":0.001,\"seed\":42,\"device\":\"cpu\",\"category_heads\":false,\"max_steps\":8,\"resume\":false,\"synthetic_fraction\":0.5}",
+    "artifact_directory": "artifacts/tiny-shared-cpu-final"
+  },
+  {
+    "architecture": "coordit-tiny-multitask-v1",
+    "fingerprint": "520ca07f7dd10ccf72e354b5450f0c7a07089f4a48e43855b5c10818e5a4c625",
+    "checkpoint_sha256": "7f9ad2e629da66c36567a1af7a9e85a6bb831a9b8b50cc7025d32bb0fe3f42fd",
+    "epoch": 19,
+    "device": "mps",
+    "category_heads": false,
+    "deployment_approved": false,
+    "purpose": "development_training",
+    "app_artifact": null,
+    "server_artifact": "artifacts/tiny-shared-mps-final-data/checkpoint.pt",
+    "manifests": [
+      {
+        "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/artf-v1.1/records.jsonl",
+        "sha256": "65953f260639f7fa038e5230d29b456790e92e444d4aab2889648afe001a87f8"
+      },
+      {
+        "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/synthetic-v1.1/records.jsonl",
+        "sha256": "1e4ef664e8bdbac99b70615728080ce838f18e61b23e0bd57cf6eef11a3db1b7"
+      }
+    ],
+    "registry_sha256": "69c156dcfcf8ac28f306dc1549403a18b29e20303cfd6b7c743b9cf326d70717",
+    "dataset_images": 799,
+    "images_seen_this_epoch": 550,
+    "unique_images_seen_this_epoch": 550,
+    "steps": 35,
+    "loss": 2.13964706829616,
+    "categories_seen": {
+      "tshirt": 134,
+      "shirt": 26,
+      "sweatshirt": 23,
+      "hoodie": 25,
+      "knit": 22,
+      "jacket": 26,
+      "coat": 23,
+      "pants": 25,
+      "jeans": 26,
+      "shorts": 79,
+      "skirt": 25
+    },
+    "synthetic_images_seen": 275,
+    "code_license": "Coordit repository",
+    "weights_license": "Internal development; source attribution obligations apply",
+    "training_config_json": "{\"manifests\":[\"artifacts/artf-v1.1/records.jsonl\",\"artifacts/synthetic-v1.1/records.jsonl\"],\"output\":\"artifacts/tiny-shared-mps-final-data\",\"epochs\":20,\"batch_size\":16,\"learning_rate\":0.001,\"seed\":42,\"device\":\"mps\",\"category_heads\":false,\"max_steps\":null,\"resume\":false,\"synthetic_fraction\":0.5}",
+    "artifact_directory": "artifacts/tiny-shared-mps-final-data",
+    "metrics_report": "reports/tiny-shared-mps-final-data-validation.json"
+  },
+  {
+    "architecture": "coordit-tiny-multitask-v1",
+    "fingerprint": "c9981d6843898ee40f141286bd4d74beba4b0aa12a31551fe89bf499aaf54825",
+    "checkpoint_sha256": "977fb9938cb8c6ff65a86592b3dc968b189b0f104cd0d3f93af4aebd1e4fde2b",
+    "epoch": 19,
+    "device": "mps",
+    "category_heads": true,
+    "deployment_approved": false,
+    "purpose": "development_training",
+    "app_artifact": null,
+    "server_artifact": "artifacts/tiny-category-mps-final-data/checkpoint.pt",
+    "manifests": [
+      {
+        "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/artf-v1.1/records.jsonl",
+        "sha256": "65953f260639f7fa038e5230d29b456790e92e444d4aab2889648afe001a87f8"
+      },
+      {
+        "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/synthetic-v1.1/records.jsonl",
+        "sha256": "1e4ef664e8bdbac99b70615728080ce838f18e61b23e0bd57cf6eef11a3db1b7"
+      }
+    ],
+    "registry_sha256": "69c156dcfcf8ac28f306dc1549403a18b29e20303cfd6b7c743b9cf326d70717",
+    "dataset_images": 799,
+    "images_seen_this_epoch": 550,
+    "unique_images_seen_this_epoch": 550,
+    "steps": 35,
+    "loss": 2.1585987772260395,
+    "categories_seen": {
+      "tshirt": 134,
+      "shirt": 26,
+      "sweatshirt": 23,
+      "hoodie": 25,
+      "knit": 22,
+      "jacket": 26,
+      "coat": 23,
+      "pants": 25,
+      "jeans": 26,
+      "shorts": 79,
+      "skirt": 25
+    },
+    "synthetic_images_seen": 275,
+    "code_license": "Coordit repository",
+    "weights_license": "Internal development; source attribution obligations apply",
+    "training_config_json": "{\"manifests\":[\"artifacts/artf-v1.1/records.jsonl\",\"artifacts/synthetic-v1.1/records.jsonl\"],\"output\":\"artifacts/tiny-category-mps-final-data\",\"epochs\":20,\"batch_size\":16,\"learning_rate\":0.001,\"seed\":42,\"device\":\"mps\",\"category_heads\":true,\"max_steps\":null,\"resume\":false,\"synthetic_fraction\":0.5}",
+    "artifact_directory": "artifacts/tiny-category-mps-final-data",
+    "metrics_report": "reports/tiny-category-mps-final-data-validation.json"
+  }
+]

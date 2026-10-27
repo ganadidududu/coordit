@@ -1,0 +1,34 @@
+name: garment-ml-rights-and-contracts
+on:
+  push:
+    paths: ['ml/**', '.github/workflows/garment-ml-ci.yml']
+  pull_request:
+    paths: ['ml/**', '.github/workflows/garment-ml-ci.yml']
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.10.9'
+      - run: uv sync --locked --python 3.12
+        working-directory: ml
+      - run: uv run python -m coordit_ml registry
+        working-directory: ml
+      - run: uv run python -m coordit_ml audit-inventory reports/SOURCE_FILES.jsonl
+        working-directory: ml
+      - run: uv run ruff check coordit_ml tests
+        working-directory: ml
+      - run: uv run basedpyright
+        working-directory: ml
+      - run: uv run pytest
+        working-directory: ml
+      - name: Validate any curated corpus manifests (unknown rights fail the job)
+        working-directory: ml
+        shell: bash
+        run: |
+          shopt -s nullglob globstar
+          for manifest in curated/**/*.jsonl; do
+            uv run python -m coordit_ml validate "$manifest"
+          done

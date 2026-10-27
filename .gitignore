@@ -29,3 +29,10 @@ AGENTS.md
 
 # Xcode user-specific UI and scheme state
 **/xcuserdata/
+
+# Garment ML datasets and model artifacts (never ship in regular Git)
+ml/artifacts/
+ml/.venv/
+ml/.pytest_cache/
+ml/.ruff_cache/
+**/__pycache__/

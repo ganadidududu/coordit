@@ -28,6 +28,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
     var isLower: Bool { category.garmentKind == .lower }
     @Published private(set) var hasAutomaticProposal = false
     private var detectionTask: Task<Void, Never>?
+    private let inferenceEngine: any CoorditGarmentInferenceEngine
     private var detectionRevision = UUID()
     private var proposedEndpoints: [CoorditMeasurementPoint] = []
     var dimensions: [CoorditGarmentDimension] { category.cameraDimensions }
@@ -64,8 +65,10 @@ final class CoorditGarmentCaptureController: ObservableObject {
         #endif
     }
 
-    init(method: CoorditGarmentMeasurement.Method? = nil) {
-        self.method = method ?? (Self.supportsCardlessAR ? .arPlane : (Self.supportsLiDAR ? .lidar : .card))
+    init(method: CoorditGarmentMeasurement.Method? = nil, inferenceEngine: any CoorditGarmentInferenceEngine = CoorditHybridGarmentInference()) {
+        self.inferenceEngine = inferenceEngine
+        let requested = method ?? (Self.supportsCardlessAR ? .arPlane : (Self.supportsLiDAR ? .lidar : .card))
+        self.method = requested == .arPlane && !Self.supportsCardlessAR ? .card : requested
     }
 
     var isComplete: Bool { points.count == dimensions.count * 2 }
@@ -162,7 +165,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
         detectionTask = Task {
             defer { if generation == detectionRevision { isDetecting = false } }
             do {
-                let proposal = try await CoorditGarmentOutlineDetector().detect(data, category: category, cardHint: cardHint, garmentHint: garmentHint)
+                let proposal = try await inferenceEngine.infer(.init(image: data, category: category, cardHint: cardHint, garmentHint: garmentHint))
                 guard !Task.isCancelled, generation == detectionRevision else { return }
                 guard proposal.endpoints.isEmpty || proposal.isLower == isLower else {
                     message = isLower ? "비교할 바지를 촬영해주세요." : "비교할 상의를 촬영해주세요."
@@ -375,7 +378,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
         detectionTask = Task {
             defer { if generation == measurementID { isDetecting = false } }
             do {
-                let proposal = try await CoorditGarmentOutlineDetector().detect(data, category: category)
+                let proposal = try await inferenceEngine.infer(.init(image: data, category: category, cardHint: nil, garmentHint: nil))
                 guard !Task.isCancelled, generation == measurementID,
                       let current = view.session.currentFrame else { return }
                 guard trackingReady,

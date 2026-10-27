@@ -1,0 +1,82 @@
+{
+  "categories": {
+    "tshirt": {
+      "real_approved": 210,
+      "synthetic_approved": 30,
+      "real_independent_cm": 0
+    },
+    "shirt": {
+      "real_approved": 0,
+      "synthetic_approved": 30,
+      "real_independent_cm": 0
+    },
+    "sweatshirt": {
+      "real_approved": 0,
+      "synthetic_approved": 30,
+      "real_independent_cm": 0
+    },
+    "hoodie": {
+      "real_approved": 0,
+      "synthetic_approved": 30,
+      "real_independent_cm": 0
+    },
+    "knit": {
+      "real_approved": 0,
+      "synthetic_approved": 30,
+      "real_independent_cm": 0
+    },
+    "jacket": {
+      "real_approved": 0,
+      "synthetic_approved": 30,
+      "real_independent_cm": 0
+    },
+    "coat": {
+      "real_approved": 0,
+      "synthetic_approved": 30,
+      "real_independent_cm": 0
+    },
+    "pants": {
+      "real_approved": 0,
+      "synthetic_approved": 30,
+      "real_independent_cm": 0
+    },
+    "jeans": {
+      "real_approved": 0,
+      "synthetic_approved": 30,
+      "real_independent_cm": 0
+    },
+    "shorts": {
+      "real_approved": 104,
+      "synthetic_approved": 30,
+      "real_independent_cm": 0
+    },
+    "skirt": {
+      "real_approved": 0,
+      "synthetic_approved": 30,
+      "real_independent_cm": 0
+    },
+    "aux_towel": {
+      "real_approved": 210,
+      "synthetic_approved": 0,
+      "real_independent_cm": 0
+    }
+  },
+  "publisher_test_excluded": 980,
+  "source_manifests": [
+    {
+      "path": "artifacts/artf-v1.1/records.jsonl",
+      "sha256": "65953f260639f7fa038e5230d29b456790e92e444d4aab2889648afe001a87f8"
+    },
+    {
+      "path": "artifacts/synthetic-v1.1/records.jsonl",
+      "sha256": "1e4ef664e8bdbac99b70615728080ce838f18e61b23e0bd57cf6eef11a3db1b7"
+    }
+  ],
+  "archive_sha256": "2f9ad46db331f533d71b0867304deb0d66f8599d7e143006e5212aeac4ff04aa",
+  "synthetic_splits": {
+    "train": 275,
+    "test": 28,
+    "validation": 27
+  },
+  "real_holdout": "none: source garment IDs unavailable in publisher train/val pool"
+}

@@ -1,0 +1,24 @@
+{
+  "app": [],
+  "server": [],
+  "development": [
+    {
+      "path": "artifacts/tiny-shared-cpu-final/checkpoint.pt",
+      "sha256": "911cc7d4f1607f7ab3aeb786857f74ba883914ae0327837ab961278cd821e4aa",
+      "training_registry_sha256": "69c156dcfcf8ac28f306dc1549403a18b29e20303cfd6b7c743b9cf326d70717",
+      "deployment_approved": false
+    },
+    {
+      "path": "artifacts/tiny-shared-mps-final-data/checkpoint.pt",
+      "sha256": "7f9ad2e629da66c36567a1af7a9e85a6bb831a9b8b50cc7025d32bb0fe3f42fd",
+      "training_registry_sha256": "69c156dcfcf8ac28f306dc1549403a18b29e20303cfd6b7c743b9cf326d70717",
+      "deployment_approved": false
+    },
+    {
+      "path": "artifacts/tiny-category-mps-final-data/checkpoint.pt",
+      "sha256": "977fb9938cb8c6ff65a86592b3dc968b189b0f104cd0d3f93af4aebd1e4fde2b",
+      "training_registry_sha256": "69c156dcfcf8ac28f306dc1549403a18b29e20303cfd6b7c743b9cf326d70717",
+      "deployment_approved": false
+    }
+  ]
+}

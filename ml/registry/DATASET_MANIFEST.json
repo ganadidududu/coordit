@@ -33,7 +33,7 @@
       ],
       "attribution": "aRTF Clothes, Thomas Lips, Victor-Louis De Gusseme and Francis wyffels, CC BY 4.0, doi:10.5281/zenodo.14501499. Resized/converted; cite Learning Keypoints for Robotic Cloth Manipulation using Synthetic Data (2024).",
       "published_image_count": 1886,
-      "approved_image_count": 0,
+      "approved_image_count": 524,
       "categories": [
         "tshirt",
         "shorts",
@@ -45,7 +45,7 @@
         "polygon",
         "source_keypoints"
       ],
-      "provenance_manifest": "artifacts/artf-records.jsonl",
+      "provenance_manifest": "artifacts/artf-v1.1/records.jsonl",
       "status": "approved",
       "approval_reason": "Publisher-created household captures; publisher GitHub explicitly licenses dataset CC BY 4.0; Zenodo record API confirms cc-by-4.0. Scope excludes publisher test partition from train/validation.",
       "download_url": "https://zenodo.org/records/14501499/files/aRTFClothes-resized-paper-splits.zip?download=1",
@@ -70,7 +70,7 @@
       ],
       "attribution": "Coordit procedural garment generator v1",
       "published_image_count": null,
-      "approved_image_count": 0,
+      "approved_image_count": 330,
       "categories": [
         "tshirt",
         "shirt",
@@ -92,7 +92,7 @@
         "camera",
         "synthetic_cm"
       ],
-      "provenance_manifest": "artifacts/synthetic-records.jsonl",
+      "provenance_manifest": "artifacts/synthetic-v1.1/records.jsonl",
       "status": "approved",
       "approval_reason": "Procedural geometry, colors and patterns authored in this repository; no external 3D models, textures, photos or pretrained weights. Internal project use; no public relicensing of repository implied."
     },
@@ -371,6 +371,50 @@
       "provenance_manifest": null,
       "status": "blocked",
       "approval_reason": "Research/noncommercial or original-image rights not commercially cleared. No contract held."
+    },
+    {
+      "id": "garmageset",
+      "name": "garmageset",
+      "original_url": "https://huggingface.co/datasets/Style3D/GarmageSet",
+      "publisher": "Style3D",
+      "image_rightsholder": "unverified",
+      "data_license": "CC-BY-NC-ND-4.0",
+      "annotation_license": "CC-BY-NC-ND-4.0",
+      "license_url": "https://huggingface.co/datasets/Style3D/GarmageSet",
+      "checked_at": "2026-10-27",
+      "terms_url": "https://huggingface.co/datasets/Style3D/GarmageSet",
+      "commercial_basis": "Original card CC BY-NC-ND 4.0; login/terms gated. No commercial training/modification grant.",
+      "permissions": [],
+      "attribution": "",
+      "published_image_count": null,
+      "approved_image_count": 0,
+      "categories": [],
+      "annotation_types": [],
+      "provenance_manifest": null,
+      "status": "blocked",
+      "approval_reason": "Original card CC BY-NC-ND 4.0; login/terms gated. No commercial training/modification grant."
+    },
+    {
+      "id": "garmentcodedata-v2",
+      "name": "garmentcodedata-v2",
+      "original_url": "https://www.research-collection.ethz.ch/items/9d16a4da-0d30-4963-8842-af20fcf82899",
+      "publisher": "Maria Korosteleva et al. / ETH Zurich",
+      "image_rightsholder": "unverified",
+      "data_license": "unverified",
+      "annotation_license": "unverified",
+      "license_url": "https://www.research-collection.ethz.ch/items/9d16a4da-0d30-4963-8842-af20fcf82899",
+      "checked_at": "2026-10-27",
+      "terms_url": "https://www.research-collection.ethz.ch/items/9d16a4da-0d30-4963-8842-af20fcf82899",
+      "commercial_basis": "GarmentCode code is MIT, not proof of dataset/body/texture rights. Original dataset page returned HTTP 403; rights documents not fully read. No mirror accepted.",
+      "permissions": [],
+      "attribution": "",
+      "published_image_count": null,
+      "approved_image_count": 0,
+      "categories": [],
+      "annotation_types": [],
+      "provenance_manifest": null,
+      "status": "pending_review",
+      "approval_reason": "GarmentCode code is MIT, not proof of dataset/body/texture rights. Original dataset page returned HTTP 403; rights documents not fully read. No mirror accepted."
     }
   ]
 }

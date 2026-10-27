@@ -1,0 +1,15 @@
+{
+  "manifests": [
+    "artifacts/artf-v1.1/records.jsonl",
+    "artifacts/synthetic-v1.1/records.jsonl"
+  ],
+  "output": "artifacts/tiny-shared-gpu",
+  "epochs": 100,
+  "batch_size": 32,
+  "learning_rate": 0.0005,
+  "seed": 42,
+  "device": "cuda",
+  "category_heads": false,
+  "max_steps": null,
+  "synthetic_fraction": 0.5
+}

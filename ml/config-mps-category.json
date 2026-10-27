@@ -1,0 +1,15 @@
+{
+  "manifests": [
+    "artifacts/artf-v1.1/records.jsonl",
+    "artifacts/synthetic-v1.1/records.jsonl"
+  ],
+  "output": "artifacts/tiny-category-mps-final-data",
+  "epochs": 20,
+  "batch_size": 16,
+  "learning_rate": 0.001,
+  "seed": 42,
+  "device": "mps",
+  "category_heads": true,
+  "max_steps": null,
+  "synthetic_fraction": 0.5
+}
