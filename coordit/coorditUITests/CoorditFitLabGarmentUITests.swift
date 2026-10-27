@@ -54,7 +54,7 @@ final class CoorditFitLabGarmentUITests: XCTestCase {
             scrollTo("fitlab-size-score-L", app).tap()
             XCTAssertEqual(element("fitlab-recommended-size", app).label, "L")
             XCTAssertTrue(scrollTo("fitlab-size-reason", app).isHittable)
-            XCTAssertTrue(app.staticTexts["ABOUT L"].exists)
+            XCTAssertTrue(app.staticTexts[lower ? "WHY L?" : "ABOUT L"].exists)
             capture("\(category)-retained-result-after-back", app)
             app.terminate()
         }
