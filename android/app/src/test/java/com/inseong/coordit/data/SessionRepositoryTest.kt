@@ -54,6 +54,20 @@ class SessionRepositoryTest {
         assertNull(store.value)
         assertNull(repository.session.value)
     }
+    @Test fun validGuestSessionRestoresWithoutCallingRefreshEndpoint() = runTest {
+        val payload = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString("{\"exp\":${System.currentTimeMillis()/1000+3600}}".toByteArray())
+        val guest = AuthSession("header.$payload.signature", "guest-refresh", AuthUser("guest-user", "", true))
+        store.value = guest
+        assertEquals(guest, repository.restore())
+        assertEquals(0, server.requestCount)
+        assertTrue(requireNotNull(repository.session.value).user.isAnonymous)
+    }
+    @Test fun serverContractFailureDoesNotDeleteSavedGuestIdentity() = runTest {
+        store.value = saved.copy(user = AuthUser("guest-user", "", true))
+        server.enqueue(MockResponse().setResponseCode(400).setBody("{\"message\":\"Auth user email is missing\"}"))
+        try { repository.restore(); fail("Expected server contract failure") } catch (error: HttpException) { assertEquals(400,error.code()) }
+        assertNotNull(store.value)
+    }
     @Test fun transientFailureKeepsStoredSessionForRetry() = runTest {
         store.value = saved
         server.enqueue(MockResponse().setResponseCode(503))
@@ -117,6 +131,15 @@ class SessionRepositoryTest {
     @Test fun emptyEmailIsAcceptedAsInIosContract() = runTest {
         server.enqueue(MockResponse().setBody("""{"accessToken":"a","refreshToken":"r","user":{"id":"u","email":""}}"""))
         assertEquals("", repository.loginGoogle("token", "nonce").user.email)
+    }
+    @Test fun anonymousMarkerSurvivesParsingAndEncryptedStoreSerialization() = runTest {
+        val json = """{"accessToken":"a","refreshToken":"r","user":{"id":"guest-user","email":null,"isAnonymous":true}}"""
+        server.enqueue(MockResponse().setBody(json))
+        val guest = repository.loginGuest()
+        assertTrue(guest.user.isAnonymous)
+        assertEquals("", guest.user.email)
+        val gson = CoorditJson.create()
+        assertEquals(guest, gson.fromJson(gson.toJson(guest), AuthSession::class.java))
     }
     @Test fun myPageMutationsMatchBackendContractAndDeleteClearsSessionAfterSuccess() = runTest {
         server.enqueue(MockResponse().setBody(authJson))

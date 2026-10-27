@@ -56,6 +56,7 @@ private fun ThreadChargeState.withPrivacy(state: AdPrivacyState) = copy(
     privacyStatusText = state.statusText,
 )
 data class AppState(
+    val userId: String? = null,
     val stage: AppStage = AppStage.Restoring,
     val busy: Boolean = false,
     val error: String? = null,
@@ -97,7 +98,7 @@ class AppViewModel(
                 if (restored == null) signedOut() else loadAccount(returning = true)
             } catch (error: Exception) {
                 if (error is CancellationException) throw error
-                if (error is HttpException && error.code() in setOf(400, 401, 403)) signedOut()
+                if (error is HttpException && error.code() in setOf(401, 403)) signedOut()
                 else mutableState.value = AppState(stage = AppStage.AccountRecovery, error = "로그인 상태를 복원하지 못했어요.\n연결을 확인하고 다시 시도해 주세요.")
             }
         }
@@ -174,6 +175,13 @@ class AppViewModel(
         }
     }
     private suspend fun loadAccount(returning: Boolean) {
+        mutableState.update { it.copy(userId = session.session.value?.user?.id) }
+        if (session.session.value?.user?.isAnonymous == true) {
+            welcome.markCompleted()
+            mutableState.update { it.copy(stage = if (returning) AppStage.ReturningWelcome else AppStage.Home, busy = false, error = null) }
+            refreshHome()
+            return
+        }
         val status = session.loadOnboardingStatus()
         val profile = optional { session.loadProfile() }
         val body = optional { session.loadBodyMeasurements().firstOrNull() }

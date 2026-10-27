@@ -113,6 +113,8 @@ class AppViewModelTest {
         assertEquals(1, api.guestCalls)
         assertTrue(requireNotNull(store.value).user.isAnonymous)
         assertEquals(AppStage.Home, model.state.value.stage)
+        assertEquals("guest-user", model.state.value.userId)
+        assertEquals(0, api.statusCalls)
     }
 
     @Test fun emailLoginPersistsBackendSessionAndLoadsHome() = runTest {
