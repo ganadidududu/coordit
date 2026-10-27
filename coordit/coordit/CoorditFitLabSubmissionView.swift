@@ -75,7 +75,7 @@ struct CoorditFitLabSubmissionView: View {
 
             if !coordinator.draft.isTutorialExample {
                 CoorditInputMethodPanel(metrics: metrics) {
-                if CoorditGarmentCaptureController.featureEnabled, [.tshirt, .pants].contains(coordinator.draft.category), let measureWithCamera {
+                if CoorditGarmentCaptureController.featureEnabled, let measureWithCamera {
                     CoorditInputMethodCard(title: "촬영해서 비교", subtitle: "사진과 치수는 옷장에 자동 저장", symbol: "camera", metrics: metrics, action: measureWithCamera)
                         .accessibilityIdentifier("fitlab-camera-comparison")
                 }

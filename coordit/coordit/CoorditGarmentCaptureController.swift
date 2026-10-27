@@ -9,6 +9,8 @@ import UIKit
 
 @MainActor
 final class CoorditGarmentCaptureController: ObservableObject {
+    enum Selection { case automatic, card, garment, manual }
+    @Published private(set) var selection: Selection = .automatic
     @Published private(set) var method: CoorditGarmentMeasurement.Method
     @Published private(set) var image: UIImage?
     private(set) var garmentPhotoData: Data?
@@ -21,11 +23,14 @@ final class CoorditGarmentCaptureController: ObservableObject {
     @Published var basisConfirmed = false
     @Published private(set) var isDetecting = false
     @Published private(set) var outline: [CoorditMeasurementPoint] = []
-    @Published private(set) var isLower = false
+    @Published private(set) var category: CoorditFitLabCategory = .tshirt
+    @Published var longSleeves = false
+    var isLower: Bool { category.garmentKind == .lower }
     @Published private(set) var hasAutomaticProposal = false
     private var detectionTask: Task<Void, Never>?
+    private var detectionRevision = UUID()
     private var proposedEndpoints: [CoorditMeasurementPoint] = []
-    var dimensions: [CoorditGarmentDimension] { isLower ? CoorditGarmentDimension.lower : CoorditGarmentDimension.upper }
+    var dimensions: [CoorditGarmentDimension] { category.cameraDimensions }
     private(set) var calibration: CoorditCardCalibration?
     private weak var sceneView: ARSCNView?
     private var lastProjectionTime: TimeInterval = 0
@@ -54,14 +59,20 @@ final class CoorditGarmentCaptureController: ObservableObject {
         return dimensions[points.count / 2]
     }
     var needsCardCorners: Bool { method == .card && image != nil && calibration == nil }
-    var canReview: Bool { isComplete && (method == .card || trackingReady) }
+    var canReview: Bool {
+        isComplete && (method == .card || trackingReady)
+            && (try? CoorditGarmentMeasurement(method: method, segments: segments, lengthBasis: lengthBasis, category: category)) != nil
+    }
     var canFinish: Bool { canReview && basisConfirmed }
 
     var instruction: String {
         if isDetecting { return "옷과 카드를 찾고 있어요" }
+        if method == .card, selection != .manual {
+            if selection == .card || needsCardCorners { return "사진에서 카드를 눌러주세요. 모서리는 끌어서 맞출 수 있어요." }
+            if selection == .garment || !isComplete { return "사진에서 옷을 눌러주세요." }
+        }
         if needsCardCorners {
-            let names = ["왼쪽 위", "오른쪽 위", "오른쪽 아래", "왼쪽 아래"]
-            return "카드의 \(names[min(corners.count, 3)]) 모서리를 눌러주세요."
+            return "카드 모서리를 시계 방향으로 눌러주세요. \(corners.count + 1)/4"
         }
         if isComplete { return "점이 옷 끝에 맞는지 확인해주세요. 끌어서 조정할 수 있어요." }
         return dimension?.instruction ?? "옷을 평평하게 펴주세요."
@@ -76,6 +87,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
     }
 
     func setImage(_ input: UIImage, detect: Bool = true) {
+        selectMethod(.card)
         let maximum: CGFloat = 2400
         let ratio = min(1, maximum / max(input.size.width, input.size.height))
         let size = CGSize(width: input.size.width * ratio, height: input.size.height * ratio)
@@ -86,51 +98,125 @@ final class CoorditGarmentCaptureController: ObservableObject {
         if detect { detectOutline() }
     }
 
-    func configure(isLower: Bool) {
-        guard self.isLower != isLower else { return }
-        self.isLower = isLower
+    func configure(category: CoorditFitLabCategory) {
+        guard self.category != category else { return }
+        self.category = category
+        longSleeves = category.garmentKind == .upper && category != .tshirt
         clearCapture()
         lengthBasis = isLower ? "waist_to_hem" : "high_shoulder_to_hem"
     }
 
-    func detectOutline() {
+    func select(_ target: Selection) {
+        guard !isDetecting else { return }
+        selection = target
+        message = nil
+    }
+
+    func tapImage(_ point: CoorditMeasurementPoint) {
+        guard point.isNormalized, !isDetecting else { return }
+        if selection == .manual { addImagePoint(point); return }
+        if selection == .card || needsCardCorners { detectOutline(cardHint: point) }
+        else if selection == .garment || !isComplete { detectOutline(garmentHint: point) }
+        else if CoorditGarmentOutlineDetector.contains(point, in: corners) { detectOutline(cardHint: point) }
+        else if CoorditGarmentOutlineDetector.contains(point, in: outline) { detectOutline(garmentHint: point) }
+    }
+
+    func beginManualCard() {
+        selection = .manual
+        if !points.isEmpty { proposedEndpoints = points.compactMap { project($0) } }
+        points = []; projectedPoints = []; corners = []; calibration = nil
+        basisConfirmed = false; message = nil
+    }
+
+    func beginManualGarment() {
+        selection = .manual
+        points = []; projectedPoints = []; proposedEndpoints = []; outline = []
+        hasAutomaticProposal = false; basisConfirmed = false; message = nil
+    }
+
+    func detectOutline(cardHint: CoorditMeasurementPoint? = nil, garmentHint: CoorditMeasurementPoint? = nil) {
         guard let data = image?.pngData(), method == .card else { return }
         detectionTask?.cancel()
-        let generation = measurementID
+        detectionRevision = UUID()
+        let generation = detectionRevision
         isDetecting = true
         detectionTask = Task {
-            defer { if generation == measurementID { isDetecting = false } }
+            defer { if generation == detectionRevision { isDetecting = false } }
             do {
-                let proposal = try await CoorditGarmentOutlineDetector().detect(data)
-                guard !Task.isCancelled, generation == measurementID else { return }
+                let proposal = try await CoorditGarmentOutlineDetector().detect(data, category: category, cardHint: cardHint, garmentHint: garmentHint)
+                guard !Task.isCancelled, generation == detectionRevision else { return }
                 guard proposal.endpoints.isEmpty || proposal.isLower == isLower else {
                     message = isLower ? "비교할 바지를 촬영해주세요." : "비교할 상의를 촬영해주세요."
                     return
                 }
-                outline = proposal.outline
-                proposedEndpoints = proposal.endpoints
-                for corner in proposal.corners { addImagePoint(corner) }
+                message = nil
+                if cardHint != nil {
+                    guard proposal.corners.count == 4 else {
+                        message = "카드 테두리를 찾지 못했어요. 확대해서 다시 누르거나 직접 맞춰주세요."
+                        return
+                    }
+                    try replaceCard(proposal.corners)
+                } else if garmentHint != nil {
+                    guard !proposal.endpoints.isEmpty else {
+                        message = "옷의 측정점을 찾지 못했어요. 다시 누르거나 직접 맞춰주세요."
+                        return
+                    }
+                    outline = proposal.outline
+                    proposedEndpoints = proposal.endpoints
+                    points = []; projectedPoints = []
+                } else {
+                    outline = proposal.outline
+                    proposedEndpoints = proposal.endpoints
+                    for corner in proposal.corners { addImagePoint(corner) }
+                }
                 applyProposedEndpoints()
+                selection = cardHint == nil ? .automatic : .card
+                basisConfirmed = false
+                validateEditedMeasurements()
             } catch {
-                guard generation == measurementID else { return }
-                message = "자동으로 찾지 못했어요. 사진의 측정점을 눌러주세요."
+                guard !Task.isCancelled, generation == detectionRevision else { return }
+                message = "자동으로 찾지 못했어요. 카드나 옷을 눌러 다시 찾아주세요."
             }
         }
     }
 
+    private func replaceCard(_ newCorners: [CoorditMeasurementPoint]) throws {
+        guard let image else { return }
+        let replacement = try CoorditCardCalibration(corners: newCorners, imageWidth: image.size.width, imageHeight: image.size.height)
+        let imagePoints = points.compactMap { project($0) }
+        let replacementPoints = try imagePoints.map(replacement.worldPoint)
+        corners = newCorners
+        calibration = replacement
+        points = replacementPoints
+        basisConfirmed = false
+        refreshProjection()
+    }
+
+    func moveCardCorner(_ index: Int, to point: CoorditMeasurementPoint) {
+        guard corners.indices.contains(index), point.isNormalized, !isDetecting else { return }
+        var adjusted = corners
+        adjusted[index] = point
+        do {
+            try replaceCard(adjusted)
+            message = nil
+            applyProposedEndpoints()
+            validateEditedMeasurements()
+        } catch { message = "카드의 네 모서리에 맞춰주세요." }
+    }
+
     private func applyProposedEndpoints() {
-        guard calibration != nil, points.isEmpty, proposedEndpoints.count == 8 else { return }
+        guard calibration != nil, points.isEmpty, proposedEndpoints.count == dimensions.count * 2 else { return }
         do {
             guard let calibration else { return }
             let values = try proposedEndpoints.map(calibration.worldPoint)
             let proposed = Dictionary(uniqueKeysWithValues: dimensions.enumerated().map { index, dimension in
                 (dimension, CoorditMeasurementSegment(start: values[index * 2], end: values[index * 2 + 1]))
             })
-            _ = try CoorditGarmentMeasurement(method: .card, segments: proposed, lengthBasis: lengthBasis)
+            _ = try CoorditGarmentMeasurement(method: .card, segments: proposed, lengthBasis: lengthBasis, category: category)
             points = values
             hasAutomaticProposal = true
             refreshProjection()
-        } catch { message = "측정선을 찾지 못했어요. 옷의 끝점을 눌러주세요." }
+        } catch { message = "\(error.localizedDescription) 옷의 끝점을 눌러주세요." }
     }
 
     func moveEndpoint(_ index: Int, to point: CoorditMeasurementPoint) {
@@ -139,6 +225,15 @@ final class CoorditGarmentCaptureController: ObservableObject {
         points[index] = world
         basisConfirmed = false
         refreshProjection()
+        validateEditedMeasurements()
+    }
+
+    private func validateEditedMeasurements() {
+        guard isComplete else { return }
+        do {
+            _ = try CoorditGarmentMeasurement(method: method, segments: segments, lengthBasis: lengthBasis, category: category)
+            message = nil
+        } catch { message = error.localizedDescription }
     }
 
     func clearCapture() {
@@ -149,7 +244,8 @@ final class CoorditGarmentCaptureController: ObservableObject {
 
     func reset() {
         garmentPhotoData = nil
-        detectionTask?.cancel(); isDetecting = false
+        detectionTask?.cancel(); isDetecting = false; detectionRevision = UUID()
+        selection = .automatic
         proposedEndpoints = []; outline = []; hasAutomaticProposal = false
         corners = []; points = []; projectedPoints = []; calibration = nil
         basisConfirmed = false; measurementID = UUID(); message = nil
@@ -167,7 +263,20 @@ final class CoorditGarmentCaptureController: ObservableObject {
             if needsCardCorners {
                 corners.append(point)
                 if corners.count == 4 {
-                    do { calibration = try CoorditCardCalibration(corners: corners, imageWidth: image.size.width, imageHeight: image.size.height) }
+                    do {
+                        var ordered = corners
+                        if selection == .manual {
+                            func edge(_ first: Int, _ second: Int) -> Double {
+                                hypot((corners[first].x - corners[second].x) * image.size.width,
+                                      (corners[first].y - corners[second].y) * image.size.height)
+                            }
+                            if edge(1, 2) + edge(3, 0) > edge(0, 1) + edge(2, 3) {
+                                ordered = [corners[1], corners[2], corners[3], corners[0]]
+                            }
+                        }
+                        calibration = try CoorditCardCalibration(corners: ordered, imageWidth: image.size.width, imageHeight: image.size.height)
+                        corners = ordered
+                    }
                     catch { corners.removeLast(); throw error }
                     applyProposedEndpoints()
                 }
@@ -198,7 +307,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
         detectionTask = Task {
             defer { if generation == measurementID { isDetecting = false } }
             do {
-                let proposal = try await CoorditGarmentOutlineDetector().detect(data)
+                let proposal = try await CoorditGarmentOutlineDetector().detect(data, category: category)
                 guard !Task.isCancelled, generation == measurementID,
                       let current = view.session.currentFrame else { return }
                 guard trackingReady,
@@ -207,7 +316,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
                     message = "잠시 카메라를 고정하고 다시 눌러주세요."
                     return
                 }
-                guard proposal.endpoints.count == 8, proposal.isLower == isLower else {
+                guard proposal.endpoints.count == dimensions.count * 2, proposal.isLower == isLower else {
                     message = "옷을 찾지 못했어요. 끝점을 눌러서 지정할 수 있어요."
                     return
                 }
@@ -270,7 +379,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
 
     func makeMeasurement() throws -> CoorditGarmentMeasurement {
         guard canFinish else { throw CoorditGarmentMeasurementError.unstableTracking }
-        let measurement = try CoorditGarmentMeasurement(id: measurementID, method: method, segments: segments, lengthBasis: lengthBasis)
+        let measurement = try CoorditGarmentMeasurement(id: measurementID, method: method, segments: segments, lengthBasis: lengthBasis, category: category)
         if let photo = method == .card ? image : sceneView?.snapshot() {
             let scale = min(1, 1200 / max(photo.size.width, photo.size.height))
             let size = CGSize(width: photo.size.width * scale, height: photo.size.height * scale)
@@ -319,6 +428,25 @@ final class CoorditGarmentCaptureController: ObservableObject {
     func resume() { if let sceneView, method == .lidar { attach(sceneView) } }
 
     #if DEBUG
+    func loadGuideTestFixture() {
+        selectMethod(.card)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        let fixture = UIGraphicsImageRenderer(size: CGSize(width: 2400, height: 3000), format: format).image { context in
+            UIColor(white: 0.92, alpha: 1).setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 2400, height: 3000))
+            UIColor(white: 0.15, alpha: 1).setFill()
+            context.cgContext.addPath(CoorditGarmentGuideShape(category: category, longSleeves: longSleeves).path(in: CGRect(x: 150, y: 100, width: 2100, height: 2300)).cgPath)
+            context.cgContext.fillPath()
+            UIColor.black.setFill()
+            UIBezierPath(roundedRect: CGRect(x: 180, y: 2650, width: 240, height: 240 * 53.98 / 85.60), cornerRadius: 8).fill()
+            if ProcessInfo.processInfo.arguments.contains("--coordit-test-ambiguous-card") {
+                UIBezierPath(roundedRect: CGRect(x: 1900, y: 2650, width: 240, height: 240 * 53.98 / 85.60), cornerRadius: 8).fill()
+            }
+        }
+        setImage(fixture)
+    }
+
     func loadTestFixture(automatic: Bool = false) {
         selectMethod(.card)
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1200, height: 1500))

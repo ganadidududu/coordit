@@ -163,8 +163,8 @@ final class CoorditFitLabCoordinator: ObservableObject {
         guard !isPreparingCameraAnalysis, !isAnalysisRunning, loadState != .loading else { throw CoorditFitLabError.invalidDraft("현재 분석을 마친 뒤 다시 시도해주세요.") }
         guard let owner = authenticatedUserID ?? userID else { throw CoorditFitLabError.loginRequired }
         guard let selectedAPI = overrideAPI ?? api else { throw CoorditFitLabError.transport("분석 연결을 준비하지 못했어요.") }
-        guard (draft.category == .tshirt && !measurement.isLower || draft.category == .pants && measurement.isLower), !draft.isTutorialExample else { throw CoorditFitLabError.invalidDraft("상품과 같은 종류의 옷을 촬영해주세요.") }
-        _ = try CoorditGarmentMeasurement(id: measurement.id, method: measurement.method, measuredAt: measurement.measuredAt, segments: measurement.segments, lengthBasis: measurement.lengthBasis)
+        guard draft.category == measurement.resolvedCategory, !draft.isTutorialExample else { throw CoorditFitLabError.invalidDraft("상품과 같은 종류의 옷을 촬영해주세요.") }
+        _ = try CoorditGarmentMeasurement(id: measurement.id, method: measurement.method, measuredAt: measurement.measuredAt, segments: measurement.segments, lengthBasis: measurement.lengthBasis, category: measurement.category)
         isPreparingCameraAnalysis = true
         defer { isPreparingCameraAnalysis = false }
         let generation = operationGeneration
@@ -220,8 +220,8 @@ final class CoorditFitLabCoordinator: ObservableObject {
         guard let owner, let data = UserDefaults.standard.data(forKey: cameraSessionKey(owner)) else { return }
         do {
             let state = try JSONDecoder().decode(CoorditCameraAnalysisState.self, from: data)
-            guard state.userID == owner, [.tshirt, .pants].contains(state.draft.category), CoorditFitLabDraftValidation.submissionError(for: state.draft) == nil else { throw CoorditFitLabError.malformedResponse }
-            _ = try CoorditGarmentMeasurement(id: state.measurement.id, method: state.measurement.method, measuredAt: state.measurement.measuredAt, segments: state.measurement.segments, lengthBasis: state.measurement.lengthBasis)
+            guard state.userID == owner, state.draft.category == state.measurement.resolvedCategory, CoorditFitLabDraftValidation.submissionError(for: state.draft) == nil else { throw CoorditFitLabError.malformedResponse }
+            _ = try CoorditGarmentMeasurement(id: state.measurement.id, method: state.measurement.method, measuredAt: state.measurement.measuredAt, segments: state.measurement.segments, lengthBasis: state.measurement.lengthBasis, category: state.measurement.category)
             draft = state.draft; cameraMeasurement = state.measurement; cameraReference = state.reference
             checkpoint = state.checkpoint; recommendation = state.recommendation; report = state.report
             createdProductID = state.checkpoint.productID

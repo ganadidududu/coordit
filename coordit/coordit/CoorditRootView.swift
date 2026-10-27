@@ -243,9 +243,9 @@ struct CoorditRootView: View {
             } else {
                 closetItems.insert(CoorditClosetItem(
                     id: backendID,
-                    name: measurement.isLower ? "잘 맞는 바지" : "잘 맞는 티셔츠",
+                    name: measurement.garmentName,
                     category: measurement.isLower ? .bottom : .top,
-                    exactCategory: measurement.isLower ? .pants : .tshirt,
+                    exactCategory: measurement.resolvedCategory,
                     score: 0,
                     scoreColor: CoorditClosetColors.navy,
                     route: measurement.isLower ? .closetDetailBottom : .closetDetailTop,

@@ -257,7 +257,7 @@ struct CoorditFitLabFamilyView: View {
                 manageReferences: onManageReferences,
                 submit: submitAnalysis,
                 measureWithCamera: {
-                    coordinator.cameraCapture.configure(isLower: coordinator.draft.category == .pants)
+                    coordinator.cameraCapture.configure(category: coordinator.draft.category)
                     if coordinator.cameraMeasurement == nil { coordinator.cameraCapture.clearCapture() }
                     showsCameraComparison = true
                 },

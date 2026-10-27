@@ -53,11 +53,14 @@ final class CoorditCameraComparisonUITests: XCTestCase {
         XCTAssertLessThan(element("closet-add-method-manual", app).frame.width, element("closet-add-method-link", app).frame.width / 2)
         capture("simple-closet-methods", app)
         element("closet-add-method-photo", app).tap()
-        XCTAssertTrue(app.buttons["바지"].waitForExistence(timeout: 3))
+        XCTAssertTrue(element("closet-camera-kind-lower", app).waitForExistence(timeout: 3))
         capture("simple-closet-category", app)
-        app.buttons["바지"].tap()
+        element("closet-camera-kind-lower", app).tap()
+        element("closet-camera-continue", app).tap()
         XCTAssertTrue(element("camera-fit-screen", app).waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["바지를 평평하게 펴주세요."].exists)
+        XCTAssertFalse(element("camera-fit-guide-pants", app).exists)
+        XCTAssertTrue(element("camera-fit-take-photo", app).exists)
+        XCTAssertTrue(element("camera-fit-select-photo", app).exists)
         capture("simple-pants-camera", app)
     }
 
@@ -66,7 +69,7 @@ final class CoorditCameraComparisonUITests: XCTestCase {
         app.launchArguments = ["--coordit-ui-testing", "--coordit-start-route", "closet-add-method", "--coordit-test-closet-save-success"]
         app.launch()
         element("closet-add-method-photo", app).tap()
-        app.buttons["반팔 티셔츠"].tap()
+        element("closet-camera-continue", app).tap()
         reachable("camera-fit-test-fixture", app).tap()
         reachable("camera-fit-analyze", app).tap()
         let photo = element("closet-detail-garment-photo", app)

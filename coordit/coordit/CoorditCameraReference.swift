@@ -24,8 +24,8 @@ extension CoorditFitLabHTTPAPI {
     func saveCameraReference(measurement: CoorditGarmentMeasurement, existing: CoorditCameraReference?) async throws -> CoorditCameraReference {
         let sizeID: String
         let itemID: String
-        let name = measurement.isLower ? "잘 맞는 바지" : "잘 맞는 티셔츠"
-        let category = measurement.isLower ? "pants" : "tshirt"
+        let name = measurement.garmentName
+        let category = measurement.resolvedCategory.rawValue
         if let existing {
             let updated: CoorditClothingSizeResponse = try await send(path: "/clothing-sizes/\(existing.clothingSizeID)", method: "PATCH", body: measurement.clothingSizeRequest)
             sizeID = updated.id

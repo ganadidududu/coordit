@@ -163,7 +163,7 @@ enum CoorditFitLabDraftValidation {
             return "사이즈명은 중복될 수 없어요."
         }
         let allowedKeys = Set(CoorditFitLabMeasurementKey.allCases.filter {
-            $0.garmentKind == draft.category.garmentKind
+            $0.garmentKind == draft.category.garmentKind || (draft.category == .skirt && $0 == .totalLength)
         })
         for row in draft.sizes {
             guard !normalizedSizeLabel(row.label).isEmpty else { return "모든 사이즈명을 입력해 주세요." }

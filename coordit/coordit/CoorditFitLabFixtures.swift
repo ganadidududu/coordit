@@ -224,7 +224,7 @@ final class CoorditFitLabFixtureAPI: CoorditFitLabAPI {
 
     func saveCameraReference(measurement: CoorditGarmentMeasurement, existing: CoorditCameraReference?) async throws -> CoorditCameraReference {
         requestLedger.append("camera-reference:\(measurement.method.rawValue)")
-        return .init(reference: .init(id: "reference-camera-fixture", clothingItemID: "clothing-camera-fixture", nickname: measurement.isLower ? "잘 맞는 바지" : "잘 맞는 티셔츠", category: measurement.isLower ? .pants : .tshirt, fitType: "regular", preferenceScore: 100, isActive: true), clothingSizeID: "size-camera-fixture")
+        return .init(reference: .init(id: "reference-camera-fixture", clothingItemID: "clothing-camera-fixture", nickname: measurement.garmentName, category: measurement.resolvedCategory, fitType: "regular", preferenceScore: 100, isActive: true), clothingSizeID: "size-camera-fixture")
     }
 
     func compatibleReferences(category: CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow] {

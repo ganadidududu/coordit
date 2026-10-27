@@ -9,6 +9,7 @@ struct CoorditFitLabCameraComparison: View {
     @ObservedObject var coordinator: CoorditFitLabCoordinator
     let analyze: (CoorditGarmentMeasurement) async throws -> Void
     @ObservedObject var capture: CoorditGarmentCaptureController
+    @StateObject private var cameraMotion = CoorditCameraMotion()
     var savesReferenceOnly = false
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var showsCamera = false
@@ -47,6 +48,14 @@ struct CoorditFitLabCameraComparison: View {
                         cardSourceControls(metrics)
                             .disabled(isAnalyzing || isUnlocked)
                     }
+                    if capture.image != nil || capture.method == .lidar { measurementReadout(metrics) }
+                    if capture.image != nil, !isUnlocked {
+                        recognitionControls
+                        Text(capture.instruction)
+                            .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityIdentifier("camera-fit-instruction")
+                    }
                     captureSurface(metrics)
                     if capture.image != nil || capture.method == .lidar { measurementControls(metrics) }
                     if isUnlocked { comparisonControls(metrics) }
@@ -65,6 +74,7 @@ struct CoorditFitLabCameraComparison: View {
                 .padding(metrics.value(16))
                 .padding(.bottom, metrics.value(24))
             }
+            .clipped()
             .background(CoorditDesignTokens.ColorToken.appBackground)
             .foregroundStyle(CoorditFitLabPalette.ink)
             .safeAreaInset(edge: .bottom) {
@@ -85,11 +95,27 @@ struct CoorditFitLabCameraComparison: View {
         }
         .preferredColorScheme(.light)
         .interactiveDismissDisabled(isAnalyzing)
-        .sheet(isPresented: $showsCamera) {
-            CoorditFitLabCameraPicker { image in
+        .fullScreenCover(isPresented: $showsCamera) {
+            #if DEBUG && targetEnvironment(simulator)
+            CoorditGarmentCameraOverlay(category: capture.category, takePhoto: {
+                showsCamera = false
+                capture.loadGuideTestFixture()
+            }, cancel: { showsCamera = false })
+            .background(.black)
+            .overlay(alignment: .top) {
+                Text("시뮬레이터 · 촬영 미리보기")
+                    .font(.caption2)
+                    .foregroundStyle(.white)
+                    .padding(.top, 48)
+                    .allowsHitTesting(false)
+            }
+            #else
+            CoorditGuidedGarmentCamera(category: capture.category) { image in
                 showsCamera = false
                 if let image { capture.setImage(image) }
             }
+            .ignoresSafeArea()
+            #endif
         }
         .task(id: selectedPhoto) {
             guard let photo = selectedPhoto else { return }
@@ -97,20 +123,27 @@ struct CoorditFitLabCameraComparison: View {
                 guard let data = try await photo.loadTransferable(type: Data.self), let image = UIImage(data: data) else {
                     throw CoorditFitLabError.invalidDraft("사진을 불러오지 못했어요.")
                 }
+                guard !Task.isCancelled else { return }
                 capture.setImage(image)
             } catch { failureMessage = error.localizedDescription }
         }
         .task {
-            if capture.method == .lidar { await requestCameraPermission() }
+            if capture.method == .lidar { cameraMotion.start(); await requestCameraPermission() }
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase != .active { capture.stop() }
-            else if cameraAuthorized { capture.resume() }
+            if phase != .active { capture.stop(); cameraMotion.stop() }
+            else if cameraAuthorized {
+                capture.resume()
+                if capture.method == .lidar { cameraMotion.start() }
+            }
+        }
+        .onChange(of: capture.method) { _, method in
+            if method == .lidar { cameraMotion.start() } else { cameraMotion.stop() }
         }
         .onChange(of: capture.image) { _, _ in
             photoScale = 1; accumulatedPhotoScale = 1; photoOffset = .zero; accumulatedPhotoOffset = .zero
         }
-        .onDisappear { capture.stop() }
+        .onDisappear { capture.stop(); cameraMotion.stop() }
         .alert("분석은 계속 진행돼요", isPresented: $showsCloseConfirmation) {
             Button("화면에 머물기", role: .cancel) {}
             Button("닫기") { dismiss() }
@@ -126,7 +159,7 @@ struct CoorditFitLabCameraComparison: View {
             Text(isUnlocked ? "내 옷과 겹쳐보기" : (capture.image == nil ? "잘 맞는 내 옷을 촬영해요" : "측정선을 확인해주세요"))
                 .font(CoorditTypography.gmarketBold(size: metrics.value(20), relativeTo: .title3))
                 .accessibilityIdentifier("camera-fit-screen")
-            Text(capture.image == nil ? (capture.isLower ? "바지를 평평하게 펴주세요." : "어깨 봉제선이 있는 반팔 티셔츠를 평평하게 펴주세요.") : "추정 치수 · cm")
+            Text(capture.image == nil ? capture.category.captureInstruction : "\(capture.category.koreanTitle) · 추정 치수 · cm")
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
                 .foregroundStyle(CoorditFitLabPalette.muted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -162,6 +195,12 @@ struct CoorditFitLabCameraComparison: View {
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: metrics.value(8)) {
                 Button("촬영하기") {
+                    #if DEBUG && targetEnvironment(simulator)
+                    if ProcessInfo.processInfo.arguments.contains("--coordit-ui-testing") {
+                        showsCamera = true
+                        return
+                    }
+                    #endif
                     Task {
                         await requestCameraPermission()
                         if cameraAuthorized && UIImagePickerController.isSourceTypeAvailable(.camera) { showsCamera = true }
@@ -191,6 +230,15 @@ struct CoorditFitLabCameraComparison: View {
                             .padding(12)
                             .background(CoorditFitLabPalette.surface, in: RoundedRectangle(cornerRadius: 7))
                     }
+                    VStack {
+                        Spacer()
+                        Text(cameraMotion.posture.text)
+                            .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
+                            .padding(12)
+                            .background(CoorditFitLabPalette.surface, in: Capsule())
+                            .padding(12)
+                    }
+                    .allowsHitTesting(false)
                 }
             }
             .frame(height: metrics.value(400))
@@ -207,6 +255,9 @@ struct CoorditFitLabCameraComparison: View {
                         if capture.isComplete, !isUnlocked, !isAnalyzing {
                             endpointHandles(size: geometry.size)
                         }
+                        if capture.selection == .card, !isUnlocked, !isAnalyzing {
+                            cardHandles(size: geometry.size)
+                        }
                     }
                     .scaleEffect(photoScale)
                     .offset(photoOffset)
@@ -214,11 +265,11 @@ struct CoorditFitLabCameraComparison: View {
                 .clipped()
                 .contentShape(Rectangle())
                 .gesture(SpatialTapGesture().onEnded { tap in
-                    guard !isAnalyzing, !isUnlocked else { return }
+                    guard !isAnalyzing, !isUnlocked, !capture.isDetecting else { return }
                     let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
                     let x = ((tap.location.x - center.x - photoOffset.width) / photoScale + center.x) / geometry.size.width
                     let y = ((tap.location.y - center.y - photoOffset.height) / photoScale + center.y) / geometry.size.height
-                    capture.addImagePoint(.init(x: x, y: y))
+                    capture.tapImage(.init(x: x, y: y))
                 })
                 .simultaneousGesture(MagnifyGesture().onChanged { value in photoScale = min(5, max(1, accumulatedPhotoScale * value.magnification)) }.onEnded { _ in accumulatedPhotoScale = photoScale })
                 .simultaneousGesture(DragGesture(minimumDistance: 12).onChanged { value in
@@ -229,22 +280,69 @@ struct CoorditFitLabCameraComparison: View {
             .aspectRatio(image.size.width / image.size.height, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
         } else {
-            VStack(spacing: metrics.value(12)) {
-                Image(systemName: capture.method == .lidar ? "viewfinder" : "creditcard.and.123")
-                    .font(.system(size: metrics.value(34)))
-                    .accessibilityHidden(true)
-                Text(capture.method == .lidar ? "카메라 권한을 확인해주세요" : "옷과 카드가 함께 보이는 사진을 준비해주세요")
-                    .font(CoorditTypography.gmarketMedium(size: metrics.value(13), relativeTo: .body))
-                    .multilineTextAlignment(.center)
+            EmptyView()
+        }
+    }
+
+    private var recognitionControls: some View {
+        HStack(spacing: 8) {
+            Button { capture.select(.card) } label: {
+                Label("카드", systemImage: capture.selection == .card ? "hand.tap.fill" : "creditcard")
             }
-            .frame(maxWidth: .infinity, minHeight: metrics.value(190))
-            .background(CoorditFitLabPalette.field, in: RoundedRectangle(cornerRadius: metrics.value(8)))
+            .accessibilityIdentifier("camera-fit-select-card")
+            Button { capture.select(.garment) } label: {
+                Label("옷", systemImage: capture.selection == .garment ? "hand.tap.fill" : "tshirt")
+            }
+            .accessibilityIdentifier("camera-fit-select-garment")
+            Spacer(minLength: 0)
+            Menu {
+                Button("카드 모서리 직접 지정") { capture.beginManualCard() }
+                Button("옷 측정점 직접 지정") { capture.beginManualGarment() }
+            } label: {
+                Label("직접 보정", systemImage: "slider.horizontal.3")
+            }
+            .accessibilityIdentifier("camera-fit-manual-correction")
+        }
+        .font(CoorditTypography.gmarketMedium(size: 12, relativeTo: .caption))
+        .buttonStyle(.bordered)
+        .tint(CoorditFitLabPalette.ink)
+        .disabled(capture.isDetecting || isAnalyzing)
+    }
+
+    private func cardHandles(size: CGSize) -> some View {
+        ForEach(Array(capture.corners.enumerated()), id: \.offset) { index, point in
+            Circle().fill(.white)
+                .frame(width: 14, height: 14)
+                .overlay(Circle().stroke(CoorditDesignTokens.ColorToken.blue, lineWidth: 3))
+                .frame(width: 32, height: 32)
+                .contentShape(Circle())
+                .position(x: point.x * size.width, y: point.y * size.height)
+                .gesture(DragGesture(minimumDistance: 0).onChanged { value in
+                    let key = index + 100
+                    let origin = draggedOrigins[key] ?? point
+                    draggedOrigins[key] = origin
+                    capture.moveCardCorner(index, to: .init(x: origin.x + value.translation.width / size.width / photoScale,
+                                                          y: origin.y + value.translation.height / size.height / photoScale))
+                }.onEnded { _ in draggedOrigins[index + 100] = nil })
+                .accessibilityLabel("카드 모서리 \(index + 1)")
+                .accessibilityIdentifier("camera-fit-card-corner-\(index)")
         }
     }
 
     private func measurementOverlay(size: CGSize) -> some View {
         Canvas { context, canvas in
             func screen(_ point: CoorditMeasurementPoint) -> CGPoint { .init(x: point.x * canvas.width, y: point.y * canvas.height) }
+            if capture.outline.count > 2 {
+                var outline = Path()
+                outline.addLines(capture.outline.map(screen))
+                outline.closeSubpath()
+                context.stroke(outline, with: .color(CoorditDesignTokens.ColorToken.blue.opacity(0.7)), lineWidth: 1)
+            }
+            if capture.corners.count == 4 {
+                var border = Path()
+                border.addLines(capture.corners.map(screen)); border.closeSubpath()
+                context.stroke(border, with: .color(CoorditDesignTokens.ColorToken.blue), lineWidth: 2)
+            }
             for (index, point) in capture.corners.enumerated() {
                 let position = screen(point)
                 context.fill(Path(ellipseIn: CGRect(x: position.x - 6, y: position.y - 6, width: 12, height: 12)), with: .color(CoorditFitLabPalette.ink))
@@ -296,15 +394,43 @@ struct CoorditFitLabCameraComparison: View {
 
     private func measurementControls(_ metrics: CoorditResponsiveMetrics) -> some View {
         VStack(alignment: .leading, spacing: metrics.value(10)) {
-            Text(capture.instruction)
+            if capture.method == .lidar { Text(capture.instruction)
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(13), relativeTo: .body))
                 .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier("camera-fit-instruction")
+                .accessibilityIdentifier("camera-fit-instruction") }
             if capture.isDetecting { ProgressView() }
+            if capture.method == .card, !capture.isDetecting {
+                HStack(spacing: 16) {
+                    Label(capture.calibration == nil ? "카드 위치 확인" : "카드 인식", systemImage: capture.calibration == nil ? "viewfinder" : "checkmark.circle.fill")
+                    Label(capture.hasAutomaticProposal ? "치수 추정 완료" : "측정점 확인", systemImage: capture.hasAutomaticProposal ? "checkmark.circle.fill" : "point.topleft.down.to.point.bottomright.curvepath")
+                }
+                .font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))
+                .accessibilityIdentifier("camera-fit-detection-status")
+            }
             if capture.method == .lidar, !isUnlocked {
                 Button("자동으로 측정선 찾기") { capture.detectLiDAROutline() }
                     .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
                     .disabled(!capture.trackingReady || capture.isDetecting)
+            }
+            HStack(spacing: metrics.value(8)) {
+                if !isUnlocked && !capture.isComplete {
+                    Button("마지막 점 취소") { capture.undo() }
+                        .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+                        .disabled(isAnalyzing || capture.isDetecting || (capture.points.isEmpty && capture.corners.isEmpty))
+                }
+                Button("다시 촬영") { capture.clearCapture(); selectedPhoto = nil }
+                    .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+                    .disabled(isAnalyzing)
+                    .accessibilityIdentifier("camera-fit-remeasure")
+            }
+        }
+    }
+
+    private func measurementReadout(_ metrics: CoorditResponsiveMetrics) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if capture.isDetecting {
+                ProgressView("옷과 카드를 찾고 있어요")
+                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
             }
             HStack(spacing: metrics.value(8)) {
                 ForEach(capture.dimensions) { dimension in
@@ -318,17 +444,6 @@ struct CoorditFitLabCameraComparison: View {
                     .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("camera-fit-measurement-\(dimension.rawValue)")
                 }
-            }
-            HStack(spacing: metrics.value(8)) {
-                if !isUnlocked && !capture.isComplete {
-                    Button("마지막 점 취소") { capture.undo() }
-                        .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
-                        .disabled(isAnalyzing || (capture.points.isEmpty && capture.corners.isEmpty))
-                }
-                Button("다시 촬영") { capture.clearCapture(); selectedPhoto = nil }
-                    .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
-                    .disabled(isAnalyzing)
-                    .accessibilityIdentifier("camera-fit-remeasure")
             }
         }
     }

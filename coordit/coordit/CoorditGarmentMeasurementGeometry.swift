@@ -5,8 +5,8 @@ enum CoorditGarmentDimension: String, Codable, CaseIterable, Identifiable, Senda
     case shoulder, chest, length, sleeve
     case waist, hip, rise, outseam
 
-    static let upper: [Self] = [.shoulder, .chest, .length, .sleeve]
-    static let lower: [Self] = [.waist, .hip, .rise, .outseam]
+    nonisolated static let upper: [Self] = [.shoulder, .chest, .length, .sleeve]
+    nonisolated static let lower: [Self] = [.waist, .hip, .rise, .outseam]
 
     var id: String { rawValue }
     var title: String {
@@ -183,18 +183,23 @@ struct CoorditGarmentMeasurement: Codable, Equatable, Sendable, Identifiable {
     let measuredAt: Date
     let segments: [CoorditGarmentDimension: CoorditMeasurementSegment]
     let lengthBasis: String
+    let category: CoorditFitLabCategory?
 
     var isLower: Bool { segments[.waist] != nil }
-    var dimensions: [CoorditGarmentDimension] { isLower ? .init(CoorditGarmentDimension.lower) : .init(CoorditGarmentDimension.upper) }
+    var resolvedCategory: CoorditFitLabCategory { category ?? (isLower ? .pants : .tshirt) }
+    var garmentName: String { "잘 맞는 \(resolvedCategory.koreanTitle)" }
+    var dimensions: [CoorditGarmentDimension] { resolvedCategory.cameraDimensions }
 
-    init(id: UUID = UUID(), method: Method, measuredAt: Date = Date(), segments: [CoorditGarmentDimension: CoorditMeasurementSegment], lengthBasis: String) throws {
-        let dimensions = segments[.waist] != nil ? CoorditGarmentDimension.lower : CoorditGarmentDimension.upper
+    init(id: UUID = UUID(), method: Method, measuredAt: Date = Date(), segments: [CoorditGarmentDimension: CoorditMeasurementSegment], lengthBasis: String, category: CoorditFitLabCategory? = nil) throws {
+        let resolved = category ?? (segments[.waist] != nil ? .pants : .tshirt)
+        let dimensions = resolved.cameraDimensions
+        guard Set(segments.keys) == Set(dimensions) else { throw CoorditGarmentMeasurementError.invalidPoint }
         for dimension in dimensions {
             guard let segment = segments[dimension], segment.start.isFinite, segment.end.isFinite,
                   dimension.validRange.contains(segment.centimeters) else { throw CoorditGarmentMeasurementError.invalidDimension(dimension.title) }
         }
         guard (segments[.waist] != nil ? ["waist_to_hem"] : ["high_shoulder_to_hem", "back_neck_to_hem"]).contains(lengthBasis) else { throw CoorditGarmentMeasurementError.invalidDimension("총장 기준") }
-        self.id = id; self.method = method; self.measuredAt = measuredAt; self.segments = segments; self.lengthBasis = lengthBasis
+        self.id = id; self.method = method; self.measuredAt = measuredAt; self.segments = segments; self.lengthBasis = lengthBasis; self.category = category
     }
 
     var measurementValues: [String: Double] {
