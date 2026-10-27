@@ -17,6 +17,7 @@ struct CoorditFitLabFamilyView: View {
     @State private var inputDestination: CoorditFitLabInputDestination = .sources
     @State private var inputNavigationDirection: CoorditNavigationDirection = .forward
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var inheritedTypeSize
 
     var body: some View {
         CoorditScreenScaffold(
@@ -25,10 +26,11 @@ struct CoorditFitLabFamilyView: View {
             contentTop: 115,
             contentBottom: 0
         ) { metrics in
-            VStack(spacing: metrics.value(22)) {
+            VStack(spacing: metrics.value(currentRoute == .fitLabResultTop ? 12 : 22)) {
                 CoorditFitLabTitleCard(
                     title: currentRoute == .fitLabHistoryDetail ? "FIT DETAIL" : "FIT LAB",
-                    metrics: metrics
+                    metrics: metrics,
+                    height: currentRoute == .fitLabResultTop ? 51 : 60
                 ) {
                     handleTitleBack()
                 }
@@ -81,6 +83,7 @@ struct CoorditFitLabFamilyView: View {
             }
             #endif
         }
+        .environment(\.dynamicTypeSize, resolvedTypeSize)
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .onChange(of: coordinator.analysisState) { _, state in
             routeToCompletedAnalysis(state)
@@ -138,6 +141,16 @@ struct CoorditFitLabFamilyView: View {
         #endif
     }
 
+    private var resolvedTypeSize: DynamicTypeSize {
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--coordit-ui-testing"), arguments.contains("--coordit-fitlab-accessibility-xxxl") {
+            return .accessibility5
+        }
+        #endif
+        return inheritedTypeSize
+    }
+
     @ViewBuilder
     private func completedReportContent(
         variant: CoorditFitLabResultVariant,
@@ -146,6 +159,7 @@ struct CoorditFitLabFamilyView: View {
         if coordinator.recommendation != nil {
             CoorditFitLabResultScreen(
                 variant: variant,
+                category: coordinator.draft.category,
                 recommendation: coordinator.recommendation,
                 report: coordinator.report,
                 sizeDrafts: coordinator.draft.sizes,
@@ -766,6 +780,7 @@ private struct CoorditFitLabLoadingScreen: View {
 private struct CoorditFitLabResultScreen: View {
     @EnvironmentObject private var tutorial: CoorditFitLabTutorial
     let variant: CoorditFitLabResultVariant
+    let category: CoorditFitLabCategory
     let recommendation: CoorditFitLabRecommendationResponse?
     let report: CoorditFitLabReportResponse?
     let sizeDrafts: [CoorditFitLabSizeDraft]
@@ -788,7 +803,8 @@ private struct CoorditFitLabResultScreen: View {
                 variant: variant,
                 recommendation: $0,
                 report: report,
-                sizeDrafts: sizeDrafts
+                sizeDrafts: sizeDrafts,
+                category: category
             )
         } ?? []
         let selectedSize = sizeOptions.first { $0.sizeLabel == selectedSizeLabel }
@@ -801,16 +817,14 @@ private struct CoorditFitLabResultScreen: View {
         )
         let selection = CoorditFitLabScoreSelection(selected: selectedSize, recommendation: recommendation, report: report)
         ScrollView {
-            VStack(spacing: metrics.value(14)) {
+            VStack(spacing: metrics.value(11)) {
                 scoreCard
 
-                CoorditFitLabMannequinPanel(
-                    assetName: variant.assetName,
-                    metrics: metrics,
-                    measurements: scoreCard.measurements
+                CoorditFitLabGarmentPanel(
+                    category: category,
+                    measurements: scoreCard.measurements,
+                    metrics: metrics
                 )
-                .frame(height: metrics.value(270))
-                CoorditFitLabOverlayLegend(metrics: metrics)
 
                 CoorditFitLabSizeScoreChart(
                     options: sizeOptions,
@@ -820,6 +834,11 @@ private struct CoorditFitLabResultScreen: View {
 
                 .fitLabTutorialTarget(.result)
 
+                CoorditFitLabSizeReason(
+                    size: selectedSize,
+                    recommendationReason: report?.report.recommendationReason,
+                    metrics: metrics
+                )
                 CoorditFitLabComparisonNote(
                     selected: selection.sizeLabel,
                     recommended: recommendation?.recommendedSize ?? "-",
@@ -947,7 +966,7 @@ private struct CoorditFitLabResultScreen: View {
                 }
                 #endif
             }
-            .padding(.horizontal, metrics.value(24))
+            .padding(.horizontal, metrics.value(16))
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))

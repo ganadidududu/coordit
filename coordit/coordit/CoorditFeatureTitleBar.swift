@@ -5,6 +5,7 @@ struct CoorditFeatureTitleBar: View {
     let title: String
     let metrics: CoorditResponsiveMetrics
     let accessibilityLabel: String
+    var height: CGFloat = 60
     let onBack: () -> Void
 
     var body: some View {
@@ -15,12 +16,14 @@ struct CoorditFeatureTitleBar: View {
                 Text(title)
                     .font(CoorditTypography.gmarketBold(size: metrics.value(22), relativeTo: .headline))
                     .tracking(metrics.value(1.5))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.35)
                 Spacer(minLength: 0)
             }
             .foregroundStyle(.black)
             .padding(.horizontal, metrics.value(29))
             .frame(width: metrics.value(CoorditResponsiveMetrics.designWidth - 32))
-            .frame(height: metrics.value(60))
+            .frame(height: metrics.value(height))
             .background(CoorditDesignTokens.ColorToken.panel)
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
         }

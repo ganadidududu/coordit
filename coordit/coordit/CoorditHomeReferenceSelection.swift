@@ -8,6 +8,7 @@ struct CoorditHomeReferenceCard: View {
     let selectedIDs: Set<String>
     let metrics: CoorditResponsiveMetrics
     let onSelect: () -> Void
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     private var previewItems: [CoorditClosetItem] {
         let selected = items.filter { selectedIDs.contains($0.id) }
@@ -16,13 +17,13 @@ struct CoorditHomeReferenceCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: metrics.value(9)) {
-            HStack(alignment: .top, spacing: metrics.value(10)) {
+            headerLayout {
                 VStack(alignment: .leading, spacing: metrics.value(3)) {
                     Text("기준 의류")
-                        .font(CoorditTypography.gmarketBold(size: metrics.value(14)))
+                        .font(CoorditTypography.gmarketBold(size: metrics.value(17), relativeTo: .headline))
                         .foregroundStyle(CoorditHomeReferencePalette.ink)
                     Text(statusText)
-                        .font(CoorditTypography.gmarketMedium(size: metrics.value(9.5)))
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
                         .foregroundStyle(CoorditHomeReferencePalette.ink.opacity(0.55))
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -30,10 +31,10 @@ struct CoorditHomeReferenceCard: View {
                 Spacer(minLength: 0)
 
                 Button(selectedIDs.isEmpty ? "옷장에서 선택" : "다시 선택", action: onSelect)
-                    .font(CoorditTypography.gmarketBold(size: metrics.value(9.5)))
+                    .font(CoorditTypography.gmarketBold(size: metrics.value(10), relativeTo: .headline))
                     .foregroundStyle(.white)
                     .padding(.horizontal, metrics.value(11))
-                    .frame(height: metrics.value(36))
+                    .frame(minHeight: metrics.value(44))
                     .background(CoorditHomeReferencePalette.ink)
                     .clipShape(Capsule())
                     .coorditPressFeedback()
@@ -41,19 +42,23 @@ struct CoorditHomeReferenceCard: View {
             }
 
             if !previewItems.isEmpty {
-                HStack(spacing: metrics.value(8)) {
+                let layout = typeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: metrics.value(12)))
+                    : AnyLayout(HStackLayout(alignment: .top, spacing: metrics.value(10)))
+                layout {
                     ForEach(previewItems) { item in
-                        HStack(spacing: metrics.value(6)) {
+                        VStack(alignment: .leading, spacing: metrics.value(6)) {
                             CoorditHomeReferenceThumbnail(item: item, metrics: metrics)
-                                .frame(width: metrics.value(34), height: metrics.value(46))
-                            VStack(alignment: .leading, spacing: metrics.value(2)) {
-                                Text(item.name)
-                                    .font(CoorditTypography.gmarketBold(size: metrics.value(8.5)))
-                                    .lineLimit(1)
-                                Text(item.exactCategory.koreanTitle)
-                                    .font(CoorditTypography.gmarketMedium(size: metrics.value(7.5)))
-                                    .foregroundStyle(CoorditHomeReferencePalette.ink.opacity(0.48))
-                            }
+                                .frame(height: metrics.value(55))
+                                .frame(maxWidth: .infinity)
+                                .background(CoorditDesignTokens.ColorToken.field, in: RoundedRectangle(cornerRadius: metrics.value(9)))
+                            Text(item.name)
+                                .font(CoorditTypography.gmarketBold(size: metrics.value(10), relativeTo: .caption))
+                                .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Text(item.exactCategory.koreanTitle)
+                                .font(CoorditTypography.gmarketMedium(size: metrics.value(8), relativeTo: .caption2))
+                                .foregroundStyle(CoorditDesignTokens.ColorToken.muted)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .accessibilityIdentifier("home-reference-preview-\(item.id)")
@@ -69,7 +74,14 @@ struct CoorditHomeReferenceCard: View {
             RoundedRectangle(cornerRadius: metrics.value(CoorditDesignTokens.HomeReferenceMetrics.cardRadius), style: .continuous)
                 .stroke(CoorditHomeReferencePalette.ink.opacity(0.08), lineWidth: metrics.value(0.8))
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("home-reference-card")
+    }
+
+    private var headerLayout: AnyLayout {
+        typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: metrics.value(12)))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: metrics.value(10)))
     }
 
     private var statusText: String {
