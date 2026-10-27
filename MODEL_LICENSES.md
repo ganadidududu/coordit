@@ -1,0 +1,9 @@
+# Model rights register
+
+Authority: `ml/registry/MODEL_MANIFEST.json`. App and server artifact lists are separate and currently empty. No third-party weights are bundled or downloaded.
+
+[Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2) identifies Small as Apache-2.0 and Base/Large/Giant as CC BY-NC 4.0. The [Metric Hypersim Small card](https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Hypersim-Small) says Apache-2.0, but [Hypersim](https://github.com/apple-aiml-research/ml-hypersim) dataset uses CC BY-SA 3.0. Asset, share-alike and teacher/pretraining lineage obligations are unresolved: Metric Small remains pending, not deployed.
+
+[MMPose](https://github.com/open-mmlab/mmpose) Apache code does not clear individual checkpoints/data. [SAM 2](https://github.com/facebookresearch/sam2) code/checkpoint statements do not establish a garment seam model or complete training-data rights. [RF-DETR](https://github.com/roboflow/rf-detr) differentiates Apache-designated components/weights and Plus PML terms. All selected checkpoint candidates remain pending until their exact hash and lineage are reviewed. AGPL/NC weights are blocked by default.
+
+The planned Coordit baseline is randomly initialized and trains only through the approved loader. A CPU smoke checkpoint is a development artifact, never a production model. Artifacts must carry architecture, category/landmark schema, training manifest hash, registry hash, checkpoint SHA-256, metrics and deployment approval. Torch pickle checkpoints are local trusted artifacts only; service loading must use `weights_only=True`.
