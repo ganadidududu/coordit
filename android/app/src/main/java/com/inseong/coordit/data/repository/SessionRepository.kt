@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import retrofit2.HttpException
+import com.google.gson.JsonParser
+import java.util.Base64
 
 class SessionRepository(private val api: CoorditApi, private val store: SessionStore) {
     private val mutableSession = MutableStateFlow<AuthSession?>(null)
@@ -18,10 +20,15 @@ class SessionRepository(private val api: CoorditApi, private val store: SessionS
 
     suspend fun restore(): AuthSession? = sessionMutation.withLock {
         val saved = store.read() ?: return@withLock null
+        val expiration = tokenExpiration(saved.accessToken)
+        if (expiration != null && expiration > System.currentTimeMillis() / 1000 + 5 * 60) {
+            mutableSession.value = saved
+            return@withLock saved
+        }
         val refreshed = try {
             api.refresh(RefreshAuthRequest(saved.refreshToken))
         } catch (error: HttpException) {
-            if (error.code() in setOf(400, 401, 403)) {
+            if (error.code() in setOf(401, 403)) {
                 store.clear()
                 mutableSession.value = null
             }
@@ -62,6 +69,13 @@ class SessionRepository(private val api: CoorditApi, private val store: SessionS
     }
 
     private fun authorization(): String = "Bearer ${checkNotNull(session.value) { "Sign in required" }.accessToken}"
+    private fun tokenExpiration(token: String): Long? = runCatching {
+        val segments = token.split('.')
+        if (segments.size != 3) return@runCatching null
+        val payload = String(Base64.getUrlDecoder().decode(segments[1]), Charsets.UTF_8)
+        val exp = JsonParser.parseString(payload).asJsonObject.get("exp")
+        if (exp == null || !exp.isJsonPrimitive || !exp.asJsonPrimitive.isNumber) null else exp.asLong
+    }.getOrNull()
     private suspend fun persist(value: AuthSession): AuthSession {
         if (!value.isValid()) throw IOException("Invalid authentication response")
         store.write(value)

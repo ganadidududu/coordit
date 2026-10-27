@@ -21,6 +21,7 @@ data class ClosetDraft(
     val hasGarmentImage: Boolean = false,
     val hasSizeChartImage: Boolean = false,
 ) {
+    val isTutorialExample get() = productLink.trim() == com.inseong.coordit.data.fitlab.TutorialExample.link
     val selectedSizeRow get() = sizeRows.firstOrNull { it.id == selectedSizeRowId }
     val measurementKeys get() = if (category.upper) listOf("shoulder_width", "chest_width", "total_length", "sleeve_length") else listOf("waist_width", "hip_width", "rise", "outseam")
     fun measurements(): Map<String, Double> {

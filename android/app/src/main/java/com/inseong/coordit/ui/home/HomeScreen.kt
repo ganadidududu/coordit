@@ -35,6 +35,7 @@ import com.inseong.coordit.data.home.HomeSnapshot
 import com.inseong.coordit.ui.components.*
 import com.inseong.coordit.ui.theme.*
 import kotlinx.coroutines.delay
+import com.inseong.coordit.data.fitlab.FitLabHistorySnapshot
 
 data class HomeUiState(
     val snapshot: HomeSnapshot = HomeSnapshot(),
@@ -51,6 +52,8 @@ fun HomeScreen(
     onCloset: () -> Unit,
     onFitLab: () -> Unit,
     onProfile: () -> Unit,
+    history: List<FitLabHistorySnapshot> = emptyList(),
+    onHistory: (FitLabHistorySnapshot) -> Unit = {},
 ) {
     var picker by remember { mutableStateOf(false) }
     var awaitingSave by remember { mutableStateOf(false) }
@@ -69,7 +72,7 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy((16 * s).dp)) {
             MagazineCard(s)
-            FitHistoryCard(s, onFitLab)
+            FitHistoryCard(s, onFitLab, history, onHistory)
             ReferenceCard(state, s, { picker = true }, onRetry)
             Pressable(onCloset, Modifier.width((361 * s).dp).height((43 * s).dp)
                 .coorditShadow(Color.Black.copy(alpha = .035f), (9 * s).dp, ContinuousRoundedShape((10 * s).dp), (3 * s).dp)
@@ -147,8 +150,8 @@ private fun MagazineCard(s: Float) {
 }
 
 @Composable
-private fun FitHistoryCard(s: Float, onFitLab: () -> Unit) {
-    Column(Modifier.width((361 * s).dp).height((170 * s).dp)
+private fun FitHistoryCard(s: Float, onFitLab: () -> Unit, history: List<FitLabHistorySnapshot>, onHistory: (FitLabHistorySnapshot) -> Unit) {
+    Column(Modifier.width((361 * s).dp).heightIn(min = (170 * s).dp)
         .coorditShadow(Color.Black.copy(alpha = .04f), (12 * s).dp, ContinuousRoundedShape((10 * s).dp), (4 * s).dp).background(AppColors.panel, ContinuousRoundedShape((10 * s).dp))
         .padding(horizontal = (16 * s).dp).padding(top = (14 * s).dp).testTag("coordit-main04-fitlab-card")) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy((7 * s).dp)) {
@@ -163,9 +166,23 @@ private fun FitHistoryCard(s: Float, onFitLab: () -> Unit) {
             Label("HISTORY", CoorditTypography.climate2019(8.8f * s).copy(color = Color.Black, letterSpacing = (-.35f * s).sp))
             Label("최근 저장 2개", CoorditTypography.gmarketMedium(8.2f * s).copy(color = Color.Black.copy(alpha = .48f)))
         }
-        Box(Modifier.padding(top = (6 * s).dp).fillMaxWidth().height((54 * s).dp)
+        if (history.isEmpty()) Box(Modifier.padding(top = (6 * s).dp).fillMaxWidth().height((54 * s).dp)
             .background(Color.Black.copy(alpha = .035f), ContinuousRoundedShape((6 * s).dp)).testTag("coordit-main04-history-empty"), contentAlignment = Alignment.Center) {
             Label("저장한 핏 리포트가 아직 없어요", CoorditTypography.gmarketMedium(10 * s).copy(color = Color.Black.copy(alpha = .55f)))
+        }
+        else Column(Modifier.padding(top = (6 * s).dp, bottom = (12 * s).dp), verticalArrangement = Arrangement.spacedBy((6 * s).dp)) {
+            history.sortedByDescending { it.savedAt }.take(2).forEach { snapshot ->
+                Pressable({ onHistory(snapshot) }, Modifier.fillMaxWidth().testTag("home-history-${snapshot.analysisId}"), cornerRadius = 6 * s) {
+                    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).background(AppColors.closetField).padding((10 * s).dp),
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy((8 * s).dp)) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy((4 * s).dp)) {
+                            Label(snapshot.productName, CoorditTypography.gmarketBold(11 * s))
+                            Label("${snapshot.recommendation.recommendedSize} · ${String.format(java.util.Locale.KOREA, "%.1f", snapshot.recommendation.fitScore)}점", CoorditTypography.gmarketMedium(10 * s))
+                        }
+                        Label("보기 ›", CoorditTypography.gmarketMedium(10 * s))
+                    }
+                }
+            }
         }
     }
 }

@@ -6,6 +6,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,11 +20,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -51,28 +58,28 @@ import com.inseong.coordit.ui.theme.CoorditTypography
 /** Mirrors the production iOS authentication sheet in CoorditSplashAuthenticationSheet.swift. */
 private object AuthenticationDesign {
     const val designWidth = 402f
-    const val sheetHeight = 450f
+    const val sheetHeight = 460f
     const val sheetCornerRadius = 28f
     const val horizontalInset = 24f
-    const val topInset = 22f
-    const val bottomInset = 18f
+    const val topInset = 28f
+    const val bottomInset = 20f
     const val titleSize = 22f
     const val subtitleSize = 13f
     const val titleToSubtitleSpacing = 10f
-    const val subtitleToProviderSpacing = 28f
+    const val subtitleToProviderSpacing = 24f
     const val providerStackSpacing = 12f
     const val providerHeight = 56f
     const val providerHorizontalInset = 16f
-    const val providerCornerRadius = 16f
+    const val providerCornerRadius = 14f
     const val providerTitleSize = 14f
-    const val providerMarkFrame = 28f
+    const val providerMarkFrame = 24f
     const val secondaryActionHeight = 44f
-    const val emailEntrySize = 12f
-    const val statusTopSpacing = 18f
-    const val statusSize = 11.5f
-    const val footerMinimumSpacing = 16f
+    const val emailEntrySize = 13f
+    const val statusTopSpacing = 12f
+    const val statusSize = 13f
+    const val footerMinimumSpacing = 24f
     const val legalSize = 11f
-    val providerSurface = Color(0xFFF6F7FA)
+    val providerSurface = AppColors.field
     val errorForeground = Color(0xFF9E0A14)
 }
 
@@ -91,7 +98,9 @@ fun AuthenticationScreen(
 ) {
     var mode by rememberSaveable { mutableStateOf(AuthenticationMode.Providers) }
     var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    val focus = LocalFocusManager.current
+    LaunchedEffect(mode) { focus.clearFocus() }
     val leave = {
         if (mode == AuthenticationMode.Email) {
             mode = AuthenticationMode.Providers
@@ -106,12 +115,14 @@ fun AuthenticationScreen(
     BoxWithConstraints(modifier.fillMaxSize().testTag("coordit-screen-splash")) {
         val scale = (maxWidth.value / AuthenticationDesign.designWidth).coerceAtLeast(.1f)
         SplashBackground(Modifier.fillMaxSize())
+        BasicText("당신을 위한 디지털 옷장", Modifier.align(Alignment.TopCenter).padding(top = (232 * scale).dp),
+            style = CoorditTypography.gmarketMedium(24.462f * scale).copy(color = Color.White, textAlign = TextAlign.Center))
         Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = .12f)))
         Column(
             Modifier.align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .imePadding()
-                .height((AuthenticationDesign.sheetHeight * scale).dp)
+                .heightIn(min = minOf((AuthenticationDesign.sheetHeight * scale).dp, maxHeight * .92f), max = maxHeight * .92f)
                 .background(
                     Color.White,
                     RoundedCornerShape(
@@ -119,6 +130,7 @@ fun AuthenticationScreen(
                         topEnd = (AuthenticationDesign.sheetCornerRadius * scale).dp,
                     ),
                 )
+                .verticalScroll(rememberScrollState())
                 .padding(
                     start = (AuthenticationDesign.horizontalInset * scale).dp,
                     end = (AuthenticationDesign.horizontalInset * scale).dp,
@@ -136,7 +148,7 @@ fun AuthenticationScreen(
             BasicText(
                 "coordit 시작하기",
                 Modifier.semantics { },
-                style = CoorditTypography.gmarketMedium(AuthenticationDesign.titleSize * scale)
+                style = CoorditTypography.gmarketBold(AuthenticationDesign.titleSize * scale)
                     .copy(color = AppColors.ink),
             )
             BasicText(
@@ -184,6 +196,7 @@ fun AuthenticationScreen(
                 BasicText(
                     error,
                     Modifier.fillMaxWidth().padding(top = (AuthenticationDesign.statusTopSpacing * scale).dp)
+                        .background(AuthenticationDesign.errorForeground.copy(alpha = .06f), RoundedCornerShape(14.dp)).padding(12.dp)
                         .testTag("splash-auth-error")
                         .semantics { liveRegion = LiveRegionMode.Assertive; error(error) },
                     style = CoorditTypography.gmarketMedium(AuthenticationDesign.statusSize * scale)
@@ -191,9 +204,9 @@ fun AuthenticationScreen(
                 )
             }
 
-            Spacer(Modifier.weight(1f, fill = true))
+            Spacer(Modifier.height((AuthenticationDesign.footerMinimumSpacing * scale).dp))
             BasicText(
-                "계속하면 coordit의 이용약관과 개인정보 처리방침에 동의하게 됩니다.",
+                "계속하면 coordit의 이용약관과 개인정보 처리방침에\n동의하게 됩니다.",
                 Modifier.fillMaxWidth().testTag("splash-auth-legal"),
                 style = CoorditTypography.gmarketMedium(AuthenticationDesign.legalSize * scale)
                     .copy(color = AppColors.ink.copy(alpha = .58f), textAlign = TextAlign.Center, lineHeight = (14 * scale).sp),
@@ -241,14 +254,20 @@ private fun ProviderChoices(
                     style = TextStyle(
                         fontFamily = FontFamily.SansSerif,
                         fontWeight = FontWeight.Bold,
-                        fontSize = (16 * scale).sp,
+                        fontSize = (20 * scale).sp,
                         color = Color(0xFF4273D4),
                     ),
                 )
             }
         }
         AppleProviderButton(scale, !busy, onApple)
-        OutlineProviderButton("비회원으로 로그인하기", "splash-auth-guest", scale, !busy, onGuest)
+        SocialProviderButton("비회원으로 계속하기", !busy, scale, "splash-auth-guest", onGuest) {
+            Canvas(Modifier.size((AuthenticationDesign.providerMarkFrame * scale).dp)) {
+                val stroke = Stroke(1.7f * scale * density)
+                drawCircle(AppColors.ink, size.width * .15f, androidx.compose.ui.geometry.Offset(size.width * .5f, size.height * .28f), style = stroke)
+                drawArc(AppColors.ink, 180f, 180f, false, androidx.compose.ui.geometry.Offset(size.width * .15f, size.height * .5f), androidx.compose.ui.geometry.Size(size.width * .7f, size.height * .7f), style = stroke)
+            }
+        }
         SecondaryActionButton("이메일로 로그인", "splash-auth-email", scale, !busy, onEmail)
     }
 }
@@ -265,43 +284,39 @@ private fun SocialProviderButton(
     val shape = RoundedCornerShape((AuthenticationDesign.providerCornerRadius * scale).dp)
     Pressable(onClick, Modifier.fillMaxWidth().testTag(tag), enabled, AuthenticationDesign.providerCornerRadius * scale) {
         Row(
-            Modifier.fillMaxWidth().height((AuthenticationDesign.providerHeight * scale).dp)
-                .background(AuthenticationDesign.providerSurface, shape)
-                .border(1.dp, AppColors.ink.copy(alpha = .09f), shape)
-                .padding(horizontal = (AuthenticationDesign.providerHorizontalInset * scale).dp),
+            Modifier.fillMaxWidth().heightIn(min = (AuthenticationDesign.providerHeight * scale).dp)
+                .background(Color.White, shape)
+                .border(1.dp, AppColors.line, shape)
+                .padding(horizontal = (AuthenticationDesign.providerHorizontalInset * scale).dp, vertical = (12 * scale).dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy((12 * scale).dp),
         ) {
             mark()
             BasicText(
                 title,
+                Modifier.weight(1f),
                 style = CoorditTypography.gmarketMedium(AuthenticationDesign.providerTitleSize * scale)
-                    .copy(color = AppColors.ink),
+                    .copy(color = AppColors.ink, textAlign = TextAlign.Center),
             )
+            Spacer(Modifier.width((AuthenticationDesign.providerMarkFrame * scale).dp))
         }
     }
 }
 
 @Composable
 private fun AppleProviderButton(scale: Float, enabled: Boolean, onClick: () -> Unit) {
-    val shape = RoundedCornerShape((AuthenticationDesign.providerCornerRadius * scale).dp)
-    Pressable(onClick, Modifier.fillMaxWidth().testTag("splash-auth-apple"), enabled, AuthenticationDesign.providerCornerRadius * scale) {
-        Row(
-            Modifier.fillMaxWidth().height((AuthenticationDesign.providerHeight * scale).dp)
-                .background(AppColors.ink, shape)
-                .padding(horizontal = (AuthenticationDesign.providerHorizontalInset * scale).dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy((12 * scale).dp),
-        ) {
+    SocialProviderButton("Apple로 계속하기", enabled, scale, "splash-auth-apple", onClick) {
+        Box(Modifier.size((AuthenticationDesign.providerMarkFrame * scale).dp).clipToBounds()) {
             Image(
                 painterResource(R.drawable.apple_sign_in_logo),
                 contentDescription = null,
-                modifier = Modifier.size((AuthenticationDesign.providerMarkFrame * scale).dp),
-            )
-            BasicText(
-                "Apple로 계속하기",
-                style = CoorditTypography.gmarketMedium(AuthenticationDesign.providerTitleSize * scale)
-                    .copy(color = Color.White),
+                modifier = Modifier.fillMaxSize().graphicsLayer { scaleX = 2f; scaleY = 2f },
+                colorFilter = ColorFilter.colorMatrix(ColorMatrix(floatArrayOf(
+                    0f,0f,0f,0f,0f,
+                    0f,0f,0f,0f,12f,
+                    0f,0f,0f,0f,64f,
+                    1f,0f,0f,0f,0f,
+                ))),
             )
         }
     }
@@ -312,12 +327,11 @@ private fun OutlineProviderButton(title: String, tag: String, scale: Float, enab
     val shape = RoundedCornerShape((AuthenticationDesign.providerCornerRadius * scale).dp)
     Pressable(onClick, Modifier.fillMaxWidth().testTag(tag), enabled, AuthenticationDesign.providerCornerRadius * scale) {
         Box(
-            Modifier.fillMaxWidth().height((AuthenticationDesign.providerHeight * scale).dp)
-                .background(Color.White, shape)
-                .border(1.dp, AppColors.ink.copy(alpha = .2f), shape),
+            Modifier.fillMaxWidth().heightIn(min = (AuthenticationDesign.providerHeight * scale).dp)
+                .background(AppColors.ink, shape),
             contentAlignment = Alignment.Center,
         ) {
-            BasicText(title, style = CoorditTypography.gmarketMedium(AuthenticationDesign.providerTitleSize * scale).copy(color = AppColors.ink))
+            BasicText(title, style = CoorditTypography.gmarketMedium(AuthenticationDesign.providerTitleSize * scale).copy(color = Color.White))
         }
     }
 }
@@ -393,7 +407,7 @@ private fun AuthField(
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth().height((AuthenticationDesign.providerHeight * scale).dp)
+        modifier = Modifier.fillMaxWidth().heightIn(min = (AuthenticationDesign.providerHeight * scale).dp)
             .clip(shape).background(AuthenticationDesign.providerSurface).padding(horizontal = (AuthenticationDesign.providerHorizontalInset * scale).dp)
             .testTag(tag),
         enabled = enabled,

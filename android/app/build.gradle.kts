@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.net.URI
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -10,18 +13,28 @@ val debugAdMobAppId = "ca-app-pub-3940256099942544~3347511713"
 val debugRewardedAdUnitId = "ca-app-pub-3940256099942544/5224354917"
 val releaseAdMobAppId = providers.gradleProperty("ADMOB_APP_ID").orElse("")
 val releaseRewardedAdUnitId = providers.gradleProperty("ADMOB_REWARDED_AD_UNIT_ID").orElse("")
+val signingPropertiesFile = rootProject.file(providers.environmentVariable("COORDIT_SIGNING_PROPERTIES").orElse("signing/release.properties").get())
+val uploadSigning = Properties().apply { if (signingPropertiesFile.isFile) signingPropertiesFile.inputStream().use(::load) }
 require(releaseApi.get().startsWith("https://")) { "Release API URL must use HTTPS" }
 android {
     namespace = "com.inseong.coordit"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
-        applicationId = "com.inseong.coordit"
+        applicationId = "com.coordit.app"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 1
-        versionName = "0.2.0"
+        targetSdk = 36
+        versionCode = providers.gradleProperty("COORDIT_VERSION_CODE").orElse("10").get().toInt()
+        versionName = providers.gradleProperty("COORDIT_VERSION_NAME").orElse("1.0.1").get()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", quoted(providers.gradleProperty("GOOGLE_WEB_CLIENT_ID").orElse("").get()))
+    }
+    signingConfigs {
+        if (signingPropertiesFile.isFile) create("upload") {
+            storeFile = rootProject.file(uploadSigning.getProperty("storeFile"))
+            storePassword = uploadSigning.getProperty("storePassword")
+            keyAlias = uploadSigning.getProperty("keyAlias")
+            keyPassword = uploadSigning.getProperty("keyPassword")
+        }
     }
     buildTypes {
         debug {
@@ -33,6 +46,7 @@ android {
             manifestPlaceholders["adMobApplicationId"] = debugAdMobAppId
         }
         release {
+            signingConfig = signingConfigs.findByName("upload")
             isMinifyEnabled = false
             buildConfigField("String", "API_BASE_URL", quoted(releaseApi.get()))
             buildConfigField("String", "ADMOB_REWARDED_AD_UNIT_ID", quoted(releaseRewardedAdUnitId.get()))
@@ -47,6 +61,12 @@ android {
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = "17" }
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
+}
+tasks.matching { it.name == "bundleRelease" }.configureEach {
+    doFirst {
+        require(signingPropertiesFile.isFile) { "Create an upload key with scripts/create-upload-key.sh or set COORDIT_SIGNING_PROPERTIES." }
+        require(URI(releaseApi.get()).host?.endsWith(".invalid") == false) { "Configure COORDIT_RELEASE_API_BASE_URL before building a release bundle." }
+    }
 }
 dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2024.12.01")

@@ -122,12 +122,16 @@ fun MyPageScreen(
     onRefreshAdPrivacy: (Activity?) -> Unit, onShowAdPrivacyOptions: (Activity?) -> Unit,
     onSaveProfile: (String) -> Unit, onSaveBody: (Double, Double) -> Unit,
     onLogout: () -> Unit, onDeleteAccount: () -> Unit, onClearMessage: () -> Unit,
+    initiallyShowThreadCharge: Boolean = false,
 ) {
     var page by rememberSaveable { mutableStateOf(Page.Root) }
     val activity = LocalContext.current.findActivity()
     val contentScroll = rememberScrollState()
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
+    LaunchedEffect(initiallyShowThreadCharge) {
+        if (initiallyShowThreadCharge) { page = Page.ThreadCharge; onOpenThreadCharge(activity) }
+    }
     LaunchedEffect(page) {
         focusManager.clearFocus(force = true)
         keyboard?.hide()

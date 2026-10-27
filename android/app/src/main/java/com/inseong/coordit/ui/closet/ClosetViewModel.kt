@@ -87,7 +87,20 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
     }
     fun setSizeRows(rows: List<ClosetSizeRow>) = editDraft { it.copy(sizeRows = rows, selectedSizeRowId = null) }
     fun selectSize(id: String) = editDraft { it.copy(selectedSizeRowId = id) }
+    fun startExample() {
+        if (state.value.busy) return
+        pendingKey = null
+        mutableState.value = state.value.copy(screen = ClosetScreen.Link, draft = ClosetDraft(method = ClosetMethod.Link, productLink = com.inseong.coordit.data.fitlab.TutorialExample.link), error = null)
+    }
+    fun finishExample() {
+        mutableState.value = state.value.copy(screen = ClosetScreen.Overview, draft = ClosetDraft(), detail = null, error = null)
+    }
     fun prefill() = runOperation { token, ticket ->
+        if (state.value.draft.isTutorialExample) {
+            val draft = state.value.draft
+            mutableState.value = state.value.copy(draft = draft.copy(name = "[예시] 베이직 ${draft.category.title}", sizeRows = com.inseong.coordit.data.fitlab.TutorialExample.rows(draft.category.upper).map { ClosetSizeRow(it.id, it.label, it.measurements) }))
+            return@runOperation
+        }
         val result = repository.prefill(token, state.value.draft)
         if (current(ticket)) {
             pendingKey = null
@@ -107,6 +120,14 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
         val draft = state.value.draft
         val key = pendingKey ?: UUID.randomUUID().toString().also { pendingKey = it }
         try { draft.request(key) } catch (failure: IllegalArgumentException) { error(failure.message ?: "입력값을 확인해 주세요."); return }
+        if (draft.isTutorialExample) {
+            val row = requireNotNull(draft.selectedSizeRow)
+            mutableState.value = state.value.copy(screen = ClosetScreen.Detail, detail = ClosetDetail(
+                ClosetItem("tutorial-example", draft.name, draft.category, row.label), listOf(row),
+                comparison = ClosetComparison("ready", if (draft.category.upper) "upper" else "lower", 1, 95.0, .5, row.measurements.mapValues { 1.0 }, "예시 점수이며 실제 의류를 분석한 결과가 아니에요."),
+            ))
+            return
+        }
         mutableState.value = state.value.copy(screen = ClosetScreen.Saving)
         runOperation { token, ticket ->
             val detail = repository.create(token, draft, key)

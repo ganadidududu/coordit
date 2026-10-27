@@ -1,5 +1,7 @@
 # Coordit Android
 
+2026-10-27: 최신 원격 `main`(`a4c1f0b831c090040a56d44ceca02b4dad46bb9e`)의 iOS를 기준으로 로그인 시트·공통 제목·홈 히스토리·백그라운드 분석 알림·공유 입력·사용 가이드·예시 체험·의류 사진 보관을 맞췄다. API 36, iOS와 같은 staging 서버, 별도 업로드 키로 서명한 App Bundle을 생성한다. 앞선 기능 브랜치의 iOS 변경은 포함하지 않는다. 최신 변경·검증·출시 제한과 재빌드 방법은 [main 대응 및 App Bundle](docs/MAIN_PARITY_RELEASE.md)을 따른다. 아래 Foundation 기록은 기존 구현의 배경이다.
+
 기존 SwiftUI 원본을 기준으로 진행 중인 Kotlin/Jetpack Compose 포팅이다. 현재 앱은 main 브랜치의 `android/` 폴더에 통합되어 있다. Android Studio에서는 저장소 루트 아래 `android/`를 연다.
 
 현재는 **Foundation + 계정·홈 + 옷장 + FitLab 분석·히스토리 + 마이페이지·설정 단계**다. MainActivity가 제품 시작점이며 Google 로그인, 세션 복원, 온보딩, 홈 기준 의류 조회·선택·저장, 로그아웃을 연결했다. 실제 Google 계정의 서버 인증·프로필 조회·홈 진입과 앱 재시작 후 세션 복원을 확인했다. 옷장 검색·직접 입력·링크 추출·사진 OCR·수정·삭제, FitLab 추천·리포트·히스토리, 프로필·신체정보·알림·개인정보·회원탈퇴를 연결했다. Apple 로그인·Google Play 결제는 남아 있어 아직 출시 가능한 전체 앱은 아니다.
@@ -27,14 +29,14 @@ Android Studio에서 **이 android 디렉터리**를 열고 SDK 경로를 설정
 ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
 ./gradlew :app:connectedDebugAndroidTest
 ./gradlew :app:installDebug
-adb shell am start -n com.inseong.coordit.debug/com.inseong.coordit.MainActivity
+adb shell am start -n com.coordit.app.debug/com.inseong.coordit.MainActivity
 ```
 
 별도 FoundationActivity 검증 화면에서 최초/재방문 스플래시를 열거나 직접 시작할 수 있다. 스플래시 CTA는 개발용 host에서 콜백을 기록하고 catalog로 돌아간다. 사용자 로그인 성공으로 처리하는 코드가 아니다.
 
 ```bash
-adb shell am start -S -n com.inseong.coordit.debug/com.inseong.coordit.preview.FoundationActivity --es route first-install --ez reduce_motion true
-adb shell am start -S -n com.inseong.coordit.debug/com.inseong.coordit.preview.FoundationActivity --es route returning --ez reduce_motion true
+adb shell am start -S -n com.coordit.app.debug/com.inseong.coordit.preview.FoundationActivity --es route first-install --ez reduce_motion true
+adb shell am start -S -n com.coordit.app.debug/com.inseong.coordit.preview.FoundationActivity --es route returning --ez reduce_motion true
 ```
 
 DEBUG API와 Google Web Client ID는 기존 iOS의 staging 공개 설정을 `gradle.properties`에 기록했다. 로컬 서버는 `-PCOORDIT_API_BASE_URL=http://10.0.2.2:4000/`로 선택한다. API 설정을 바꾸려면 Gradle 속성을 지정한다. Foundation catalog만 서버 호출을 하지 않는다.
@@ -68,4 +70,4 @@ node render-assets.cjs
 - [FitLab 검증 기록](docs/FITLAB_VALIDATION.md)
 - [마이페이지·설정 검증 기록](docs/MYPAGE_VALIDATION.md)
 
-원본 기준 `bd1f9311638645a4a1500c2a5693a33482dc1214` (2026-09-16 fetch). iOS·backend·frontend 소스는 수정하지 않았다. commit/push는 하지 않았다.
+기존 Foundation 감사 기준은 `bd1f9311638645a4a1500c2a5693a33482dc1214`이며, 이번 업데이트의 기준은 위의 최신 `main`이다. iOS·backend·frontend 소스는 수정하지 않았다.

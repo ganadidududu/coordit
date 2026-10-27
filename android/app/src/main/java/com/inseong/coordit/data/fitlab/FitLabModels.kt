@@ -8,6 +8,7 @@ import java.util.Locale
 enum class FitLabSource { Manual, Ocr, Url }
 enum class FitLabScreen { Sources, Manual, Ocr, Url, Review, References, Loading, Result, HistoryDetail }
 enum class FitLabStep { Idle, References, Product, Sizes, Recommendation, Report, Complete }
+enum class FitLabNotice { Running, Completed, Failed }
 
 data class FitLabSizeDraft(
     val id: String,
@@ -25,6 +26,7 @@ data class FitLabDraft(
     val selectedReferenceIds: Set<String> = emptySet(),
 ) {
     val upper get() = category.upper
+    val isTutorialExample get() = productUrl.trim() == TutorialExample.link
     fun validationError(): String? {
         if (productName.isBlank()) return "상품명을 입력해 주세요."
         if (sizes.isEmpty()) return "사이즈 행을 하나 이상 추가해 주세요."
@@ -126,6 +128,7 @@ data class FitLabCheckpoint(
 )
 
 data class FitLabState(
+    val accountReady: Boolean = false,
     val screen: FitLabScreen = FitLabScreen.Sources,
     val draft: FitLabDraft = FitLabDraft(),
     val references: List<FitLabReference> = emptyList(),
@@ -140,6 +143,8 @@ data class FitLabState(
     val history: List<FitLabHistorySnapshot> = emptyList(),
     val selectedHistory: FitLabHistorySnapshot? = null,
     val historySaved: Boolean = false,
+    val notice: FitLabNotice? = null,
+    val needsThreads: Boolean = false,
 )
 
 fun measurementKeys(upper: Boolean): List<String> = if (upper) {
