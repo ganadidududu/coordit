@@ -105,6 +105,8 @@ internal class ARCoreCameraSurface(
             if (shutter.getAndSet(false)) {
                 if (plane == null) { post { status("평면과 카메라가 안정되면 다시 촬영해주세요.", false) }; return }
                 frame.acquireCameraImage().use { image ->
+                    check(image.timestamp == frame.androidCameraTimestamp) { "Image and AR pose are different sensor frames" }
+                    check(image.cropRect == Rect(0, 0, image.width, image.height)) { "Cropped sensor image needs separate intrinsics" }
                     val intrinsics = frame.camera.imageIntrinsics
                     check(intrinsics.imageDimensions.contentEquals(intArrayOf(image.width, image.height))) { "Sensor coordinates disagree" }
                     val orientation = activity.getSystemService(CameraManager::class.java)

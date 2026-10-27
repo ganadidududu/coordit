@@ -20,6 +20,7 @@ struct CoorditFitLabCameraComparison: View {
     @State private var showsDiscardMeasurement = false
     @State private var showsAIProcessingConsent = false
     @State private var cameraAuthorized = AVCaptureDevice.authorizationStatus(for: .video) == .authorized
+    @GestureState private var isMagnifyingPhoto = false
     @State private var photoScale: CGFloat = 1
     @State private var accumulatedPhotoScale: CGFloat = 1
     @State private var photoOffset = CGSize.zero
@@ -274,6 +275,15 @@ struct CoorditFitLabCameraComparison: View {
                         Image(uiImage: image).resizable().scaledToFit()
                             .accessibilityLabel("측정 사진. 표시된 점을 끌어서 조정하세요")
                             .accessibilityIdentifier("camera-fit-photo-viewport")
+                            .accessibilityValue("\(Int(photoScale * 100))% 확대")
+                            .gesture(DragGesture(minimumDistance: 12, coordinateSpace: .named("camera-photo-viewport"))
+                                .onChanged { value in
+                                    guard photoScale > 1, !isMagnifyingPhoto, draggedOrigins.isEmpty else { return }
+                                    photoOffset = .init(width: accumulatedPhotoOffset.width + value.translation.width,
+                                                        height: accumulatedPhotoOffset.height + value.translation.height)
+                                }.onEnded { _ in
+                                    if !isMagnifyingPhoto { accumulatedPhotoOffset = photoOffset }
+                                }, including: photoScale > 1 ? .all : .none)
                         measurementOverlay(size: geometry.size)
                         if capture.isComplete, !isUnlocked, !isAnalyzing {
                             endpointHandles(size: geometry.size)
@@ -285,20 +295,22 @@ struct CoorditFitLabCameraComparison: View {
                     .scaleEffect(photoScale)
                     .offset(photoOffset)
                 }
+                .coordinateSpace(name: "camera-photo-viewport")
                 .clipped()
                 .contentShape(Rectangle())
-                .gesture(SpatialTapGesture().onEnded { tap in
+                .gesture(SpatialTapGesture(coordinateSpace: .named("camera-photo-viewport")).onEnded { tap in
                     guard !isAnalyzing, !isUnlocked, !capture.isDetecting else { return }
                     let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
                     let x = ((tap.location.x - center.x - photoOffset.width) / photoScale + center.x) / geometry.size.width
                     let y = ((tap.location.y - center.y - photoOffset.height) / photoScale + center.y) / geometry.size.height
                     capture.tapImage(.init(x: x, y: y))
                 })
-                .simultaneousGesture(MagnifyGesture().onChanged { value in photoScale = min(5, max(1, accumulatedPhotoScale * value.magnification)) }.onEnded { _ in accumulatedPhotoScale = photoScale })
-                .simultaneousGesture(DragGesture(minimumDistance: 12).onChanged { value in
-                    guard photoScale > 1 else { return }
-                    photoOffset = .init(width: accumulatedPhotoOffset.width + value.translation.width, height: accumulatedPhotoOffset.height + value.translation.height)
-                }.onEnded { _ in accumulatedPhotoOffset = photoOffset }, including: photoScale > 1 ? .all : .none)
+                .simultaneousGesture(MagnifyGesture().updating($isMagnifyingPhoto) { _, active, _ in active = true }
+                    .onChanged { value in photoScale = min(5, max(1, accumulatedPhotoScale * value.magnification)) }
+                    .onEnded { _ in accumulatedPhotoScale = photoScale })
+                .onChange(of: isMagnifyingPhoto) { _, active in
+                    if active { photoOffset = accumulatedPhotoOffset }
+                }
             }
             .aspectRatio(image.size.width / image.size.height, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
@@ -341,8 +353,9 @@ struct CoorditFitLabCameraComparison: View {
                 .overlay(Circle().stroke(CoorditDesignTokens.ColorToken.blue, lineWidth: 3))
                 .frame(width: 32, height: 32)
                 .contentShape(Circle())
+                .scaleEffect(1 / photoScale)
                 .position(x: point.x * size.width, y: point.y * size.height)
-                .gesture(DragGesture(minimumDistance: 0).onChanged { value in
+                .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("camera-photo-viewport")).onChanged { value in
                     let key = index + 100
                     let origin = draggedOrigins[key] ?? point
                     draggedOrigins[key] = origin
@@ -391,6 +404,7 @@ struct CoorditFitLabCameraComparison: View {
             }
         }
         .accessibilityHidden(true)
+        .allowsHitTesting(false)
     }
 
     private func endpointHandles(size: CGSize) -> some View {
@@ -402,8 +416,9 @@ struct CoorditFitLabCameraComparison: View {
                     .overlay(Circle().stroke(CoorditFitLabPalette.ink, lineWidth: 3))
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
+                    .scaleEffect(1 / photoScale)
                     .position(x: projected.x * size.width, y: projected.y * size.height)
-                    .gesture(DragGesture(minimumDistance: 0).onChanged { value in
+                    .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("camera-photo-viewport")).onChanged { value in
                         let origin = draggedOrigins[index] ?? projected
                         draggedOrigins[index] = origin
                         let x = origin.x + value.translation.width / size.width / photoScale

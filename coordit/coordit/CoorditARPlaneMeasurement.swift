@@ -110,6 +110,8 @@ struct CoorditARPlaneStability {
     private var firstTime: Double?
     private var previousTime: Double?
     private var previousCamera: simd_float4x4?
+    private var previousPlane: simd_float4x4?
+    private var baselineOrigin: SIMD3<Float>?
     private var stillSince: Double?
     private(set) var movement: Float = 0
     private(set) var stableSeconds: Double = 0
@@ -117,7 +119,16 @@ struct CoorditARPlaneStability {
     mutating func reset() { self = .init() }
 
     mutating func observe(planeID: UUID, plane: simd_float4x4, camera: simd_float4x4, timestamp: Double) -> Bool {
-        if let previousTime, timestamp <= previousTime { return stableSeconds >= 1 && movement >= 0.03 && stillSince.map { timestamp - $0 >= 0.3 } == true }
+        guard timestamp.isFinite, (0..<4).allSatisfy({ c in
+            (0..<4).allSatisfy { r in plane[c, r].isFinite && camera[c, r].isFinite }
+        }) else { reset(); return false }
+        if let previousTime, timestamp < previousTime { reset(); return false }
+        if let previousTime, timestamp == previousTime {
+            guard self.planeID == planeID, let previousCamera, let previousPlane,
+                  (0..<4).allSatisfy({ simd_distance(previousCamera[$0], camera[$0]) < 0.000001 &&
+                                       simd_distance(previousPlane[$0], plane[$0]) < 0.000001 }) else { reset(); return false }
+            return stableSeconds >= 1 && movement >= 0.03 && stillSince.map { timestamp - $0 >= 0.3 } == true
+        }
         if self.planeID != planeID || previousTime.map({ timestamp - $0 > 0.5 }) == true ||
             reference.map({ simd_distance($0.columns.3, plane.columns.3) > 0.01 || simd_dot($0.columns.1, plane.columns.1) < 0.999 }) == true {
             reset()
@@ -127,12 +138,16 @@ struct CoorditARPlaneStability {
         firstTime = firstTime ?? timestamp
         if let previousCamera, let previousTime {
             let step = simd_distance(previousCamera.columns.3, camera.columns.3)
-            movement += step
             let duration = Float(timestamp - previousTime)
-            let still = step / max(duration, 0.001) < 0.03 && simd_dot(previousCamera.columns.2, camera.columns.2) > 0.9995
+            let rotation = simd_quatf(previousCamera).inverse * simd_quatf(camera)
+            let angle = 2 * atan2(simd_length(rotation.imag), abs(rotation.real))
+            let still = step / max(duration, 0.001) < 0.03 && angle / max(duration, 0.001) < 0.04
             stillSince = still ? (stillSince ?? timestamp) : nil
         }
+        baselineOrigin = baselineOrigin ?? camera.columns.3.xyz
+        if let baselineOrigin { movement = max(movement, simd_distance(baselineOrigin, camera.columns.3.xyz)) }
         previousCamera = camera
+        previousPlane = plane
         previousTime = timestamp
         stableSeconds = timestamp - (firstTime ?? timestamp)
         return stableSeconds >= 1 && movement >= 0.03 && stillSince.map { timestamp - $0 >= 0.3 } == true
@@ -163,6 +178,9 @@ struct CoorditARPlaneCapture {
         }
         let buffer = frame.capturedImage
         let rawWidth = CVPixelBufferGetWidth(buffer), rawHeight = CVPixelBufferGetHeight(buffer)
+        guard frame.camera.imageResolution == CGSize(width: rawWidth, height: rawHeight) else {
+            throw CoorditGarmentMeasurementError.invalidPoint
+        }
         let source = CIImage(cvPixelBuffer: buffer).oriented(imageOrientation)
         guard let bitmap = CIContext().createCGImage(source, from: source.extent) else { throw CoorditGarmentMeasurementError.invalidPoint }
         image = UIImage(cgImage: bitmap)

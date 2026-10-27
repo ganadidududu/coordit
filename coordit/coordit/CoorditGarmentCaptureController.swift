@@ -389,7 +389,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
         guard method == .arPlane, !sessionInterrupted, trackingReady, let view = sceneView,
               let frame = view.session.currentFrame, case .normal = frame.camera.trackingState,
               let plane = centerPlane(view), plane.extent.x >= 0.25, plane.extent.z >= 0.25,
-              abs(frame.camera.transform.columns.2.y) > 0.75,
+              frame.camera.transform.columns.2.y > 0.75,
               planeStability.observe(planeID: plane.identifier, plane: plane.transform, camera: frame.camera.transform, timestamp: frame.timestamp) else {
             arFailureReason = "plane_or_tracking_unstable"
             message = "평면을 인식한 뒤 카메라를 잠깐 고정해주세요. 카드 촬영으로 전환할 수도 있어요."
@@ -535,7 +535,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
         let ready: Bool
         if case .normal = frame.camera.trackingState {
             if method == .arPlane, let plane = centerPlane(view), plane.extent.x >= 0.25, plane.extent.z >= 0.25,
-               abs(frame.camera.transform.columns.2.y) > 0.75 {
+               frame.camera.transform.columns.2.y > 0.75 {
                 ready = planeStability.observe(planeID: plane.identifier, plane: plane.transform, camera: frame.camera.transform, timestamp: frame.timestamp)
             } else {
                 if method == .arPlane { planeStability.reset() }

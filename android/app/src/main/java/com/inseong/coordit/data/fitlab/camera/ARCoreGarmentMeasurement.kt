@@ -8,7 +8,6 @@ import com.google.ar.core.Plane
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.inseong.coordit.BuildConfig
-import kotlin.math.abs
 import kotlin.math.sqrt
 
 /** Host owns camera permission, GL camera texture, display geometry and resume/pause/close.
@@ -57,17 +56,15 @@ class ARCoreGarmentMeasurement {
     private var planeOrigin: FloatArray? = null
     private var firstTimestamp = 0L
     private var lastTimestamp = 0L
-    private var lastCamera: FloatArray? = null
-    private var lastCameraRotation: FloatArray? = null
+    private val cameraMotion = ARCaptureMotion()
     private var stillSince = 0L
-    private var movement = 0.0
 
     val stablePlaneSeconds: Double get() = (lastTimestamp - firstTimestamp) / 1e9
-    val cameraMotionBaselineMeters: Double get() = movement
+    val cameraMotionBaselineMeters: Double get() = cameraMotion.baselineMeters
 
     fun reset() {
         plane = null; planeOrigin = null; firstTimestamp = 0; lastTimestamp = 0
-        lastCamera = null; lastCameraRotation = null; stillSince = 0; movement = 0.0
+        cameraMotion.reset(); stillSince = 0
     }
 
     /** Manual or heuristic endpoints are all hit-tested synchronously against ONE captured Frame. */
@@ -89,7 +86,7 @@ class ARCoreGarmentMeasurement {
         val selected = hits.first().trackable as Plane
         if (hits.any { it.trackable != selected }) return Result.Rejected("different_planes")
         val down = frame.camera.pose.getTransformedAxis(2, 1f)
-        if (abs(down[1]) < .75f) return Result.Rejected("camera_tilted")
+        if (down[1] < .75f) return Result.Rejected("camera_tilted")
         if (!observe(selected, frame)) return Result.Rejected("plane_or_scale_unstable")
         val segments = keys.mapIndexed { index, key ->
             val a = hits[index * 2].hitPose.translation.toList()
@@ -107,7 +104,7 @@ class ARCoreGarmentMeasurement {
     /** Observe the center plane on each rendered Frame before freezing a raw camera image. */
     fun readyPlane(frame: Frame, center: Point): Plane? {
         if (frame.camera.trackingState != TrackingState.TRACKING) { reset(); return null }
-        if (abs(frame.camera.pose.getTransformedAxis(2, 1f)[1]) < .75f) { reset(); return null }
+        if (frame.camera.pose.getTransformedAxis(2, 1f)[1] < .75f) { reset(); return null }
         val candidate = frame.hitTest(center.x, center.y).firstOrNull { hit ->
             val p = hit.trackable as? Plane
             p != null && p.type == Plane.Type.HORIZONTAL_UPWARD_FACING && p.trackingState == TrackingState.TRACKING &&
@@ -120,24 +117,20 @@ class ARCoreGarmentMeasurement {
         val origin = candidate.centerPose.translation
         val position = frame.camera.pose.translation
         fun distance(a: FloatArray, b: FloatArray) = sqrt(a.indices.sumOf { (a[it] - b[it]).toDouble().let { d -> d * d } })
-        if (frame.timestamp <= lastTimestamp) return false
+        if (frame.timestamp < lastTimestamp) { reset(); return false }
+        if (frame.timestamp == lastTimestamp) return candidate == plane &&
+            cameraMotion.matches(position, frame.camera.pose.rotationQuaternion, frame.timestamp) &&
+            frame.timestamp - firstTimestamp >= 1_000_000_000L && cameraMotion.baselineMeters >= .03 &&
+            stillSince > 0 && frame.timestamp - stillSince >= 300_000_000L
         if (candidate != plane || (lastTimestamp > 0 && frame.timestamp - lastTimestamp > 500_000_000L) ||
             planeOrigin?.let { distance(it, origin) > .01 } == true) reset()
         plane = candidate
         planeOrigin = planeOrigin ?: origin.copyOf()
         if (firstTimestamp == 0L) firstTimestamp = frame.timestamp
-        lastCamera?.let { previous ->
-            val step = distance(position, previous)
-            movement += step
-            val speed = step / ((frame.timestamp - lastTimestamp) / 1e9)
-            val rotation = frame.camera.pose.rotationQuaternion
-            val dot = lastCameraRotation?.let { previousRotation -> abs(rotation.indices.sumOf { rotation[it].toDouble() * previousRotation[it] }) } ?: 0.0
-            stillSince = if (speed < .03 && dot > .9995) { if (stillSince == 0L) frame.timestamp else stillSince } else 0L
-        }
-        lastCamera = position.copyOf()
-        lastCameraRotation = frame.camera.pose.rotationQuaternion.copyOf()
+        val still = cameraMotion.observe(position, frame.camera.pose.rotationQuaternion, frame.timestamp)
+        stillSince = if (still) { if (stillSince == 0L) frame.timestamp else stillSince } else 0L
         lastTimestamp = frame.timestamp
-        return frame.timestamp - firstTimestamp >= 1_000_000_000L && movement >= .03 &&
+        return frame.timestamp - firstTimestamp >= 1_000_000_000L && cameraMotion.baselineMeters >= .03 &&
             stillSince > 0 && frame.timestamp - stillSince >= 300_000_000L
     }
 }

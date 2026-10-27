@@ -167,6 +167,37 @@ final class CoorditCameraComparisonUITests: XCTestCase {
         capture("camera-ready-accessibility", app)
     }
 
+    func testZoomedLandmarkDragFollowsFingerWithoutPanningThePhoto() {
+        let app = launch(balance: 3)
+        reachable("fitlab-camera-comparison", app).tap()
+        reachable("camera-fit-test-fixture", app).tap()
+        let photo = element("camera-fit-photo-viewport", app)
+        XCTAssertTrue(photo.waitForExistence(timeout: 5))
+        photo.pinch(withScale: 1.5, velocity: 1)
+        capture("zoomed-before-landmark-drag", app)
+        let point = element("camera-fit-point-2", app)
+        let zoomText = (photo.value as? String)?.components(separatedBy: "%").first ?? "100"
+        let scale = (Double(zoomText) ?? 100) / 100
+        let viewportCenter = CGPoint(x: app.frame.midX, y: photo.frame.midY)
+        let canvas = app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: viewportCenter.x, dy: viewportCenter.y))
+        // Zoom may move the selected seam outside the clipped viewport. Pan it back before editing.
+        for _ in 0..<6 {
+            let dx = viewportCenter.x - point.frame.midX
+            let dy = viewportCenter.y - point.frame.midY
+            if abs(dx) < 35 && abs(dy) < 35 { break }
+            canvas.press(forDuration: 0.1, thenDragTo: canvas.withOffset(CGVector(dx: min(80, max(-80, dx)), dy: min(80, max(-80, dy)))))
+        }
+        XCTAssertGreaterThan(scale, 1)
+        XCTAssertTrue(point.isHittable)
+        let initial = point.frame
+        let photoBefore = photo.frame
+        let start = point.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 30, dy: 0)))
+        XCTAssertEqual(point.frame.midX - initial.midX, 30, accuracy: 8, "The displayed landmark must follow the user's finger at zoom")
+        XCTAssertEqual(photo.frame.midX, photoBefore.midX, accuracy: 2, "Editing a measurement point must not pan the photo")
+        capture("zoomed-landmark-correction", app)
+    }
+
     private func launch(balance: Int, contentSize: String? = nil) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--coordit-ui-testing", "--coordit-start-route", "fitlab-input", "--coordit-fitlab-fixture", "camera-success", "--coordit-thread-balance", String(balance)]
