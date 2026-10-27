@@ -7,13 +7,22 @@ struct CoorditFitLabHistoryDetailScreen: View {
     let delete: () async -> Void
     let onRouteChange: (CoorditFrameRoute) -> Void
     @State private var isDeleting = false
+    @State private var selectedSizeLabel: String?
 
     var body: some View {
         let variant = CoorditFitLabResultVariant.history(snapshot.garmentKind)
-        let scoreCard = CoorditFitLabScoreCard(
+        let sizeOptions = CoorditFitLabSizeOption.makeOptions(
             variant: variant,
             recommendation: snapshot.recommendation,
             report: snapshot.report,
+            sizeDrafts: snapshot.sizeDrafts ?? [],
+            category: snapshot.category
+        )
+        let selectedSize = sizeOptions.first { $0.sizeLabel == selectedSizeLabel }
+            ?? sizeOptions.first { $0.isRecommended } ?? sizeOptions.first
+        let scoreCard = CoorditFitLabScoreCard(
+            variant: variant,
+            selectedSize: selectedSize,
             metrics: metrics
         )
         ScrollView {
@@ -23,7 +32,7 @@ struct CoorditFitLabHistoryDetailScreen: View {
                         .font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))
                         .foregroundStyle(Color.black)
                         .accessibilityIdentifier("fitlab-history-detail-product")
-                    Text("\(snapshot.category.rawValue) · \(snapshot.recommendation.recommendedSize) · \(snapshot.savedAt.formatted(date: .abbreviated, time: .shortened))")
+                    Text("\(snapshot.category.koreanTitle) · \(snapshot.recommendation.recommendedSize) · \(snapshot.savedAt.formatted(date: .abbreviated, time: .shortened))")
                         .font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .body))
                         .foregroundStyle(Color.black.opacity(0.62))
                     Text("입력: \(sourceLabel) · 기준 옷 \(snapshot.references.count)개")
@@ -43,18 +52,17 @@ struct CoorditFitLabHistoryDetailScreen: View {
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
 
                 scoreCard
-                CoorditFitLabMannequinPanel(
-                    assetName: variant.assetName,
-                    metrics: metrics,
-                    measurements: scoreCard.measurements
-                )
-                .frame(height: metrics.value(270))
-                CoorditFitLabOverlayLegend(metrics: metrics)
-                CoorditFitLabSizeScoreChart(
-                    report: snapshot.report,
-                    recommendation: snapshot.recommendation,
+                CoorditFitLabGarmentPanel(
+                    category: snapshot.category,
+                    measurements: scoreCard.measurements,
                     metrics: metrics
                 )
+                CoorditFitLabSizeScoreChart(
+                    options: sizeOptions,
+                    selectedSizeLabel: $selectedSizeLabel,
+                    metrics: metrics
+                )
+                CoorditFitLabSizeReason(size: selectedSize, recommendationReason: snapshot.report?.report.recommendationReason, metrics: metrics)
                 CoorditFitLabPointScoreChart(
                     scores: snapshot.report?.chartData.fitPointScores ?? [],
                     metrics: metrics
@@ -78,11 +86,12 @@ struct CoorditFitLabHistoryDetailScreen: View {
                 .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
                 .accessibilityIdentifier("fitlab-history-delete")
             }
-            .padding(.horizontal, metrics.value(24))
+            .padding(.horizontal, metrics.value(16))
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
         .accessibilityIdentifier("fitlab-history-detail")
+        .onChange(of: snapshot.id) { _, _ in selectedSizeLabel = nil }
     }
 
     private var sourceLabel: String {

@@ -104,7 +104,8 @@ struct CoorditFitLabSizeOption: Identifiable {
         variant: CoorditFitLabResultVariant,
         recommendation: CoorditFitLabRecommendationResponse,
         report: CoorditFitLabReportResponse?,
-        sizeDrafts: [CoorditFitLabSizeDraft]
+        sizeDrafts: [CoorditFitLabSizeDraft],
+        category: CoorditFitLabCategory? = nil
     ) -> [CoorditFitLabSizeOption] {
         let reportScoreRows = report?.chartData.sizeScoreRanking ?? []
         let reportScoresBySize = scoresBySize(reportScoreRows)
@@ -135,7 +136,7 @@ struct CoorditFitLabSizeOption: Identifiable {
                 sizeLabel: draft.label,
                 fitScore: score,
                 isRecommended: isRecommended,
-                measurements: measurements
+                measurements: measurements.filter { category != .skirt || $0.key != .rise }
             )
         }
 
@@ -157,6 +158,7 @@ struct CoorditFitLabSizeOption: Identifiable {
                     isRecommended: isRecommended,
                     measurements: isRecommended
                         ? authoritativeMeasurements(variant: variant, comparisons: referenceComparisons)
+                            .filter { category != .skirt || $0.key != .rise }
                         : []
                 )
             }
@@ -168,6 +170,7 @@ struct CoorditFitLabSizeOption: Identifiable {
                 fitScore: recommendation.fitScore,
                 isRecommended: true,
                 measurements: authoritativeMeasurements(variant: variant, comparisons: referenceComparisons)
+                    .filter { category != .skirt || $0.key != .rise }
             )
         ]
     }
@@ -268,6 +271,7 @@ struct CoorditFitLabSizeOption: Identifiable {
 }
 
 struct CoorditFitLabScoreCard: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     let variant: CoorditFitLabResultVariant
     let selectedSize: CoorditFitLabSizeOption?
     let metrics: CoorditResponsiveMetrics
@@ -306,46 +310,66 @@ struct CoorditFitLabScoreCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: metrics.value(10)) {
-            Text(selectedSize?.isRecommended == false ? "선택 사이즈 비교 기준" : variant.scoreBasis)
-                .font(CoorditTypography.mona12(size: metrics.value(10), relativeTo: .caption))
-                .foregroundStyle(Color.black.opacity(0.64))
-            Text("FIT SCORE")
-                .font(CoorditTypography.climate2019(size: metrics.value(19), relativeTo: .headline))
-                .tracking(metrics.value(0.7))
-                .foregroundStyle(Color.black)
-
-            HStack(alignment: .firstTextBaseline, spacing: metrics.value(7)) {
-                VStack(alignment: .leading, spacing: metrics.value(2)) {
-                    Text(selectedSize?.isRecommended == false ? "선택한 사이즈" : "추천 사이즈")
-                        .font(CoorditTypography.gmarketMedium(size: metrics.value(9), relativeTo: .caption))
-                    Text(selectedSize?.sizeLabel ?? "-")
-                        .font(CoorditTypography.gmarketBold(size: metrics.value(20), relativeTo: .title3))
-                        .accessibilityIdentifier("fitlab-recommended-size")
+            headlineLayout {
+                VStack(alignment: .leading, spacing: metrics.value(9)) {
+                    Text(selectedSize?.isRecommended == false ? "YOUR SELECTED FIT" : "YOUR BEST FIT")
+                        .font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .caption))
+                        .foregroundStyle(CoorditDesignTokens.ColorToken.muted)
+                    HStack(alignment: .firstTextBaseline, spacing: metrics.value(5)) {
+                        Text(selectedSize?.isRecommended == false ? "선택 사이즈" : "추천 사이즈")
+                        Text(selectedSize?.sizeLabel ?? "-")
+                            .accessibilityIdentifier("fitlab-recommended-size")
+                    }
+                    .font(CoorditTypography.gmarketBold(size: metrics.value(26), relativeTo: .title2))
+                    .minimumScaleFactor(0.65)
+                    .lineLimit(2)
                 }
-                Spacer(minLength: 0)
-                VStack(alignment: .trailing, spacing: metrics.value(2)) {
-                    Text("총점")
+                if !typeSize.isAccessibilitySize {
+                    Spacer(minLength: 0)
+                    Rectangle().fill(CoorditDesignTokens.ColorToken.line)
+                        .frame(width: 1, height: metrics.value(57))
+                        .accessibilityHidden(true)
+                }
+                VStack(alignment: .leading, spacing: metrics.value(7)) {
+                    Text("SCORE")
                         .font(CoorditTypography.gmarketMedium(size: metrics.value(9), relativeTo: .caption))
-                    Text(scoreText)
-                        .font(CoorditTypography.gmarketBold(size: metrics.value(20), relativeTo: .title3))
-                        .accessibilityIdentifier("fitlab-total-score")
+                        .foregroundStyle(CoorditDesignTokens.ColorToken.muted)
+                    HStack(alignment: .firstTextBaseline, spacing: 0) {
+                        Text(scoreText)
+                            .font(CoorditTypography.gmarketBold(size: metrics.value(32), relativeTo: .largeTitle))
+                            .accessibilityIdentifier("fitlab-total-score")
+                        Text("점")
+                            .font(CoorditTypography.gmarketBold(size: metrics.value(17), relativeTo: .headline))
+                    }
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                 }
             }
-            .foregroundStyle(Color.black)
+            Text(selectedSize?.comparisonSummary ?? "비교 데이터를 불러오면 핏을 확인할 수 있어요.")
+                .font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .body))
+                .foregroundStyle(CoorditDesignTokens.ColorToken.muted)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(metrics.value(14))
+        .foregroundStyle(CoorditDesignTokens.ColorToken.ink)
+        .padding(metrics.value(16))
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(CoorditFitLabPalette.surface)
-        .clipShape(RoundedRectangle(cornerRadius: metrics.value(7)))
+        .clipShape(RoundedRectangle(cornerRadius: metrics.value(10)))
         .overlay(
-            RoundedRectangle(cornerRadius: metrics.value(7))
-                .stroke(Color.black.opacity(0.12), lineWidth: 1)
+            RoundedRectangle(cornerRadius: metrics.value(10))
+                .stroke(CoorditDesignTokens.ColorToken.line, lineWidth: 1)
         )
     }
 
     private var scoreText: String {
         guard let score = selectedSize?.fitScore, score.isFinite else { return "-" }
         return CoorditFitLabResultMeasurement.score(score)
+    }
+
+    private var headlineLayout: AnyLayout {
+        typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: metrics.value(12)))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: metrics.value(12)))
     }
 }
 
@@ -392,6 +416,7 @@ struct CoorditFitLabMeasurementRows: View {
 }
 
 struct CoorditFitLabSizeScoreChart: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     let options: [CoorditFitLabSizeOption]
     @Binding var selectedSizeLabel: String?
     private let isInteractive: Bool
@@ -428,10 +453,10 @@ struct CoorditFitLabSizeScoreChart: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: metrics.value(12)) {
+        VStack(alignment: .leading, spacing: metrics.value(2)) {
             VStack(alignment: .leading, spacing: metrics.value(3)) {
-                Text("SIZE SCORE COMPARISON")
-                    .font(CoorditTypography.mona12(size: metrics.value(16), relativeTo: .headline))
+                Text(typeSize.isAccessibilitySize ? "사이즈별 점수 비교" : "SIZE SCORE COMPARISON")
+                    .font(CoorditTypography.gmarketBold(size: metrics.value(17), relativeTo: .headline))
                 Text("모든 사이즈를 같은 기준으로 비교한 결과예요.")
                     .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
                     .foregroundStyle(CoorditFitLabPalette.muted)
@@ -443,36 +468,37 @@ struct CoorditFitLabSizeScoreChart: View {
                 Button {
                     selectedSizeLabel = option.sizeLabel
                 } label: {
-                    HStack(spacing: metrics.value(8)) {
-                        Text(option.sizeLabel)
-                            .font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .body))
-                            .foregroundStyle(isSelected ? Color.white : CoorditFitLabPalette.ink)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.78)
-                            .allowsTightening(true)
-                            .frame(width: metrics.value(58), height: metrics.value(28), alignment: .leading)
-                            .background(isSelected ? CoorditFitLabPalette.ink : CoorditFitLabPalette.field)
-                            .clipShape(RoundedRectangle(cornerRadius: metrics.value(6), style: .continuous))
+                    if typeSize.isAccessibilitySize {
+                        accessibleRow(option, selected: isSelected)
+                    } else {
+                        HStack(spacing: metrics.value(8)) {
+                            Text(option.sizeLabel)
+                                .font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .body))
+                                .foregroundStyle(isSelected ? Color.white : CoorditFitLabPalette.ink)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.78)
+                                .allowsTightening(true)
+                                .frame(width: metrics.value(38), height: metrics.value(25), alignment: .center)
+                                .background(isSelected ? CoorditFitLabPalette.ink : CoorditFitLabPalette.field)
+                                .clipShape(RoundedRectangle(cornerRadius: metrics.value(6), style: .continuous))
 
-                        GeometryReader { proxy in
-                            ZStack(alignment: .leading) {
-                                Capsule().fill(CoorditFitLabPalette.field)
-                                Capsule()
-                                    .fill(isSelected ? CoorditFitLabPalette.ink : CoorditDesignTokens.ColorToken.blue.opacity(0.42))
-                                    .frame(width: proxy.size.width * normalized(option.fitScore))
+                            GeometryReader { proxy in
+                                ZStack(alignment: .leading) {
+                                    Capsule().fill(CoorditFitLabPalette.field)
+                                    Capsule()
+                                        .fill(isSelected ? CoorditFitLabPalette.ink : CoorditDesignTokens.ColorToken.blue.opacity(0.42))
+                                        .frame(width: proxy.size.width * normalized(option.fitScore))
+                                }
                             }
-                        }
-                        .frame(height: metrics.value(11))
+                            .frame(height: metrics.value(11))
 
-                        Text(scoreText(option.fitScore))
-                            .font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .caption))
-                            .frame(width: metrics.value(48), alignment: .trailing)
+                            Text(scoreText(option.fitScore))
+                                .font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .caption))
+                                .frame(width: metrics.value(48), alignment: .trailing)
 
-                        if option.isRecommended {
-                            Text("추천")
-                                .font(CoorditTypography.gmarketBold(size: metrics.value(8), relativeTo: .caption2))
-                                .foregroundStyle(CoorditDesignTokens.ColorToken.green)
                         }
+                        .frame(minHeight: metrics.value(44))
+                        .contentShape(Rectangle())
                     }
                 }
                 .buttonStyle(.plain)
@@ -488,7 +514,7 @@ struct CoorditFitLabSizeScoreChart: View {
             }
         }
         .foregroundStyle(Color.black)
-        .padding(metrics.value(16))
+        .padding(metrics.value(14))
         .background(CoorditFitLabPalette.surface)
         .clipShape(RoundedRectangle(cornerRadius: metrics.value(9), style: .continuous))
         .overlay(
@@ -502,6 +528,34 @@ struct CoorditFitLabSizeScoreChart: View {
     private func normalized(_ score: Double?) -> CGFloat {
         guard let score, score.isFinite else { return 0 }
         return CGFloat(min(max(score, 0), 100) / 100)
+    }
+
+    private func accessibleRow(_ option: CoorditFitLabSizeOption, selected: Bool) -> some View {
+        VStack(alignment: .leading, spacing: metrics.value(8)) {
+            HStack(alignment: .firstTextBaseline, spacing: metrics.value(8)) {
+                Text(option.sizeLabel)
+                    .font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .body))
+                if option.isRecommended {
+                    Text("추천")
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
+                }
+            }
+            Text(scoreText(option.fitScore))
+                .font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .body))
+                .fixedSize(horizontal: false, vertical: true)
+            GeometryReader { proxy in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(CoorditFitLabPalette.field)
+                    Capsule().fill(selected ? CoorditFitLabPalette.ink : CoorditDesignTokens.ColorToken.blue.opacity(0.42))
+                        .frame(width: proxy.size.width * normalized(option.fitScore))
+                }
+            }
+            .frame(height: metrics.value(11))
+        }
+        .foregroundStyle(CoorditFitLabPalette.ink)
+        .padding(.vertical, metrics.value(8))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
     }
 
     private func scoreText(_ score: Double?) -> String {

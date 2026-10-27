@@ -13,6 +13,7 @@ enum CoorditFitLabPalette {
 struct CoorditFitLabTitleCard: View {
     let title: String
     let metrics: CoorditResponsiveMetrics
+    var height: CGFloat = 60
     let onBack: () -> Void
 
     var body: some View {
@@ -20,6 +21,7 @@ struct CoorditFitLabTitleCard: View {
             title: title,
             metrics: metrics,
             accessibilityLabel: "\(title) 뒤로가기",
+            height: height,
             onBack: onBack
         )
     }
