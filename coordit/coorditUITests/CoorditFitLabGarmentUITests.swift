@@ -36,13 +36,37 @@ final class CoorditFitLabGarmentUITests: XCTestCase {
         capture("jacket-why-M", app)
     }
 
+    func testBackNavigationRetainsCategoryAndSizeComparison() {
+        for category in ["jacket", "skirt"] {
+            let lower = category == "skirt"
+            let app = launch(category: category, lower: lower)
+            let diagramID = lower ? "fitlab-mannequin-lower" : "fitlab-mannequin-upper"
+            XCTAssertTrue(element(diagramID, app).waitForExistence(timeout: 10))
+            XCTAssertEqual(element(diagramID, app).value as? String, category)
+            app.buttons["FIT LAB 뒤로가기"].tap()
+            scrollTo("fitlab-source-manual", app).tap()
+            scrollTo("fitlab-manual-continue", app).tap()
+            scrollTo("fitlab-manual-confirm", app).tap()
+            XCTAssertTrue(element("fitlab-submission-result", app).waitForExistence(timeout: 10))
+            let diagram = scrollTo(diagramID, app)
+            XCTAssertEqual(diagram.value as? String, category)
+            if lower { XCTAssertFalse(element("fitlab-overlay-rise", app).exists) }
+            scrollTo("fitlab-size-score-L", app).tap()
+            XCTAssertEqual(element("fitlab-recommended-size", app).label, "L")
+            XCTAssertTrue(scrollTo("fitlab-size-reason", app).isHittable)
+            XCTAssertTrue(app.staticTexts["ABOUT L"].exists)
+            capture("\(category)-retained-result-after-back", app)
+            app.terminate()
+        }
+    }
+
     func testSavedReportRetainsCategoryAndAlternativeMeasurements() {
         let namespace = UUID().uuidString
         let args = ["--coordit-fitlab-history-namespace", namespace, "--coordit-fitlab-history-user", "garment-user"]
         var app = launch(category: "coat", extra: args)
         XCTAssertTrue(element("fitlab-total-score", app).waitForExistence(timeout: 10))
         scrollTo("fitlab-add-history", app).tap()
-        XCTAssertTrue(element("fitlab-history-card-analysis-fixture-upper", app).waitForExistence(timeout: 10))
+        XCTAssertTrue(scrollTo("fitlab-history-card-analysis-fixture-upper", app).isHittable)
         app.terminate()
         app = launch(category: "coat", route: "fitlab-history-detail", extra: args)
         let diagram = element("fitlab-mannequin-upper", app)

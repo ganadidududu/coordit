@@ -226,7 +226,8 @@ struct CoorditFitLabSubmissionView: View {
                     variant: variant,
                     recommendation: recommendation,
                     report: coordinator.report,
-                    sizeDrafts: coordinator.draft.sizes
+                    sizeDrafts: coordinator.draft.sizes,
+                    category: coordinator.draft.category
                 )
                 let selectedSize = sizeOptions.first { $0.sizeLabel == selectedSizeLabel }
                     ?? sizeOptions.first { $0.isRecommended }
@@ -238,16 +239,19 @@ struct CoorditFitLabSubmissionView: View {
                 )
                 let selection = CoorditFitLabScoreSelection(selected: selectedSize, recommendation: recommendation, report: coordinator.report)
                 scoreCard
-                CoorditFitLabMannequinPanel(
-                    assetName: variant.assetName,
-                    metrics: metrics,
-                    measurements: scoreCard.measurements
+                CoorditFitLabGarmentPanel(
+                    category: coordinator.draft.category,
+                    measurements: scoreCard.measurements,
+                    metrics: metrics
                 )
-                .frame(height: metrics.value(270))
-                CoorditFitLabOverlayLegend(metrics: metrics)
                 CoorditFitLabSizeScoreChart(
                     options: sizeOptions,
                     selectedSizeLabel: $selectedSizeLabel,
+                    metrics: metrics
+                )
+                CoorditFitLabSizeReason(
+                    size: selectedSize,
+                    recommendationReason: coordinator.report?.report.recommendationReason,
                     metrics: metrics
                 )
                 CoorditFitLabComparisonNote(selected: selection.sizeLabel, recommended: recommendation.recommendedSize, missingScores: !selection.isRecommended && selection.measurementScores.isEmpty, metrics: metrics)
