@@ -121,6 +121,25 @@
       "deployment_approved": false,
       "purpose": "projected_pair_supervision_development_not_centimeter_or_release_accuracy",
       "weights_license": "Internal local training; AI Hub territory/attribution restrictions and aRTF/GarmentCodeData CC BY 4.0 notices; no app/server deployment grant"
+    },
+    {
+      "path": "artifacts/seam-teacher-control-v1/checkpoint.pt",
+      "sha256": "61576f4c77c4af3c57e842c4e0d6529cc58d3eb2fe0da87940d8b8ce6786c006",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+      "deployment_approved": false,
+      "purpose": "equal_budget_teacher_control_not_promoted",
+      "weights_license": "Internal local training; AI Hub local/territory restrictions and source attribution; no app/server deployment grant"
+    },
+    {
+      "path": "artifacts/seam-artf-visual-teacher-v1/checkpoint.pt",
+      "sha256": "5038e2660a02334e49344eaae401404c2b4750e223d90d28a7c9d9872f6bd087",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+      "deployment_approved": false,
+      "purpose": "weak_public_artf_teacher_experiment_did_not_improve_parent_not_promoted",
+      "teacher_predictions_sha256": "ca6d2e0cd7dd1036c9a859564c6aee6d2701ce4e0ef3dd76c4cf3fe8f808eb84",
+      "weights_license": "Internal local training; unverified assistant proposals, AI Hub local/territory restrictions and source attribution; no app/server deployment grant"
     }
   ]
 }

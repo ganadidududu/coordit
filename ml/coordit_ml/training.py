@@ -16,6 +16,8 @@ from coordit_ml.pair_supervision import projected_pair_loss
 from coordit_ml.provenance import REGISTRY_ROOT, approved_entry, read_records, sha256
 from coordit_ml.sampling import SourceSampling, balance_categories, sample_sources
 from coordit_ml.schema import BoundaryModel, PipelineError, read_registry
+from coordit_ml.teacher_annotations import TeacherPin
+from coordit_ml.teacher_supervision import load_teacher
 
 
 class TrainingConfig(BoundaryModel):
@@ -38,6 +40,7 @@ class TrainingConfig(BoundaryModel):
     initialize_from: ParentCheckpoint | None = None
     augmentation: Augmentation | None = None
     projected_pair_loss_weight: float = 0
+    teacher_annotations: TeacherPin | None = None
 
 
 def fingerprint(config: TrainingConfig) -> str:
@@ -67,6 +70,9 @@ def fingerprint(config: TrainingConfig) -> str:
         sha256(Path(__file__).with_name("provenance.py")),
         sha256(Path(__file__).with_name("similarity.py")),
         sha256(Path(__file__).with_name("network.py")),
+        sha256(Path(__file__).with_name("teacher_supervision.py")),
+        sha256(Path(__file__).with_name("teacher_annotations.py")),
+        config.teacher_annotations.model_dump_json() if config.teacher_annotations else "none",
         sha256(Path(__file__)),
         sha256(REGISTRY_ROOT.parent / "uv.lock"),
     ]
@@ -91,6 +97,7 @@ def train(config: TrainingConfig) -> Path:
     dataset = ApprovedDataset(config.manifests, registry, "train")
     if not len(dataset):
         raise PipelineError("No approved training images")
+    teacher = load_teacher(config.teacher_annotations, dataset.samples, config.augmentation)
     run_fingerprint = fingerprint(config)
     model = create_model(config.architecture, config.category_heads).to(config.device)
     dataset.image_size = model.input_size
@@ -159,6 +166,9 @@ def train(config: TrainingConfig) -> Path:
             optimizer.zero_grad()
             prediction = model.forward(target.pixels, target.category)
             objective = model_loss(config.architecture, prediction, target)
+            if teacher:
+                ids = [dataset.samples[i][1].image_id for i in selected]
+                objective = objective + teacher.objective(prediction, ids)
             if config.projected_pair_loss_weight:
                 aspects = torch.tensor([
                     dataset.samples[i][1].width / dataset.samples[i][1].height for i in selected
@@ -212,6 +222,9 @@ def train(config: TrainingConfig) -> Path:
                 source: sum(dataset.samples[i][1].source_dataset == source for i in used)
                 for source in sorted({record.source_dataset for _, record in dataset.samples})
             },
+            teacher_target_counts=teacher.counts if teacher else None,
+            teacher_images_seen_this_epoch=teacher.exposures(
+                [dataset.samples[i][1].image_id for i in used]) if teacher else 0,
             parent_checkpoint_sha256=(config.initialize_from.checkpoint_sha256 if config.initialize_from else None),
             code_license="Coordit repository",
             weights_license="Internal development; source attribution obligations apply",

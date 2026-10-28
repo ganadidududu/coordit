@@ -1,0 +1,49 @@
+{
+  "manifests": [
+    "artifacts/aihub71501/approved-v1/records.jsonl",
+    "artifacts/artf-landmarks-v1/records.jsonl",
+    "artifacts/garmentcodedata-v2/body-free-pilot-v3/records.jsonl"
+  ],
+  "output": "artifacts/seam-artf-visual-teacher-v1",
+  "epochs": 12,
+  "batch_size": 4,
+  "learning_rate": 0.0001,
+  "seed": 42,
+  "device": "mps",
+  "architecture": "coordit-spatial-multitask-v4-256-context",
+  "category_heads": false,
+  "max_steps": null,
+  "resume": false,
+  "synthetic_fraction": 0.5,
+  "balance_real_categories": false,
+  "source_sampling": {
+    "weights": {
+      "aihub-71501": 0.1,
+      "artf-1.0.1": 0.85,
+      "garmentcodedata-v2": 0.05
+    },
+    "epoch_images": 512
+  },
+  "initialize_from": {
+    "directory": "artifacts/seam-resolution-256-pairs-v1",
+    "checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+    "artifact_sha256": "e45d6b82c5735c1c9b5db1c2142b9e8f2dad248270f6069f10b25b19d8b7e8a9",
+    "allow_resolution_transfer": false
+  },
+  "augmentation": {
+    "rotation_degrees": 0.0,
+    "shift_fraction": 0.0,
+    "scale_min": 1.0,
+    "scale_max": 1.0,
+    "brightness_min": 0.7,
+    "brightness_max": 1.3
+  },
+  "projected_pair_loss_weight": 2.0,
+  "teacher_annotations": {
+    "packet": "artifacts/artf-training-teacher-v1/packet.json",
+    "packet_sha256": "2a46e007324f534db100bab1ce386c3346931a6ea8422ae3de2c6436de6dbd22",
+    "predictions": "artifacts/artf-training-teacher-v1/predictions.json",
+    "predictions_sha256": "ca6d2e0cd7dd1036c9a859564c6aee6d2701ce4e0ef3dd76c4cf3fe8f808eb84",
+    "loss_weight": 0.25
+  }
+}

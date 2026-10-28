@@ -1,0 +1,31 @@
+{
+  "source_images": 24,
+  "with_eligible_points": 22,
+  "eligible_points": 122,
+  "counts": {
+    "publisher_disagreement": 5,
+    "accepted_existing_target": 73,
+    "accepted_new_unverified_target": 49,
+    "publisher_not_visible": 4,
+    "abstained": 25
+  },
+  "point_names": [
+    "armpit_left",
+    "armpit_right",
+    "crotch",
+    "hem_center",
+    "length_start",
+    "shoulder_left",
+    "shoulder_right",
+    "side_hem",
+    "sleeve_end",
+    "sleeve_start",
+    "waist_center",
+    "waist_left",
+    "waist_right"
+  ],
+  "publisher_records_modified": false,
+  "human_verified_teacher_points": 0,
+  "evaluation_images_in_training": 0,
+  "aihub_external_transfers": 0
+}

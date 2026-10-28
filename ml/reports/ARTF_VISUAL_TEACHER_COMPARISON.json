@@ -1,0 +1,573 @@
+{
+  "report_version": 1,
+  "evaluation_manifest_sha256": "ae9806f8ad98e2ede7add42f7591ccb60b294de984ad632dcee75aea1d79fa00",
+  "images": 561,
+  "categories": {
+    "tshirt": 389,
+    "shorts": 172
+  },
+  "visible_unique_targets": 2200,
+  "source_reports": [
+    {
+      "path": "reports/ARTF_TEACHER_CONTROL_EVALUATION.json",
+      "sha256": "252ea013c978816dc2b9db0de812f86ad60acadc7f02908bb1d1aa89661a9dae"
+    },
+    {
+      "path": "reports/ARTF_VISUAL_TEACHER_CANDIDATE_EVALUATION.json",
+      "sha256": "62f1a1e73c2b0b2c5e44b18d0b0b93a44aa93bece80b3c1c0b5f96d312e616d8"
+    }
+  ],
+  "models": [
+    {
+      "name": "parent_latest_pairs",
+      "checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+      "artifact_sha256": "e45d6b82c5735c1c9b5db1c2142b9e8f2dad248270f6069f10b25b19d8b7e8a9",
+      "common_unique_targets": {
+        "shorts": {
+          "images": 172,
+          "visible_gt_points": 664,
+          "supplied_points": 664,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.25301204819277107,
+          "nme_supplied_only": 0.1338787589532751,
+          "nme_with_abstention_penalty_1": 0.13387875895327506
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 163,
+          "supplied_pairs": 163,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 29.365433168282827,
+          "mean_relative_error_supplied_only": 0.2939760320741879
+        },
+        "all": {
+          "images": 561,
+          "visible_gt_points": 2200,
+          "supplied_points": 2200,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.23136363636363635,
+          "nme_supplied_only": 0.13850890274693803,
+          "nme_with_abstention_penalty_1": 0.13850890274693814
+        },
+        "all/chest_width": {
+          "eligible_pairs": 376,
+          "supplied_pairs": 376,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 39.5733532944221,
+          "mean_relative_error_supplied_only": 0.33011799608880926
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 382,
+          "supplied_pairs": 382,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 38.715998991250764,
+          "mean_relative_error_supplied_only": 0.3717193350173114
+        },
+        "all/waist_width": {
+          "eligible_pairs": 163,
+          "supplied_pairs": 163,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 29.365433168282827,
+          "mean_relative_error_supplied_only": 0.2939760320741879
+        },
+        "tshirt": {
+          "images": 389,
+          "visible_gt_points": 1536,
+          "supplied_points": 1536,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.22200520833333334,
+          "nme_supplied_only": 0.14051047532440694,
+          "nme_with_abstention_penalty_1": 0.140510475324407
+        },
+        "tshirt/chest_width": {
+          "eligible_pairs": 376,
+          "supplied_pairs": 376,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 39.5733532944221,
+          "mean_relative_error_supplied_only": 0.33011799608880926
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 382,
+          "supplied_pairs": 382,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 38.715998991250764,
+          "mean_relative_error_supplied_only": 0.3717193350173114
+        }
+      },
+      "legacy_all_mapped_targets": {
+        "shorts": {
+          "points": 832,
+          "pck_005": 0.24519230769230768,
+          "nme": 0.13474904359575773
+        },
+        "tshirt": {
+          "points": 1536,
+          "pck_005": 0.22200520833333334,
+          "nme": 0.14051047763966076
+        }
+      },
+      "mask_iou_per_category": {
+        "shorts": 0.6349500679378167,
+        "tshirt": 0.6921237917058791
+      },
+      "macro_miou": 0.6635369298218479,
+      "previous_eight_photo_subset": {
+        "shorts": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.06666666666666667,
+          "nme_supplied_only": 0.1680313723558318,
+          "nme_with_abstention_penalty_1": 0.16803137235583185
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 36.124941593987984,
+          "mean_relative_error_supplied_only": 0.37026611298324474
+        },
+        "all": {
+          "images": 8,
+          "visible_gt_points": 30,
+          "supplied_points": 30,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.13333333333333333,
+          "nme_supplied_only": 0.13688919818522613,
+          "nme_with_abstention_penalty_1": 0.13688919818522624
+        },
+        "all/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 33.37666763653661,
+          "mean_relative_error_supplied_only": 0.22117512779080473
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 32.320026367398206,
+          "mean_relative_error_supplied_only": 0.3707397876178873
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 36.124941593987984,
+          "mean_relative_error_supplied_only": 0.37026611298324474
+        },
+        "tshirt": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.2,
+          "nme_supplied_only": 0.10574702401462048,
+          "nme_with_abstention_penalty_1": 0.10574702401462042
+        },
+        "tshirt/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 33.37666763653661,
+          "mean_relative_error_supplied_only": 0.22117512779080473
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 32.320026367398206,
+          "mean_relative_error_supplied_only": 0.3707397876178873
+        }
+      }
+    },
+    {
+      "name": "equal_budget_control",
+      "checkpoint_sha256": "61576f4c77c4af3c57e842c4e0d6529cc58d3eb2fe0da87940d8b8ce6786c006",
+      "artifact_sha256": "9c7704795f2a2fff763e3b81f027d98c29f6570bd9f4a4bf0687c6747b3313a6",
+      "common_unique_targets": {
+        "shorts": {
+          "images": 172,
+          "visible_gt_points": 664,
+          "supplied_points": 664,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.24548192771084337,
+          "nme_supplied_only": 0.13723722968097155,
+          "nme_with_abstention_penalty_1": 0.13723722968097152
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 163,
+          "supplied_pairs": 163,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 30.73019908164642,
+          "mean_relative_error_supplied_only": 0.30767567756281694
+        },
+        "all": {
+          "images": 561,
+          "visible_gt_points": 2200,
+          "supplied_points": 2200,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.22545454545454546,
+          "nme_supplied_only": 0.14369646790015086,
+          "nme_with_abstention_penalty_1": 0.14369646790015084
+        },
+        "all/chest_width": {
+          "eligible_pairs": 376,
+          "supplied_pairs": 376,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 42.745063981854194,
+          "mean_relative_error_supplied_only": 0.36241084774608306
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 382,
+          "supplied_pairs": 382,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 37.890987296223365,
+          "mean_relative_error_supplied_only": 0.376915672481845
+        },
+        "all/waist_width": {
+          "eligible_pairs": 163,
+          "supplied_pairs": 163,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 30.73019908164642,
+          "mean_relative_error_supplied_only": 0.30767567756281694
+        },
+        "tshirt": {
+          "images": 389,
+          "visible_gt_points": 1536,
+          "supplied_points": 1536,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.216796875,
+          "nme_supplied_only": 0.14648874275531693,
+          "nme_with_abstention_penalty_1": 0.14648874275531698
+        },
+        "tshirt/chest_width": {
+          "eligible_pairs": 376,
+          "supplied_pairs": 376,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 42.745063981854194,
+          "mean_relative_error_supplied_only": 0.36241084774608306
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 382,
+          "supplied_pairs": 382,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 37.890987296223365,
+          "mean_relative_error_supplied_only": 0.376915672481845
+        }
+      },
+      "legacy_all_mapped_targets": {
+        "shorts": {
+          "points": 832,
+          "pck_005": 0.23918269230769232,
+          "nme": 0.13774152872820894
+        },
+        "tshirt": {
+          "points": 1536,
+          "pck_005": 0.216796875,
+          "nme": 0.1464887450096247
+        }
+      },
+      "mask_iou_per_category": {
+        "shorts": 0.5905641859619294,
+        "tshirt": 0.6511257037882037
+      },
+      "macro_miou": 0.6208449448750666,
+      "previous_eight_photo_subset": {
+        "shorts": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.0,
+          "nme_supplied_only": 0.1804608048549283,
+          "nme_with_abstention_penalty_1": 0.18046080485492838
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 25.375263443657428,
+          "mean_relative_error_supplied_only": 0.2399488799276015
+        },
+        "all": {
+          "images": 8,
+          "visible_gt_points": 30,
+          "supplied_points": 30,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.06666666666666667,
+          "nme_supplied_only": 0.14500321501773497,
+          "nme_with_abstention_penalty_1": 0.145003215017735
+        },
+        "all/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 32.548408314807055,
+          "mean_relative_error_supplied_only": 0.22294411608324397
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 29.39975212617983,
+          "mean_relative_error_supplied_only": 0.3604978010736548
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 25.375263443657428,
+          "mean_relative_error_supplied_only": 0.2399488799276015
+        },
+        "tshirt": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.13333333333333333,
+          "nme_supplied_only": 0.1095456251805416,
+          "nme_with_abstention_penalty_1": 0.1095456251805416
+        },
+        "tshirt/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 32.548408314807055,
+          "mean_relative_error_supplied_only": 0.22294411608324397
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 29.39975212617983,
+          "mean_relative_error_supplied_only": 0.3604978010736548
+        }
+      }
+    },
+    {
+      "name": "visual_teacher_candidate",
+      "checkpoint_sha256": "5038e2660a02334e49344eaae401404c2b4750e223d90d28a7c9d9872f6bd087",
+      "artifact_sha256": "f183632940671ce7adb967f5e463aeaaee5bde87866a81df409f24423cd4827a",
+      "common_unique_targets": {
+        "shorts": {
+          "images": 172,
+          "visible_gt_points": 664,
+          "supplied_points": 664,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.24849397590361447,
+          "nme_supplied_only": 0.13735639234365823,
+          "nme_with_abstention_penalty_1": 0.13735639234365826
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 163,
+          "supplied_pairs": 163,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 30.454035563854966,
+          "mean_relative_error_supplied_only": 0.30403712366143654
+        },
+        "all": {
+          "images": 561,
+          "visible_gt_points": 2200,
+          "supplied_points": 2200,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.22863636363636364,
+          "nme_supplied_only": 0.14326918146828505,
+          "nme_with_abstention_penalty_1": 0.14326918146828513
+        },
+        "all/chest_width": {
+          "eligible_pairs": 376,
+          "supplied_pairs": 376,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 42.163269041625554,
+          "mean_relative_error_supplied_only": 0.3558157736272694
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 382,
+          "supplied_pairs": 382,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 37.00317905431437,
+          "mean_relative_error_supplied_only": 0.3675419874768131
+        },
+        "all/waist_width": {
+          "eligible_pairs": 163,
+          "supplied_pairs": 163,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 30.454035563854966,
+          "mean_relative_error_supplied_only": 0.30403712366143654
+        },
+        "tshirt": {
+          "images": 389,
+          "visible_gt_points": 1536,
+          "supplied_points": 1536,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.22005208333333334,
+          "nme_supplied_only": 0.14582523093361854,
+          "nme_with_abstention_penalty_1": 0.14582523093361863
+        },
+        "tshirt/chest_width": {
+          "eligible_pairs": 376,
+          "supplied_pairs": 376,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 42.163269041625554,
+          "mean_relative_error_supplied_only": 0.3558157736272694
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 382,
+          "supplied_pairs": 382,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 37.00317905431437,
+          "mean_relative_error_supplied_only": 0.3675419874768131
+        }
+      },
+      "legacy_all_mapped_targets": {
+        "shorts": {
+          "points": 832,
+          "pck_005": 0.24278846153846154,
+          "nme": 0.1375542506936584
+        },
+        "tshirt": {
+          "points": 1536,
+          "pck_005": 0.22005208333333334,
+          "nme": 0.14582523362730626
+        }
+      },
+      "mask_iou_per_category": {
+        "shorts": 0.5889727349482242,
+        "tshirt": 0.6481443883113175
+      },
+      "macro_miou": 0.6185585616297709,
+      "previous_eight_photo_subset": {
+        "shorts": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.0,
+          "nme_supplied_only": 0.17848895728698816,
+          "nme_with_abstention_penalty_1": 0.17848895728698816
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 30.788170388119106,
+          "mean_relative_error_supplied_only": 0.2935656695698563
+        },
+        "all": {
+          "images": 8,
+          "visible_gt_points": 30,
+          "supplied_points": 30,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.03333333333333333,
+          "nme_supplied_only": 0.14544197956063057,
+          "nme_with_abstention_penalty_1": 0.1454419795606306
+        },
+        "all/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 36.31833729781255,
+          "mean_relative_error_supplied_only": 0.2377139033201393
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 31.75285876845422,
+          "mean_relative_error_supplied_only": 0.3844053177992446
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 30.788170388119106,
+          "mean_relative_error_supplied_only": 0.2935656695698563
+        },
+        "tshirt": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.06666666666666667,
+          "nme_supplied_only": 0.11239500183427294,
+          "nme_with_abstention_penalty_1": 0.112395001834273
+        },
+        "tshirt/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 36.31833729781255,
+          "mean_relative_error_supplied_only": 0.2377139033201393
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 31.75285876845422,
+          "mean_relative_error_supplied_only": 0.3844053177992446
+        }
+      }
+    }
+  ],
+  "decision": "No promotion. Candidate slightly improves equal-budget control but does not improve existing parent overall; old-eight PCK worsens. New endpoint accuracy and actual cm remain unverified.",
+  "candidate_promoted": false,
+  "cm_accuracy": null,
+  "phase_3_changed": false,
+  "aihub_external_transfers": 0
+}

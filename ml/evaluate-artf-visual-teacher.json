@@ -1,0 +1,18 @@
+{
+  "manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+  "manifest_sha256": "ae9806f8ad98e2ede7add42f7591ccb60b294de984ad632dcee75aea1d79fa00",
+  "pilot_packet": "reports/EXTERNAL_ARTF_VISION_PACKET.json",
+  "pilot_packet_sha256": "67e41b8192e00bfbf6dc08c1d26e65b285026117d7499d3e8bd01169a62d8e08",
+  "models": [
+    {
+      "name": "visual_teacher_candidate",
+      "model": {
+        "directory": "artifacts/seam-artf-visual-teacher-v1",
+        "checkpoint_sha256": "5038e2660a02334e49344eaae401404c2b4750e223d90d28a7c9d9872f6bd087",
+        "artifact_sha256": "f183632940671ce7adb967f5e463aeaaee5bde87866a81df409f24423cd4827a",
+        "allow_resolution_transfer": false
+      }
+    }
+  ],
+  "output": "reports/ARTF_VISUAL_TEACHER_CANDIDATE_EVALUATION.json"
+}

@@ -1,0 +1,8 @@
+{
+  "manifest": "artifacts/artf-landmarks-v1/records.jsonl",
+  "evaluation_manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+  "protocol": "protocols/artf-training-teacher-v1.md",
+  "output": "artifacts/artf-training-teacher-v1",
+  "per_category": 12,
+  "seed": 20261029
+}

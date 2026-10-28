@@ -68,6 +68,8 @@ class Artifact(BoundaryModel):
     code_license: str
     weights_license: str
     training_config_json: str
+    teacher_target_counts: dict[str, int] | None = None
+    teacher_images_seen_this_epoch: int = 0
 
 
 def read_checkpoint(path: Path) -> CheckpointState:
