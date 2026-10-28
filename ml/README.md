@@ -98,3 +98,20 @@ uv run python -c 'import onnx; onnx.checker.check_model("artifacts/spatial-v2-sh
 V2 export and checker actually passed. Core ML conversion and ONNX Runtime device execution remain untested. All checkpoints and ONNX inherit data attribution and remain unapproved research artifacts; `registry/MODEL_ARTIFACTS.json` has empty app/server deployment lists. No external pretrained weight is bundled.
 
 Production requires original rights/terms clearance, lawful real seam labels across all categories, independent real evaluation, device/sensor reliability and the cm gate. Keep flags off until evidence exists. See `../DATASET_LICENSES.md`, `../MODEL_LICENSES.md`, `../THIRD_PARTY_NOTICES.md` and the checkpoint document.
+
+## Real anatomical labels and topology-based seam fine tuning
+
+See `../docs/SEAM_TRAINING_INTEGRATION.md` for actual counts, limitations, checkpoint hashes and results. The historical 35-epoch results above used aRTF for masks only. The new immutable `artf-landmarks-v1` corpus maps only reviewed publisher points; 314 real photos have partial anatomical supervision. GarmentCodeData contributes 48 synthetic views from six official-training designs, with source UV panel junctions, camera parameters and ray-tested visibility. Neither source supplies independent tape-measured cm accuracy.
+
+```sh
+# Run from ml. Large images/weights stay in ignored artifacts/.
+uv run python -m coordit_ml prepare-artf-landmarks artifacts/artf-v1.1/records.jsonl artifacts/artf-landmarks-v1
+uv run python -m coordit_ml download-garmentcode-sample artifacts/garmentcodedata-v2
+uv run python -m coordit_ml render-garmentcode garmentcode-pilot.json
+uv run python -m coordit_ml train config-seam-pilot.json
+uv run python -m coordit_ml train config-seam-finetune.json
+uv run python -m coordit_ml compare-seams compare-seam-finetune.json
+uv run python -m coordit_ml import-seam-reviews <local-review-config.json>
+```
+
+Use fresh output directories for reproduction; existing source/model files are never overwritten. Model and comparison configs pin their exact parent checkpoint/metadata hashes. Fine tuning uses fresh optimizer state; resuming the same fine-tune run restores its own optimizer/RNG/epoch. Source sampling is explicit and logs repeated exposures separately from unique photos. Current ratios are development choices, not independently optimized estimates. AI Hub pending/model-generated seam suggestions are ineligible; verified review import additionally requires source hash, semantic rights scope, reviewer, protocol and pixel evidence. No AI Hub photo was sent to external AI for annotation. Phase 3 and mobile feature flags are unchanged.

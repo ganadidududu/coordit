@@ -12,6 +12,7 @@ dependencies = [
   "uvicorn>=0.38,<1",
   "httpx2[http2,brotli,zstd]>=2,<3",
   "polars>=1.32,<2",
+  "pyyaml>=6,<7",
 ]
 [dependency-groups]
 dev = ["pytest>=9,<10", "ruff>=0.14,<1", "basedpyright>=1.31,<2", "httpx>=0.28,<1"]
@@ -30,9 +31,11 @@ ignore = ["COM812", "ISC001", "D203", "D213", "CPY001", "TRY003", "EM101", "EM10
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D", "S101", "PLR2004", "INP001"]
 "tests/test_real_photo_supervision.py" = ["S311"]
+"tests/test_seam_integration.py" = ["S311"]
 "coordit_ml/__main__.py" = ["T201", "PLC0415", "C901", "PLR0912", "PLR0915"]
 "coordit_ml/acquisition.py" = ["C901", "PLR0912", "PLR0915"]
 "coordit_ml/secondhand_conversion.py" = ["PLR0912", "PLR0915"]
+"coordit_ml/garmentcode_conversion.py" = ["PLR0915"]
 "coordit_ml/evaluation.py" = ["C901", "PLR0912", "PLR0915"]
 "coordit_ml/synthetic.py" = ["S311", "C901", "PLR0912", "PLR0915"]
 "coordit_ml/training.py" = ["S311", "C901", "PLR0912", "PLR0915"]

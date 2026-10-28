@@ -59,6 +59,8 @@ class Artifact(BoundaryModel):
     loss: float
     categories_seen: dict[str, int]
     synthetic_images_seen: int
+    sources_seen: dict[str, int] | None = None
+    parent_checkpoint_sha256: str | None = None
     code_license: str
     weights_license: str
     training_config_json: str

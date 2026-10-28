@@ -1,0 +1,27 @@
+{
+  "manifests": [
+    "artifacts/aihub71501/approved-v1/records.jsonl",
+    "artifacts/artf-landmarks-v1/records.jsonl",
+    "artifacts/garmentcodedata-v2/body-free-pilot-v3/records.jsonl"
+  ],
+  "output": "artifacts/seam-integrated-pilot-v1",
+  "epochs": 10,
+  "batch_size": 16,
+  "learning_rate": 0.0003,
+  "seed": 42,
+  "device": "mps",
+  "architecture": "coordit-spatial-multitask-v2",
+  "category_heads": false,
+  "max_steps": null,
+  "resume": false,
+  "balance_real_categories": false,
+  "source_sampling": {
+    "weights": {"aihub-71501": 0.5, "artf-1.0.1": 0.4, "garmentcodedata-v2": 0.1},
+    "epoch_images": 1024
+  },
+  "initialize_from": {
+    "directory": "artifacts/aihub-coat-jacket-mask-pretrain-v2",
+    "checkpoint_sha256": "0baeadd24aeb788b1a575c3f4762643b1b6a1b8b486d84ec1ceb0fb9cae96ddf",
+    "artifact_sha256": "80ad9948bf00c3aa448ff00168b9ce690fc4cb72ed28c36efe86e744696e2adf"
+  }
+}

@@ -8,17 +8,21 @@
       "secondhand_classification_only": 3018,
       "secondhand_weak_visual_labels": 0,
       "real_semantic_seam_ground_truth": 0,
-      "real_holdout_status": "unverified"
+      "real_holdout_status": "unverified",
+      "real_publisher_anatomical_candidate_images": 210,
+      "garmentcode_synthetic_images": 0
     },
     "shirt": {
       "real_approved": 1895,
-      "synthetic_approved": 150,
+      "synthetic_approved": 174,
       "real_independent_cm": 0,
       "synthetic_v2": 120,
       "secondhand_classification_only": 1895,
       "secondhand_weak_visual_labels": 0,
       "real_semantic_seam_ground_truth": 0,
-      "real_holdout_status": "unverified"
+      "real_holdout_status": "unverified",
+      "real_publisher_anatomical_candidate_images": 0,
+      "garmentcode_synthetic_images": 24
     },
     "sweatshirt": {
       "real_approved": 4,
@@ -28,7 +32,9 @@
       "secondhand_classification_only": 4,
       "secondhand_weak_visual_labels": 4,
       "real_semantic_seam_ground_truth": 0,
-      "real_holdout_status": "unverified"
+      "real_holdout_status": "unverified",
+      "real_publisher_anatomical_candidate_images": 0,
+      "garmentcode_synthetic_images": 0
     },
     "hoodie": {
       "real_approved": 513,
@@ -38,7 +44,9 @@
       "secondhand_classification_only": 513,
       "secondhand_weak_visual_labels": 0,
       "real_semantic_seam_ground_truth": 0,
-      "real_holdout_status": "unverified"
+      "real_holdout_status": "unverified",
+      "real_publisher_anatomical_candidate_images": 0,
+      "garmentcode_synthetic_images": 0
     },
     "knit": {
       "real_approved": 948,
@@ -48,7 +56,9 @@
       "secondhand_classification_only": 948,
       "secondhand_weak_visual_labels": 0,
       "real_semantic_seam_ground_truth": 0,
-      "real_holdout_status": "unverified"
+      "real_holdout_status": "unverified",
+      "real_publisher_anatomical_candidate_images": 0,
+      "garmentcode_synthetic_images": 0
     },
     "jacket": {
       "real_approved": 2700,
@@ -59,7 +69,9 @@
       "secondhand_weak_visual_labels": 0,
       "real_semantic_seam_ground_truth": 0,
       "real_holdout_status": "unverified",
-      "aihub_polygon_native_cm": 1232
+      "aihub_polygon_native_cm": 1232,
+      "real_publisher_anatomical_candidate_images": 0,
+      "garmentcode_synthetic_images": 0
     },
     "coat": {
       "real_approved": 1259,
@@ -70,17 +82,21 @@
       "secondhand_weak_visual_labels": 9,
       "real_semantic_seam_ground_truth": 0,
       "real_holdout_status": "unverified",
-      "aihub_polygon_native_cm": 1250
+      "aihub_polygon_native_cm": 1250,
+      "real_publisher_anatomical_candidate_images": 0,
+      "garmentcode_synthetic_images": 0
     },
     "pants": {
       "real_approved": 2853,
-      "synthetic_approved": 150,
+      "synthetic_approved": 158,
       "real_independent_cm": 0,
       "synthetic_v2": 120,
       "secondhand_classification_only": 2853,
       "secondhand_weak_visual_labels": 0,
       "real_semantic_seam_ground_truth": 0,
-      "real_holdout_status": "unverified"
+      "real_holdout_status": "unverified",
+      "real_publisher_anatomical_candidate_images": 0,
+      "garmentcode_synthetic_images": 8
     },
     "jeans": {
       "real_approved": 1383,
@@ -90,7 +106,9 @@
       "secondhand_classification_only": 1383,
       "secondhand_weak_visual_labels": 0,
       "real_semantic_seam_ground_truth": 0,
-      "real_holdout_status": "unverified"
+      "real_holdout_status": "unverified",
+      "real_publisher_anatomical_candidate_images": 0,
+      "garmentcode_synthetic_images": 0
     },
     "shorts": {
       "real_approved": 1003,
@@ -100,23 +118,29 @@
       "secondhand_classification_only": 899,
       "secondhand_weak_visual_labels": 0,
       "real_semantic_seam_ground_truth": 0,
-      "real_holdout_status": "unverified"
+      "real_holdout_status": "unverified",
+      "real_publisher_anatomical_candidate_images": 104,
+      "garmentcode_synthetic_images": 0
     },
     "skirt": {
       "real_approved": 1111,
-      "synthetic_approved": 150,
+      "synthetic_approved": 166,
       "real_independent_cm": 0,
       "synthetic_v2": 120,
       "secondhand_classification_only": 1111,
       "secondhand_weak_visual_labels": 0,
       "real_semantic_seam_ground_truth": 0,
-      "real_holdout_status": "unverified"
+      "real_holdout_status": "unverified",
+      "real_publisher_anatomical_candidate_images": 0,
+      "garmentcode_synthetic_images": 16
     },
     "aux_towel": {
       "real_approved": 210,
-      "synthetic_approved": 0,
+      "synthetic_approved": 150,
       "real_independent_cm": 0,
-      "synthetic_v2": 0
+      "synthetic_v2": 0,
+      "real_publisher_anatomical_candidate_images": 0,
+      "garmentcode_synthetic_images": 0
     }
   },
   "publisher_test_excluded": 980,
@@ -187,5 +211,12 @@
   "aihub_training_only": 2482,
   "aihub_worn_views_excluded": 3678,
   "aihub_cm_endpoint_compatibility": "native published cm protocol preserved; Coordit seam targets and independent cm evaluation unverified",
-  "aihub_local_provenance": "artifacts/aihub71501/approved-v1/audit/quarantined_pairs.jsonl (original labels/images remain private)"
+  "aihub_local_provenance": "artifacts/aihub71501/approved-v1/audit/quarantined_pairs.jsonl (original labels/images remain private)",
+  "garmentcode_v2_pilot": {
+    "source_designs": 15,
+    "selected_designs": 6,
+    "synthetic_images": 48,
+    "independent_real_images": 0
+  },
+  "aRTF_partial_anatomical_label_images": 314
 }

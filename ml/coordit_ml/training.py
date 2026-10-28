@@ -8,10 +8,11 @@ from typing import Literal
 import torch
 
 from coordit_ml.artifacts import Artifact, ManifestPin, read_checkpoint
+from coordit_ml.finetuning import ParentCheckpoint, initialize
 from coordit_ml.model_factory import Architecture, PerceptionModel, create_model, model_loss
 from coordit_ml.network import ApprovedDataset, batch
 from coordit_ml.provenance import REGISTRY_ROOT, approved_entry, read_records, sha256
-from coordit_ml.sampling import balance_categories
+from coordit_ml.sampling import SourceSampling, balance_categories, sample_sources
 from coordit_ml.schema import BoundaryModel, PipelineError, read_registry
 
 
@@ -31,6 +32,8 @@ class TrainingConfig(BoundaryModel):
     resume: bool = False
     synthetic_fraction: float = 0.5
     balance_real_categories: bool = False
+    source_sampling: SourceSampling | None = None
+    initialize_from: ParentCheckpoint | None = None
 
 
 def fingerprint(config: TrainingConfig) -> str:
@@ -47,6 +50,9 @@ def fingerprint(config: TrainingConfig) -> str:
         str(config.learning_rate),
         str(config.synthetic_fraction),
         str(config.balance_real_categories),
+        config.source_sampling.model_dump_json() if config.source_sampling else "none",
+        config.initialize_from.model_dump_json() if config.initialize_from else "none",
+        sha256(Path(__file__).with_name("finetuning.py")),
         sha256(Path(__file__).with_name("schema.py")),
         sha256(Path(__file__).with_name("sampling.py")),
         sha256(Path(__file__).with_name("provenance.py")),
@@ -62,6 +68,8 @@ def train(config: TrainingConfig) -> Path:
     """Train actual randomly initialized weights; CPU runs remain smoke artifacts."""
     if config.epochs < 1 or config.batch_size < 1 or not 0 <= config.synthetic_fraction <= 1:
         raise PipelineError("Invalid training hyperparameters")
+    if config.source_sampling and config.balance_real_categories:
+        raise PipelineError("Choose source quotas or category balancing explicitly")
     if config.device == "cuda" and not torch.cuda.is_available():
         raise PipelineError("CUDA is unavailable; do not claim GPU training")
     if config.device == "mps" and not torch.backends.mps.is_available():
@@ -92,6 +100,10 @@ def train(config: TrainingConfig) -> Path:
         seen_ids.update(metadata.seen_image_ids)
     elif checkpoint.exists():
         raise PipelineError("Run already exists; use resume or a new output directory")
+    elif config.initialize_from:
+        if config.output.resolve() == config.initialize_from.directory.resolve():
+            raise PipelineError("Fine tuning must preserve the parent run directory")
+        initialize(model, config.initialize_from)
     if first_epoch >= config.epochs:
         raise PipelineError("No new epochs requested")
     synthetic = [i for i, (_, r) in enumerate(dataset.samples) if r.acquisition_metadata.synthetic]
@@ -119,6 +131,10 @@ def train(config: TrainingConfig) -> Path:
             )
         else:
             indices = synthetic + real_epoch
+        if config.source_sampling:
+            indices = sample_sources(
+                [record.source_dataset for _, record in dataset.samples], config.source_sampling, rng
+            )
         rng.shuffle(indices)
         losses: list[float] = []
         used: list[int] = []
@@ -171,6 +187,11 @@ def train(config: TrainingConfig) -> Path:
             loss=sum(losses) / len(losses),
             categories_seen={c: sum(dataset.samples[i][1].category == c for i in used) for c in registry.categories},
             synthetic_images_seen=sum(dataset.samples[i][1].acquisition_metadata.synthetic for i in used),
+            sources_seen={
+                source: sum(dataset.samples[i][1].source_dataset == source for i in used)
+                for source in sorted({record.source_dataset for _, record in dataset.samples})
+            },
+            parent_checkpoint_sha256=(config.initialize_from.checkpoint_sha256 if config.initialize_from else None),
             code_license="Coordit repository",
             weights_license="Internal development; source attribution obligations apply",
             training_config_json=config.model_dump_json(),

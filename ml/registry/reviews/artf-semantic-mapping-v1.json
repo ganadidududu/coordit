@@ -1,0 +1,15 @@
+{
+  "dataset_id": "artf-1.0.1",
+  "reviewed_at": "2026-10-28",
+  "publisher_code_revision": "e3eda811bca47584f1bb9432e3f11366ccef1e4a",
+  "evidence": [
+    "https://github.com/tlpss/aRTF-Clothes-dataset/blob/e3eda811bca47584f1bb9432e3f11366ccef1e4a/artf_clothes/keypoint_names.py",
+    "https://github.com/tlpss/aRTF-Clothes-dataset/blob/e3eda811bca47584f1bb9432e3f11366ccef1e4a/artf_clothes/scripts/keypoint_ordering.py",
+    "https://github.com/tlpss/aRTF-Clothes-dataset/blob/e3eda811bca47584f1bb9432e3f11366ccef1e4a/README.md"
+  ],
+  "tshirt_direct": ["shoulder_left", "shoulder_right", "armpit_left", "armpit_right"],
+  "shorts_direct": ["waist_left", "waist_right", "crotch"],
+  "shorts_aliases": {"side_waist": "waist_left", "side_hem": "pipe_left_outer"},
+  "omitted": ["hip", "neck_center", "length_start", "hem_center", "sleeve_start", "sleeve_end", "waist_center"],
+  "limitations": "Publisher hand-labeled anatomical candidates, not certified tailoring seam or cm ground truth. Left/right are publisher image-based symmetry ordering, not wearer anatomy. No mean/midpoint synthesis; invisible points remain masked. Publisher test partitions remain prohibited. All original train/val images were already used for mask development; this pool is training/development only."
+}

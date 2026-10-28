@@ -1,0 +1,15 @@
+{
+  "source": "artifacts/garmentcodedata-v2/pilot-15",
+  "output": "artifacts/garmentcodedata-v2/body-free-pilot-v3",
+  "categories": {
+    "rand_033UAN6C0K": "pants",
+    "rand_05H6WP8PJX": "shirt",
+    "rand_05PQL1BU0S": "shirt",
+    "rand_05V1M7JE75": "shirt",
+    "rand_04IMMO8WDD": "skirt",
+    "rand_07JYAR0G1P": "skirt"
+  },
+  "views_degrees": [-60, -30, 0, 30, 60, 120, 180, 240],
+  "official_split": "artifacts/garmentcodedata-v2/source/official-split.json",
+  "official_split_sha256": "4a8a591a1112bd635324bc04b19a7871ac7fa88d0426fa020076dbe4bc584b8f"
+}

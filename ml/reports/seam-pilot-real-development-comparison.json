@@ -1,0 +1,153 @@
+{
+  "manifest_sha256": "156fac9f1c88d9136fd17dcc8c86e8cc412e6256c3f6bb24797f6424f06a2498",
+  "split": "train",
+  "coordinate_error_normalization": "128x128 resized input diagonal, not original-photo pixels or cm",
+  "independent_evaluation": false,
+  "reason": "Pilot development pool; original aRTF training photos already used in earlier mask experiments",
+  "baseline": {
+    "checkpoint_sha256": "0baeadd24aeb788b1a575c3f4762643b1b6a1b8b486d84ec1ceb0fb9cae96ddf",
+    "images": 524,
+    "images_seen_in_training": 0,
+    "real_images": 524,
+    "synthetic_images": 0,
+    "per_category": {
+      "shorts": {
+        "points": 496,
+        "pck_005": 0.05846774193548387,
+        "nme": 0.15157514816993142
+      },
+      "tshirt": {
+        "points": 814,
+        "pck_005": 0.018427518427518427,
+        "nme": 0.15540334133600647
+      }
+    },
+    "per_landmark": {
+      "waist_left": {
+        "points": 102,
+        "pck_005": 0.0196078431372549,
+        "nme": 0.16691684680899568
+      },
+      "waist_right": {
+        "points": 101,
+        "pck_005": 0.039603960396039604,
+        "nme": 0.170578009734797
+      },
+      "crotch": {
+        "points": 91,
+        "pck_005": 0.23076923076923078,
+        "nme": 0.07402129606650835
+      },
+      "side_waist": {
+        "points": 102,
+        "pck_005": 0.00980392156862745,
+        "nme": 0.16553515716291525
+      },
+      "side_hem": {
+        "points": 100,
+        "pck_005": 0.01,
+        "nme": 0.1730685216188431
+      },
+      "shoulder_left": {
+        "points": 205,
+        "pck_005": 0.00975609756097561,
+        "nme": 0.17268132366603467
+      },
+      "shoulder_right": {
+        "points": 200,
+        "pck_005": 0.005,
+        "nme": 0.1857439734041691
+      },
+      "armpit_left": {
+        "points": 204,
+        "pck_005": 0.0392156862745098,
+        "nme": 0.1249768717360555
+      },
+      "armpit_right": {
+        "points": 205,
+        "pck_005": 0.01951219512195122,
+        "nme": 0.13880279015113667
+      }
+    },
+    "mask_iou_per_category": {
+      "shorts": 0.3405144858899383,
+      "aux_towel": 0.16014605124475478,
+      "tshirt": 0.4217447247600094
+    },
+    "macro_miou_present_categories": 0.3074684206315675
+  },
+  "candidate": {
+    "checkpoint_sha256": "eeb659c1fcb28aa4c7711976432f6590b2316d37877a3914114889f4da29ec00",
+    "images": 524,
+    "images_seen_in_training": 524,
+    "real_images": 524,
+    "synthetic_images": 0,
+    "per_category": {
+      "shorts": {
+        "points": 496,
+        "pck_005": 0.12903225806451613,
+        "nme": 0.12385382893074665
+      },
+      "tshirt": {
+        "points": 814,
+        "pck_005": 0.15233415233415235,
+        "nme": 0.1137341390974838
+      }
+    },
+    "per_landmark": {
+      "waist_left": {
+        "points": 102,
+        "pck_005": 0.029411764705882353,
+        "nme": 0.13448547414850956
+      },
+      "waist_right": {
+        "points": 101,
+        "pck_005": 0.039603960396039604,
+        "nme": 0.15196123892570487
+      },
+      "crotch": {
+        "points": 91,
+        "pck_005": 0.5274725274725275,
+        "nme": 0.05318467739641994
+      },
+      "side_waist": {
+        "points": 102,
+        "pck_005": 0.058823529411764705,
+        "nme": 0.13383001647889614
+      },
+      "side_hem": {
+        "points": 100,
+        "pck_005": 0.03,
+        "nme": 0.1387542833108455
+      },
+      "shoulder_left": {
+        "points": 205,
+        "pck_005": 0.01951219512195122,
+        "nme": 0.14606132575469774
+      },
+      "shoulder_right": {
+        "points": 200,
+        "pck_005": 0.065,
+        "nme": 0.14033369003795088
+      },
+      "armpit_left": {
+        "points": 204,
+        "pck_005": 0.27450980392156865,
+        "nme": 0.0881984624646458
+      },
+      "armpit_right": {
+        "points": 205,
+        "pck_005": 0.24878048780487805,
+        "nme": 0.08086728339151639
+      }
+    },
+    "mask_iou_per_category": {
+      "shorts": 0.9079416657869632,
+      "aux_towel": 0.7061115035138625,
+      "tshirt": 0.7672719273594253
+    },
+    "macro_miou_present_categories": 0.7937750322200836
+  },
+  "cm_accuracy": null,
+  "deployment_approved": false
+}

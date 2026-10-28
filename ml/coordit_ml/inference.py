@@ -8,6 +8,7 @@ from typing import Literal
 import torch
 from PIL import Image, ImageOps
 
+from coordit_ml.landmark_support import trained_landmarks
 from coordit_ml.network import image_tensor
 from coordit_ml.proposal_validation import rejection_reason
 from coordit_ml.provenance import sha256
@@ -53,9 +54,10 @@ def infer_image(directory: Path, content: bytes) -> InferenceResult:
     category_index = int(probabilities.argmax())
     category = CLASSES[category_index]
     permitted = {name for pair in dimension_landmarks(category).values() for name in pair}
+    supported = trained_landmarks(directory, category)
     landmarks: list[Landmark] = []
     for index, name in enumerate(LANDMARKS):
-        if name not in permitted:
+        if name not in permitted or name not in supported:
             continue
         x, y = float(prediction.points[0, index, 0]), float(prediction.points[0, index, 1])
         confidence = float(prediction.visibility[0, index].sigmoid())

@@ -23,7 +23,7 @@
       "data_license": "CC-BY-4.0",
       "annotation_license": "CC-BY-4.0",
       "license_url": "https://creativecommons.org/licenses/by/4.0/legalcode",
-      "checked_at": "2026-10-27",
+      "checked_at": "2026-10-28",
       "terms_url": "https://about.zenodo.org/terms/",
       "commercial_basis": "Publisher-created household captures; publisher GitHub explicitly licenses dataset CC BY 4.0; Zenodo record API confirms cc-by-4.0. Scope excludes publisher test partition from train/validation.",
       "permissions": [
@@ -43,11 +43,12 @@
       "annotation_types": [
         "bbox",
         "polygon",
-        "source_keypoints"
+        "source_keypoints",
+        "semantic_keypoints"
       ],
-      "provenance_manifest": "artifacts/artf-v1.1/records.jsonl",
+      "provenance_manifest": "artifacts/artf-landmarks-v1/records.jsonl",
       "status": "approved",
-      "approval_reason": "Publisher-created household captures; publisher GitHub explicitly licenses dataset CC BY 4.0; Zenodo record API confirms cc-by-4.0. Scope excludes publisher test partition from train/validation.",
+      "approval_reason": "Publisher-created household captures; publisher GitHub explicitly licenses dataset CC BY 4.0; Zenodo record API confirms cc-by-4.0. Scope excludes publisher test partition from train/validation. Reviewed direct anatomical candidate mapping: registry/reviews/artf-semantic-mapping-v1.json. These points are not certified seam/cm truth.",
       "download_url": "https://zenodo.org/records/14501499/files/aRTFClothes-resized-paper-splits.zip?download=1",
       "archive_md5": "1b342fb06d3112f193b935c8b0d7d768"
     },
@@ -427,22 +428,37 @@
       "name": "garmentcodedata-v2",
       "original_url": "https://www.research-collection.ethz.ch/items/9d16a4da-0d30-4963-8842-af20fcf82899",
       "publisher": "Maria Korosteleva et al. / ETH Zurich",
-      "image_rightsholder": "unverified",
-      "data_license": "unverified",
-      "annotation_license": "unverified",
+      "image_rightsholder": "Maria Korosteleva et al. / ETH Zurich, publisher-created garment geometry only",
+      "data_license": "CC-BY-4.0",
+      "annotation_license": "CC-BY-4.0",
       "license_url": "https://www.research-collection.ethz.ch/items/9d16a4da-0d30-4963-8842-af20fcf82899",
-      "checked_at": "2026-10-27",
+      "checked_at": "2026-10-28",
       "terms_url": "https://www.research-collection.ethz.ch/items/9d16a4da-0d30-4963-8842-af20fcf82899",
-      "commercial_basis": "GarmentCode code is MIT, not proof of dataset/body/texture rights. Original dataset page returned HTTP 403; rights documents not fully read. No mirror accepted.",
-      "permissions": [],
-      "attribution": "",
+      "commercial_basis": "Original ETH v2 deposit explicitly lists CC BY 4.0; DOI confirmed in official libdrive doi.txt. Approval limited to original garment patterns/meshes and own texture-free, body-free renders. Raw human bodies, body measurements, publisher textures and renders excluded; no third-party repack accepted.",
+      "permissions": [
+        "train",
+        "modify",
+        "redistribute_with_attribution"
+      ],
+      "attribution": "GarmentCodeData v2, Maria Korosteleva, Timur Levent Kesdogan, Fabian Kemper, Stephan Wenninger, Jasmin Koller, Yuhan Zhang, Mario Botsch, Olga Sorkine-Hornung (ECCV 2024), ETH Zurich, doi:10.3929/ethz-b-000690432, CC BY 4.0. Coordit derives topology candidates and body-free renders.",
       "published_image_count": null,
-      "approved_image_count": 0,
-      "categories": [],
-      "annotation_types": [],
-      "provenance_manifest": null,
-      "status": "pending_review",
-      "approval_reason": "GarmentCode code is MIT, not proof of dataset/body/texture rights. Original dataset page returned HTTP 403; rights documents not fully read. No mirror accepted.",
+      "approved_image_count": 48,
+      "categories": [
+        "shirt",
+        "hoodie",
+        "pants",
+        "skirt"
+      ],
+      "annotation_types": [
+        "polygon",
+        "mask",
+        "semantic_keypoints",
+        "3d_keypoints",
+        "camera"
+      ],
+      "provenance_manifest": "artifacts/garmentcodedata-v2/body-free-pilot-v3/records.jsonl",
+      "status": "approved",
+      "approval_reason": "Original publisher deposit license, official documentation and DOI-matching libdrive archive verified. Geometry-only scope; landmarks require explicit topology evidence; unknown points excluded. Zero training images until pilot conversion audit. Actual pilot: 15 source designs extracted; 6 explicitly selected official-training designs, 48 body-free renders. 9 mixed dresses/jumpsuits/unassigned designs excluded. Unknown and occluded seams remain masked; no flat-lay cm labels.",
       "download_url": null,
       "archive_md5": null
     },
@@ -495,10 +511,10 @@
     },
     {
       "id": "secondhand-fashion-v3-front",
-      "name": "Clothing Dataset for Second-Hand Fashion v3 — official author front-only RGB",
+      "name": "Clothing Dataset for Second-Hand Fashion v3 \u2014 official author front-only RGB",
       "original_url": "https://zenodo.org/records/13788681",
-      "publisher": "Farrukh Nauman / RISE Research Institutes of Sweden AB; Wargön Innovation AB; Myrorna AB",
-      "image_rightsholder": "Original institutional data collectors RISE/Wargön/Myrorna, represented by the original depositor and original-author mirror",
+      "publisher": "Farrukh Nauman / RISE Research Institutes of Sweden AB; Warg\u00f6n Innovation AB; Myrorna AB",
+      "image_rightsholder": "Original institutional data collectors RISE/Warg\u00f6n/Myrorna, represented by the original depositor and original-author mirror",
       "data_license": "CC-BY-4.0",
       "annotation_license": "CC-BY-4.0",
       "license_url": "https://creativecommons.org/licenses/by/4.0/legalcode.en",
@@ -511,7 +527,7 @@
         "redistribute_with_attribution",
         "internal_deploy"
       ],
-      "attribution": "Nauman, F. (2024). Clothing Dataset for Second-Hand Fashion (Version 3) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.13788681. RISE, Wargön Innovation and Myrorna. CC BY 4.0. Official front-only RGB conversion by Farrukh Nauman; Coordit category filtering, normalization and grouping.",
+      "attribution": "Nauman, F. (2024). Clothing Dataset for Second-Hand Fashion (Version 3) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.13788681. RISE, Warg\u00f6n Innovation and Myrorna. CC BY 4.0. Official front-only RGB conversion by Farrukh Nauman; Coordit category filtering, normalization and grouping.",
       "published_image_count": 31638,
       "approved_image_count": 14101,
       "categories": [
@@ -538,7 +554,7 @@
     },
     {
       "id": "aihub-71501",
-      "name": "의류 통합 데이터(착용 이미지, 치수 및 원단 정보), v1.1",
+      "name": "\uc758\ub958 \ud1b5\ud569 \ub370\uc774\ud130(\ucc29\uc6a9 \uc774\ubbf8\uc9c0, \uce58\uc218 \ubc0f \uc6d0\ub2e8 \uc815\ubcf4), v1.1",
       "original_url": "https://aihub.or.kr/aihubdata/data/view.do?dataSetSn=71501",
       "publisher": "AI Hub / NIA; lead builder Metrix, Annotation AI and OpinionLive",
       "image_rightsholder": "NIA and named original dataset builders; original photography with participant agreements described in pinned official guide",
@@ -552,7 +568,7 @@
         "train",
         "modify"
       ],
-      "attribution": "의류 통합 데이터(착용 이미지, 치수 및 원단 정보), AI Hub (aihub.or.kr). 과학기술정보통신부 / 한국지능정보사회진흥원 지능정보산업 인프라 조성 사업. 구축: 메트릭스, 어노테이션에이아이, 오피니언라이브. Coordit local normalization and filtering.",
+      "attribution": "\uc758\ub958 \ud1b5\ud569 \ub370\uc774\ud130(\ucc29\uc6a9 \uc774\ubbf8\uc9c0, \uce58\uc218 \ubc0f \uc6d0\ub2e8 \uc815\ubcf4), AI Hub (aihub.or.kr). \uacfc\ud559\uae30\uc220\uc815\ubcf4\ud1b5\uc2e0\ubd80 / \ud55c\uad6d\uc9c0\ub2a5\uc815\ubcf4\uc0ac\ud68c\uc9c4\ud765\uc6d0 \uc9c0\ub2a5\uc815\ubcf4\uc0b0\uc5c5 \uc778\ud504\ub77c \uc870\uc131 \uc0ac\uc5c5. \uad6c\ucd95: \uba54\ud2b8\ub9ad\uc2a4, \uc5b4\ub178\ud14c\uc774\uc158\uc5d0\uc774\uc544\uc774, \uc624\ud53c\ub2c8\uc5b8\ub77c\uc774\ube0c. Coordit local normalization and filtering.",
       "published_image_count": 550634,
       "approved_image_count": 2482,
       "categories": [
