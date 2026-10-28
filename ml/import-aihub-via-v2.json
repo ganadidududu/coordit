@@ -1,0 +1,6 @@
+{
+  "tasks": "artifacts/aihub71501/seam-review-v2/annotation-tasks.jsonl",
+  "tasks_sha256": "26e378c955be646c913fed2f322b2e741d9dd1080567e9ca33833cf48a150f0e",
+  "project": "artifacts/aihub71501/seam-review-v2/human-reviewed-project.json",
+  "output": "artifacts/aihub71501/human-reviewed-v2"
+}

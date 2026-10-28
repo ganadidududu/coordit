@@ -6,6 +6,7 @@ from typing import Literal
 
 from coordit_ml.provenance import approved_entry, audit_records, sha256, write_records
 from coordit_ml.schema import BoundaryModel, Landmark, PipelineError, Record, Registry
+from coordit_ml.seam_protocol import SideReference, validate_side_reference
 
 
 class ReviewedPoint(BoundaryModel):
@@ -25,6 +26,7 @@ class SeamReview(BoundaryModel):
     image_sha256: str
     coordinate_system: Literal["upright_rgb_normalized_top_left"]
     points: list[ReviewedPoint]
+    side_reference: SideReference | None = None
 
 
 class ReviewImport(BoundaryModel):
@@ -50,6 +52,10 @@ def import_seam_reviews(config: ReviewImport, registry: Registry) -> Path:
             raise PipelineError("Source semantic annotation scope requires explicit registry review")
         if record.sha256 != review.image_sha256:
             raise PipelineError("Seam annotation coordinates reference another image/crop")
+        if record.source_dataset == "aihub-71501":
+            validate_side_reference(review.side_reference, record)
+            if any(point.protocol != "coordit-upper-seam-v2" for point in review.points):
+                raise PipelineError("AI Hub seam review must use the v2 side and view protocol")
         if not review.points or any(
             point.review_status != "verified"
             or not point.reviewer.strip()

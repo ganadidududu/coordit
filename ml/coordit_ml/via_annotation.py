@@ -58,6 +58,8 @@ def build_offline_via(images: dict[str, ViaImage], output: Path) -> Path:
         "shoulder_right": "오른쪽 어깨 봉제선",
         "armpit_left": "왼쪽 겨드랑이 봉제 교차점",
         "armpit_right": "오른쪽 겨드랑이 봉제 교차점",
+        "hem_reference_left": "좌측 기준 밑단 — 필수 검수 기준점",
+        "hem_reference_right": "우측 기준 밑단 — 필수 검수 기준점",
     }
     project = {
         "_via_settings": {
@@ -86,6 +88,7 @@ def build_offline_via(images: dict[str, ViaImage], output: Path) -> Path:
                     "reviewer",
                     "review_complete",
                     "protocol",
+                    "view",
                     "evidence",
                 )
             },

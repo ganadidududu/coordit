@@ -11,6 +11,7 @@ from coordit_ml.network import ApprovedDataset
 from coordit_ml.provenance import REGISTRY_ROOT, approved_entry, sha256
 from coordit_ml.schema import BoundaryModel, PipelineError, Record, Registry, read_registry
 from coordit_ml.seam_comparison import score
+from coordit_ml.seam_protocol import validate_side_reference
 from coordit_ml.seam_reviews import SeamReview
 
 
@@ -61,6 +62,7 @@ class BlindAIHubDataset(ApprovedDataset):
             image = (root / record.file_name).resolve()
             if (
                 task.purpose != "blind_holdout_candidate"
+                or task.protocol != "coordit-upper-seam-v2"
                 or task.proposed_points
                 or record.split != "test"
                 or record.source_dataset != "aihub71501-evaluation-only-v1"
@@ -76,11 +78,14 @@ class BlindAIHubDataset(ApprovedDataset):
                 point.review_status != "verified"
                 or point.landmark.visibility != 2
                 or not point.reviewer.strip()
-                or point.protocol != "coordit-upper-seam-v1"
+                or point.protocol != "coordit-upper-seam-v2"
                 or not point.evidence.strip()
                 for point in review.points
             ):
                 raise PipelineError("Blind scoring requires visible human-verified seam truth")
+            validate_side_reference(review.side_reference, record)
+            if review.side_reference is None or review.side_reference.view != task.view:
+                raise PipelineError("Blind source view and human seam reference disagree")
             fields = record.model_dump()
             fields["keypoints"] = [point.landmark.model_dump() for point in review.points]
             self.samples.append((root, Record.model_validate(fields)))

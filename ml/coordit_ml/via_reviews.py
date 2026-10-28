@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from coordit_ml.aihub_review_queue import AnnotationTask
 from coordit_ml.provenance import sha256
 from coordit_ml.schema import BoundaryModel, Landmark, PipelineError
+from coordit_ml.seam_protocol import SideReference, validate_side_reference
 from coordit_ml.seam_reviews import ReviewedPoint, SeamReview
 from coordit_ml.via_annotation import ViaImage
 
@@ -39,6 +40,79 @@ class ReviewReceipt(BoundaryModel):
     original_photos_transmitted: bool = False
 
 
+def completed_review(image: ViaImage, task: AnnotationTask) -> SeamReview:
+    """Parse visible human points and their side-reference evidence after source identity was checked."""
+    attributes, record = image.file_attributes, task.record
+    reviewer, protocol, evidence = (attributes.get(key, "").strip() for key in ("reviewer", "protocol", "evidence"))
+    if (
+        not reviewer
+        or protocol != "coordit-upper-seam-v2"
+        or task.protocol != protocol
+        or task.view == "unknown"
+        or attributes.get("view") != task.view
+        or not evidence
+        or not image.regions
+    ):
+        raise PipelineError("Completed review requires reviewer, endpoint protocol and visual evidence")
+    points: list[ReviewedPoint] = []
+    anchors: dict[str, Landmark] = {}
+    names: set[str] = set()
+    for region in image.regions:
+        meta = region.region_attributes
+        name = meta.get("landmark_type", "")
+        if (
+            meta.get("review_status") != "verified"
+            or meta.get("visibility") != "2"
+            or name in names
+            or name
+            not in {
+                "shoulder_left",
+                "shoulder_right",
+                "armpit_left",
+                "armpit_right",
+                "hem_reference_left",
+                "hem_reference_right",
+            }
+        ):
+            raise PipelineError("Unverified, hidden, duplicate or unsupported seam point")
+        names.add(name)
+        landmark = Landmark(
+            landmark_type=name,
+            x=region.shape_attributes.cx / record.width,
+            y=region.shape_attributes.cy / record.height,
+            visibility=2,
+            source="local_human_seam_review",
+            correction_status="user_corrected",
+        )
+        if name.startswith("hem_reference_"):
+            anchors[name] = landmark
+            continue
+        points.append(
+            ReviewedPoint(
+                landmark=landmark,
+                review_status="verified",
+                reviewer=reviewer,
+                protocol=protocol,
+                evidence=evidence,
+            )
+        )
+    if len(anchors) != 2 or not points:
+        raise PipelineError("Verified v2 review requires two human hem anchors and actual seam points")
+    reference = SideReference(
+        left_hem=anchors["hem_reference_left"],
+        right_hem=anchors["hem_reference_right"],
+        view=task.view,
+    )
+    validate_side_reference(reference, record)
+    return SeamReview(
+        image_id=record.image_id,
+        image_sha256=record.sha256,
+        coordinate_system="upright_rgb_normalized_top_left",
+        points=points,
+        side_reference=reference,
+    )
+
+
 def import_via_reviews(config: ViaImport) -> Path:
     """Accept only explicit visible-point confirmations matched to original image identity."""
     if sha256(config.tasks) != config.tasks_sha256:
@@ -66,53 +140,15 @@ def import_via_reviews(config: ViaImport) -> Path:
             attributes.get("image_sha256") != record.sha256
             or attributes.get("purpose") != task.purpose
             or Path(image.filename).name != Path(record.file_name).name
-            or not pixels.is_relative_to(root) or sha256(pixels) != record.sha256
+            or not pixels.is_relative_to(root)
+            or sha256(pixels) != record.sha256
             or image.size != pixels.stat().st_size
         ):
             raise PipelineError("Review purpose or source image identity changed")
         if attributes.get("review_complete") != "yes":
             incomplete += 1
             continue
-        reviewer, protocol, evidence = (attributes.get(key, "").strip() for key in ("reviewer", "protocol", "evidence"))
-        if not reviewer or protocol != "coordit-upper-seam-v1" or not evidence or not image.regions:
-            raise PipelineError("Completed review requires reviewer, endpoint protocol and visual evidence")
-        points: list[ReviewedPoint] = []
-        names: set[str] = set()
-        for region in image.regions:
-            meta = region.region_attributes
-            name = meta.get("landmark_type", "")
-            if (
-                meta.get("review_status") != "verified"
-                or meta.get("visibility") != "2"
-                or name in names
-                or name not in {"shoulder_left", "shoulder_right", "armpit_left", "armpit_right"}
-            ):
-                raise PipelineError("Unverified, hidden, duplicate or unsupported seam point")
-            names.add(name)
-            points.append(
-                ReviewedPoint(
-                    landmark=Landmark(
-                        landmark_type=name,
-                        x=region.shape_attributes.cx / record.width,
-                        y=region.shape_attributes.cy / record.height,
-                        visibility=2,
-                        source="local_human_seam_review",
-                        correction_status="user_corrected",
-                    ),
-                    review_status="verified",
-                    reviewer=reviewer,
-                    protocol=protocol,
-                    evidence=evidence,
-                )
-            )
-        by_purpose[task.purpose].append(
-            SeamReview(
-                image_id=identity,
-                image_sha256=record.sha256,
-                coordinate_system="upright_rgb_normalized_top_left",
-                points=points,
-            )
-        )
+        by_purpose[task.purpose].append(completed_review(image, task))
     if not any(by_purpose.values()):
         raise PipelineError("No verified human annotations; proposals cannot be imported as ground truth")
     config.output.mkdir(parents=True, exist_ok=False)

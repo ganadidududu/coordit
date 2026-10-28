@@ -1,6 +1,7 @@
 """Private local training proposals and blind held-out annotation tasks; no automatic truth promotion."""
 
 import os
+import re
 from pathlib import Path
 from typing import Literal
 
@@ -36,6 +37,14 @@ class AnnotationTask(BoundaryModel):
     record: Record
     purpose: Literal["training_review", "blind_holdout_candidate"]
     proposed_points: list[Landmark]
+    protocol: Literal["coordit-upper-seam-v1", "coordit-upper-seam-v2"] = "coordit-upper-seam-v1"
+    view: Literal["front", "back", "unknown"] = "unknown"
+
+
+def source_view(record: Record) -> Literal["front", "back", "unknown"]:
+    """Read publisher front/back identity; never infer anatomy from a neural prediction."""
+    found = re.search(r"_(front|back)_", Path(record.source_path).name)
+    return "front" if found and found[1] == "front" else ("back" if found else "unknown")
 
 
 def prepare_aihub_review_queue(config: QueueConfig, registry: Registry) -> Path:
@@ -75,7 +84,8 @@ def prepare_aihub_review_queue(config: QueueConfig, registry: Registry) -> Path:
                 if name in permitted
             ]
             os.link(root / record.file_name, config.output / "images" / Path(record.file_name).name)
-            tasks.append(AnnotationTask(record=record, purpose="training_review", proposed_points=points))
+            tasks.append(AnnotationTask(record=record, purpose="training_review", proposed_points=points,
+                                        protocol="coordit-upper-seam-v2", view=source_view(record)))
     normal = AIHubConversion(source=config.sample_root, output=config.output)
     for line in config.sample_audit.read_text().splitlines():
         pair = QuarantinedPair.model_validate_json(line)
@@ -91,7 +101,8 @@ def prepare_aihub_review_queue(config: QueueConfig, registry: Registry) -> Path:
                 "source_group": "aihub71501-unseen-sample-candidate",
             }
         )
-        tasks.append(AnnotationTask(record=record, purpose="blind_holdout_candidate", proposed_points=[]))
+        tasks.append(AnnotationTask(record=record, purpose="blind_holdout_candidate", proposed_points=[],
+                                    protocol="coordit-upper-seam-v2", view=source_view(record)))
     index_path = config.output / "annotation-tasks.jsonl"
     _ = index_path.write_text("".join(task.model_dump_json() + "\n" for task in tasks))
     drafts = [
@@ -104,7 +115,7 @@ def prepare_aihub_review_queue(config: QueueConfig, registry: Registry) -> Path:
                     landmark=point,
                     review_status="proposal",
                     reviewer="",
-                    protocol="coordit-upper-seam-v1",
+                    protocol=task.protocol,
                     evidence="unverified model suggestion; not centimeter ground truth",
                 )
                 for point in task.proposed_points
@@ -143,7 +154,8 @@ def prepare_aihub_review_queue(config: QueueConfig, registry: Registry) -> Path:
                     "purpose": purpose,
                     "reviewer": "",
                     "review_complete": "no",
-                    "protocol": "coordit-upper-seam-v1",
+                    "protocol": task.protocol,
+                    "view": task.view,
                     "evidence": "",
                 },
             )

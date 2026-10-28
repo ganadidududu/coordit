@@ -1,5 +1,28 @@
 # AI Hub 봉제점 로컬 검수
 
+## v2 좌우·앞뒤 기준 수정 — 2026-10-28
+
+기존 v1의 “화면 좌우” 정의는 aRTF publisher의 대칭 해소 규칙과 다르다. **v1 묶음을 검수 완료로 바꿔 새 학습에 넣지 않는다.** importer는 v1 완료 주석을 거부한다. 원래 v1 파일은 보존했다.
+
+현재 로컬 묶음은 `ml/artifacts/aihub71501/seam-review-v2/`다. `training_review.html`에 코트 64장·재킷 64장, **128장/제안 512개**가 있다. 앞면 60장·뒷면 68장을 원본 파일명으로 구분한다. `blind_holdout_candidate.html`은 별도 앞면 2장이며 예측점은 없다. 검증된 AI Hub 봉제점은 여전히 **0개**다.
+
+새 프로토콜은 `coordit-upper-seam-v2`다. 원본 픽셀 좌표의 bbox 왼쪽 아래 모서리에 더 가까운 **밑단 끝이 속한 의류 쪽**을 left로 정의하고, 반대쪽을 right로 정의한다. 각 어깨/겨드랑이 쌍을 따로 x순 정렬하지 않고 **옷 전체에서 같은 쪽**을 유지한다. 착용자의 해부학적 좌우라는 뜻도 아니다. aRTF의 공개된 상의 waist/hem 대칭 해소 규칙을 참고했다. 비교 평가의 기존 aRTF 정답은 수정하지 않았다.
+
+검수자는 4개 봉제점 외에 `hem_reference_left`, `hem_reference_right` 두 기준점을 **직접** 추가한다. 옷 실제 밑단의 양 끝이 보일 때만 찍고 각각 verified/visibility 2로 설정한다. 이 두 점은 `side_reference` 검수 근거로 보관하며, 목 중심·총장·밑단 중심 등의 모델 정답으로 변환하지 않는다. importer가 원본 픽셀 단위의 코너 거리, 기준점 중복/반전, 원본 front/back과 검수 view의 일치를 검사한다. 기준점이 보이지 않거나 옷의 같은 쪽을 따라갈 수 없으면 완료 처리하지 않는다.
+
+file attributes의 `view`와 `protocol`은 원래 task에 고정돼 있으므로 수정하지 않는다. `reviewer`, `evidence`, `review_complete`와 실제 확인한 region 속성만 작성한다. 새 import 설정은 `ml/import-aihub-via-v2.json`, blind 평가 예시는 `ml/evaluate-aihub-blind-v2.example.json`이다. 실제 VIA export를 지정한 다음 실행한다.
+
+```sh
+uv run python -m coordit_ml prepare-aihub-seam-review aihub-seam-review-v2.json
+uv run python -m coordit_ml import-via-seam-reviews import-aihub-via-v2.json
+```
+
+현재 새 묶음은 이미 생성돼 있어 같은 output으로 준비 명령을 다시 실행하면 실패한다. 재생성은 config에 새 output을 지정한다. 학습/평가 export는 서로 다른 파일·output으로 import한다. 실제 사람이 검수하지 않은 초기 프로젝트는 import가 실패해야 정상이다.
+
+**로컬 주석은 이미 허가돼 있다.** 현재 부족한 것은 외부 AI 허가를 다시 받는 일이 아니라, 실제 사람이 봉제선을 확인한 좌표와 측정 프로토콜 일치다. AI Hub 가슴 수치는 겨드랑이에서 1인치 아래의 폭×2, 어깨는 뒤쪽 측정이다. 앞면 겨드랑이 점 두 개의 거리와 원본 가슴둘레 숫자를 같은 cm 정답으로 연결하지 않는다. 검수 후 semantic 학습 범위를 등록할 때도 이 의미와 증거를 확인한다.
+
+아래는 **과거 v1 묶음의 기록**이며 최신 작업은 위 v2 규칙을 따른다. 오프라인 도구의 기본 조작과 사진 외부 전송 금지 조건은 같다.
+
 원본 사진을 외부 AI에 전송하지 않는 조건으로 준비했다. 사진은 로컬 JPEG로만 읽고 EXIF는 제거돼 있다. 온라인 annotation 사이트에 올리지 않는다. 봉제점이 보이지 않거나 위치가 모호하면 정답을 만들지 않는다.
 
 ## 현재 준비된 묶음

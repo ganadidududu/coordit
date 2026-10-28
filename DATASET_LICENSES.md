@@ -1,5 +1,7 @@
 # Dataset rights register
 
+Local seam protocol v2: the previously accepted AI Hub agreement already permits local annotation; no additional external-AI consent is inferred or requested. Manual verification and consistent side/view definitions remain missing. The v2 protocol and two human hem-reference anchors prevent silently mixing the older screen-left convention with aRTF's whole-garment side convention. Its prepared proposal bundle is **not ground truth** and does not change the registry training scope. See `ml/registry/reviews/aihub-seam-protocol-v2.json`.
+
 2026-10-28 follow-up: 561 aRTF publisher-test photographs are available only through the evaluation adapter with an unregistered test-only source identity, never the approved training loader. This is an unseen-training-photo development evaluation, not a newly independent garment study; existing 16-photo heuristic fixtures and three near-training images were excluded. AI Hub local seam suggestions remain unverified, and its semantic-keypoint training scope has not been auto-approved. See `docs/SEAM_GENERALIZATION_2026_10_28.md` and `docs/AIHUB_LOCAL_SEAM_REVIEW.md`.
 
 Machine-readable authority: `ml/registry/DATASET_MANIFEST.json`; reviewed 2026-10-27.
