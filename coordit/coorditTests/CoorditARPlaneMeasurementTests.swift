@@ -4,6 +4,20 @@ import simd
 
 @MainActor
 final class CoorditARPlaneMeasurementTests: XCTestCase {
+    func testScanningGuidanceSeparatesMotionScaleAimAndShutterStillness() {
+        XCTAssertEqual(CoorditARCaptureGuidance.evaluate(trackingNormal: false, hasPlane: false,
+            movement: 0, downward: false, stable: false), .tracking)
+        XCTAssertEqual(CoorditARCaptureGuidance.evaluate(trackingNormal: true, hasPlane: false,
+            movement: 0, downward: false, stable: false), .findPlane)
+        XCTAssertEqual(CoorditARCaptureGuidance.evaluate(trackingNormal: true, hasPlane: true,
+            movement: 0.001, downward: true, stable: true), .establishScale)
+        XCTAssertEqual(CoorditARCaptureGuidance.evaluate(trackingNormal: true, hasPlane: true,
+            movement: 0.04, downward: false, stable: true), .aimDown)
+        XCTAssertEqual(CoorditARCaptureGuidance.evaluate(trackingNormal: true, hasPlane: true,
+            movement: 0.04, downward: true, stable: false), .holdStill)
+        XCTAssertEqual(CoorditARCaptureGuidance.evaluate(trackingNormal: true, hasPlane: true,
+            movement: 0.04, downward: true, stable: true), .ready)
+    }
     private func geometry(orientation: CoorditARPlaneGeometry.Orientation = .up) -> CoorditARPlaneGeometry {
         // Camera one meter above floor, optical axis points vertically down.
         var camera = matrix_identity_float4x4

@@ -41,6 +41,8 @@ final class CoorditGarmentCaptureController: ObservableObject {
     private var endpointsCorrected = false
     private var sessionInterrupted = false
     @Published private(set) var arFailureReason: String?
+    @Published private(set) var arGuidance: CoorditARCaptureGuidance = .tracking
+    @Published private(set) var mappedPlaneBoundary: [CoorditMeasurementPoint] = []
     var isFrozenAR: Bool { method == .arPlane && planeCapture != nil }
     var measurementEvidence: CoorditARMeasurementEvidence? {
         guard var evidence = planeCapture?.evidence else { return nil }
@@ -88,7 +90,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
 
     var instruction: String {
         if isDetecting { return method == .card ? "옷과 카드를 찾고 있어요" : "옷의 측정점을 찾고 있어요" }
-        if method == .arPlane, image == nil { return "옷을 비추며 천천히 움직여 평면을 인식한 뒤 촬영해주세요." }
+        if method == .arPlane, image == nil { return arGuidance.instruction }
         if method == .card, selection != .manual {
             if selection == .card || needsCardCorners { return "사진에서 카드를 눌러주세요. 모서리는 끌어서 맞출 수 있어요." }
             if selection == .garment || !isComplete { return "사진에서 옷을 눌러주세요." }
@@ -139,7 +141,11 @@ final class CoorditGarmentCaptureController: ObservableObject {
 
     func tapImage(_ point: CoorditMeasurementPoint) {
         guard point.isNormalized, !isDetecting else { return }
-        if method == .arPlane { addImagePoint(point); return }
+        if method == .arPlane {
+            if selection == .garment { detectOutline(garmentHint: point) }
+            else { addImagePoint(point) }
+            return
+        }
         if selection == .manual { addImagePoint(point); return }
         if selection == .card || needsCardCorners { detectOutline(cardHint: point) }
         else if selection == .garment || !isComplete { detectOutline(garmentHint: point) }
@@ -148,6 +154,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
     }
 
     func beginManualCard() {
+        cancelInference()
         selection = .manual
         if !points.isEmpty { proposedEndpoints = points.compactMap { project($0) } }
         points = []; projectedPoints = []; corners = []; calibration = nil
@@ -155,13 +162,24 @@ final class CoorditGarmentCaptureController: ObservableObject {
     }
 
     func beginManualGarment() {
+        cancelInference()
         selection = .manual
         points = []; projectedPoints = []; proposedEndpoints = []; outline = []
         hasAutomaticProposal = false; basisConfirmed = false; message = nil
     }
 
     func detectOutline(cardHint: CoorditMeasurementPoint? = nil, garmentHint: CoorditMeasurementPoint? = nil) {
-        guard let data = image?.pngData(), method == .card || isFrozenAR else { return }
+        guard let image, method == .card || isFrozenAR else { return }
+        let data: Data?
+        if isFrozenAR {
+            let scale = min(1, 1600 / max(image.size.width, image.size.height))
+            let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+            let format = UIGraphicsImageRendererFormat(); format.scale = 1
+            data = UIGraphicsImageRenderer(size: size, format: format).image { _ in
+                image.draw(in: CGRect(origin: .zero, size: size))
+            }.jpegData(compressionQuality: 0.9)
+        } else { data = image.pngData() }
+        guard let data else { return }
         detectionTask?.cancel()
         detectionRevision = UUID()
         let generation = detectionRevision
@@ -169,7 +187,8 @@ final class CoorditGarmentCaptureController: ObservableObject {
         detectionTask = Task {
             defer { if generation == detectionRevision { isDetecting = false } }
             do {
-                let proposal = try await inferenceEngine.infer(.init(image: data, category: category, cardHint: cardHint, garmentHint: garmentHint))
+                let proposal = try await inferenceEngine.infer(.init(image: data, category: category, cardHint: cardHint,
+                    garmentHint: garmentHint, detectCard: method == .card))
                 guard !Task.isCancelled, generation == detectionRevision else { return }
                 guard proposal.endpoints.isEmpty || proposal.isLower == isLower else {
                     message = isLower ? "비교할 바지를 촬영해주세요." : "비교할 상의를 촬영해주세요."
@@ -180,6 +199,9 @@ final class CoorditGarmentCaptureController: ObservableObject {
                     outline = proposal.outline
                     proposedEndpoints = proposal.endpoints
                     applyProposedEndpoints()
+                    if proposal.endpoints.isEmpty {
+                        message = "윤곽에서 측정점을 찾지 못했어요. 직접 측정점을 지정해주세요."
+                    }
                     return
                 }
                 if cardHint != nil {
@@ -292,11 +314,15 @@ final class CoorditGarmentCaptureController: ObservableObject {
             let proposed = Dictionary(uniqueKeysWithValues: dimensions.enumerated().map { index, dimension in
                 (dimension, CoorditMeasurementSegment(start: values[index * 2], end: values[index * 2 + 1]))
             })
-            _ = try CoorditGarmentMeasurement(method: method, segments: proposed, lengthBasis: lengthBasis, category: category, arEvidence: measurementEvidence)
             points = values
             hasAutomaticProposal = true
             refreshProjection()
-        } catch { message = "\(error.localizedDescription) 옷의 끝점을 눌러주세요." }
+            _ = try CoorditGarmentMeasurement(method: method, segments: proposed, lengthBasis: lengthBasis, category: category, arEvidence: measurementEvidence)
+        } catch {
+            message = isFrozenAR && points.isEmpty
+                ? "측정점이 인식된 평면 밖에 있어요. 옷 주변까지 다시 비추거나 직접 측정점을 지정해주세요."
+                : "\(error.localizedDescription) 표시된 점을 끌어서 맞춰주세요."
+        }
     }
 
     func moveEndpoint(_ index: Int, to point: CoorditMeasurementPoint) {
@@ -330,6 +356,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
     func reset() {
         garmentPhotoData = nil
         planeCapture = nil; endpointsCorrected = false; arFailureReason = nil
+        arGuidance = .tracking; mappedPlaneBoundary = []
         planeStability.reset()
         detectionTask?.cancel(); isDetecting = false; detectionRevision = UUID()
         selection = .automatic
@@ -537,14 +564,27 @@ final class CoorditGarmentCaptureController: ObservableObject {
         lastProjectionTime = time
         let ready: Bool
         if case .normal = frame.camera.trackingState {
-            if method == .arPlane, let plane = centerPlane(view), plane.extent.x >= 0.25, plane.extent.z >= 0.25,
-               frame.camera.transform.columns.2.y > 0.75 {
-                ready = planeStability.observe(planeID: plane.identifier, plane: plane.transform, camera: frame.camera.transform, timestamp: frame.timestamp)
+            if method == .arPlane, let plane = centerPlane(view), plane.extent.x >= 0.25, plane.extent.z >= 0.25 {
+                // Mapping needs movement before the final overhead composition. Keep that baseline while tilting.
+                let stable = planeStability.observe(planeID: plane.identifier, plane: plane.transform,
+                    camera: frame.camera.transform, timestamp: frame.timestamp)
+                let downward = frame.camera.transform.columns.2.y > 0.75
+                ready = stable && downward
+                arGuidance = .evaluate(trackingNormal: true, hasPlane: true, movement: planeStability.movement,
+                    downward: downward, stable: stable)
+                mappedPlaneBoundary = plane.geometry.boundaryVertices.compactMap { vertex in
+                    let world = plane.transform * SIMD4<Float>(vertex, 1)
+                    let projected = view.projectPoint(SCNVector3(world.x, world.y, world.z))
+                    guard projected.z > 0, projected.z < 1, view.bounds.width > 0, view.bounds.height > 0 else { return nil }
+                    return .init(x: Double(CGFloat(projected.x) / view.bounds.width), y: Double(CGFloat(projected.y) / view.bounds.height))
+                }
             } else {
-                if method == .arPlane { planeStability.reset() }
+                if method == .arPlane {
+                    planeStability.reset(); arGuidance = .findPlane; mappedPlaneBoundary = []
+                }
                 ready = method == .lidar && frame.sceneDepth != nil && abs(frame.camera.transform.columns.2.y) > 0.75
             }
-        } else { planeStability.reset(); ready = false }
+        } else { planeStability.reset(); ready = false; arGuidance = .tracking; mappedPlaneBoundary = [] }
         if trackingReady != ready { trackingReady = ready }
         refreshProjection()
     }
@@ -557,6 +597,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
         sessionInterrupted = interrupted
         trackingReady = false
         planeStability.reset()
+        arGuidance = .tracking; mappedPlaneBoundary = []
         if method == .arPlane, !isFrozenAR {
             arFailureReason = interrupted ? "session_interrupted" : "plane_reacquisition_required"
         }
@@ -621,6 +662,14 @@ struct CoorditLiDARCameraView: UIViewRepresentable {
     func makeUIView(context: Context) -> ARSCNView {
         let view = ARSCNView()
         view.scene = SCNScene()
+        if controller.method == .arPlane {
+            let coaching = ARCoachingOverlayView()
+            coaching.session = view.session
+            coaching.goal = .horizontalPlane
+            coaching.frame = view.bounds
+            coaching.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            view.addSubview(coaching)
+        }
         view.delegate = context.coordinator
         view.session.delegate = context.coordinator
         view.automaticallyUpdatesLighting = false

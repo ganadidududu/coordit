@@ -5,6 +5,45 @@ import UniformTypeIdentifiers
 @testable import coordit
 
 final class CoorditGarmentInferenceTests: XCTestCase {
+    @MainActor
+    func testInvalidAutomaticLengthKeepsHandlesForCorrection() async throws {
+        let capture = CoorditGarmentCaptureController(method: .card, inferenceEngine: InvalidLengthInference())
+        capture.loadTestFixture()
+        capture.beginManualGarment()
+        capture.detectOutline()
+        for _ in 0..<100 {
+            if !capture.isDetecting { break }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        XCTAssertEqual(capture.points.count, 8, "A bad automatic length must not erase every editable point")
+        XCTAssertFalse(capture.canReview, "Unrealistic cm values must still be refused")
+        XCTAssertNotNil(capture.message)
+    }
+
+    @MainActor
+    func testManualEntryCancelsPendingDetectionAndIgnoresItsResult() async throws {
+        let capture = CoorditGarmentCaptureController(method: .card, inferenceEngine: DelayedInference())
+        capture.loadTestFixture()
+        capture.detectOutline()
+        XCTAssertTrue(capture.isDetecting)
+        capture.beginManualGarment()
+        XCTAssertFalse(capture.isDetecting, "Manual entry must be available without waiting for Vision")
+        capture.addImagePoint(.init(x: 0.25, y: 0.25))
+        try await Task.sleep(for: .milliseconds(120))
+        XCTAssertEqual(capture.points.count, 1)
+        XCTAssertEqual(capture.selection, .manual)
+    }
+
+    @MainActor
+    func testCardlessDetectionDoesNotSearchForCardCorners() async throws {
+        let capture = CoorditGarmentCaptureController(method: .card)
+        capture.loadTestFixture()
+        let data = try XCTUnwrap(capture.image?.pngData())
+        let result = try await CoorditGarmentOutlineDetector().detect(data, category: .tshirt,
+            useForegroundFallback: false, detectCard: false)
+        XCTAssertTrue(result.corners.isEmpty)
+        XCTAssertEqual(result.endpoints.count, 8)
+    }
     func testUnapprovedModelCannotReplaceHeuristicEndpoints() {
         let response = CoorditLandmarkResponse(schemaVersion: 1, status: "needs_calibration", modelVersion: "smoke-v1",
             coordinateSystem: "upright_rgb_normalized_top_left", category: "skirt", deploymentApproved: false, landmarks: [])
@@ -76,6 +115,21 @@ final class CoorditGarmentInferenceTests: XCTestCase {
         XCTAssertNil(metadata[kCGImagePropertyGPSDictionary as String])
     }
 
+}
+
+private struct InvalidLengthInference: CoorditGarmentInferenceEngine {
+    func infer(_ input: CoorditGarmentInferenceInput) async throws -> CoorditGarmentOutlineProposal {
+        .init(corners: [], outline: [], endpoints: (0..<8).map {
+            .init(x: 0.4 + Double($0) * 0.0001, y: 0.4)
+        }, isLower: false)
+    }
+}
+
+private struct DelayedInference: CoorditGarmentInferenceEngine {
+    func infer(_ input: CoorditGarmentInferenceInput) async throws -> CoorditGarmentOutlineProposal {
+        try await Task.sleep(for: .milliseconds(80))
+        return .init(corners: [], outline: [], endpoints: [], isLower: false)
+    }
 }
 
 private final class LandmarkPrivacyStorage: @unchecked Sendable {

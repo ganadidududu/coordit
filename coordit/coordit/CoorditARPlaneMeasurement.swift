@@ -1,6 +1,29 @@
 import Foundation
 import simd
 
+enum CoorditARCaptureGuidance: Equatable {
+    case tracking, findPlane, establishScale, aimDown, holdStill, ready
+
+    var instruction: String {
+        switch self {
+        case .tracking: "카메라를 천천히 좌우로 움직여 공간을 인식해주세요."
+        case .findPlane: "옷 주변 바닥이나 테이블까지 천천히 비춰주세요."
+        case .establishScale: "휴대폰 위치를 옆으로 조금 이동해주세요. 제자리 회전만으로는 부족해요."
+        case .aimDown: "공간을 인식했어요. 옷 전체가 보이게 위에서 내려다봐주세요."
+        case .holdStill: "평면을 확인하고 있어요. 잠깐 고정해주세요."
+        case .ready: "촬영할 수 있어요. 옷 인식은 촬영 후 진행해요."
+        }
+    }
+
+    static func evaluate(trackingNormal: Bool, hasPlane: Bool, movement: Float, downward: Bool, stable: Bool) -> Self {
+        guard trackingNormal else { return .tracking }
+        guard hasPlane else { return .findPlane }
+        guard movement >= 0.03 else { return .establishScale }
+        guard downward else { return .aimDown }
+        return stable ? .ready : .holdStill
+    }
+}
+
 // Intrinsics operate on the unmirrored, unrotated sensor image, with origin at top left.
 struct CoorditARPlaneGeometry: Sendable {
     enum Orientation: String, Codable, Sendable {

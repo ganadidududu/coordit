@@ -7,6 +7,7 @@ struct CoorditGarmentInferenceInput: Sendable {
     let category: CoorditFitLabCategory
     let cardHint: CoorditMeasurementPoint?
     let garmentHint: CoorditMeasurementPoint?
+    var detectCard = true
 }
 
 protocol CoorditGarmentInferenceEngine: Sendable {
@@ -131,7 +132,7 @@ struct CoorditHybridGarmentInference: CoorditGarmentInferenceEngine {
 
     func infer(_ input: CoorditGarmentInferenceInput) async throws -> CoorditGarmentOutlineProposal {
         let local = try await CoorditGarmentOutlineDetector().detect(input.image, category: input.category,
-            cardHint: input.cardHint, garmentHint: input.garmentHint)
+            cardHint: input.cardHint, garmentHint: input.garmentHint, detectCard: input.detectCard)
         guard let remote,
               Bundle.main.object(forInfoDictionaryKey: "CoorditAILandmarksEnabled") as? Bool == true,
               input.cardHint == nil, input.garmentHint == nil else { return local }

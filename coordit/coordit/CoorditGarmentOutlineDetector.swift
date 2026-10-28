@@ -15,7 +15,8 @@ struct CoorditGarmentOutlineProposal: Sendable {
 actor CoorditGarmentOutlineDetector {
     private let logger = Logger(subsystem: "com.inseong.coordit", category: "garment-detection")
     func detect(_ data: Data, category: CoorditFitLabCategory? = nil, cardHint: CoorditMeasurementPoint? = nil,
-                garmentHint: CoorditMeasurementPoint? = nil, useForegroundFallback: Bool = true) throws -> CoorditGarmentOutlineProposal {
+                garmentHint: CoorditMeasurementPoint? = nil, useForegroundFallback: Bool = true,
+                detectCard: Bool = true) throws -> CoorditGarmentOutlineProposal {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
               let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
             throw CoorditGarmentMeasurementError.invalidPoint
@@ -27,7 +28,7 @@ actor CoorditGarmentOutlineDetector {
         rectangles.minimumSize = 0.02
         rectangles.minimumConfidence = 0.7
         rectangles.maximumObservations = 24
-        try handler.perform([rectangles])
+        if detectCard { try handler.perform([rectangles]) }
         let candidates = (rectangles.results ?? []).filter { rectangle in
             func distance(_ first: CGPoint, _ second: CGPoint) -> Double {
                 hypot((first.x - second.x) * Double(image.width), (first.y - second.y) * Double(image.height))

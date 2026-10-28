@@ -251,7 +251,7 @@ struct CoorditFitLabCameraComparison: View {
                         .id(capture.method.rawValue)
                     measurementOverlay(size: geometry.size)
                         .allowsHitTesting(false)
-                    if !capture.trackingReady {
+                    if !capture.trackingReady, capture.method != .arPlane {
                         Text("옷을 위에서 천천히 비춰주세요")
                             .font(CoorditTypography.gmarketMedium(size: metrics.value(13), relativeTo: .body))
                             .padding(12)
@@ -259,8 +259,10 @@ struct CoorditFitLabCameraComparison: View {
                     }
                     VStack {
                         Spacer()
-                        Text(cameraMotion.posture.text)
+                        Text(capture.method == .arPlane ? capture.instruction : cameraMotion.posture.text)
                             .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                             .padding(12)
                             .background(CoorditFitLabPalette.surface, in: Capsule())
                             .padding(12)
@@ -288,7 +290,7 @@ struct CoorditFitLabCameraComparison: View {
                                     if !isMagnifyingPhoto { accumulatedPhotoOffset = photoOffset }
                                 }, including: photoScale > 1 ? .all : .none)
                         measurementOverlay(size: geometry.size)
-                        if capture.isComplete, !isUnlocked, !isAnalyzing {
+                        if !capture.points.isEmpty, !isUnlocked, !isAnalyzing {
                             endpointHandles(size: geometry.size)
                         }
                         if capture.selection == .card, !isUnlocked, !isAnalyzing {
@@ -373,6 +375,12 @@ struct CoorditFitLabCameraComparison: View {
     private func measurementOverlay(size: CGSize) -> some View {
         Canvas { context, canvas in
             func screen(_ point: CoorditMeasurementPoint) -> CGPoint { .init(x: point.x * canvas.width, y: point.y * canvas.height) }
+            if capture.method == .arPlane, capture.image == nil, capture.mappedPlaneBoundary.count >= 3 {
+                var plane = Path()
+                plane.addLines(capture.mappedPlaneBoundary.map(screen)); plane.closeSubpath()
+                context.fill(plane, with: .color(CoorditDesignTokens.ColorToken.blue.opacity(0.12)))
+                context.stroke(plane, with: .color(CoorditDesignTokens.ColorToken.blue), lineWidth: 2)
+            }
             if capture.outline.count > 2 {
                 var outline = Path()
                 outline.addLines(capture.outline.map(screen))
@@ -441,17 +449,33 @@ struct CoorditFitLabCameraComparison: View {
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(13), relativeTo: .body))
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier("camera-fit-instruction") }
-            if capture.isDetecting { ProgressView() }
+            if capture.isDetecting {
+                ProgressView("측정점을 찾고 있어요")
+                Button("자동 인식 중단하고 직접 측정점 지정") { capture.beginManualGarment() }
+                    .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+                    .disabled(isAnalyzing)
+                    .accessibilityIdentifier("camera-fit-stop-detection")
+            } else if capture.image != nil, !isUnlocked {
+                Button("직접 측정점 지정") { capture.beginManualGarment() }
+                    .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+                    .disabled(isAnalyzing)
+                    .accessibilityIdentifier("camera-fit-manual-points")
+            }
             if capture.method == .card, !capture.isDetecting {
                 HStack(spacing: 16) {
+                    let proposalReady = capture.hasAutomaticProposal && capture.canReview
                     Label(capture.calibration == nil ? "카드 위치 확인" : "카드 인식", systemImage: capture.calibration == nil ? "viewfinder" : "checkmark.circle.fill")
-                    Label(capture.hasAutomaticProposal ? "치수 추정 완료" : "측정점 확인", systemImage: capture.hasAutomaticProposal ? "checkmark.circle.fill" : "point.topleft.down.to.point.bottomright.curvepath")
+                    Label(proposalReady ? "치수 추정 완료" : "측정점 확인", systemImage: proposalReady ? "checkmark.circle.fill" : "point.topleft.down.to.point.bottomright.curvepath")
                 }
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))
                 .accessibilityIdentifier("camera-fit-detection-status")
             }
             if capture.method == .arPlane, capture.image == nil, !isUnlocked {
                 Text(capture.instruction)
+                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("camera-fit-ar-guidance")
+                Text("옷 주변까지 비춰 파란 평면 영역을 넓혀주세요. 옷을 자동 인식하지 않아도 촬영할 수 있어요.")
                     .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
                     .fixedSize(horizontal: false, vertical: true)
                 Button("평면 위의 옷 촬영") { capture.captureARPlane() }
@@ -481,7 +505,7 @@ struct CoorditFitLabCameraComparison: View {
     private func measurementReadout(_ metrics: CoorditResponsiveMetrics) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             if capture.isDetecting {
-                ProgressView("옷과 카드를 찾고 있어요")
+                ProgressView(capture.method == .card ? "옷과 카드를 찾고 있어요" : "옷의 측정점을 찾고 있어요")
                     .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
             }
             HStack(spacing: metrics.value(8)) {
