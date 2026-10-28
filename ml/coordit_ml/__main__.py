@@ -26,6 +26,7 @@ from coordit_ml.garmentcode_download import (
 )
 from coordit_ml.inventory import audit_inventory
 from coordit_ml.provenance import REGISTRY_ROOT, approved_entry, audit_records
+from coordit_ml.publisher_test import TestPreparation, prepare_publisher_test
 from coordit_ml.schema import read_registry
 from coordit_ml.seam_comparison import SeamComparison, compare_seams
 from coordit_ml.seam_reviews import ReviewImport, import_seam_reviews
@@ -54,6 +55,7 @@ class Arguments(argparse.Namespace):
         "download-garmentcode-sample",
         "render-garmentcode",
         "compare-seams",
+        "prepare-publisher-test",
         "import-seam-reviews",
         "synthetic",
         "validate",
@@ -113,6 +115,8 @@ def main() -> None:
     _ = render.add_argument("config", type=Path)
     compare = commands.add_parser("compare-seams")
     _ = compare.add_argument("config", type=Path)
+    publisher_test = commands.add_parser("prepare-publisher-test")
+    _ = publisher_test.add_argument("config", type=Path)
     seam_reviews = commands.add_parser("import-seam-reviews")
     _ = seam_reviews.add_argument("config", type=Path)
     synth = commands.add_parser("synthetic")
@@ -178,6 +182,8 @@ def main() -> None:
             print(render_garmentcode(GarmentSelection.model_validate_json(args.config.read_bytes()), registry))
         case "compare-seams":
             print(compare_seams(SeamComparison.model_validate_json(args.config.read_bytes())))
+        case "prepare-publisher-test":
+            print(prepare_publisher_test(TestPreparation.model_validate_json(args.config.read_bytes()), registry))
         case "import-seam-reviews":
             print(import_seam_reviews(ReviewImport.model_validate_json(args.config.read_bytes()), registry))
         case "synthetic":

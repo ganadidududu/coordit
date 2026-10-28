@@ -1,0 +1,16 @@
+{
+  "baseline": {
+    "directory": "artifacts/seam-integrated-finetune-v1",
+    "checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+    "artifact_sha256": "397acad1b759ef6f866c2eec59f4f30c0854d9c1f722f44dca4ce2accf1ef6fb"
+  },
+  "candidate": {
+    "directory": "artifacts/seam-real-augmentation-v1",
+    "checkpoint_sha256": "2ba32df955ad6f5329f2c5636b7425f5d1408c39356087aebf79095adeaf4d54",
+    "artifact_sha256": "172d117218c9d1e19c5e139995c3a00385ff09caf4d7056a04739f0b5dd6f708"
+  },
+  "manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+  "split": "test",
+  "output": "reports/artf-unseen-after-augmentation.json",
+  "evaluation_only_publisher_test": true
+}

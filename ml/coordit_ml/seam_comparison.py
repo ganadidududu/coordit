@@ -8,9 +8,11 @@ import torch
 
 from coordit_ml.artifacts import Artifact
 from coordit_ml.finetuning import ParentCheckpoint, initialize
+from coordit_ml.history import HistoryPin, load_history
 from coordit_ml.model_factory import create_model
 from coordit_ml.network import ApprovedDataset
 from coordit_ml.provenance import REGISTRY_ROOT, sha256
+from coordit_ml.publisher_test import PublisherTestDataset
 from coordit_ml.schema import LANDMARKS, BoundaryModel, PipelineError, read_registry
 
 
@@ -22,6 +24,7 @@ class SeamComparison(BoundaryModel):
     manifest: Path
     split: str = "train"
     output: Path
+    evaluation_only_publisher_test: bool = False
 
 
 class LandmarkMetric(BoundaryModel):
@@ -106,16 +109,33 @@ def compare_seams(config: SeamComparison) -> Path:
     """Training/development comparisons cannot grant independent accuracy or production approval."""
     torch.set_num_threads(2)
     registry = read_registry(REGISTRY_ROOT / "DATASET_MANIFEST.json")
-    dataset = ApprovedDataset([config.manifest], registry, config.split)
+    dataset = (
+        PublisherTestDataset(config.manifest, registry)
+        if config.evaluation_only_publisher_test
+        else ApprovedDataset([config.manifest], registry, config.split)
+    )
     if not len(dataset):
         raise PipelineError("Comparison split is empty")
+    if config.evaluation_only_publisher_test:
+        current_history = load_history(
+            [
+                HistoryPin(artifact=parent.directory / "artifact.json", sha256=parent.artifact_sha256)
+                for parent in (config.baseline, config.candidate)
+            ]
+        )
+        if any(current_history.overlaps(record) for _, record in dataset.samples):
+            raise PipelineError("Scored model has trained on the requested test photos")
     baseline, candidate = score(config.baseline, dataset), score(config.candidate, dataset)
     result = {
         "manifest_sha256": sha256(config.manifest),
         "split": config.split,
         "coordinate_error_normalization": "128x128 resized input diagonal, not original-photo pixels or cm",
         "independent_evaluation": False,
-        "reason": "Pilot development pool; original aRTF training photos already used in earlier mask experiments",
+        "reason": (
+            "Unseen by recorded training history; publisher test family overlaps earlier heuristic development"
+            if config.evaluation_only_publisher_test
+            else "Pilot development pool; original aRTF training photos already used in earlier mask experiments"
+        ),
         "baseline": baseline.model_dump(),
         "candidate": candidate.model_dump(),
         "cm_accuracy": None,

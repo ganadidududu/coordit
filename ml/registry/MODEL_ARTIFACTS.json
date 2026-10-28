@@ -67,6 +67,24 @@
       "deployment_approved": false,
       "purpose": "partial_real_anatomical_and_topology_seam_development_not_independent_accuracy",
       "weights_license": "Internal local training; AI Hub territory and attribution restrictions plus aRTF/GarmentCodeData CC BY 4.0 notices; no release grant"
+    },
+    {
+      "path": "artifacts/seam-real-augmentation-v1/checkpoint.pt",
+      "sha256": "2ba32df955ad6f5329f2c5636b7425f5d1408c39356087aebf79095adeaf4d54",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "deployment_approved": false,
+      "purpose": "augmented_partial_real_seam_development_not_centimeter_or_release_accuracy",
+      "weights_license": "Internal local training; AI Hub territory restrictions and attribution; aRTF/GarmentCodeData/Second-Hand CC BY 4.0 notices as applicable; no release grant"
+    },
+    {
+      "path": "artifacts/seam-diverse-real-augmentation-v1/checkpoint.pt",
+      "sha256": "894f41af2aaa05a76b93431be81030c4fe1d14c7bd5fdb979a26ca7584f1d018",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "0baeadd24aeb788b1a575c3f4762643b1b6a1b8b486d84ec1ceb0fb9cae96ddf",
+      "deployment_approved": false,
+      "purpose": "augmented_partial_real_seam_development_not_centimeter_or_release_accuracy",
+      "weights_license": "Internal local training; AI Hub territory restrictions and attribution; aRTF/GarmentCodeData/Second-Hand CC BY 4.0 notices as applicable; no release grant"
     }
   ]
 }

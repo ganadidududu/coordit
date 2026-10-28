@@ -1,0 +1,82 @@
+{
+  "archive": "artifacts/download-20261027/aRTFClothes-resized-paper-splits.zip",
+  "output": "artifacts/artf-unseen-training-evaluation-v1",
+  "history": [
+    {
+      "artifact": "artifacts/aihub-coat-jacket-mask-pretrain-v1/artifact.json",
+      "sha256": "d49cd02bdd1c54f3f81b7819bf787376e351ed60c876f318ef5040f51b1bd741"
+    },
+    {
+      "artifact": "artifacts/aihub-coat-jacket-mask-pretrain-v2/artifact.json",
+      "sha256": "80ad9948bf00c3aa448ff00168b9ce690fc4cb72ed28c36efe86e744696e2adf"
+    },
+    {
+      "artifact": "artifacts/seam-integrated-finetune-v1/artifact.json",
+      "sha256": "397acad1b759ef6f866c2eec59f4f30c0854d9c1f722f44dca4ce2accf1ef6fb"
+    },
+    {
+      "artifact": "artifacts/seam-integrated-pilot-v1/artifact.json",
+      "sha256": "ff51bf49ad80bebc3ffaca54eea0a53f657a6fd06b1c300e2c1757cd7452bc08"
+    },
+    {
+      "artifact": "artifacts/secondhand-supervision-smoke/artifact.json",
+      "sha256": "86e16ebef80aa2bca17598315a84655d8a455926f36bbdc8fb03f1c8259891ee"
+    },
+    {
+      "artifact": "artifacts/spatial-v2-category/artifact.json",
+      "sha256": "12a765dc524735b07745af7615b6e766d65165f8645117651c9111939536fbc5"
+    },
+    {
+      "artifact": "artifacts/spatial-v2-shared/artifact.json",
+      "sha256": "fdd6c1f3e72984a0b41aa3c96eef748d019064aab2091630007b9c131045f3ff"
+    },
+    {
+      "artifact": "artifacts/tiny-category-cpu-v1/artifact.json",
+      "sha256": "5e50c66316e859ded7395f3ea3a65a468c62b3b64e91829a77791e281c948007"
+    },
+    {
+      "artifact": "artifacts/tiny-category-mps-development/artifact.json",
+      "sha256": "a9937bb9fcd98c3d501bc651764e38a9c644fa61810698004957401ba998d522"
+    },
+    {
+      "artifact": "artifacts/tiny-category-mps-final-data/artifact.json",
+      "sha256": "1f71f2d20b18677e7b3ddb77ecd031f1ad9078a7dd1602b1e012ef3dbe547012"
+    },
+    {
+      "artifact": "artifacts/tiny-category-mps-reviewed-data/artifact.json",
+      "sha256": "490085f3171c71e95b76827231e69ec98bc2908365d65bfa767cdcf86fd2c54d"
+    },
+    {
+      "artifact": "artifacts/tiny-shared-cpu/artifact.json",
+      "sha256": "2141de1de902aae022bb555c556a8cd4949ed7e4765c48eba1c964bb0afcbaf8"
+    },
+    {
+      "artifact": "artifacts/tiny-shared-cpu-final/artifact.json",
+      "sha256": "aed5f290c430bc44ccc254e84ce2faad24e39fb4e35d89989f23c1c463ba3c4f"
+    },
+    {
+      "artifact": "artifacts/tiny-shared-cpu-reviewed/artifact.json",
+      "sha256": "a8b2d4bfac1b104ec8ddda071e9a9097b4e4b3919cd3e43981fcc4befd5e855d"
+    },
+    {
+      "artifact": "artifacts/tiny-shared-cpu-v1/artifact.json",
+      "sha256": "52397499f542257b43b99db4829364568459c8286c2ce3a452249a9224b18348"
+    },
+    {
+      "artifact": "artifacts/tiny-shared-mps-development/artifact.json",
+      "sha256": "1c4b2ad9155098041a0f520790f14054be125706f7e443fdc93138eaa85e591d"
+    },
+    {
+      "artifact": "artifacts/tiny-shared-mps-final-data/artifact.json",
+      "sha256": "3979fb723fa13d9ccb79aeb81d20fcd9426a09e3543efdb9d450e6b2b8c3551c"
+    },
+    {
+      "artifact": "artifacts/tiny-shared-mps-reviewed-data/artifact.json",
+      "sha256": "c0e3688bc245bd2453e4450c08daf5c6e1c35f88096d2404d9528b80dc1b39cc"
+    },
+    {
+      "artifact": "artifacts/tiny-shared-mps-v1/artifact.json",
+      "sha256": "38095a00330082de877d5c1d32b3d2ca4a71e986914cbe44a6800ad92839d64b"
+    }
+  ]
+}

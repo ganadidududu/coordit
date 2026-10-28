@@ -8,6 +8,7 @@ from typing import Literal
 import torch
 
 from coordit_ml.artifacts import Artifact, ManifestPin, read_checkpoint
+from coordit_ml.augmentation import Augmentation, augment_batch
 from coordit_ml.finetuning import ParentCheckpoint, initialize
 from coordit_ml.model_factory import Architecture, PerceptionModel, create_model, model_loss
 from coordit_ml.network import ApprovedDataset, batch
@@ -34,6 +35,7 @@ class TrainingConfig(BoundaryModel):
     balance_real_categories: bool = False
     source_sampling: SourceSampling | None = None
     initialize_from: ParentCheckpoint | None = None
+    augmentation: Augmentation | None = None
 
 
 def fingerprint(config: TrainingConfig) -> str:
@@ -53,6 +55,8 @@ def fingerprint(config: TrainingConfig) -> str:
         config.source_sampling.model_dump_json() if config.source_sampling else "none",
         config.initialize_from.model_dump_json() if config.initialize_from else "none",
         sha256(Path(__file__).with_name("finetuning.py")),
+        config.augmentation.model_dump_json() if config.augmentation else "none",
+        sha256(Path(__file__).with_name("augmentation.py")),
         sha256(Path(__file__).with_name("schema.py")),
         sha256(Path(__file__).with_name("sampling.py")),
         sha256(Path(__file__).with_name("provenance.py")),
@@ -143,6 +147,8 @@ def train(config: TrainingConfig) -> Path:
                 break
             selected = indices[offset : offset + config.batch_size]
             target = batch(dataset, selected, config.device)
+            if config.augmentation:
+                target = augment_batch(target, config.augmentation, rng)
             optimizer.zero_grad()
             objective = model_loss(config.architecture, model.forward(target.pixels, target.category), target)
             if not objective.isfinite():
