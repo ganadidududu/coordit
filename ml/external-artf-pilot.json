@@ -1,0 +1,25 @@
+{
+  "manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+  "output": "artifacts/external-artf-vision-pilot-v1",
+  "baselines": [
+    {
+      "name": "previous_diverse_60",
+      "model": {
+        "directory": "artifacts/seam-diverse-real-augmentation-v1",
+        "checkpoint_sha256": "894f41af2aaa05a76b93431be81030c4fe1d14c7bd5fdb979a26ca7584f1d018",
+        "artifact_sha256": "a913325611f9a72ccd075ade54d810378182bea58195b23c95d4a4538de6f7ea"
+      }
+    },
+    {
+      "name": "latest_pair_supervision",
+      "model": {
+        "directory": "artifacts/seam-resolution-256-pairs-v1",
+        "checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+        "artifact_sha256": "e45d6b82c5735c1c9b5db1c2142b9e8f2dad248270f6069f10b25b19d8b7e8a9"
+      }
+    }
+  ],
+  "per_category": 4,
+  "seed": 20261028,
+  "exclude_first_per_category": 32
+}

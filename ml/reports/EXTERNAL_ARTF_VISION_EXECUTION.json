@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-28",
+  "execution": "interactive_assistant_vision",
+  "separate_provider_api_invoked": false,
+  "exact_external_model_revision": null,
+  "public_artf_images_shown": 8,
+  "aihub_images_shown_or_transmitted": 0,
+  "phase3_changed": false,
+  "new_training_executed": false,
+  "human_verified_training_annotations_created": 0,
+  "receipt_sha256": "67e41b8192e00bfbf6dc08c1d26e65b285026117d7499d3e8bd01169a62d8e08",
+  "response_sha256": "56c505738a465e2f2b80972aa39cc3e14da304f7863befcc3f4a21c81a4e5b93",
+  "protocol_sha256": "5a727805c74123cf561796a051cd110c42c35decbe1a07335155b88ae98e721a",
+  "predictions_saved_before_gt_scoring": true,
+  "independent_blinding_monitor": false,
+  "replayed_metrics_identical": true,
+  "independent_original_source_keypoint_check": {
+    "visible_points": 30,
+    "pck_successes": 25,
+    "abstentions_on_visible_gt": 3
+  },
+  "verification": {
+    "pytest_passed": 83,
+    "ruff_passed": true,
+    "new_modules_basedpyright_errors": 0,
+    "new_modules_basedpyright_warnings": 0,
+    "full_basedpyright_errors": 0,
+    "full_basedpyright_preexisting_warnings": 27,
+    "full_basedpyright_exit": 1
+  },
+  "cm_accuracy": null,
+  "deployment_approved": false,
+  "timing_or_cost_benchmark": false,
+  "segmentation_miou_measured": false,
+  "source": "public aRTF CC BY 4.0, attribution recorded in packet and result"
+}

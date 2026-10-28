@@ -20,6 +20,8 @@ from coordit_ml.category_review import prepare_review
 from coordit_ml.centimeter_evaluation import evaluate_centimeters
 from coordit_ml.coordinate_audit import CoordinateAudit, audit_coordinates
 from coordit_ml.evaluation import evaluate
+from coordit_ml.external_pilot import PilotPreparation, prepare_external_pilot
+from coordit_ml.external_pilot_comparison import ExternalComparison, compare_external_pilot
 from coordit_ml.field_evaluation import field_report
 from coordit_ml.garmentcode_conversion import GarmentSelection, render_garmentcode
 from coordit_ml.garmentcode_download import (
@@ -63,6 +65,8 @@ class Arguments(argparse.Namespace):
         "render-garmentcode",
         "compare-seams",
         "audit-coordinates",
+        "prepare-external-pilot",
+        "compare-external-pilot",
         "prepare-publisher-test",
         "import-seam-reviews",
         "synthetic",
@@ -131,6 +135,10 @@ def main() -> None:
     _ = compare.add_argument("config", type=Path)
     coordinate_audit = commands.add_parser("audit-coordinates")
     _ = coordinate_audit.add_argument("config", type=Path)
+    external_prep = commands.add_parser("prepare-external-pilot")
+    _ = external_prep.add_argument("config", type=Path)
+    external_compare = commands.add_parser("compare-external-pilot")
+    _ = external_compare.add_argument("config", type=Path)
     publisher_test = commands.add_parser("prepare-publisher-test")
     _ = publisher_test.add_argument("config", type=Path)
     seam_reviews = commands.add_parser("import-seam-reviews")
@@ -206,6 +214,10 @@ def main() -> None:
             print(compare_seams(SeamComparison.model_validate_json(args.config.read_bytes())))
         case "audit-coordinates":
             print(audit_coordinates(CoordinateAudit.model_validate_json(args.config.read_bytes())))
+        case "prepare-external-pilot":
+            print(prepare_external_pilot(PilotPreparation.model_validate_json(args.config.read_bytes())))
+        case "compare-external-pilot":
+            print(compare_external_pilot(ExternalComparison.model_validate_json(args.config.read_bytes())))
         case "prepare-publisher-test":
             print(prepare_publisher_test(TestPreparation.model_validate_json(args.config.read_bytes()), registry))
         case "import-seam-reviews":

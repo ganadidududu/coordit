@@ -1,0 +1,108 @@
+{
+  "preparation": {
+    "manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+    "output": "artifacts/external-artf-vision-pilot-v1",
+    "baselines": [
+      {
+        "name": "previous_diverse_60",
+        "model": {
+          "directory": "artifacts/seam-diverse-real-augmentation-v1",
+          "checkpoint_sha256": "894f41af2aaa05a76b93431be81030c4fe1d14c7bd5fdb979a26ca7584f1d018",
+          "artifact_sha256": "a913325611f9a72ccd075ade54d810378182bea58195b23c95d4a4538de6f7ea",
+          "allow_resolution_transfer": false
+        }
+      },
+      {
+        "name": "latest_pair_supervision",
+        "model": {
+          "directory": "artifacts/seam-resolution-256-pairs-v1",
+          "checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+          "artifact_sha256": "e45d6b82c5735c1c9b5db1c2142b9e8f2dad248270f6069f10b25b19d8b7e8a9",
+          "allow_resolution_transfer": false
+        }
+      }
+    ],
+    "per_category": 4,
+    "seed": 20261028,
+    "exclude_first_per_category": 32
+  },
+  "manifest_sha256": "ae9806f8ad98e2ede7add42f7591ccb60b294de984ad632dcee75aea1d79fa00",
+  "cases": [
+    {
+      "case_id": "P01",
+      "category": "tshirt",
+      "source_image_id": "artf-test-only:9e87d5b085a142710f7379d28dca8b2570a00aef9ff735682e6579b33d59d524",
+      "image_file": "P01.png",
+      "image_sha256": "9e87d5b085a142710f7379d28dca8b2570a00aef9ff735682e6579b33d59d524",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "P02",
+      "category": "tshirt",
+      "source_image_id": "artf-test-only:3a3f0a699259fdcc92f7a0157be3108e303c27d689de9f4784d68cd70fa9d819",
+      "image_file": "P02.png",
+      "image_sha256": "3a3f0a699259fdcc92f7a0157be3108e303c27d689de9f4784d68cd70fa9d819",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "P03",
+      "category": "tshirt",
+      "source_image_id": "artf-test-only:f240f69fe2b4a2abc202e5c56a373a9f14187609dfe7c6c6514fa60d8deb4a55",
+      "image_file": "P03.png",
+      "image_sha256": "f240f69fe2b4a2abc202e5c56a373a9f14187609dfe7c6c6514fa60d8deb4a55",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "P04",
+      "category": "tshirt",
+      "source_image_id": "artf-test-only:febf4d53a322cb07aef05c7df0442da27f808e7baa4daa54cb785174b889318a",
+      "image_file": "P04.png",
+      "image_sha256": "febf4d53a322cb07aef05c7df0442da27f808e7baa4daa54cb785174b889318a",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "P05",
+      "category": "shorts",
+      "source_image_id": "artf-test-only:145f2eae8fcb4c1214f08378d19891966ff7bf2dcae71d3a29664cf3d4ece6b4",
+      "image_file": "P05.png",
+      "image_sha256": "145f2eae8fcb4c1214f08378d19891966ff7bf2dcae71d3a29664cf3d4ece6b4",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "P06",
+      "category": "shorts",
+      "source_image_id": "artf-test-only:3064df25d96af05797577084ffba7e864dbbca6d8ca645cbedebbb483a8c41eb",
+      "image_file": "P06.png",
+      "image_sha256": "3064df25d96af05797577084ffba7e864dbbca6d8ca645cbedebbb483a8c41eb",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "P07",
+      "category": "shorts",
+      "source_image_id": "artf-test-only:8c1d35f3ebd429a8a795f32d0bf7c71979ee8d26278a6d4e6dff22fc7e836c79",
+      "image_file": "P07.png",
+      "image_sha256": "8c1d35f3ebd429a8a795f32d0bf7c71979ee8d26278a6d4e6dff22fc7e836c79",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "P08",
+      "category": "shorts",
+      "source_image_id": "artf-test-only:6d4a48a8f413699ef718fda5ea669c8794acb35ce12eed55aa763c190996ae1b",
+      "image_file": "P08.png",
+      "image_sha256": "6d4a48a8f413699ef718fda5ea669c8794acb35ce12eed55aa763c190996ae1b",
+      "width": 512,
+      "height": 256
+    }
+  ],
+  "ground_truth_in_visual_payload": false,
+  "aihub_images_in_visual_payload": false,
+  "license": "CC-BY-4.0",
+  "attribution": "aRTF Clothes, Thomas Lips, Victor-Louis De Gusseme and Francis wyffels, CC BY 4.0, doi:10.5281/zenodo.14501499. Resized/converted; cite Learning Keypoints for Robotic Cloth Manipulation using Synthetic Data (2024)."
+}
