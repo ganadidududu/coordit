@@ -16,7 +16,7 @@ const CATEGORY_LABELS: Record<Category, string> = {
   coat: "코트",
   pants: "팬츠",
   jeans: "데님 팬츠",
-  shorts: "쇼츠",
+  shorts: "반바지",
   skirt: "스커트"
 };
 
@@ -132,8 +132,8 @@ const buildLowerBodyImpact = (row: MeasurementRow): string => {
     case "total_length":
       return directionText(
         row.diff,
-        "하의의 세로 비율이 더 길어져 쇼츠나 스커트라면 다리 노출이 줄고, 긴 하의라면 신발 위에서의 마무리 길이가 길어질 수 있습니다.",
-        "하의의 세로 비율이 더 짧아져 쇼츠나 스커트라면 다리 노출이 늘고, 긴 하의라면 발목 쪽이 더 드러날 수 있습니다.",
+        "하의의 세로 비율이 더 길어져 반바지나 스커트라면 다리 노출이 줄고, 긴 하의라면 신발 위에서의 마무리 길이가 길어질 수 있습니다.",
+        "하의의 세로 비율이 더 짧아져 반바지나 스커트라면 다리 노출이 늘고, 긴 하의라면 발목 쪽이 더 드러날 수 있습니다.",
         "하의의 세로 비율이 평소 기준과 가까워 다리 노출과 신발 위 마무리의 균형이 익숙합니다."
       );
     case "shoulder_width":

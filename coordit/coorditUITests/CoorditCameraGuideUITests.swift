@@ -4,7 +4,7 @@ final class CoorditCameraGuideUITests: XCTestCase {
     override func setUpWithError() throws { continueAfterFailure = false }
 
     func testExistingCategoriesAutomaticPhotoAndClosetSaveWithoutFixedGuide() {
-        for (category, title) in [("hoodie", "후드"), ("shorts", "쇼츠"), ("skirt", "스커트")] {
+        for (category, title) in [("hoodie", "후드"), ("shorts", "반바지"), ("skirt", "스커트")] {
             let app = XCUIApplication()
             app.launchArguments = ["--coordit-ui-testing", "--coordit-start-route", "closet-add-method", "--coordit-test-closet-save-success"]
             app.launch()

@@ -973,7 +973,7 @@ private extension CoorditFitLabCategory {
         case .coat: "코트"
         case .pants: "팬츠"
         case .jeans: "데님"
-        case .shorts: "쇼츠"
+        case .shorts: "반바지"
         case .skirt: "스커트"
         }
     }
