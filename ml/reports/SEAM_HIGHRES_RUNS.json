@@ -209,7 +209,8 @@
       "reports/seam-resolution-context-vs-pairs.json"
     ],
     "test_ground_truth_modified": false,
-    "note": "publisher test-family previously used for heuristic development; garment/session independence unresolved; further experiments informed by this development pool"
+    "note": "publisher test-family previously used for heuristic development; garment/session independence unresolved; further experiments informed by this development pool",
+    "latest_previous_model_comparison": "reports/seam-latest-model-vs-pairs.json"
   },
   "aihub_annotation": {
     "prepared_training_images": 128,
@@ -251,7 +252,8 @@
     "measurement_candidate": null,
     "simple_256_candidate_rejected": true,
     "release_approved": false,
-    "limit": "Pair supervision improves waist projected length but chest relative error remains worse than the original baseline. PCK/NME and pixel lengths do not establish AR centimeter accuracy; no model promoted for measurement."
+    "limit": "Pair supervision improves waist projected length but chest relative error remains worse than the original baseline. PCK/NME and pixel lengths do not establish AR centimeter accuracy; no model promoted for measurement.",
+    "latest_previous_model_tradeoff": "Compared with diverse60, tshirt PCK/NME worsened and shorts improved; do not present original50 comparison as improvement over every previous model."
   },
   "projected_2d_pair_errors_not_cm": {
     "original": {
