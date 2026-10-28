@@ -26,6 +26,20 @@ cat > "$field_root/ARFieldTest.entitlements" <<'PLIST'
 PLIST
 /usr/libexec/PlistBuddy -c 'Add :CoorditARFieldTestBuild bool true' "$field_root/ARFieldTest-Info.plist"
 /usr/libexec/PlistBuddy -c 'Add :CFBundleDisplayName string Coordit AR Test' "$field_root/ARFieldTest-Info.plist"
+if [[ -n "${COORDIT_HOSTED_AR_CONNECTION_FILE:-}" ]]; then
+    /usr/bin/python3 - "$COORDIT_HOSTED_AR_CONNECTION_FILE" "$field_root/ARFieldTest-Info.plist" <<'PY'
+import json, plistlib, sys
+from pathlib import Path
+connection = json.loads(Path(sys.argv[1]).read_text())
+if not connection["url"].startswith("https://") or len(connection["token"]) < 32:
+    raise SystemExit("Invalid development gateway connection")
+path = Path(sys.argv[2])
+info = plistlib.loads(path.read_bytes())
+info["CoorditHostedARBaseURL"] = connection["url"]
+info["CoorditHostedARGatewayToken"] = connection["token"]
+path.write_bytes(plistlib.dumps(info))
+PY
+fi
 perl -pi -e 's/com\.inseong\.coordit\.CoorditShareExtension/com.insihwan.coordit.arfieldtest.CoorditShareExtension/g; s/PRODUCT_BUNDLE_IDENTIFIER = com\.inseong\.coordit;/PRODUCT_BUNDLE_IDENTIFIER = com.insihwan.coordit.arfieldtest;/g; s/INFOPLIST_FILE = coordit\/Info.plist;/INFOPLIST_FILE = ARFieldTest-Info.plist;/g; s/CODE_SIGN_ENTITLEMENTS = [^;]+;/CODE_SIGN_ENTITLEMENTS = ARFieldTest.entitlements;/g' "$field_project/project.pbxproj"
 
 echo "Temporary project: $field_root"

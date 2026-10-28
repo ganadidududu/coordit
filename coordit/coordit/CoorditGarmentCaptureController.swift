@@ -44,6 +44,9 @@ final class CoorditGarmentCaptureController: ObservableObject {
     @Published private(set) var arGuidance: CoorditARCaptureGuidance = .tracking
     @Published private(set) var mappedPlaneBoundary: [CoorditMeasurementPoint] = []
     var isFrozenAR: Bool { method == .arPlane && planeCapture != nil }
+    #if DEBUG
+    var hostedARSnapshot: CoorditARPlaneCapture? { isFrozenAR ? planeCapture : nil }
+    #endif
     var measurementEvidence: CoorditARMeasurementEvidence? {
         guard var evidence = planeCapture?.evidence else { return nil }
         evidence.corrected = endpointsCorrected

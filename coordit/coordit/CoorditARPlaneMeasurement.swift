@@ -187,6 +187,11 @@ struct CoorditARPlaneCapture {
     let geometry: CoorditARPlaneGeometry
     let evidence: CoorditARMeasurementEvidence
     let image: UIImage
+    #if DEBUG && targetEnvironment(simulator)
+    init(hostedFixtureGeometry: CoorditARPlaneGeometry, evidence: CoorditARMeasurementEvidence, image: UIImage) {
+        self.geometry = hostedFixtureGeometry; self.evidence = evidence; self.image = image
+    }
+    #endif
 
     @MainActor
     init(frame: ARFrame, plane: ARPlaneAnchor, orientation: UIInterfaceOrientation, stability: CoorditARPlaneStability) throws {

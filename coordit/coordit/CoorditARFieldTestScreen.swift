@@ -8,6 +8,15 @@ struct CoorditARFieldTestScreen: View {
     @StateObject private var coordinator = CoorditFitLabCoordinator(route: .fitLabInput, configuration: .production)
 
     var body: some View {
+        #if targetEnvironment(simulator)
+        if CoorditHostedARFixture.enabled { CoorditHostedARFixture.screen }
+        else { cameraScreen }
+        #else
+        cameraScreen
+        #endif
+    }
+
+    private var cameraScreen: some View {
         CoorditFitLabCameraComparison(coordinator: coordinator, analyze: { _ in }, capture: capture, fieldTestSession: session)
             .safeAreaInset(edge: .top) {
                 HStack {
@@ -40,9 +49,16 @@ struct CoorditARFieldTestControls: View {
     @State private var showsSettings = false
     @State private var showsExport = false
     @State private var document: CoorditFieldJSONDocument?
+    @State private var showsHostedAR = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
+            Button("Astra / Gemini 봉제점 · AR cm") {
+                capture.cancelInference()
+                showsHostedAR = true
+            }
+            .disabled(!capture.isFrozenAR)
+            .accessibilityIdentifier("ar-field-hosted-ai")
             HStack {
                 Button { showsSettings = true } label: {
                     Text(session.garmentID.isEmpty ? "시험 정보 입력" : session.garmentID).frame(minHeight: 44)
@@ -81,6 +97,12 @@ struct CoorditARFieldTestControls: View {
         .onChange(of: capture.isDetecting) { _, _ in session.prepareAutomatic(capture) }
         .onChange(of: capture.image) { _, _ in session.prepareAutomatic(capture) }
         .sheet(isPresented: $showsSettings) { settings }
+        .sheet(isPresented: $showsHostedAR) {
+            if let snapshot = capture.hostedARSnapshot {
+                CoorditHostedARReview(snapshot: snapshot, category: capture.category,
+                    garmentID: session.garmentID, groundTruth: session.groundTruth, lengthBasis: capture.lengthBasis)
+            }
+        }
         .fileExporter(isPresented: $showsExport, document: document, contentType: .json,
             defaultFilename: "coordit-ar-\(UUID().uuidString.prefix(8))") { result in
                 switch result {

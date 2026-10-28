@@ -78,7 +78,7 @@ struct CoorditRemoteLandmarkProvider: Sendable {
         #endif
     }
 
-    private static func metadataFreeJPEG(_ data: Data) throws -> Data {
+    static func metadataFreeJPEG(_ data: Data) throws -> Data {
         guard let image = UIImage(data: data), image.size.width > 0, image.size.height > 0,
               image.size.width * image.size.height <= 24_000_000 else {
             throw CoorditGarmentMeasurementError.invalidPoint
