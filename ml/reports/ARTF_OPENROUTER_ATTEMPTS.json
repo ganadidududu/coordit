@@ -1,0 +1,2922 @@
+[
+{
+  "model_requested": "openai/gpt-5.4",
+  "case_id": "P01",
+  "image_sha256": "9e87d5b085a142710f7379d28dca8b2570a00aef9ff735682e6579b33d59d524",
+  "started_utc": "2026-10-28T05:36:07.220599+00:00",
+  "elapsed_seconds": 8.295379041999695,
+  "http_status": 200,
+  "request_sha256": "f7b87774f3b7c3a3fbe22b090c5a2a184740a1a6b026fb60ce06f0d341c30042",
+  "response_sha256": "b405bec6093281ef9a78492e27b0d04e8bded1f65f1b84dc272e9c80f8cb2211",
+  "response": {
+    "id": "gen-1793165767-NHSOwHazG6YyIBicNG2T",
+    "model": "openai/gpt-5.4",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.381,\"y\":0.496,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.742,\"y\":0.309,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.416,\"y\":0.555,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.763,\"y\":0.398,\"status\":\"uncertain_proposal\"}],\"note\":\"T-shirt is heavily wrinkled and rotated on furniture; seam junctions are only approximate.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 378,
+      "total_tokens": 1134,
+      "cost": 0.00756,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 229
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.381,
+        "y": 0.496,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.742,
+        "y": 0.309,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.416,
+        "y": 0.555,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.763,
+        "y": 0.398,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "T-shirt is heavily wrinkled and rotated on furniture; seam junctions are only approximate."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4",
+  "case_id": "P08",
+  "image_sha256": "6d4a48a8f413699ef718fda5ea669c8794acb35ce12eed55aa763c190996ae1b",
+  "started_utc": "2026-10-28T05:36:15.521438+00:00",
+  "elapsed_seconds": 6.487649957998656,
+  "http_status": 200,
+  "request_sha256": "4ee1a7a5da8190f1497b42056d878d529b933fea0530587cd35ed209797656ac",
+  "response_sha256": "678536bd6c3893a6f58643aaa648c1882fef7cd80e0bdc06f3f64fb64e5a7f64",
+  "response": {
+    "id": "gen-1793165775-eEgsZ8sulihhtpNUEvH5",
+    "model": "openai/gpt-5.4",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.312,\"y\":0.316,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.531,\"y\":0.254,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.439,\"y\":0.496,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.264,\"y\":0.520,\"status\":\"uncertain_proposal\"}],\"note\":\"Landmarks are approximate due to garment rotation and limited seam clarity.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 361,
+      "total_tokens": 1113,
+      "cost": 0.007295,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 220
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.312,
+        "y": 0.316,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.531,
+        "y": 0.254,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.439,
+        "y": 0.496,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.264,
+        "y": 0.52,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Landmarks are approximate due to garment rotation and limited seam clarity."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4-mini",
+  "case_id": "P06",
+  "image_sha256": "3064df25d96af05797577084ffba7e864dbbca6d8ca645cbedebbb483a8c41eb",
+  "started_utc": "2026-10-28T05:36:22.013673+00:00",
+  "elapsed_seconds": 6.977261042000464,
+  "http_status": 200,
+  "request_sha256": "0380e0cdd232f13e12e0b482eb549f3fed651ace55b98b45af662ffa18519ec6",
+  "response_sha256": "8f2596c4afb7148db841b8a225d1ed47d588cb14adf3340496e0201ed4ea1be2",
+  "response": {
+    "id": "gen-1793165782-V9zT3l6njo624oHPCJmU",
+    "model": "openai/gpt-5.4-mini",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.381,\"y\":0.207,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.501,\"y\":0.165,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.441,\"y\":0.341,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.432,\"y\":0.425,\"status\":\"uncertain_proposal\"}],\"note\":\"Shorts are small and slightly rotated; all landmarks are approximate proposals.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 320,
+      "total_tokens": 1072,
+      "cost": 0.002004,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 178
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.381,
+        "y": 0.207,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.501,
+        "y": 0.165,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.441,
+        "y": 0.341,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.432,
+        "y": 0.425,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Shorts are small and slightly rotated; all landmarks are approximate proposals."
+  },
+  "failure": null
+},
+{
+  "model_requested": "anthropic/claude-sonnet-4.6",
+  "case_id": "P03",
+  "image_sha256": "f240f69fe2b4a2abc202e5c56a373a9f14187609dfe7c6c6514fa60d8deb4a55",
+  "started_utc": "2026-10-28T05:36:28.995156+00:00",
+  "elapsed_seconds": 20.621544749999885,
+  "http_status": 200,
+  "request_sha256": "7034f9ec2ed43909b74b5380aa37f067afb80991f0f43716ec6a98ca0c4fc768",
+  "response_sha256": "0372e669d9c67c5c7ee481257cbbf41c874a8e6593f480998038fec8a5fa616f",
+  "response": {
+    "id": "gen-1793165789-RkcCKQ13FseHhtZ3blZJ",
+    "model": "anthropic/claude-sonnet-4.6",
+    "provider": "Amazon Bedrock",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":null,\"y\":null,\"status\":\"abstain\"},{\"landmark_type\":\"shoulder_right\",\"x\":null,\"y\":null,\"status\":\"abstain\"},{\"landmark_type\":\"armpit_left\",\"x\":null,\"y\":null,\"status\":\"abstain\"},{\"landmark_type\":\"armpit_right\",\"x\":null,\"y\":null,\"status\":\"abstain\"}],\"note\":\"Garment is folded and landmarks are not distinguishable.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "end_turn"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1212,
+      "completion_tokens": 116,
+      "total_tokens": 1328,
+      "cost": 0.005376,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": null,
+        "y": null,
+        "status": "abstain"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": null,
+        "y": null,
+        "status": "abstain"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": null,
+        "y": null,
+        "status": "abstain"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": null,
+        "y": null,
+        "status": "abstain"
+      }
+    ],
+    "note": "Garment is folded and landmarks are not distinguishable."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4-mini",
+  "case_id": "P05",
+  "image_sha256": "145f2eae8fcb4c1214f08378d19891966ff7bf2dcae71d3a29664cf3d4ece6b4",
+  "started_utc": "2026-10-28T05:36:49.619637+00:00",
+  "elapsed_seconds": 7.5892338330013445,
+  "http_status": 200,
+  "request_sha256": "aabfddbec0d7fcdc0788078364d23a73c4dad63b5330f15fd3d738cca5cfcc43",
+  "response_sha256": "2f00d91bfaa077bfe23e2cc5b2e65e9886e642accdca6501b632f13127596f2a",
+  "response": {
+    "id": "gen-1793165809-AkEHyoEnCtI2tJmzD3DT",
+    "model": "openai/gpt-5.4-mini",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.354,\"y\":0.307,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.518,\"y\":0.256,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.469,\"y\":0.530,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.339,\"y\":0.695,\"status\":\"visible_proposal\"}],\"note\":\"Shorts landmarks proposed from visible waistband, crotch seam, and left-leg outer hem.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 596,
+      "total_tokens": 1348,
+      "cost": 0.003246,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 453
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.354,
+        "y": 0.307,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.518,
+        "y": 0.256,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.469,
+        "y": 0.53,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.339,
+        "y": 0.695,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Shorts landmarks proposed from visible waistband, crotch seam, and left-leg outer hem."
+  },
+  "failure": null
+},
+{
+  "model_requested": "anthropic/claude-sonnet-4.6",
+  "case_id": "P02",
+  "image_sha256": "3a3f0a699259fdcc92f7a0157be3108e303c27d689de9f4784d68cd70fa9d819",
+  "started_utc": "2026-10-28T05:36:57.212996+00:00",
+  "elapsed_seconds": 4.4715275000016845,
+  "http_status": 200,
+  "request_sha256": "2391c60f4f5a640516d87abf9e79e08ad7b64de8878128f2d65cc18c36cb6d98",
+  "response_sha256": "c1d9ab1db5a5077a1c475c71ab91db7407297ac078d6f5e232b0d56291de1069",
+  "response": {
+    "id": "gen-1793165817-KIjibH7WZ8RdnnSnM2yY",
+    "model": "anthropic/claude-sonnet-4.6",
+    "provider": "Amazon Bedrock",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.33,\"y\":0.62,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.62,\"y\":0.55,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.38,\"y\":0.82,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.65,\"y\":0.72,\"status\":\"uncertain_proposal\"}],\"note\":\"Garment is a leopard-print top laid flat on a sofa; seams are not clearly visible so all proposals are uncertain.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "end_turn"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1212,
+      "completion_tokens": 151,
+      "total_tokens": 1363,
+      "cost": 0.005901,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.33,
+        "y": 0.62,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.62,
+        "y": 0.55,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.38,
+        "y": 0.82,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.65,
+        "y": 0.72,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Garment is a leopard-print top laid flat on a sofa; seams are not clearly visible so all proposals are uncertain."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-6-astra",
+  "case_id": "P02",
+  "image_sha256": "3a3f0a699259fdcc92f7a0157be3108e303c27d689de9f4784d68cd70fa9d819",
+  "started_utc": "2026-10-28T05:37:01.687222+00:00",
+  "elapsed_seconds": 19.506275791998632,
+  "http_status": 200,
+  "request_sha256": "b0271d3d86183ed44a3e48ab2414ed9aa93f10bb8fdb7708485d298cff79b55b",
+  "response_sha256": "ba785fae3905a59ab9ff975e317c02d99ff090d1a5416d8ac5207629bd764b48",
+  "response": {
+    "id": "gen-1793165821-pv0QoOpvEivdILrxN13s",
+    "model": "openai/gpt-6-astra",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.686,\"y\":0.742,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.669,\"y\":0.477,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.592,\"y\":0.809,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.582,\"y\":0.492,\"status\":\"uncertain_proposal\"}],\"note\":\"The shirt is sideways, with its neckline at right. Pattern and folds obscure the attachment seams; all coordinates are uncertain.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 512,
+      "total_tokens": 1268,
+      "cost": 0.03316,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 358
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.686,
+        "y": 0.742,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.669,
+        "y": 0.477,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.592,
+        "y": 0.809,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.582,
+        "y": 0.492,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "The shirt is sideways, with its neckline at right. Pattern and folds obscure the attachment seams; all coordinates are uncertain."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4",
+  "case_id": "P03",
+  "image_sha256": "f240f69fe2b4a2abc202e5c56a373a9f14187609dfe7c6c6514fa60d8deb4a55",
+  "started_utc": "2026-10-28T05:37:21.196924+00:00",
+  "elapsed_seconds": 10.510000374997617,
+  "http_status": 200,
+  "request_sha256": "81a7cadd8f8c79d7dbfb94b1c05d51f3a49da41aec4ea079e15b17c15cba0af2",
+  "response_sha256": "dbcc0cc4cfcbade8842a2f131276641455ca32ce66b21406c449d7b89018eeea",
+  "response": {
+    "id": "gen-1793165841-rSJJxjpfnL76xa5E1cWl",
+    "model": "openai/gpt-5.4",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.248,\"y\":0.289,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.457,\"y\":0.305,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.293,\"y\":0.434,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.506,\"y\":0.434,\"status\":\"uncertain_proposal\"}],\"note\":\"Rotated dark leopard-print T-shirt; seam junctions are somewhat ambiguous, so all points are uncertain proposals.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 559,
+      "total_tokens": 1315,
+      "cost": 0.010275,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 407
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.248,
+        "y": 0.289,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.457,
+        "y": 0.305,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.293,
+        "y": 0.434,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.506,
+        "y": 0.434,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Rotated dark leopard-print T-shirt; seam junctions are somewhat ambiguous, so all points are uncertain proposals."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4",
+  "case_id": "P05",
+  "image_sha256": "145f2eae8fcb4c1214f08378d19891966ff7bf2dcae71d3a29664cf3d4ece6b4",
+  "started_utc": "2026-10-28T05:37:31.710808+00:00",
+  "elapsed_seconds": 6.720622000000731,
+  "http_status": 200,
+  "request_sha256": "16b9f3706e761af6e28f8c6d371351fec25d81f93092c84f2932a8e66829885e",
+  "response_sha256": "9bac1a0799448a091d84c264007811574a991fc06026a8c59d1b1f595219fb55",
+  "response": {
+    "id": "gen-1793165851-Pp1Op8B0B3PF79bYxrp4",
+    "model": "openai/gpt-5.4",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.367,\"y\":0.332,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.574,\"y\":0.250,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.504,\"y\":0.488,\"status\":\"visible_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.373,\"y\":0.793,\"status\":\"visible_proposal\"}],\"note\":\"Visible landmark proposals on the shorts in the original image.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 299,
+      "total_tokens": 1051,
+      "cost": 0.006365,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 164
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.367,
+        "y": 0.332,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.574,
+        "y": 0.25,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.504,
+        "y": 0.488,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.373,
+        "y": 0.793,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Visible landmark proposals on the shorts in the original image."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-6-astra",
+  "case_id": "P05",
+  "image_sha256": "145f2eae8fcb4c1214f08378d19891966ff7bf2dcae71d3a29664cf3d4ece6b4",
+  "started_utc": "2026-10-28T05:37:38.436031+00:00",
+  "elapsed_seconds": 7.966856541999732,
+  "http_status": 200,
+  "request_sha256": "a526c965e3ec9afb59cb73e8726767a049c023964683c36084a434c1b25bf688",
+  "response_sha256": "537c7ede7ecdb92f4e7b5dffe0ce5b3fbf55a41e0798491ea0503931274e595d",
+  "response": {
+    "id": "gen-1793165858-owZeT3iabKHMkrLIqWmY",
+    "model": "openai/gpt-6-astra",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.365,\"y\":0.41,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.549,\"y\":0.305,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.517,\"y\":0.594,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.392,\"y\":0.785,\"status\":\"visible_proposal\"}],\"note\":\"Crotch junction is partly obscured by folds.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 207,
+      "total_tokens": 959,
+      "cost": 0.01787,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 71
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.365,
+        "y": 0.41,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.549,
+        "y": 0.305,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.517,
+        "y": 0.594,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.392,
+        "y": 0.785,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Crotch junction is partly obscured by folds."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-6-astra",
+  "case_id": "P08",
+  "image_sha256": "6d4a48a8f413699ef718fda5ea669c8794acb35ce12eed55aa763c190996ae1b",
+  "started_utc": "2026-10-28T05:37:46.408066+00:00",
+  "elapsed_seconds": 23.370707999998558,
+  "http_status": 200,
+  "request_sha256": "a3ef3947c012927034d4ebbcc57b607a9f885c7c0105c27827cd09c47c343c19",
+  "response_sha256": "7f7726204f2d1a961114aa6d83095627a36f79cd8b171835a2fc87c24f8a2558",
+  "response": {
+    "id": "gen-1793165866-nNIjwNInQl0Nc0CVXTOX",
+    "model": "openai/gpt-6-astra",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.381,\"y\":0.285,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.493,\"y\":0.23,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.454,\"y\":0.51,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.297,\"y\":0.477,\"status\":\"visible_proposal\"}],\"note\":\"Waist endpoints and inseam junction are uncertain due to folds and low seam contrast.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 660,
+      "total_tokens": 1412,
+      "cost": 0.04052,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 516
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.381,
+        "y": 0.285,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.493,
+        "y": 0.23,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.454,
+        "y": 0.51,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.297,
+        "y": 0.477,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Waist endpoints and inseam junction are uncertain due to folds and low seam contrast."
+  },
+  "failure": null
+},
+{
+  "model_requested": "anthropic/claude-sonnet-4.6",
+  "case_id": "P01",
+  "image_sha256": "9e87d5b085a142710f7379d28dca8b2570a00aef9ff735682e6579b33d59d524",
+  "started_utc": "2026-10-28T05:38:09.781784+00:00",
+  "elapsed_seconds": 19.26052104199698,
+  "http_status": 200,
+  "request_sha256": "0c8e74cb0a9963d1105f38bbb99e2fd036e3dff89df957b5c86b0b39119c2299",
+  "response_sha256": "1dd911aa80914b8bcb66240f4e175d79ef145ea3cb4f7992a6e758b8d833abdd",
+  "response": {
+    "id": "gen-1793165889-FlVTwj6mPf3gYnez6UK3",
+    "model": "anthropic/claude-sonnet-4.6",
+    "provider": "Amazon Bedrock",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.32,\"y\":0.55,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.52,\"y\":0.35,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.38,\"y\":0.72,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.55,\"y\":0.52,\"status\":\"uncertain_proposal\"}],\"note\":\"T-shirt lying flat on sofa at an angle; seams not clearly visible, proposals are uncertain estimates.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "end_turn"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1212,
+      "completion_tokens": 145,
+      "total_tokens": 1357,
+      "cost": 0.005811,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.32,
+        "y": 0.55,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.52,
+        "y": 0.35,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.38,
+        "y": 0.72,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.55,
+        "y": 0.52,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "T-shirt lying flat on sofa at an angle; seams not clearly visible, proposals are uncertain estimates."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-6-astra",
+  "case_id": "P07",
+  "image_sha256": "8c1d35f3ebd429a8a795f32d0bf7c71979ee8d26278a6d4e6dff22fc7e836c79",
+  "started_utc": "2026-10-28T05:38:29.047800+00:00",
+  "elapsed_seconds": 8.899642999997013,
+  "http_status": 200,
+  "request_sha256": "a1d27f22ea19ed3af5a9c0a41bd316f6ca6cc0413448641efc3cbc97190bcfe1",
+  "response_sha256": "2bf946750af435f4ca0b6bcb5ef026aa317d43adbc8959d1cbffa53f5b273935",
+  "response": {
+    "id": "gen-1793165909-66PNJsNP2lJhYD8Rx3Uw",
+    "model": "openai/gpt-6-astra",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.4,\"y\":0.188,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.714,\"y\":0.25,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.525,\"y\":0.648,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.318,\"y\":0.719,\"status\":\"visible_proposal\"}],\"note\":\"Crotch junction is partially obscured by folds.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 239,
+      "total_tokens": 991,
+      "cost": 0.01947,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 103
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.4,
+        "y": 0.188,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.714,
+        "y": 0.25,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.525,
+        "y": 0.648,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.318,
+        "y": 0.719,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Crotch junction is partially obscured by folds."
+  },
+  "failure": null
+},
+{
+  "model_requested": "google/gemini-3.8-flash",
+  "case_id": "P05",
+  "image_sha256": "145f2eae8fcb4c1214f08378d19891966ff7bf2dcae71d3a29664cf3d4ece6b4",
+  "started_utc": "2026-10-28T05:38:37.951404+00:00",
+  "elapsed_seconds": 7.814454915998795,
+  "http_status": 200,
+  "request_sha256": "db8fc3f62f89810ec65ed24162897e31a23c085ace9532419b4266a3cf844570",
+  "response_sha256": "5bee889d09b4abc986c84d226fa2bf472b321e0fc4ea26d589f451ed956c1346",
+  "response": {
+    "id": "gen-1793165917-SBms1iFf1j2H6JvC2ihm",
+    "model": "google/gemini-3.8-flash",
+    "provider": "Google",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.365,\"y\":0.416,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.551,\"y\":0.305,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.503,\"y\":0.525,\"status\":\"visible_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.391,\"y\":0.789,\"status\":\"visible_proposal\"}],\"note\":\"Garment landmarks identified for shorts based on standard pixel distance definitions.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "STOP"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1849,
+      "completion_tokens": 796,
+      "total_tokens": 2645,
+      "cost": 0.00437175,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 656
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.365,
+        "y": 0.416,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.551,
+        "y": 0.305,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.503,
+        "y": 0.525,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.391,
+        "y": 0.789,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Garment landmarks identified for shorts based on standard pixel distance definitions."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4-mini",
+  "case_id": "P04",
+  "image_sha256": "febf4d53a322cb07aef05c7df0442da27f808e7baa4daa54cb785174b889318a",
+  "started_utc": "2026-10-28T05:38:45.772774+00:00",
+  "elapsed_seconds": 5.045516958998633,
+  "http_status": 200,
+  "request_sha256": "ccaaab629dc0f4e0a5f5d4e94951c3826008011a2c61e6dae5652d05e831e4c0",
+  "response_sha256": "38cec2d07451f1d0b9f5648f247898d2286df46a785a7c56eb83441acc4d0a8a",
+  "response": {
+    "id": "gen-1793165925-ImQG5G88fJGTtJqSZMgB",
+    "model": "openai/gpt-5.4-mini",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.292,\"y\":0.28,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.653,\"y\":0.278,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.308,\"y\":0.398,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.632,\"y\":0.39,\"status\":\"uncertain_proposal\"}],\"note\":\"Landmarks estimated from visible garment seams and silhouette; shirt appears slightly rotated but left/right followed garment sides.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 394,
+      "total_tokens": 1150,
+      "cost": 0.00234,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 243
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.292,
+        "y": 0.28,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.653,
+        "y": 0.278,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.308,
+        "y": 0.398,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.632,
+        "y": 0.39,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Landmarks estimated from visible garment seams and silhouette; shirt appears slightly rotated but left/right followed garment sides."
+  },
+  "failure": null
+},
+{
+  "model_requested": "google/gemini-3.8-flash",
+  "case_id": "P04",
+  "image_sha256": "febf4d53a322cb07aef05c7df0442da27f808e7baa4daa54cb785174b889318a",
+  "started_utc": "2026-10-28T05:38:50.821690+00:00",
+  "elapsed_seconds": 6.364901334000024,
+  "http_status": 200,
+  "request_sha256": "68830092d99816416b9b33e65d80f9516921d037ec122635908bf63446c91c49",
+  "response_sha256": "b0b152f912a3905d85f07ab93ca34d70557540f888281344eeef95fd8cff9359",
+  "response": {
+    "id": "gen-1793165930-bentgUwOtASW83KmKX8f",
+    "model": "google/gemini-3.8-flash",
+    "provider": "Google",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.316,\"y\":0.781,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.785,\"y\":0.77,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.344,\"y\":0.582,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.707,\"y\":0.598,\"status\":\"uncertain_proposal\"}],\"note\":\"Garment is upside down with collar near bottom; hem is near the top.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "STOP"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1852,
+      "completion_tokens": 144,
+      "total_tokens": 1996,
+      "cost": 0.001929,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.316,
+        "y": 0.781,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.785,
+        "y": 0.77,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.344,
+        "y": 0.582,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.707,
+        "y": 0.598,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Garment is upside down with collar near bottom; hem is near the top."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4",
+  "case_id": "P04",
+  "image_sha256": "febf4d53a322cb07aef05c7df0442da27f808e7baa4daa54cb785174b889318a",
+  "started_utc": "2026-10-28T05:38:57.190708+00:00",
+  "elapsed_seconds": 9.914107542001148,
+  "http_status": 200,
+  "request_sha256": "badbac859e038e1e8d75685a59e322a6c2abf2ccf3564b1ae1eb3435bb29018d",
+  "response_sha256": "1a86c27d5efc40f1fcdc98ef61657589b5a6b5b48d7b3d9c28ec47dac242d473",
+  "response": {
+    "id": "gen-1793165937-OPfzWZxaFtPuX58UEznW",
+    "model": "openai/gpt-5.4",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.273,\"y\":0.613,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.75,\"y\":0.613,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.223,\"y\":0.73,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.801,\"y\":0.727,\"status\":\"uncertain_proposal\"}],\"note\":\"Upside-down T-shirt; sleeve/body junctions are partially obscured by wrinkles, so all four points are uncertain proposals.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 731,
+      "total_tokens": 1487,
+      "cost": 0.012855,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 576
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.273,
+        "y": 0.613,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.75,
+        "y": 0.613,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.223,
+        "y": 0.73,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.801,
+        "y": 0.727,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Upside-down T-shirt; sleeve/body junctions are partially obscured by wrinkles, so all four points are uncertain proposals."
+  },
+  "failure": null
+},
+{
+  "model_requested": "anthropic/claude-sonnet-4.6",
+  "case_id": "P07",
+  "image_sha256": "8c1d35f3ebd429a8a795f32d0bf7c71979ee8d26278a6d4e6dff22fc7e836c79",
+  "started_utc": "2026-10-28T05:39:07.109673+00:00",
+  "elapsed_seconds": 4.2318688340019435,
+  "http_status": 200,
+  "request_sha256": "f7540e6365128b8173074ebcc8711bd3219a6f1abf1a81379f1ba151a23d7028",
+  "response_sha256": "1ef493036ee38d9fb2c83f5335e979f9f56a5dcc1201ed16bd136d628b48b9aa",
+  "response": {
+    "id": "gen-1793165947-aDCKGtWiT9X2PR2oeVR1",
+    "model": "anthropic/claude-sonnet-4.6",
+    "provider": "Amazon Bedrock",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.33,\"y\":0.18,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.72,\"y\":0.2,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.52,\"y\":0.82,\"status\":\"visible_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.3,\"y\":0.88,\"status\":\"visible_proposal\"}],\"note\":\"Khaki shorts on table. Waist endpoints at waistband corners, crotch at inseam junction, side_hem at left leg outer hem corner.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "end_turn"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1210,
+      "completion_tokens": 158,
+      "total_tokens": 1368,
+      "cost": 0.006,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.33,
+        "y": 0.18,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.72,
+        "y": 0.2,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.52,
+        "y": 0.82,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.3,
+        "y": 0.88,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Khaki shorts on table. Waist endpoints at waistband corners, crotch at inseam junction, side_hem at left leg outer hem corner."
+  },
+  "failure": null
+},
+{
+  "model_requested": "google/gemini-3.8-flash",
+  "case_id": "P06",
+  "image_sha256": "3064df25d96af05797577084ffba7e864dbbca6d8ca645cbedebbb483a8c41eb",
+  "started_utc": "2026-10-28T05:39:11.343883+00:00",
+  "elapsed_seconds": 12.536787624998396,
+  "http_status": 200,
+  "request_sha256": "9afa55bb35c992d60374992ec2ab7ba6deb316378e769c90ec9c692d93a08a72",
+  "response_sha256": "7b3dcb0a4fc255d7d4383f4f2a53217e8dc9c3cea34250e507d6873d984c7221",
+  "response": {
+    "id": "gen-1793165951-J9jStwiinBRlgwSYQoq8",
+    "model": "google/gemini-3.8-flash",
+    "provider": "Google",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.523,\"y\":0.226,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.59,\"y\":0.473,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.485,\"y\":0.395,\"status\":\"visible_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.378,\"y\":0.262,\"status\":\"visible_proposal\"}],\"note\":\"Garment landmarks localized with waist_left identified via nearest distance to garment bounding-box top-left corner.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "STOP"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1849,
+      "completion_tokens": 1266,
+      "total_tokens": 3115,
+      "cost": 0.00613425,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 1117
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.523,
+        "y": 0.226,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.59,
+        "y": 0.473,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.485,
+        "y": 0.395,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.378,
+        "y": 0.262,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Garment landmarks localized with waist_left identified via nearest distance to garment bounding-box top-left corner."
+  },
+  "failure": null
+},
+{
+  "model_requested": "google/gemini-3.8-flash",
+  "case_id": "P02",
+  "image_sha256": "3a3f0a699259fdcc92f7a0157be3108e303c27d689de9f4784d68cd70fa9d819",
+  "started_utc": "2026-10-28T05:39:23.885707+00:00",
+  "elapsed_seconds": 13.772286833002,
+  "http_status": 200,
+  "request_sha256": "d3393a7cdbed30ac6be282ca7b2b8d2aa235c6dfb518946b73d424e2f378e44e",
+  "response_sha256": "d5b7bae72057cf7966a5f0038d082b1bec347a6c527420f513aad5b291dd7011",
+  "response": {
+    "id": "gen-1793165963-n2A5UiW0nHrhh3T4HXLr",
+    "model": "google/gemini-3.8-flash",
+    "provider": "Google",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.652,\"y\":0.781,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.654,\"y\":0.468,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.533,\"y\":0.816,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.551,\"y\":0.506,\"status\":\"uncertain_proposal\"}],\"note\":\"Garment is oriented horizontally with lower hem at the left; left side corresponds to the lower edge in image coordinates.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "STOP"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1852,
+      "completion_tokens": 1594,
+      "total_tokens": 3446,
+      "cost": 0.0073665,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 1442
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.652,
+        "y": 0.781,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.654,
+        "y": 0.468,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.533,
+        "y": 0.816,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.551,
+        "y": 0.506,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Garment is oriented horizontally with lower hem at the left; left side corresponds to the lower edge in image coordinates."
+  },
+  "failure": null
+},
+{
+  "model_requested": "google/gemini-3.8-flash",
+  "case_id": "P07",
+  "image_sha256": "8c1d35f3ebd429a8a795f32d0bf7c71979ee8d26278a6d4e6dff22fc7e836c79",
+  "started_utc": "2026-10-28T05:39:37.664035+00:00",
+  "elapsed_seconds": 3.545065082998917,
+  "http_status": 200,
+  "request_sha256": "13c7ae25471b88b52e51d6ad1326098fa006e2275d971b9b0a0a929038e4d1d8",
+  "response_sha256": "ecf5d0896bb3e607b55013f5d5fe4af62bbcd43b5a98d7711b6e2478c881609c",
+  "response": {
+    "id": "gen-1793165977-Y2xsIgWEuzQDEQxFMhBW",
+    "model": "google/gemini-3.8-flash",
+    "provider": "Google",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.403,\"y\":0.187,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.71,\"y\":0.25,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.528,\"y\":0.505,\"status\":\"visible_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.317,\"y\":0.722,\"status\":\"visible_proposal\"}],\"note\":\"Garment is upright shorts on a wooden table.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "STOP"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1849,
+      "completion_tokens": 135,
+      "total_tokens": 1984,
+      "cost": 0.001893,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.403,
+        "y": 0.187,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.71,
+        "y": 0.25,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.528,
+        "y": 0.505,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.317,
+        "y": 0.722,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Garment is upright shorts on a wooden table."
+  },
+  "failure": null
+},
+{
+  "model_requested": "google/gemini-3.8-flash",
+  "case_id": "P01",
+  "image_sha256": "9e87d5b085a142710f7379d28dca8b2570a00aef9ff735682e6579b33d59d524",
+  "started_utc": "2026-10-28T05:39:41.212846+00:00",
+  "elapsed_seconds": 6.7824417909978365,
+  "http_status": 200,
+  "request_sha256": "f788fef9de9b13c3cf38efeb415a7bb8087f394161136021ab2355d63f07f8c6",
+  "response_sha256": "cb065a6807517d3ab27a4d54277316cc9d80e3ce028542479fe20199a97128e6",
+  "response": {
+    "id": "gen-1793165981-cjStn4PkAcQKrkZr0sv3",
+    "model": "google/gemini-3.8-flash",
+    "provider": "Google",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.395,\"y\":0.301,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.584,\"y\":0.191,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.398,\"y\":0.449,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.617,\"y\":0.32,\"status\":\"uncertain_proposal\"}],\"note\":\"The blue t-shirt is laid out across the sofa with the hem extending towards the bottom-right. Bottom hem corners are near the lower right, so the garment side closer to the bounding box bottom-left is the left side (facing viewer left/upper-left). Shoulder seams are wrinkled and estimated.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "STOP"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1852,
+      "completion_tokens": 190,
+      "total_tokens": 2042,
+      "cost": 0.0021015,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.395,
+        "y": 0.301,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.584,
+        "y": 0.191,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.398,
+        "y": 0.449,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.617,
+        "y": 0.32,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "The blue t-shirt is laid out across the sofa with the hem extending towards the bottom-right. Bottom hem corners are near the lower right, so the garment side closer to the bounding box bottom-left is the left side (facing viewer left/upper-left). Shoulder seams are wrinkled and estimated."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4-mini",
+  "case_id": "P02",
+  "image_sha256": "3a3f0a699259fdcc92f7a0157be3108e303c27d689de9f4784d68cd70fa9d819",
+  "started_utc": "2026-10-28T05:39:47.997983+00:00",
+  "elapsed_seconds": 7.513962917000754,
+  "http_status": 200,
+  "request_sha256": "94a299e87f07b60db3a08fa7410298f40bc23e56762036a7a3b22ef375771dff",
+  "response_sha256": "4fa85ba786433413d55dcc453667e5bbac0fcb26c6c909c25d33acda966937b8",
+  "response": {
+    "id": "gen-1793165988-28BA25qc8ralJoFuBDYR",
+    "model": "openai/gpt-5.4-mini",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.485,\"y\":0.492,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.657,\"y\":0.492,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.492,\"y\":0.638,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.636,\"y\":0.588,\"status\":\"uncertain_proposal\"}],\"note\":\"Visible garment side is partially folded; points are approximate proposals.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 373,
+      "total_tokens": 1129,
+      "cost": 0.0022455,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 231
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.485,
+        "y": 0.492,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.657,
+        "y": 0.492,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.492,
+        "y": 0.638,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.636,
+        "y": 0.588,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Visible garment side is partially folded; points are approximate proposals."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-6-astra",
+  "case_id": "P06",
+  "image_sha256": "3064df25d96af05797577084ffba7e864dbbca6d8ca645cbedebbb483a8c41eb",
+  "started_utc": "2026-10-28T05:39:55.516276+00:00",
+  "elapsed_seconds": 12.541921625001123,
+  "http_status": 200,
+  "request_sha256": "e687e57dba2740bafbd26fce0f40f84c3f7b3fbca5b104f2c680297e53e3354e",
+  "response_sha256": "b3cb8363704e455e700f97f9b4061baa78ee396e6369248d613fb5d6b69a177d",
+  "response": {
+    "id": "gen-1793165995-kBszMp1rdixMlthdQhg5",
+    "model": "openai/gpt-6-astra",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.524,\"y\":0.226,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.592,\"y\":0.481,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.441,\"y\":0.427,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.377,\"y\":0.263,\"status\":\"visible_proposal\"}],\"note\":\"Crotch junction is partially obscured by folds.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 324,
+      "total_tokens": 1076,
+      "cost": 0.02372,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 188
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.524,
+        "y": 0.226,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.592,
+        "y": 0.481,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.441,
+        "y": 0.427,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.377,
+        "y": 0.263,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Crotch junction is partially obscured by folds."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-6-astra",
+  "case_id": "P03",
+  "image_sha256": "f240f69fe2b4a2abc202e5c56a373a9f14187609dfe7c6c6514fa60d8deb4a55",
+  "started_utc": "2026-10-28T05:40:08.063805+00:00",
+  "elapsed_seconds": 13.108031415998994,
+  "http_status": 200,
+  "request_sha256": "5bcfe54ccd3e0070f22086a7822781b223544b377434f440935b078d08c9d792",
+  "response_sha256": "688708523a3820069fdab0c171d36fef1f072523566e78eec042cc83a10f346c",
+  "response": {
+    "id": "gen-1793166008-Ez7mMifrBS5DOSAvK4Ly",
+    "model": "openai/gpt-6-astra",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.311,\"y\":0.4,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.379,\"y\":0.246,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.356,\"y\":0.523,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.458,\"y\":0.301,\"status\":\"uncertain_proposal\"}],\"note\":\"Attachment seams and underarm junctions are indistinct against the patterned fabric.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 351,
+      "total_tokens": 1107,
+      "cost": 0.02511,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 206
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.311,
+        "y": 0.4,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.379,
+        "y": 0.246,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.356,
+        "y": 0.523,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.458,
+        "y": 0.301,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Attachment seams and underarm junctions are indistinct against the patterned fabric."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4-mini",
+  "case_id": "P07",
+  "image_sha256": "8c1d35f3ebd429a8a795f32d0bf7c71979ee8d26278a6d4e6dff22fc7e836c79",
+  "started_utc": "2026-10-28T05:40:21.176465+00:00",
+  "elapsed_seconds": 4.664936000001035,
+  "http_status": 200,
+  "request_sha256": "7e3b3a6eef0e111df3a93fa12b85d0546f808bf4a5344e70a72c5b107efa47f1",
+  "response_sha256": "0289d3a2df0a68e994625365578a68a54bb9bad20541421a095dbee7d2de54aa",
+  "response": {
+    "id": "gen-1793166021-31BLgbPo8u7zLJ27hREp",
+    "model": "openai/gpt-5.4-mini",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.299,\"y\":0.275,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.719,\"y\":0.287,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.511,\"y\":0.551,\"status\":\"visible_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.325,\"y\":0.754,\"status\":\"visible_proposal\"}],\"note\":\"Shorts laid flat; left side resolved from the garment’s top-left waistband endpoint.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 338,
+      "total_tokens": 1090,
+      "cost": 0.002085,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 197
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.299,
+        "y": 0.275,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.719,
+        "y": 0.287,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.511,
+        "y": 0.551,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.325,
+        "y": 0.754,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Shorts laid flat; left side resolved from the garment’s top-left waistband endpoint."
+  },
+  "failure": null
+},
+{
+  "model_requested": "google/gemini-3.8-flash",
+  "case_id": "P03",
+  "image_sha256": "f240f69fe2b4a2abc202e5c56a373a9f14187609dfe7c6c6514fa60d8deb4a55",
+  "started_utc": "2026-10-28T05:40:25.846126+00:00",
+  "elapsed_seconds": 3.8729864999986603,
+  "http_status": 200,
+  "request_sha256": "8acd649464a51eb3205d54104ca2d734fb9e9ed9fe4b35e3b18f5c79c139ba19",
+  "response_sha256": "ec9eefe5e149af30b603cfdae07373933d2ed5e2271ba27144190e4eacf2676e",
+  "response": {
+    "id": "gen-1793166025-SjqD60HnDlTFHKpb3EWv",
+    "model": "google/gemini-3.8-flash",
+    "provider": "Google",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.404,\"y\":0.211,\"status\":\"visible_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.283,\"y\":0.449,\"status\":\"visible_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.463,\"y\":0.312,\"status\":\"visible_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.344,\"y\":0.523,\"status\":\"visible_proposal\"}],\"note\":\"Landmarks detected for tshirt on tabletop.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "STOP"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1852,
+      "completion_tokens": 137,
+      "total_tokens": 1989,
+      "cost": 0.00190275,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.404,
+        "y": 0.211,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.283,
+        "y": 0.449,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.463,
+        "y": 0.312,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.344,
+        "y": 0.523,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Landmarks detected for tshirt on tabletop."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-6-astra",
+  "case_id": "P04",
+  "image_sha256": "febf4d53a322cb07aef05c7df0442da27f808e7baa4daa54cb785174b889318a",
+  "started_utc": "2026-10-28T05:40:29.723428+00:00",
+  "elapsed_seconds": 13.412874625002587,
+  "http_status": 200,
+  "request_sha256": "2e09dde4e4bc985c45b0341baa7712d27292c4a543955b3f2d5048874b382ce5",
+  "response_sha256": "f8d2a84100aca711fa23c15936d341f6ff6880be9f26b6aefce1162b470537f1",
+  "response": {
+    "id": "gen-1793166029-Hvvu7X6XhSQFcye1cRGl",
+    "model": "openai/gpt-6-astra",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.421,\"y\":0.84,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.71,\"y\":0.832,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.345,\"y\":0.586,\"status\":\"visible_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.703,\"y\":0.609,\"status\":\"uncertain_proposal\"}],\"note\":\"Garment is upside down; folds obscure exact shoulder seam endpoints.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 370,
+      "total_tokens": 1126,
+      "cost": 0.02606,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 228
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.421,
+        "y": 0.84,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.71,
+        "y": 0.832,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.345,
+        "y": 0.586,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.703,
+        "y": 0.609,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Garment is upside down; folds obscure exact shoulder seam endpoints."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4-mini",
+  "case_id": "P08",
+  "image_sha256": "6d4a48a8f413699ef718fda5ea669c8794acb35ce12eed55aa763c190996ae1b",
+  "started_utc": "2026-10-28T05:40:43.141623+00:00",
+  "elapsed_seconds": 5.705541291998088,
+  "http_status": 200,
+  "request_sha256": "2464e136fbb1af5fbff01ed4b508e3075ceb814eb35113bf8fa6e6de2916bf83",
+  "response_sha256": "75d22fcf7cec5b76c59200df163378a54c0fcf00e1a46f889942a1f889d346f6",
+  "response": {
+    "id": "gen-1793166043-ybKLMtGxLowBFGQdnCGa",
+    "model": "openai/gpt-5.4-mini",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.335,\"y\":0.234,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.458,\"y\":0.277,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.395,\"y\":0.493,\"status\":\"visible_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.289,\"y\":0.494,\"status\":\"visible_proposal\"}],\"note\":\"Shorts laid diagonally; all four landmarks are approximate visible proposals.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 406,
+      "total_tokens": 1158,
+      "cost": 0.002391,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 268
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.335,
+        "y": 0.234,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.458,
+        "y": 0.277,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.395,
+        "y": 0.493,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.289,
+        "y": 0.494,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Shorts laid diagonally; all four landmarks are approximate visible proposals."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4",
+  "case_id": "P07",
+  "image_sha256": "8c1d35f3ebd429a8a795f32d0bf7c71979ee8d26278a6d4e6dff22fc7e836c79",
+  "started_utc": "2026-10-28T05:40:48.853247+00:00",
+  "elapsed_seconds": 6.11193866600297,
+  "http_status": 200,
+  "request_sha256": "53ababfb74635cddfa47224ddd5e5460311d047f1caf696882d9b1e6782e3b56",
+  "response_sha256": "3b0134cafddc6abf6deb07744b42276044846f5cf12d46332c496f9f1c581c5d",
+  "response": {
+    "id": "gen-1793166048-ibUWIjGBwnvBvqV6UEK6",
+    "model": "openai/gpt-5.4",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.303,\"y\":0.227,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.701,\"y\":0.246,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.516,\"y\":0.672,\"status\":\"visible_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.293,\"y\":0.746,\"status\":\"visible_proposal\"}],\"note\":\"Estimated from the visible shorts outline and seam junctions in the original image.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 284,
+      "total_tokens": 1036,
+      "cost": 0.00614,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 145
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.303,
+        "y": 0.227,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.701,
+        "y": 0.246,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.516,
+        "y": 0.672,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.293,
+        "y": 0.746,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Estimated from the visible shorts outline and seam junctions in the original image."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4-mini",
+  "case_id": "P01",
+  "image_sha256": "9e87d5b085a142710f7379d28dca8b2570a00aef9ff735682e6579b33d59d524",
+  "started_utc": "2026-10-28T05:40:54.969303+00:00",
+  "elapsed_seconds": 6.931542832997366,
+  "http_status": 200,
+  "request_sha256": "64abbf49d4658923458867cb6b06b91ef86b2c0491ebc3ac45b1e454275085b6",
+  "response_sha256": "a5d54f2e78804bcbe24fd25be9199c6bf953572c6937ae7ddfebca5a23119dfc",
+  "response": {
+    "id": "gen-1793166055-ciK1cSDoReFaQKpkn4gQ",
+    "model": "openai/gpt-5.4-mini",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.426,\"y\":0.3605,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.6797,\"y\":0.274,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.412,\"y\":0.529,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.597,\"y\":0.427,\"status\":\"uncertain_proposal\"}],\"note\":\"Partially visible T-shirt on couch; seams estimated from drape.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 453,
+      "total_tokens": 1209,
+      "cost": 0.0026055,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 307
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.426,
+        "y": 0.3605,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.6797,
+        "y": 0.274,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.412,
+        "y": 0.529,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.597,
+        "y": 0.427,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Partially visible T-shirt on couch; seams estimated from drape."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-6-astra",
+  "case_id": "P01",
+  "image_sha256": "9e87d5b085a142710f7379d28dca8b2570a00aef9ff735682e6579b33d59d524",
+  "started_utc": "2026-10-28T05:41:01.905508+00:00",
+  "elapsed_seconds": 11.897425917002693,
+  "http_status": 200,
+  "request_sha256": "d765de2978a0f4fed9bbbeea460cb9bb4604baad76f5d342fcfdde34469d1752",
+  "response_sha256": "2ee8ac15a2170fca9475fafdbdce8beb2cade0774aad77a27e5be88db36a3280",
+  "response": {
+    "id": "gen-1793166061-EoG5ePsylfRQ90Fzh7eJ",
+    "model": "openai/gpt-6-astra",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.394,\"y\":0.293,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.588,\"y\":0.191,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.4,\"y\":0.445,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.615,\"y\":0.305,\"status\":\"uncertain_proposal\"}],\"note\":\"Folds and low seam contrast make the attachment endpoints and underarm junctions uncertain.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 318,
+      "total_tokens": 1074,
+      "cost": 0.02346,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 171
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.394,
+        "y": 0.293,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.588,
+        "y": 0.191,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.4,
+        "y": 0.445,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.615,
+        "y": 0.305,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Folds and low seam contrast make the attachment endpoints and underarm junctions uncertain."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4",
+  "case_id": "P02",
+  "image_sha256": "3a3f0a699259fdcc92f7a0157be3108e303c27d689de9f4784d68cd70fa9d819",
+  "started_utc": "2026-10-28T05:41:13.808297+00:00",
+  "elapsed_seconds": 7.1156936250008584,
+  "http_status": 200,
+  "request_sha256": "503ba34898fd8188e4e18797400585492a414cac13a4ce3d3441787f33db8869",
+  "response_sha256": "601bd459ead57a857e6cedda0abba68b8cbe2db3a94d5680e57733a90d782bff",
+  "response": {
+    "id": "gen-1793166073-T3cQ6SzRLrf13mSd2B99",
+    "model": "openai/gpt-5.4",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.495,\"y\":0.547,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.687,\"y\":0.566,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.434,\"y\":0.707,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.686,\"y\":0.715,\"status\":\"uncertain_proposal\"}],\"note\":\"Crumpled garment; all four landmarks are uncertain proposals.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 356,
+      "total_tokens": 1112,
+      "cost": 0.00723,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 214
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.495,
+        "y": 0.547,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.687,
+        "y": 0.566,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.434,
+        "y": 0.707,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.686,
+        "y": 0.715,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Crumpled garment; all four landmarks are uncertain proposals."
+  },
+  "failure": null
+},
+{
+  "model_requested": "google/gemini-3.8-flash",
+  "case_id": "P08",
+  "image_sha256": "6d4a48a8f413699ef718fda5ea669c8794acb35ce12eed55aa763c190996ae1b",
+  "started_utc": "2026-10-28T05:41:20.928825+00:00",
+  "elapsed_seconds": 3.382477208000637,
+  "http_status": 200,
+  "request_sha256": "f105bdb9243fa19752ccaab35989dac4eede71ceb8a87aebc6f9e8b9f05f3242",
+  "response_sha256": "34ca09161490a5c10795525085c7ee4012d975639339587ad2600f33c2853bcc",
+  "response": {
+    "id": "gen-1793166081-q0W08uw1boh7rw9dvkwi",
+    "model": "google/gemini-3.8-flash",
+    "provider": "Google",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.413,\"y\":0.617,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.547,\"y\":0.428,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.384,\"y\":0.318,\"status\":\"visible_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.297,\"y\":0.477,\"status\":\"visible_proposal\"}],\"note\":\"Landmarks detected on denim shorts oriented diagonally on the table.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "STOP"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1849,
+      "completion_tokens": 140,
+      "total_tokens": 1989,
+      "cost": 0.00191175,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.413,
+        "y": 0.617,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.547,
+        "y": 0.428,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.384,
+        "y": 0.318,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.297,
+        "y": 0.477,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Landmarks detected on denim shorts oriented diagonally on the table."
+  },
+  "failure": null
+},
+{
+  "model_requested": "anthropic/claude-sonnet-4.6",
+  "case_id": "P05",
+  "image_sha256": "145f2eae8fcb4c1214f08378d19891966ff7bf2dcae71d3a29664cf3d4ece6b4",
+  "started_utc": "2026-10-28T05:41:24.315514+00:00",
+  "elapsed_seconds": 4.802618375000748,
+  "http_status": 200,
+  "request_sha256": "b82bf528b141c5c70efabc4ba01f8ce2d5e130cba8211beebe9e7f75b04f0c81",
+  "response_sha256": "24bf88e3b3b689355adddae570e9442ba684616adee94b72e87a21fc334deb26",
+  "response": {
+    "id": "gen-1793166084-8cNTbRtPY3mfyM7gBtga",
+    "model": "anthropic/claude-sonnet-4.6",
+    "provider": "Amazon Bedrock",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.32,\"y\":0.35,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.55,\"y\":0.32,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.44,\"y\":0.72,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.28,\"y\":0.78,\"status\":\"visible_proposal\"}],\"note\":\"Shorts laid flat on table; waist_left nearest bounding-box top-left, side_hem on corresponding left leg outer hem.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "end_turn"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1210,
+      "completion_tokens": 152,
+      "total_tokens": 1362,
+      "cost": 0.00591,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.32,
+        "y": 0.35,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.55,
+        "y": 0.32,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.44,
+        "y": 0.72,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.28,
+        "y": 0.78,
+        "status": "visible_proposal"
+      }
+    ],
+    "note": "Shorts laid flat on table; waist_left nearest bounding-box top-left, side_hem on corresponding left leg outer hem."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4",
+  "case_id": "P06",
+  "image_sha256": "3064df25d96af05797577084ffba7e864dbbca6d8ca645cbedebbb483a8c41eb",
+  "started_utc": "2026-10-28T05:41:29.122294+00:00",
+  "elapsed_seconds": 12.026017042000603,
+  "http_status": 200,
+  "request_sha256": "a008007dd30280a8a71daf9897a9ca5283ad0f8904b74cc8485b1a0a50903e1c",
+  "response_sha256": "de6827bf1e8e3f2e2cb7505bd95cae626c37da0933d76f9ff868d3aa68b306aa",
+  "response": {
+    "id": "gen-1793166089-A6SthVB22wrpjCzbsGUb",
+    "model": "openai/gpt-5.4",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.365,\"y\":0.141,\"status\":\"visible_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.504,\"y\":0.223,\"status\":\"visible_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.449,\"y\":0.379,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.347,\"y\":0.480,\"status\":\"uncertain_proposal\"}],\"note\":\"Shorts are rotated and partly folded; crotch and left-side hem are uncertain proposals.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 752,
+      "completion_tokens": 522,
+      "total_tokens": 1274,
+      "cost": 0.00971,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 378
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.365,
+        "y": 0.141,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.504,
+        "y": 0.223,
+        "status": "visible_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.449,
+        "y": 0.379,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.347,
+        "y": 0.48,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Shorts are rotated and partly folded; crotch and left-side hem are uncertain proposals."
+  },
+  "failure": null
+},
+{
+  "model_requested": "openai/gpt-5.4-mini",
+  "case_id": "P03",
+  "image_sha256": "f240f69fe2b4a2abc202e5c56a373a9f14187609dfe7c6c6514fa60d8deb4a55",
+  "started_utc": "2026-10-28T05:41:41.153963+00:00",
+  "elapsed_seconds": 3.788197415997274,
+  "http_status": 200,
+  "request_sha256": "fb015f48c2479158adb79a2387d12c848564f87952416b50f1cb1b943a9ea38e",
+  "response_sha256": "9fa442a8b66483715c4a11889ca0a3aa096a6e86856f97c3e8472f571e60c815",
+  "response": {
+    "id": "gen-1793166101-aQVRk3JdfymJ4kGL076s",
+    "model": "openai/gpt-5.4-mini",
+    "provider": "Azure",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":null,\"y\":null,\"status\":\"abstain\"},{\"landmark_type\":\"shoulder_right\",\"x\":null,\"y\":null,\"status\":\"abstain\"},{\"landmark_type\":\"armpit_left\",\"x\":null,\"y\":null,\"status\":\"abstain\"},{\"landmark_type\":\"armpit_right\",\"x\":null,\"y\":null,\"status\":\"abstain\"}],\"note\":\"Seams for the requested T-shirt landmarks are not clearly visible in this photo.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "completed"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 756,
+      "completion_tokens": 229,
+      "total_tokens": 985,
+      "cost": 0.0015975,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 103
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": null,
+        "y": null,
+        "status": "abstain"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": null,
+        "y": null,
+        "status": "abstain"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": null,
+        "y": null,
+        "status": "abstain"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": null,
+        "y": null,
+        "status": "abstain"
+      }
+    ],
+    "note": "Seams for the requested T-shirt landmarks are not clearly visible in this photo."
+  },
+  "failure": null
+},
+{
+  "model_requested": "anthropic/claude-sonnet-4.6",
+  "case_id": "P06",
+  "image_sha256": "3064df25d96af05797577084ffba7e864dbbca6d8ca645cbedebbb483a8c41eb",
+  "started_utc": "2026-10-28T05:41:44.948432+00:00",
+  "elapsed_seconds": 7.998276791000535,
+  "http_status": 200,
+  "request_sha256": "a8f1b3b6be0b35688943b5b541a8a1c32fd80f586ce22a0121e18baa14d6d004",
+  "response_sha256": "958c5f656a7fcee3e65f334c1200eb7a1b4aecfe9a8b5b30c9cfcb2bcc707cfb",
+  "response": {
+    "id": "gen-1793166104-4TSJ536HTQg4aipR8Sfs",
+    "model": "anthropic/claude-sonnet-4.6",
+    "provider": "Amazon Bedrock",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.37,\"y\":0.33,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.62,\"y\":0.30,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.50,\"y\":0.63,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.36,\"y\":0.72,\"status\":\"uncertain_proposal\"}],\"note\":\"Shorts laid flat on bed; waistband top edge used for waist points, inseam junction estimated for crotch, outer left leg hem for side_hem.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "end_turn"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1210,
+      "completion_tokens": 422,
+      "total_tokens": 1632,
+      "cost": 0.00996,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 261
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.37,
+        "y": 0.33,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.62,
+        "y": 0.3,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.5,
+        "y": 0.63,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.36,
+        "y": 0.72,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Shorts laid flat on bed; waistband top edge used for waist points, inseam junction estimated for crotch, outer left leg hem for side_hem."
+  },
+  "failure": null
+},
+{
+  "model_requested": "anthropic/claude-sonnet-4.6",
+  "case_id": "P04",
+  "image_sha256": "febf4d53a322cb07aef05c7df0442da27f808e7baa4daa54cb785174b889318a",
+  "started_utc": "2026-10-28T05:41:52.952769+00:00",
+  "elapsed_seconds": 4.7401916250018985,
+  "http_status": 200,
+  "request_sha256": "751ccbd14d8e592556a72da88baa24e713903953b38b5275fc563866fd9dde95",
+  "response_sha256": "c55e25953dae2954827cbeb48155ca6165bd016baf211306ae52b330c535ad95",
+  "response": {
+    "id": "gen-1793166113-EscoGaMpSyRh4y9uarvs",
+    "model": "anthropic/claude-sonnet-4.6",
+    "provider": "Amazon Bedrock",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"shoulder_left\",\"x\":0.18,\"y\":0.55,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"shoulder_right\",\"x\":0.72,\"y\":0.25,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_left\",\"x\":0.25,\"y\":0.72,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"armpit_right\",\"x\":0.65,\"y\":0.45,\"status\":\"uncertain_proposal\"}],\"note\":\"T-shirt laid flat and rotated; landmarks estimated from sleeve attachment regions with uncertainty.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "end_turn"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1212,
+      "completion_tokens": 140,
+      "total_tokens": 1352,
+      "cost": 0.005736,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "shoulder_left",
+        "x": 0.18,
+        "y": 0.55,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "shoulder_right",
+        "x": 0.72,
+        "y": 0.25,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_left",
+        "x": 0.25,
+        "y": 0.72,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "armpit_right",
+        "x": 0.65,
+        "y": 0.45,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "T-shirt laid flat and rotated; landmarks estimated from sleeve attachment regions with uncertainty."
+  },
+  "failure": null
+},
+{
+  "model_requested": "anthropic/claude-sonnet-4.6",
+  "case_id": "P08",
+  "image_sha256": "6d4a48a8f413699ef718fda5ea669c8794acb35ce12eed55aa763c190996ae1b",
+  "started_utc": "2026-10-28T05:41:57.696094+00:00",
+  "elapsed_seconds": 4.788603957997111,
+  "http_status": 200,
+  "request_sha256": "5ced7ef405db20b187138b97cc99d1de76be407186eeddcdd4a294ef3982f0d8",
+  "response_sha256": "0d5458830e121edf43eaf1c80e99167e715b01cd3df6b19e61505b8f1c72c25a",
+  "response": {
+    "id": "gen-1793166117-FGSwPer0JS6dYv2LVU1j",
+    "model": "anthropic/claude-sonnet-4.6",
+    "provider": "Amazon Bedrock",
+    "choices": [
+      {
+        "message": {
+          "content": "{\"points\":[{\"landmark_type\":\"waist_left\",\"x\":0.28,\"y\":0.55,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"waist_right\",\"x\":0.62,\"y\":0.42,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"crotch\",\"x\":0.45,\"y\":0.72,\"status\":\"uncertain_proposal\"},{\"landmark_type\":\"side_hem\",\"x\":0.22,\"y\":0.72,\"status\":\"uncertain_proposal\"}],\"note\":\"Shorts folded on table, landmarks estimated from visible waistband and hem edges.\"}",
+          "refusal": null
+        },
+        "finish_reason": "stop",
+        "native_finish_reason": "end_turn"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1210,
+      "completion_tokens": 140,
+      "total_tokens": 1350,
+      "cost": 0.00573,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      },
+      "completion_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "reasoning_tokens": 0
+      }
+    },
+    "error": null
+  },
+  "annotation": {
+    "points": [
+      {
+        "landmark_type": "waist_left",
+        "x": 0.28,
+        "y": 0.55,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "waist_right",
+        "x": 0.62,
+        "y": 0.42,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "crotch",
+        "x": 0.45,
+        "y": 0.72,
+        "status": "uncertain_proposal"
+      },
+      {
+        "landmark_type": "side_hem",
+        "x": 0.22,
+        "y": 0.72,
+        "status": "uncertain_proposal"
+      }
+    ],
+    "note": "Shorts folded on table, landmarks estimated from visible waistband and hem edges."
+  },
+  "failure": null
+}
+]
