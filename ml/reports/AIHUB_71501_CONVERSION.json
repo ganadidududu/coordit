@@ -1,0 +1,14 @@
+{
+  "accepted_images": 2482,
+  "category_counts": {
+    "coat": 1250,
+    "jacket": 1232
+  },
+  "excluded": {
+    "worn_view_not_flat_garment_target": 3678
+  },
+  "real_seam_supervision_images": 0,
+  "cm_regression_training_images": 0,
+  "real_independent_validation_images": 0,
+  "training_only": true
+}

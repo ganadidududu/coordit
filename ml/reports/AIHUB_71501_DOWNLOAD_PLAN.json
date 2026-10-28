@@ -1,0 +1,355 @@
+{
+  "dataset_id": 71501,
+  "checked_at": "2026-10-28",
+  "source_url": "https://aihub.or.kr/aihubdata/data/view.do?dataSetSn=71501",
+  "file_list_url": "https://aihub.or.kr/aihubdata/data/aJaxS3FileList.do",
+  "access": "Explicitly accepted current dataset agreement; authenticated browser downloads verified by native ZIP size, CRC and SHA-256; no cookies/API keys exported",
+  "source_archives_downloaded": 2,
+  "training_images": 2482,
+  "files": [
+    {
+      "file_key": 466466,
+      "name": "TS_상품_상의_blouse.zip",
+      "bytes": 17525558884,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466467,
+      "name": "TS_상품_상의_cardigan.zip",
+      "bytes": 17291689043,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466468,
+      "name": "TS_상품_상의_coat.zip",
+      "bytes": 18477838139,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466469,
+      "name": "TS_상품_상의_jacket.zip",
+      "bytes": 18033808939,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466470,
+      "name": "TS_상품_상의_jumper.zip",
+      "bytes": 17816895424,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466471,
+      "name": "TS_상품_상의_shirt.zip",
+      "bytes": 23390108854,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466472,
+      "name": "TS_상품_상의_sweater.zip",
+      "bytes": 20983388232,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466473,
+      "name": "TS_상품_상의_t-shirt.zip",
+      "bytes": 58148459172,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466474,
+      "name": "TS_상품_상의_vest.zip",
+      "bytes": 15656913972,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466475,
+      "name": "TS_상품_하의_bottom.zip",
+      "bytes": 67035338796,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466476,
+      "name": "TS_상품_하의_onepiece(dress).zip",
+      "bytes": 35734908837,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466477,
+      "name": "TS_상품_하의_onepiece(jumpsuite).zip",
+      "bytes": 888380831,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466478,
+      "name": "TL_상품_상의_blouse.zip",
+      "bytes": 95167760,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466479,
+      "name": "TL_상품_상의_cardigan.zip",
+      "bytes": 89567594,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466480,
+      "name": "TL_상품_상의_coat.zip",
+      "bytes": 111619012,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466481,
+      "name": "TL_상품_상의_jacket.zip",
+      "bytes": 102277283,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466482,
+      "name": "TL_상품_상의_jumper.zip",
+      "bytes": 120410540,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466483,
+      "name": "TL_상품_상의_shirt.zip",
+      "bytes": 118295478,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466484,
+      "name": "TL_상품_상의_sweater.zip",
+      "bytes": 104987633,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466485,
+      "name": "TL_상품_상의_t-shirt.zip",
+      "bytes": 354010746,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466486,
+      "name": "TL_상품_상의_vest.zip",
+      "bytes": 66948937,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466487,
+      "name": "TL_상품_하의_bottom.zip",
+      "bytes": 310864129,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466488,
+      "name": "TL_상품_하의_onepiece(dress).zip",
+      "bytes": 189513407,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466489,
+      "name": "TL_상품_하의_onepiece(jumpsuite).zip",
+      "bytes": 5181252,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466490,
+      "name": "VS_상품_상의_blouse.zip",
+      "bytes": 2161552616,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466491,
+      "name": "VS_상품_상의_cardigan.zip",
+      "bytes": 2133923772,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466492,
+      "name": "VS_상품_상의_coat.zip",
+      "bytes": 2252838699,
+      "sha256": "e63c7b49ac40fa089484c0a1cfd39ce4f8fca2e6e181e649c52b4288fb467563",
+      "downloaded": true
+    },
+    {
+      "file_key": 466493,
+      "name": "VS_상품_상의_jacket.zip",
+      "bytes": 2203616543,
+      "sha256": "1a858a766b0eda36f1bf57ab8ec17e3b4c1228f65cbbf671661a19392f3f1130",
+      "downloaded": true
+    },
+    {
+      "file_key": 466494,
+      "name": "VS_상품_상의_jumper.zip",
+      "bytes": 2176652769,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466495,
+      "name": "VS_상품_상의_shirt.zip",
+      "bytes": 2992351926,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466496,
+      "name": "VS_상품_상의_sweater.zip",
+      "bytes": 2599274928,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466497,
+      "name": "VS_상품_상의_t-shirt.zip",
+      "bytes": 7314580784,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466498,
+      "name": "VS_상품_상의_vest.zip",
+      "bytes": 1900907061,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466499,
+      "name": "VS_상품_하의_bottom.zip",
+      "bytes": 8396912627,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466500,
+      "name": "VS_상품_하의_onepiece(dress).zip",
+      "bytes": 4498887312,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466501,
+      "name": "VS_상품_하의_onepiece(jumpsuite).zip",
+      "bytes": 105941062,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466502,
+      "name": "VL_상품_상의_blouse.zip",
+      "bytes": 11840082,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466503,
+      "name": "VL_상품_상의_cardigan.zip",
+      "bytes": 11231610,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466504,
+      "name": "VL_상품_상의_coat.zip",
+      "bytes": 14074338,
+      "sha256": "5cb8e119ca2b9d1fa93acdfc7d91d92ade75d32d8bcd0d97ccf5ad23b19b30d0",
+      "downloaded": true
+    },
+    {
+      "file_key": 466505,
+      "name": "VL_상품_상의_jacket.zip",
+      "bytes": 12858727,
+      "sha256": "44168726f5c5c18e7a98058089864442357586045ea2250635fc46b1390652f0",
+      "downloaded": true
+    },
+    {
+      "file_key": 466506,
+      "name": "VL_상품_상의_jumper.zip",
+      "bytes": 14931765,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466507,
+      "name": "VL_상품_상의_shirt.zip",
+      "bytes": 14755845,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466508,
+      "name": "VL_상품_상의_sweater.zip",
+      "bytes": 13049990,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466509,
+      "name": "VL_상품_상의_t-shirt.zip",
+      "bytes": 44478485,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466510,
+      "name": "VL_상품_상의_vest.zip",
+      "bytes": 8497672,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466511,
+      "name": "VL_상품_하의_bottom.zip",
+      "bytes": 38804089,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466512,
+      "name": "VL_상품_하의_onepiece(dress).zip",
+      "bytes": 23640726,
+      "sha256": null,
+      "downloaded": false
+    },
+    {
+      "file_key": 466513,
+      "name": "VL_상품_하의_onepiece(jumpsuite).zip",
+      "bytes": 661537,
+      "sha256": null,
+      "downloaded": false
+    }
+  ],
+  "label_archives_downloaded": 2,
+  "sample_download": {
+    "file_key": 19263,
+    "images": 12,
+    "bytes": 1782855,
+    "sha256": "d03c33269e0fda31632aad924976400fc9f3d5e6b5abab5a767d44bd74998280",
+    "used_for_training": false
+  }
+}

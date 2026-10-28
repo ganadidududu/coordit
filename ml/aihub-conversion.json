@@ -1,0 +1,5 @@
+{
+  "source": "artifacts/aihub71501/real",
+  "output": "artifacts/aihub71501/approved-v1",
+  "maximum_per_category": 10000
+}

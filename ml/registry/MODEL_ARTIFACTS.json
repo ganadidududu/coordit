@@ -41,6 +41,14 @@
       "deployment_approved": false,
       "purpose": "classification_only_ingestion_cpu_smoke_not_landmark_training",
       "weights_license": "Internal development; source attribution obligations apply"
+    },
+    {
+      "path": "artifacts/aihub-coat-jacket-mask-pretrain-v2/checkpoint.pt",
+      "sha256": "0baeadd24aeb788b1a575c3f4762643b1b6a1b8b486d84ec1ceb0fb9cae96ddf",
+      "training_registry_sha256": "6d293479ef3eba8c2f5e0bb1ca1b5f9ef31e18b97135e2530826466d9973a9de",
+      "deployment_approved": false,
+      "purpose": "real_coat_jacket_mask_pretraining_only_no_seam_or_cm_regression",
+      "weights_license": "Internal local development under AI-Hub-71501-2026-10-28; attribution and territory restrictions; separate deployment review required"
     }
   ]
 }

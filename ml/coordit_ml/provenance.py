@@ -55,6 +55,17 @@ def approved_entry(registry: Registry, dataset_id: str) -> DatasetEntry:
     if entry.status != Status.APPROVED or "train" not in entry.permissions:
         raise PipelineError(f"Dataset is not approved for training: {dataset_id}")
     allowed = {"MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "CC0-1.0", "CC-BY-4.0", "Coordit-owned"}
+    if dataset_id == "aihub-71501" and entry.data_license == "AI-Hub-71501-2026-10-28":
+        agreement = REGISTRY_ROOT / "reviews/aihub-71501-agreement.json"
+        if (
+            not agreement.is_file()
+            or sha256(agreement) != "8ed522bbe3876ec45f2c6ab89d3ea90342e753c237a9331e1e8214e2eab7098f"
+            or not set(entry.permissions) <= {"train", "modify"}
+        ):
+            raise PipelineError(
+                "AI Hub requires the pinned local-training agreement; source/deployment rights excluded"
+            )
+        allowed.add("AI-Hub-71501-2026-10-28")
     if entry.data_license not in allowed or entry.annotation_license not in allowed:
         raise PipelineError(f"License requires separate obligations review: {dataset_id}")
     if (

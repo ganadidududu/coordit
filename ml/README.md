@@ -4,6 +4,8 @@ Actual code, data conversion, training and inference are implemented. This is a 
 
 For the standalone iPhone field-test app, tape protocol, exact synthetic PCK/NME and local JSON evaluation, see [AR_FIELD_TEST_GUIDE](../docs/AR_FIELD_TEST_GUIDE.md). `uv run python -m coordit_ml field-report <export.json-or-directory> <new-output-directory>` separates automatic and corrected cm metrics, preserves failures, rejects simulator/non-independent/duplicate trials and never approves deployment.
 
+[AI Hub 71501 and AR feedback](../docs/AIHUB_71501_AND_AR_FEEDBACK.md) records the explicitly accepted local-training agreement, actual downloads and camera fixes. Two real source/label archive pairs yielded **2,482 approved unworn coat/jacket images**, actually used for 5 Metal GPU epochs of mask/classification pretraining. Native numeric cm is preserved; **real seam and cm regression supervision remain zero**, and independent accuracy/deployment remain unapproved. `audit-aihub <private-source> <fresh-output>` inventories pairs without granting rights; `convert-aihub aihub-conversion.json` requires the pinned reviewed grant. Source photos/labels and private per-file measurements stay out of Git.
+
 ## Locked environment and data
 
 Run from `ml/` with Python 3.12 and uv (tested with 0.10.9):

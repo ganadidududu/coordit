@@ -51,24 +51,26 @@
       "real_holdout_status": "unverified"
     },
     "jacket": {
-      "real_approved": 1468,
+      "real_approved": 2700,
       "synthetic_approved": 150,
       "real_independent_cm": 0,
       "synthetic_v2": 120,
       "secondhand_classification_only": 1468,
       "secondhand_weak_visual_labels": 0,
       "real_semantic_seam_ground_truth": 0,
-      "real_holdout_status": "unverified"
+      "real_holdout_status": "unverified",
+      "aihub_polygon_native_cm": 1232
     },
     "coat": {
-      "real_approved": 9,
+      "real_approved": 1259,
       "synthetic_approved": 150,
       "real_independent_cm": 0,
       "synthetic_v2": 120,
       "secondhand_classification_only": 9,
       "secondhand_weak_visual_labels": 9,
       "real_semantic_seam_ground_truth": 0,
-      "real_holdout_status": "unverified"
+      "real_holdout_status": "unverified",
+      "aihub_polygon_native_cm": 1250
     },
     "pants": {
       "real_approved": 2853,
@@ -134,6 +136,10 @@
     {
       "path": "artifacts/secondhand-v3-training/records.jsonl",
       "sha256": "4d85aecf62764b999de7a649da30a06ea9cb1236d0907a76b2edba43c58c29e4"
+    },
+    {
+      "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/aihub71501/approved-v1/records.jsonl",
+      "sha256": "631e3065ed187f9e68f8a2211c46b1b1c0b16202c2ca53303994cd5418c382d6"
     }
   ],
   "archive_sha256": "2f9ad46db331f533d71b0867304deb0d66f8599d7e143006e5212aeac4ff04aa",
@@ -142,7 +148,7 @@
     "test": 28,
     "validation": 27
   },
-  "real_holdout": "none: aRTF source garment IDs unavailable; secondhand capture-day/near-duplicate connected pool held training-only; publisher tests excluded",
+  "real_holdout": "none: aRTF source garment IDs unavailable; secondhand capture-day/near-duplicate connected pool held training-only; publisher tests excluded; AI Hub new paired pool conservatively training-only, no independent real holdout claimed",
   "synthetic_v2_splits": {
     "train": 1108,
     "test": 102,
@@ -175,5 +181,11 @@
     "unmapped_or_rejected/Night Gown": 115,
     "conflicting_duplicate_labels": 0
   },
-  "secondhand_fine_label_review": "registry/reviews/secondhand-fine-categories.json"
+  "secondhand_fine_label_review": "registry/reviews/secondhand-fine-categories.json",
+  "aihub_downloaded_image_label_pairs": 6161,
+  "aihub_exact_duplicates": 1,
+  "aihub_training_only": 2482,
+  "aihub_worn_views_excluded": 3678,
+  "aihub_cm_endpoint_compatibility": "native published cm protocol preserved; Coordit seam targets and independent cm evaluation unverified",
+  "aihub_local_provenance": "artifacts/aihub71501/approved-v1/audit/quarantined_pairs.jsonl (original labels/images remain private)"
 }

@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Literal, assert_never
 
 from coordit_ml.acquisition import convert_artf, download_artf
+from coordit_ml.aihub import audit_aihub
+from coordit_ml.aihub_conversion import AIHubConversion, convert_aihub
 from coordit_ml.approval import approve_dataset
 from coordit_ml.category_review import prepare_review
 from coordit_ml.centimeter_evaluation import evaluate_centimeters
@@ -32,6 +34,8 @@ class Arguments(argparse.Namespace):
         "registry",
         "approve-dataset",
         "audit-inventory",
+        "audit-aihub",
+        "convert-aihub",
         "download-artf",
         "download-secondhand",
         "convert-secondhand",
@@ -67,6 +71,11 @@ def main() -> None:
     _ = commands.add_parser("registry")
     inventory = commands.add_parser("audit-inventory")
     _ = inventory.add_argument("manifest", type=Path)
+    aihub = commands.add_parser("audit-aihub", help="Inspect privately downloaded 71501 pairs; no training approval")
+    _ = aihub.add_argument("source", type=Path)
+    _ = aihub.add_argument("output", type=Path)
+    aihub_conversion = commands.add_parser("convert-aihub", help="Prepare approved local polygon supervision")
+    _ = aihub_conversion.add_argument("config", type=Path)
     review = commands.add_parser("approve-dataset")
     _ = review.add_argument("config", type=Path)
     fetch = commands.add_parser("download-artf")
@@ -119,6 +128,10 @@ def main() -> None:
             approve_dataset(REGISTRY_ROOT / "DATASET_MANIFEST.json", args.config)
         case "audit-inventory":
             print(audit_inventory(args.manifest, registry))
+        case "audit-aihub":
+            print(audit_aihub(args.source, args.output).model_dump_json(indent=2))
+        case "convert-aihub":
+            print(convert_aihub(AIHubConversion.model_validate_json(args.config.read_bytes()), registry))
         case "download-artf":
             print(download_artf(args.output, registry))
         case "download-secondhand":

@@ -39,6 +39,7 @@ coordit/coordit/CoorditFitLabCoordinator.swift
 coordit/coordit/CoorditGarmentCaptureController.swift
 coordit/coordit/CoorditGarmentInference.swift
 coordit/coordit/CoorditGarmentMeasurementGeometry.swift
+coordit/coordit/CoorditGarmentOutlineDetector.swift
 coordit/coordit/CoorditRootView.swift
 coordit/coordit/Info.plist
 coordit/coordit/coorditApp.swift
@@ -48,6 +49,7 @@ coordit/coorditTests/CoorditGarmentInferenceTests.swift
 coordit/coorditTests/CoorditGarmentMeasurementTests.swift
 coordit/coorditUITests/CoorditARFieldUITests.swift
 coordit/coorditUITests/CoorditCameraComparisonUITests.swift
+docs/AIHUB_71501_AND_AR_FEEDBACK.md
 docs/API_SPEC_MOBILE.md
 docs/AR_FIELD_TEST_GUIDE.md
 docs/CAMERA_FIT_DEVELOPMENT.md
@@ -57,6 +59,8 @@ docs/CARDLESS_CHANGED_FILES.txt
 docs/CARDLESS_MEASUREMENT_AUDIT.md
 docs/CARDLESS_PHASE_2_STATUS.md
 ml/README.md
+ml/aihub-conversion.json
+ml/config-aihub-mask-pretrain.json
 ml/config-gpu.json
 ml/config-mps-category.json
 ml/config-mps-shared.json
@@ -70,6 +74,8 @@ ml/config-spatial-v2-shared.json
 ml/coordit_ml/__init__.py
 ml/coordit_ml/__main__.py
 ml/coordit_ml/acquisition.py
+ml/coordit_ml/aihub.py
+ml/coordit_ml/aihub_conversion.py
 ml/coordit_ml/approval.py
 ml/coordit_ml/artifacts.py
 ml/coordit_ml/category_review.py
@@ -100,13 +106,22 @@ ml/registry/DATASET_MANIFEST.json
 ml/registry/EVALUATION_DENYLIST.json
 ml/registry/MODEL_ARTIFACTS.json
 ml/registry/MODEL_MANIFEST.json
+ml/registry/reviews/aihub-71501-agreement.json
+ml/registry/reviews/aihub-71501-training.json
 ml/registry/reviews/secondhand-fine-categories.json
 ml/registry/reviews/secondhand-v3-front.json
 ml/registry/source-pins/secondhand-v3-front.json
+ml/reports/AIHUB_71501_CONVERSION.json
+ml/reports/AIHUB_71501_DOWNLOAD_PLAN.json
+ml/reports/AIHUB_71501_PAIR_AUDIT.json
+ml/reports/AIHUB_71501_SAMPLE_AUDIT.json
+ml/reports/AIHUB_71501_TRAINING.json
+ml/reports/AR_FEEDBACK_QA.json
 ml/reports/DATA_COUNTS.json
 ml/reports/MODEL_RUNS.json
 ml/reports/SOURCE_FILES.jsonl
 ml/reports/SPATIAL_V2_LANDMARK_SUMMARY.json
+ml/reports/aihub-mask-pretrain-training-set-metrics.json
 ml/reports/ar-mathematical-geometry.json
 ml/reports/secondhand-conversion.json
 ml/reports/spatial-v2-category-validation.json
@@ -114,6 +129,7 @@ ml/reports/spatial-v2-shared-test.json
 ml/reports/spatial-v2-shared-validation.json
 ml/reports/tiny-category-mps-final-data-validation.json
 ml/reports/tiny-shared-mps-final-data-validation.json
+ml/tests/test_aihub.py
 ml/tests/test_field_evaluation.py
 ml/tests/test_pipeline.py
 ml/tests/test_real_photo_supervision.py

@@ -535,6 +535,40 @@
       "approval_reason": "Original-photo origin and CC BY 4.0 confirmed in original institutional deposit, original depositor project page and his official front-only mirror. Commercial training/modification allowed subject to attribution. Approval covers image rights, not nonexistent seam/mask/cm labels or release accuracy.",
       "download_url": null,
       "archive_md5": null
+    },
+    {
+      "id": "aihub-71501",
+      "name": "의류 통합 데이터(착용 이미지, 치수 및 원단 정보), v1.1",
+      "original_url": "https://aihub.or.kr/aihubdata/data/view.do?dataSetSn=71501",
+      "publisher": "AI Hub / NIA; lead builder Metrix, Annotation AI and OpinionLive",
+      "image_rightsholder": "NIA and named original dataset builders; original photography with participant agreements described in pinned official guide",
+      "data_license": "AI-Hub-71501-2026-10-28",
+      "annotation_license": "AI-Hub-71501-2026-10-28",
+      "license_url": "https://aihub.or.kr/intrcn/guid/usagepolicy.do?currMenu=151&topMenu=105",
+      "checked_at": "2026-10-28",
+      "terms_url": "https://aihub.or.kr/aihubnews/faq/list.do",
+      "commercial_basis": "Explicitly accepted dataset download agreement allows commercial products/services learned from source. Pinned review 8ed522bbe3876ec45f2c6ab89d3ea90342e753c237a9331e1e8214e2eab7098f limits approval to local training/preprocessing in the approved Korean environment; attribution mandatory; no raw source redistribution, third-party AI/photo transfer or overseas export. No checkpoint deployment grant is issued here.",
+      "permissions": [
+        "train",
+        "modify"
+      ],
+      "attribution": "의류 통합 데이터(착용 이미지, 치수 및 원단 정보), AI Hub (aihub.or.kr). 과학기술정보통신부 / 한국지능정보사회진흥원 지능정보산업 인프라 조성 사업. 구축: 메트릭스, 어노테이션에이아이, 오피니언라이브. Coordit local normalization and filtering.",
+      "published_image_count": 550634,
+      "approved_image_count": 2482,
+      "categories": [
+        "coat",
+        "jacket"
+      ],
+      "annotation_types": [
+        "classification",
+        "segmentation",
+        "source_measurements_cm"
+      ],
+      "provenance_manifest": "artifacts/aihub71501/approved-v1/records.jsonl",
+      "status": "approved",
+      "approval_reason": "Official authenticated source, original guides and explicit current human agreement acceptance verified. Coat/jacket label archives actually downloaded. Image count remains zero until paired source conversion is verified. Grant is for classification/polygon supervision and native cm metadata, not invented seam coordinates or production accuracy; app/server release stays unapproved.",
+      "download_url": null,
+      "archive_md5": null
     }
   ]
 }
