@@ -11,7 +11,9 @@ from typing import Literal, assert_never
 
 from coordit_ml.acquisition import convert_artf, download_artf
 from coordit_ml.aihub import audit_aihub
+from coordit_ml.aihub_blind_evaluation import BlindEvaluation, evaluate_aihub_blind
 from coordit_ml.aihub_conversion import AIHubConversion, convert_aihub
+from coordit_ml.aihub_review_queue import QueueConfig, prepare_aihub_review_queue
 from coordit_ml.approval import approve_dataset
 from coordit_ml.artf_landmarks import prepare_artf_landmarks
 from coordit_ml.category_review import prepare_review
@@ -35,6 +37,7 @@ from coordit_ml.secondhand_download import download_secondhand
 from coordit_ml.synthetic import generate
 from coordit_ml.synthetic_v2 import generate_v2
 from coordit_ml.training import TrainingConfig, load_model, train
+from coordit_ml.via_reviews import ViaImport, import_via_reviews
 
 
 class Arguments(argparse.Namespace):
@@ -45,6 +48,9 @@ class Arguments(argparse.Namespace):
         "approve-dataset",
         "audit-inventory",
         "audit-aihub",
+        "prepare-aihub-seam-review",
+        "import-via-seam-reviews",
+        "evaluate-aihub-blind",
         "convert-aihub",
         "download-artf",
         "download-secondhand",
@@ -90,6 +96,12 @@ def main() -> None:
     aihub = commands.add_parser("audit-aihub", help="Inspect privately downloaded 71501 pairs; no training approval")
     _ = aihub.add_argument("source", type=Path)
     _ = aihub.add_argument("output", type=Path)
+    queue = commands.add_parser("prepare-aihub-seam-review")
+    _ = queue.add_argument("config", type=Path)
+    via_reviews = commands.add_parser("import-via-seam-reviews")
+    _ = via_reviews.add_argument("config", type=Path)
+    blind_evaluation = commands.add_parser("evaluate-aihub-blind")
+    _ = blind_evaluation.add_argument("config", type=Path)
     aihub_conversion = commands.add_parser("convert-aihub", help="Prepare approved local polygon supervision")
     _ = aihub_conversion.add_argument("config", type=Path)
     review = commands.add_parser("approve-dataset")
@@ -159,6 +171,12 @@ def main() -> None:
             print(audit_inventory(args.manifest, registry))
         case "audit-aihub":
             print(audit_aihub(args.source, args.output).model_dump_json(indent=2))
+        case "prepare-aihub-seam-review":
+            print(prepare_aihub_review_queue(QueueConfig.model_validate_json(args.config.read_bytes()), registry))
+        case "import-via-seam-reviews":
+            print(import_via_reviews(ViaImport.model_validate_json(args.config.read_bytes())))
+        case "evaluate-aihub-blind":
+            print(evaluate_aihub_blind(BlindEvaluation.model_validate_json(args.config.read_bytes())))
         case "convert-aihub":
             print(convert_aihub(AIHubConversion.model_validate_json(args.config.read_bytes()), registry))
         case "download-artf":

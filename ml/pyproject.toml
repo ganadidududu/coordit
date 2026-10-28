@@ -35,6 +35,7 @@ ignore = ["COM812", "ISC001", "D203", "D213", "CPY001", "TRY003", "EM101", "EM10
 "coordit_ml/__main__.py" = ["T201", "PLC0415", "C901", "PLR0912", "PLR0915"]
 "coordit_ml/acquisition.py" = ["C901", "PLR0912", "PLR0915"]
 "coordit_ml/publisher_test.py" = ["C901", "PLR0912", "PLR0915"]
+"coordit_ml/aihub_review_queue.py" = ["PLR0912", "PLR0915"]
 "coordit_ml/secondhand_conversion.py" = ["PLR0912", "PLR0915"]
 "coordit_ml/garmentcode_conversion.py" = ["PLR0915"]
 "coordit_ml/evaluation.py" = ["C901", "PLR0912", "PLR0915"]

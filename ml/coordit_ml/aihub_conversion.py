@@ -36,8 +36,9 @@ class ConversionReport(BoundaryModel):
     training_only: bool = True
 
 
-def _record(pair: QuarantinedPair, source: Path, output: Path, license_id: str) -> Record:
+def normalize_pair_record(pair: QuarantinedPair, config: AIHubConversion, license_id: str) -> Record:
     """Normalize pixels and matching polygons without EXIF-induced coordinate changes."""
+    source, output = config.source, config.output
     identity = re.fullmatch(r"(\d+)_sou_(\d+)_(\d+)_(front|back|wear)_.+", pair.source_name)
     if identity is None:
         raise PipelineError("Unknown source identity format; refusing guessed grouping")
@@ -119,7 +120,7 @@ def convert_aihub(config: AIHubConversion, registry: Registry) -> Path:
         if counts[category] >= config.maximum_per_category:
             excluded["per_category_limit"] += 1
             continue
-        record = _record(pair, config.source, config.output, entry.data_license)
+        record = normalize_pair_record(pair, config, entry.data_license)
         if record.sha256 in normalized_hashes:
             excluded["normalized_duplicate"] += 1
             continue
