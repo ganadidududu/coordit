@@ -81,4 +81,4 @@ iOS 시뮬레이터는 먼저 AGENTS.md의 SimSlim list/on/verify/doctor를 수�
 
 도구 설치 기록: cloudflared 설치 중 Homebrew 자동 정리가 Python 3.14.6을 제거하여 Python 3.14.10으로 복구했다. 프로젝트의 uv Python 3.12 환경은 그대로 사용했고 ML 검사도 통과했다. 이후 Homebrew 작업에서는 자동 정리를 비활성화했다.
 
-최종 독립 검수는 기능/개인정보·고정 AR/저장 전 종료 경고와 시각 A–F 검수 모두 PASS다. 최종 16개 light/dark 캡처는 Git에서 제외된 `ml/artifacts/hosted-ar/ui/final/manifest.json`에 있다. 별도 앱의 AR·모델 연동/총장 기준 보완판은 goofy에 설치했다. 이후 URLSession을 화면 갱신마다 생성하지 않고 한 번 재사용하도록 수정한 최종 바이너리는 서명 빌드·전송 단위 테스트를 통과했으나, 폰 설치기가 추가 48,034,566 bytes 공간 부족을 반환했다. 사용자 공간 확보 후 최종 재설치가 필요하다. 기존 앱이나 사진을 임의로 삭제하지 않았다.
+최종 독립 검수는 기능/개인정보·고정 AR/저장 전 종료 경고와 시각 A–F 검수 모두 PASS다. 최종 16개 light/dark 캡처는 Git에서 제외된 `ml/artifacts/hosted-ar/ui/final/manifest.json`에 있다. 별도 앱의 AR·모델 연동/총장 기준 보완판은 goofy에 설치했다. 이후 URLSession을 화면 갱신마다 생성하지 않고 한 번 재사용하도록 수정한 최종 바이너리는 서명 빌드·전송 단위 테스트를 통과했으나, 폰 설치기가 추가 48,034,566 bytes 공간 부족을 반환했다. 사용자가 공간을 확보한 뒤 최종 바이너리를 재설치했고 `devicectl`에서 설치와 자동 실행 성공을 확인했다. 기존 앱이나 사진을 임의로 삭제하지 않았다.
