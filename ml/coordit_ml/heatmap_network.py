@@ -29,7 +29,6 @@ class ConvBlock(nn.Module):
         return F.silu(self.norm2.forward(self.second.forward(features)))
 
 
-@final
 class GarmentHeatmapNet(nn.Module):
     """Share a spatial encoder between category, mask and optional category-specific pose heads."""
 
@@ -39,18 +38,18 @@ class GarmentHeatmapNet(nn.Module):
     def __init__(self, category_heads: bool = False) -> None:
         """Initialize the encoder, skip decoder and semantic heatmap heads from scratch."""
         super().__init__()
-        self.category_heads = category_heads
-        self.encoder0 = ConvBlock(3, 16)
-        self.encoder1 = ConvBlock(16, 32)
-        self.encoder2 = ConvBlock(32, 64)
-        self.encoder3 = ConvBlock(64, 96)
-        self.decoder2 = ConvBlock(160, 64)
-        self.decoder1 = ConvBlock(96, 32)
-        self.decoder0 = ConvBlock(48, 16)
-        self.classifier = nn.Linear(96 * 4 * 4, len(CLASSES))
-        self.mask = nn.Conv2d(16, 1, 1)
-        self.heatmap = nn.Conv2d(32, len(LANDMARKS) * (len(CLASSES) if category_heads else 1), 1)
-        self.visibility = nn.Linear(96, len(LANDMARKS))
+        self.category_heads: bool = category_heads
+        self.encoder0: ConvBlock = ConvBlock(3, 16)
+        self.encoder1: ConvBlock = ConvBlock(16, 32)
+        self.encoder2: ConvBlock = ConvBlock(32, 64)
+        self.encoder3: ConvBlock = ConvBlock(64, 96)
+        self.decoder2: ConvBlock = ConvBlock(160, 64)
+        self.decoder1: ConvBlock = ConvBlock(96, 32)
+        self.decoder0: ConvBlock = ConvBlock(48, 16)
+        self.classifier: nn.Linear = nn.Linear(96 * 4 * 4, len(CLASSES))
+        self.mask: nn.Conv2d = nn.Conv2d(16, 1, 1)
+        self.heatmap: nn.Conv2d = nn.Conv2d(32, len(LANDMARKS) * (len(CLASSES) if category_heads else 1), 1)
+        self.visibility: nn.Linear = nn.Linear(96, len(LANDMARKS))
 
     @override
     def forward(self, pixels: Tensor, categories: Tensor | None = None) -> Prediction:

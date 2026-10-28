@@ -14,6 +14,7 @@ class ParentCheckpoint(BoundaryModel):
     directory: Path
     checkpoint_sha256: str
     artifact_sha256: str
+    allow_resolution_transfer: bool = False
 
 
 def initialize(model: PerceptionModel, parent: ParentCheckpoint) -> None:
@@ -23,9 +24,24 @@ def initialize(model: PerceptionModel, parent: ParentCheckpoint) -> None:
     if sha256(checkpoint) != parent.checkpoint_sha256 or sha256(metadata_path) != parent.artifact_sha256:
         raise PipelineError("Parent checkpoint or metadata differs from explicit pin")
     metadata = Artifact.model_validate_json(metadata_path.read_bytes())
+    spatial_versions = {
+        "coordit-spatial-multitask-v2", "coordit-spatial-multitask-v3-256", "coordit-spatial-multitask-v3-512",
+        "coordit-spatial-multitask-v4-256-context",
+    }
+    compatible_resolution_transfer = (
+        parent.allow_resolution_transfer
+        and model.model_version in spatial_versions
+        and metadata.architecture in spatial_versions
+    )
+    expected_parent_size = {
+        "coordit-tiny-multitask-v1": 64, "coordit-spatial-multitask-v2": 128,
+        "coordit-spatial-multitask-v3-256": 256, "coordit-spatial-multitask-v3-512": 512,
+        "coordit-spatial-multitask-v4-256-context": 256,
+    }[metadata.architecture]
     if (
         metadata.checkpoint_sha256 != parent.checkpoint_sha256
-        or model.model_version != metadata.architecture
+        or (model.model_version != metadata.architecture and not compatible_resolution_transfer)
+        or metadata.input_size != expected_parent_size
         or model.category_heads != metadata.category_heads
     ):
         raise PipelineError("Parent checkpoint architecture/hash mismatch")

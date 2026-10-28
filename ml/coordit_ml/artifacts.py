@@ -38,7 +38,11 @@ class CheckpointState(BoundaryModel):
 class Artifact(BoundaryModel):
     """Deployment approval is a separate future process; smoke artifacts cannot assert it."""
 
-    architecture: Literal["coordit-tiny-multitask-v1", "coordit-spatial-multitask-v2"]
+    architecture: Literal[
+        "coordit-tiny-multitask-v1", "coordit-spatial-multitask-v2",
+        "coordit-spatial-multitask-v3-256", "coordit-spatial-multitask-v3-512",
+        "coordit-spatial-multitask-v4-256-context",
+    ]
     fingerprint: str
     checkpoint_sha256: str
     epoch: int

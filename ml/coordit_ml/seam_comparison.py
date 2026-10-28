@@ -129,7 +129,7 @@ def compare_seams(config: SeamComparison) -> Path:
     result = {
         "manifest_sha256": sha256(config.manifest),
         "split": config.split,
-        "coordinate_error_normalization": "128x128 resized input diagonal, not original-photo pixels or cm",
+        "coordinate_error_normalization": "normalized square-input diagonal; independent of input resolution, not cm",
         "independent_evaluation": False,
         "reason": (
             "Unseen by recorded training history; publisher test family overlaps earlier heuristic development"

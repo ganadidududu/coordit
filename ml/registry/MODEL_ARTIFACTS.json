@@ -85,6 +85,42 @@
       "deployment_approved": false,
       "purpose": "augmented_partial_real_seam_development_not_centimeter_or_release_accuracy",
       "weights_license": "Internal local training; AI Hub territory restrictions and attribution; aRTF/GarmentCodeData/Second-Hand CC BY 4.0 notices as applicable; no release grant"
+    },
+    {
+      "path": "artifacts/seam-resolution-128-v1/checkpoint.pt",
+      "sha256": "16b431031c4d3704ec6c2bcc21993937494c3049a88accae784ea7b258ca2f07",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "deployment_approved": false,
+      "purpose": "controlled_spatial_resolution_development_not_release_or_centimeter_accuracy",
+      "weights_license": "Internal local training; AI Hub territory/attribution restrictions and aRTF/GarmentCodeData CC BY 4.0 notices; no app/server deployment grant"
+    },
+    {
+      "path": "artifacts/seam-resolution-256-v1/checkpoint.pt",
+      "sha256": "1648b17b8324db22b3639de2458f57a623c441482b3dd109a36618749f82ebb9",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "deployment_approved": false,
+      "purpose": "controlled_spatial_resolution_development_not_release_or_centimeter_accuracy",
+      "weights_license": "Internal local training; AI Hub territory/attribution restrictions and aRTF/GarmentCodeData CC BY 4.0 notices; no app/server deployment grant"
+    },
+    {
+      "path": "artifacts/seam-resolution-256-context-v1/checkpoint.pt",
+      "sha256": "097ca00c3aef5e1639a7ab3232176b724bde34dc246b65507f84258a4fb0a32f",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "deployment_approved": false,
+      "purpose": "controlled_spatial_resolution_development_not_release_or_centimeter_accuracy",
+      "weights_license": "Internal local training; AI Hub territory/attribution restrictions and aRTF/GarmentCodeData CC BY 4.0 notices; no app/server deployment grant"
+    },
+    {
+      "path": "artifacts/seam-resolution-256-pairs-v1/checkpoint.pt",
+      "sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "deployment_approved": false,
+      "purpose": "projected_pair_supervision_development_not_centimeter_or_release_accuracy",
+      "weights_license": "Internal local training; AI Hub territory/attribution restrictions and aRTF/GarmentCodeData CC BY 4.0 notices; no app/server deployment grant"
     }
   ]
 }

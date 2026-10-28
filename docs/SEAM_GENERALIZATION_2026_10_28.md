@@ -1,5 +1,7 @@
 # 실제 사진 봉제점 추가 학습·평가 — 2026-10-28
 
+후속 좌표/측정 프로토콜 점검과 128·256 입력 비교는 [좌표·고해상도 실험 기록](SEAM_COORDINATE_AND_HIGHRES_AUDIT.md)에 있다. AI Hub의 과거 screen-left 검수 규칙은 v2로 보완됐으며, 단순 고해상도 학습은 성능이 악화돼 채택하지 않았다.
+
 기존 브랜치에서 Phase 2만 수정했다. 원본 AI Hub 5epoch와 통합 50epoch checkpoint는 보존했다. Apple Metal/MPS에서 추가 30epoch와 별도 60epoch 학습을 **완료**했다. 두 새 모델 모두 운영 승인·앱 설치·서버 배포하지 않았다.
 
 ## 정답과 학습량

@@ -18,6 +18,7 @@ from coordit_ml.approval import approve_dataset
 from coordit_ml.artf_landmarks import prepare_artf_landmarks
 from coordit_ml.category_review import prepare_review
 from coordit_ml.centimeter_evaluation import evaluate_centimeters
+from coordit_ml.coordinate_audit import CoordinateAudit, audit_coordinates
 from coordit_ml.evaluation import evaluate
 from coordit_ml.field_evaluation import field_report
 from coordit_ml.garmentcode_conversion import GarmentSelection, render_garmentcode
@@ -61,6 +62,7 @@ class Arguments(argparse.Namespace):
         "download-garmentcode-sample",
         "render-garmentcode",
         "compare-seams",
+        "audit-coordinates",
         "prepare-publisher-test",
         "import-seam-reviews",
         "synthetic",
@@ -127,6 +129,8 @@ def main() -> None:
     _ = render.add_argument("config", type=Path)
     compare = commands.add_parser("compare-seams")
     _ = compare.add_argument("config", type=Path)
+    coordinate_audit = commands.add_parser("audit-coordinates")
+    _ = coordinate_audit.add_argument("config", type=Path)
     publisher_test = commands.add_parser("prepare-publisher-test")
     _ = publisher_test.add_argument("config", type=Path)
     seam_reviews = commands.add_parser("import-seam-reviews")
@@ -200,6 +204,8 @@ def main() -> None:
             print(render_garmentcode(GarmentSelection.model_validate_json(args.config.read_bytes()), registry))
         case "compare-seams":
             print(compare_seams(SeamComparison.model_validate_json(args.config.read_bytes())))
+        case "audit-coordinates":
+            print(audit_coordinates(CoordinateAudit.model_validate_json(args.config.read_bytes())))
         case "prepare-publisher-test":
             print(prepare_publisher_test(TestPreparation.model_validate_json(args.config.read_bytes()), registry))
         case "import-seam-reviews":
@@ -234,13 +240,15 @@ def main() -> None:
             import torch
 
             model = load_model(args.model)
+            example = torch.zeros(1, 3, model.input_size, model.input_size)
+            has_heatmaps = model.forward(example).heatmaps is not None
             _ = torch.onnx.export(
                 model,
-                (torch.zeros(1, 3, model.input_size, model.input_size),),
+                (example,),
                 args.output,
                 input_names=["rgb"],
                 output_names=["category", "mask", "landmarks", "visibility"]
-                + (["heatmaps"] if model.input_size == 128 else []),
+                + (["heatmaps"] if has_heatmaps else []),
                 opset_version=18,
             )
             print(args.output)

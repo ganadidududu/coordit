@@ -1,0 +1,16 @@
+{
+  "baseline": {
+    "directory": "artifacts/seam-resolution-128-v1",
+    "checkpoint_sha256": "16b431031c4d3704ec6c2bcc21993937494c3049a88accae784ea7b258ca2f07",
+    "artifact_sha256": "d52ac66304f3480fa35ecc391856acd2090952eb3c314e25e4f796b7fee0a3d7"
+  },
+  "candidate": {
+    "directory": "artifacts/seam-resolution-256-context-v1",
+    "checkpoint_sha256": "097ca00c3aef5e1639a7ab3232176b724bde34dc246b65507f84258a4fb0a32f",
+    "artifact_sha256": "34f5efd8bd04b70c1ce51e00f0eff967f8f406b20df3e050bb95f044fae5b4ee"
+  },
+  "manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+  "split": "test",
+  "output": "reports/seam-resolution-128-vs-256-context.json",
+  "evaluation_only_publisher_test": true
+}

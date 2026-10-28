@@ -1,0 +1,273 @@
+{
+  "date": "2026-10-28",
+  "branch": "codex/camera-auto-guides",
+  "phase3_changed": false,
+  "app_installed_or_deployed": false,
+  "independent_tape_cm_accuracy": null,
+  "cm_MAE": null,
+  "cm_P95": null,
+  "runs": [
+    {
+      "name": "seam-resolution-128-v1",
+      "architecture": "coordit-spatial-multitask-v2",
+      "input_size": 128,
+      "checkpoint": "artifacts/seam-resolution-128-v1/checkpoint.pt",
+      "checkpoint_sha256": "16b431031c4d3704ec6c2bcc21993937494c3049a88accae784ea7b258ca2f07",
+      "artifact_sha256": "d52ac66304f3480fa35ecc391856acd2090952eb3c314e25e4f796b7fee0a3d7",
+      "parent_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "training_fingerprint": "cf80a7d2ebfd022a0bb0ca020672a40bc73d23e75bb03a927e466b29ebfcafe1",
+      "training_source_snapshot": "artifacts/seam-resolution-128-v1/training-source",
+      "training_source_snapshot_sha256": "7573ca16b54f84d9c41834f70153f7bf8228450682bd57bacde8bea8b8918046",
+      "epochs": 20,
+      "steps": 2560,
+      "exposures": 10240,
+      "synthetic_exposures": 520,
+      "unique_images": 1416,
+      "unique_images_by_source": {
+        "aihub-71501": 844,
+        "artf-1.0.1": 524,
+        "garmentcodedata-v2": 48
+      },
+      "unique_images_by_category": {
+        "coat": 427,
+        "jacket": 417,
+        "shorts": 104,
+        "aux_towel": 210,
+        "tshirt": 210,
+        "pants": 8,
+        "skirt": 16,
+        "shirt": 24
+      },
+      "visible_label_images_by_source": {
+        "artf-1.0.1": 314,
+        "garmentcodedata-v2": 17
+      },
+      "per_epoch_source_exposures": {
+        "aihub-71501": 51,
+        "artf-1.0.1": 435,
+        "garmentcodedata-v2": 26
+      },
+      "final_loss": 4.069984096917324,
+      "loss_comparable_across_heatmap_resolutions": false,
+      "device": "mps",
+      "deployment_approved": false
+    },
+    {
+      "name": "seam-resolution-256-v1",
+      "architecture": "coordit-spatial-multitask-v3-256",
+      "input_size": 256,
+      "checkpoint": "artifacts/seam-resolution-256-v1/checkpoint.pt",
+      "checkpoint_sha256": "1648b17b8324db22b3639de2458f57a623c441482b3dd109a36618749f82ebb9",
+      "artifact_sha256": "1569dcd672a7ffb1a18392f8683f32c00161010ac6db47acd732634a454130fc",
+      "parent_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "training_fingerprint": "8865148e1e4497c758bbef34078d43db027ecdff365191523a35481dcac31e1f",
+      "training_source_snapshot": "artifacts/seam-resolution-256-v1/training-source",
+      "training_source_snapshot_sha256": "56dfd1fb7adc52ef3ee461ab0a28d560679780da74451443098187425708ebbe",
+      "epochs": 20,
+      "steps": 2560,
+      "exposures": 10240,
+      "synthetic_exposures": 520,
+      "unique_images": 1416,
+      "unique_images_by_source": {
+        "aihub-71501": 844,
+        "artf-1.0.1": 524,
+        "garmentcodedata-v2": 48
+      },
+      "unique_images_by_category": {
+        "coat": 427,
+        "jacket": 417,
+        "shorts": 104,
+        "aux_towel": 210,
+        "tshirt": 210,
+        "pants": 8,
+        "skirt": 16,
+        "shirt": 24
+      },
+      "visible_label_images_by_source": {
+        "artf-1.0.1": 314,
+        "garmentcodedata-v2": 17
+      },
+      "per_epoch_source_exposures": {
+        "aihub-71501": 51,
+        "artf-1.0.1": 435,
+        "garmentcodedata-v2": 26
+      },
+      "final_loss": 5.580127531968174,
+      "loss_comparable_across_heatmap_resolutions": false,
+      "device": "mps",
+      "deployment_approved": false
+    },
+    {
+      "name": "seam-resolution-256-context-v1",
+      "architecture": "coordit-spatial-multitask-v4-256-context",
+      "input_size": 256,
+      "checkpoint": "artifacts/seam-resolution-256-context-v1/checkpoint.pt",
+      "checkpoint_sha256": "097ca00c3aef5e1639a7ab3232176b724bde34dc246b65507f84258a4fb0a32f",
+      "artifact_sha256": "34f5efd8bd04b70c1ce51e00f0eff967f8f406b20df3e050bb95f044fae5b4ee",
+      "parent_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "training_fingerprint": "4506f3be5232a160f1408f44192f13eb603112fa54237e7b03b06933111d37bf",
+      "training_source_snapshot": "artifacts/seam-resolution-256-context-v1/training-source",
+      "training_source_snapshot_sha256": "c3535d5fa632ff5ec0cf99d5062cd55f3e3b5a5735211cf3f6612718579547ba",
+      "epochs": 20,
+      "steps": 2560,
+      "exposures": 10240,
+      "synthetic_exposures": 520,
+      "unique_images": 1416,
+      "unique_images_by_source": {
+        "aihub-71501": 844,
+        "artf-1.0.1": 524,
+        "garmentcodedata-v2": 48
+      },
+      "unique_images_by_category": {
+        "coat": 427,
+        "jacket": 417,
+        "shorts": 104,
+        "aux_towel": 210,
+        "tshirt": 210,
+        "pants": 8,
+        "skirt": 16,
+        "shirt": 24
+      },
+      "visible_label_images_by_source": {
+        "artf-1.0.1": 314,
+        "garmentcodedata-v2": 17
+      },
+      "per_epoch_source_exposures": {
+        "aihub-71501": 51,
+        "artf-1.0.1": 435,
+        "garmentcodedata-v2": 26
+      },
+      "final_loss": 5.184889574171393,
+      "loss_comparable_across_heatmap_resolutions": false,
+      "device": "mps",
+      "deployment_approved": false
+    },
+    {
+      "name": "seam-resolution-256-pairs-v1",
+      "architecture": "coordit-spatial-multitask-v4-256-context",
+      "input_size": 256,
+      "checkpoint": "artifacts/seam-resolution-256-pairs-v1/checkpoint.pt",
+      "checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+      "artifact_sha256": "e45d6b82c5735c1c9b5db1c2142b9e8f2dad248270f6069f10b25b19d8b7e8a9",
+      "parent_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "training_fingerprint": "b18ccae919d983bdf948ab3b05dfd705c112fcefc61903d4cd5cc59e023e8bf0",
+      "training_source_snapshot": "artifacts/seam-resolution-256-pairs-v1/training-source",
+      "training_source_snapshot_sha256": "e41b11f51f86b5563174a3803f0edb75dd405f2ab1673bb8be60e20fca6ffb53",
+      "epochs": 20,
+      "steps": 2560,
+      "exposures": 10240,
+      "synthetic_exposures": 520,
+      "unique_images": 1416,
+      "unique_images_by_source": {
+        "aihub-71501": 844,
+        "artf-1.0.1": 524,
+        "garmentcodedata-v2": 48
+      },
+      "unique_images_by_category": {
+        "coat": 427,
+        "jacket": 417,
+        "shorts": 104,
+        "aux_towel": 210,
+        "tshirt": 210,
+        "pants": 8,
+        "skirt": 16,
+        "shirt": 24
+      },
+      "visible_label_images_by_source": {
+        "artf-1.0.1": 314,
+        "garmentcodedata-v2": 17
+      },
+      "per_epoch_source_exposures": {
+        "aihub-71501": 51,
+        "artf-1.0.1": 435,
+        "garmentcodedata-v2": 26
+      },
+      "final_loss": 5.085302364983363,
+      "loss_comparable_across_heatmap_resolutions": false,
+      "projected_pair_loss_weight": 2.0,
+      "device": "mps",
+      "deployment_approved": false
+    }
+  ],
+  "unseen_training_photo_evaluation": {
+    "photos": 561,
+    "category_images": {
+      "tshirt": 389,
+      "shorts": 172
+    },
+    "training_overlap": 0,
+    "new_independent_study": false,
+    "normalization": "normalized square-input diagonal; PCK@0.05",
+    "reports": [
+      "reports/seam-resolution-control-128.json",
+      "reports/seam-resolution-128-vs-256.json",
+      "reports/seam-resolution-128-vs-256-context.json",
+      "reports/seam-resolution-context-vs-pairs.json"
+    ],
+    "test_ground_truth_modified": false,
+    "note": "publisher test-family previously used for heuristic development; garment/session independence unresolved; further experiments informed by this development pool"
+  },
+  "aihub_annotation": {
+    "prepared_training_images": 128,
+    "front": 60,
+    "back": 68,
+    "unverified_seam_proposals": 512,
+    "blind_images": 2,
+    "blind_proposals": 0,
+    "human_verified_images": 0,
+    "used_new_aihub_seam_labels_for_training": false,
+    "human_hem_reference_required": true,
+    "external_photo_transmission": false,
+    "local_annotation_permission_already_approved": true,
+    "blocker": "human visible-seam verification under the local-only constraint; no raw seam-coordinate labels found in source"
+  },
+  "verification": {
+    "pytest_passed": 78,
+    "ruff_passed": true,
+    "full_basedpyright_errors": 0,
+    "full_basedpyright_existing_warnings": 27,
+    "full_basedpyright_exit": 1,
+    "new_modules_basedpyright_errors": 0,
+    "new_modules_basedpyright_warnings": 0,
+    "unreviewed_real_via_projects_rejected": true,
+    "via_static_javascript_and_csp_checked": true,
+    "via_browser_ui_tested": false,
+    "browser_blocker": "prior file:// automatic approval denial; no alternate browser/HTTP workaround",
+    "actual_local_http_inference_report": "reports/highres-local-inference-smoke.json",
+    "ios_android_tests_this_turn": false,
+    "training_source_fingerprints_verified_for_all_four_runs": true,
+    "final_model_local_http_inference_report": "reports/pair-final-local-inference-smoke.json",
+    "new_model_onnx_coreml_export_executed": false
+  },
+  "selection": {
+    "landmark_research_candidates": [
+      "seam-resolution-256-context-v1",
+      "seam-resolution-256-pairs-v1"
+    ],
+    "measurement_candidate": null,
+    "simple_256_candidate_rejected": true,
+    "release_approved": false,
+    "limit": "Pair supervision improves waist projected length but chest relative error remains worse than the original baseline. PCK/NME and pixel lengths do not establish AR centimeter accuracy; no model promoted for measurement."
+  },
+  "projected_2d_pair_errors_not_cm": {
+    "original": {
+      "shorts/waist_left/waist_right": 0.3406350485275864,
+      "tshirt/shoulder_left/shoulder_right": 0.37965754383005473,
+      "tshirt/armpit_left/armpit_right": 0.32715650058035256
+    },
+    "context": {
+      "shorts/waist_left/waist_right": 0.3199919765147698,
+      "tshirt/shoulder_left/shoulder_right": 0.37098945792140625,
+      "tshirt/armpit_left/armpit_right": 0.3438088105655448
+    },
+    "pair_objective": {
+      "shorts/waist_left/waist_right": 0.2939760330545594,
+      "tshirt/shoulder_left/shoulder_right": 0.37171935091135155,
+      "tshirt/armpit_left/armpit_right": 0.33011799443566975
+    }
+  }
+}

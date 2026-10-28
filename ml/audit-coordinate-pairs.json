@@ -1,0 +1,9 @@
+{
+  "model": {
+    "directory": "artifacts/seam-resolution-256-pairs-v1",
+    "checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+    "artifact_sha256": "e45d6b82c5735c1c9b5db1c2142b9e8f2dad248270f6069f10b25b19d8b7e8a9"
+  },
+  "manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+  "output": "reports/coordinate-pairs-audit.json"
+}

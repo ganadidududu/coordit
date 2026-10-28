@@ -1,0 +1,16 @@
+{
+  "baseline": {
+    "directory": "artifacts/seam-integrated-finetune-v1",
+    "checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+    "artifact_sha256": "397acad1b759ef6f866c2eec59f4f30c0854d9c1f722f44dca4ce2accf1ef6fb"
+  },
+  "candidate": {
+    "directory": "artifacts/seam-resolution-128-v1",
+    "checkpoint_sha256": "16b431031c4d3704ec6c2bcc21993937494c3049a88accae784ea7b258ca2f07",
+    "artifact_sha256": "d52ac66304f3480fa35ecc391856acd2090952eb3c314e25e4f796b7fee0a3d7"
+  },
+  "manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+  "split": "test",
+  "output": "reports/seam-resolution-control-128.json",
+  "evaluation_only_publisher_test": true
+}

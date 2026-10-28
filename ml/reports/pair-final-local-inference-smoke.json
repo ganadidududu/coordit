@@ -1,0 +1,19 @@
+{
+  "http_status": 200,
+  "unauthorized_http_status": 401,
+  "status": "failed",
+  "reason": "landmarks_missing_or_occluded",
+  "model_version": "coordit-spatial-multitask-v4-256-context@f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+  "mask_width": 256,
+  "mask_height": 256,
+  "landmarks": [
+    "shoulder_left",
+    "shoulder_right",
+    "armpit_left",
+    "armpit_right"
+  ],
+  "centimeter_values": {},
+  "deployment_approved": false,
+  "source": "public_aRTF_unseen_training_photo",
+  "AIHub_photo_transmission": false
+}

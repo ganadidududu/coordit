@@ -12,6 +12,7 @@ from coordit_ml.augmentation import Augmentation, augment_batch
 from coordit_ml.finetuning import ParentCheckpoint, initialize
 from coordit_ml.model_factory import Architecture, PerceptionModel, create_model, model_loss
 from coordit_ml.network import ApprovedDataset, batch
+from coordit_ml.pair_supervision import projected_pair_loss
 from coordit_ml.provenance import REGISTRY_ROOT, approved_entry, read_records, sha256
 from coordit_ml.sampling import SourceSampling, balance_categories, sample_sources
 from coordit_ml.schema import BoundaryModel, PipelineError, read_registry
@@ -36,6 +37,7 @@ class TrainingConfig(BoundaryModel):
     source_sampling: SourceSampling | None = None
     initialize_from: ParentCheckpoint | None = None
     augmentation: Augmentation | None = None
+    projected_pair_loss_weight: float = 0
 
 
 def fingerprint(config: TrainingConfig) -> str:
@@ -46,6 +48,9 @@ def fingerprint(config: TrainingConfig) -> str:
         config.architecture,
         str(config.category_heads),
         sha256(Path(__file__).with_name("heatmap_network.py")),
+        sha256(Path(__file__).with_name("high_resolution.py")),
+        sha256(Path(__file__).with_name("pair_supervision.py")),
+        str(config.projected_pair_loss_weight),
         sha256(Path(__file__).with_name("model_factory.py")),
         str(config.seed),
         str(config.batch_size),
@@ -72,6 +77,8 @@ def train(config: TrainingConfig) -> Path:
     """Train actual randomly initialized weights; CPU runs remain smoke artifacts."""
     if config.epochs < 1 or config.batch_size < 1 or not 0 <= config.synthetic_fraction <= 1:
         raise PipelineError("Invalid training hyperparameters")
+    if config.projected_pair_loss_weight < 0:
+        raise PipelineError("Projected pair loss weight must be nonnegative")
     if config.source_sampling and config.balance_real_categories:
         raise PipelineError("Choose source quotas or category balancing explicitly")
     if config.device == "cuda" and not torch.cuda.is_available():
@@ -150,7 +157,15 @@ def train(config: TrainingConfig) -> Path:
             if config.augmentation:
                 target = augment_batch(target, config.augmentation, rng)
             optimizer.zero_grad()
-            objective = model_loss(config.architecture, model.forward(target.pixels, target.category), target)
+            prediction = model.forward(target.pixels, target.category)
+            objective = model_loss(config.architecture, prediction, target)
+            if config.projected_pair_loss_weight:
+                aspects = torch.tensor([
+                    dataset.samples[i][1].width / dataset.samples[i][1].height for i in selected
+                ], device=config.device)
+                objective = objective + config.projected_pair_loss_weight * projected_pair_loss(
+                    prediction, target, aspects,
+                )
             if not objective.isfinite():
                 raise PipelineError("Nonfinite training objective")
             _ = objective.backward()

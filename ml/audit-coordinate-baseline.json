@@ -1,0 +1,9 @@
+{
+  "model": {
+    "directory": "artifacts/seam-integrated-finetune-v1",
+    "checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+    "artifact_sha256": "397acad1b759ef6f866c2eec59f4f30c0854d9c1f722f44dca4ce2accf1ef6fb"
+  },
+  "manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+  "output": "reports/coordinate-baseline-audit.json"
+}
