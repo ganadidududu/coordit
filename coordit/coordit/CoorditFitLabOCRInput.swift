@@ -155,6 +155,14 @@ struct CoorditFitLabOCRInputView: View {
                 }
                 .coorditPressFeedback()
                 .accessibilityIdentifier("fitlab-ocr-camera")
+                .disabled(!CoorditGarmentCaptureController.featureEnabled)
+
+                if let message {
+                    Text(message).font(.footnote).fixedSize(horizontal: false, vertical: true)
+                    Button("직접 입력으로 계속하기", action: switchToManual)
+                        .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+                        .accessibilityIdentifier("fitlab-ocr-manual-fallback")
+                }
 
                 #if DEBUG
                 if fixtureName?.hasPrefix("ocr-") == true {
@@ -277,6 +285,9 @@ struct CoorditFitLabOCRInputView: View {
                 .fitLabTutorialTarget(.review, message: "사진에서 읽은 상품명과 실측을 확인하고 잘못된 값을 수정하세요. 아래 확인 버튼을 누르면 기준 옷 선택으로 이어져요.")
 
                 if result?.didFindTable == false {
+                    Button("직접 입력으로 계속하기", action: switchToManual)
+                        .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+                        .accessibilityIdentifier("fitlab-ocr-manual-fallback")
                     Text("표를 완전히 읽지 못했어요. 원문을 보며 값을 직접 채워 주세요.")
                         .font(.footnote.weight(.semibold))
                         .fixedSize(horizontal: false, vertical: true)
@@ -521,6 +532,7 @@ struct CoorditFitLabOCRInputView: View {
     }
 
     private func requestCamera() {
+        guard CoorditGarmentCaptureController.featureEnabled else { return }
         #if DEBUG
         let forceAvailable = ProcessInfo.processInfo.arguments.contains("--coordit-ocr-force-camera-available")
         #else

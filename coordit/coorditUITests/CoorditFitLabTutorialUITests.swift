@@ -55,7 +55,7 @@ final class CoorditFitLabTutorialUITests: XCTestCase {
         XCTAssertFalse(element("fitlab-tutorial-step-0", app).exists)
         start(app)
         step(0, app)
-        tap("fitlab-source-manual", app)
+        tap("fitlab-source-ocr", app)
         XCTAssertFalse(element("fitlab-tutorial-step-0", app).exists)
     }
 

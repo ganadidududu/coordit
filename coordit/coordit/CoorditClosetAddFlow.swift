@@ -264,6 +264,7 @@ private struct CoorditClosetAddMethodScreen: View {
     let onBack: () -> Void
     let onSelect: (CoorditClosetAddMethod) -> Void
     let onHelp: () -> Void
+    @State private var showsCameraComingSoon = false
 
     var body: some View {
         VStack(spacing: metrics.value(22)) {
@@ -279,28 +280,27 @@ private struct CoorditClosetAddMethodScreen: View {
                         Text("어떤 옷을 추가할까요?")
                             .font(CoorditTypography.gmarketBold(size: metrics.value(18), relativeTo: .headline))
                             .foregroundStyle(Color.black)
-                        Text("사진, 링크, 사이즈표로 내 옷을 등록해요.")
+                        Text("상품 링크나 사이즈표로 내 옷을 등록해요.")
                             .font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .footnote))
                             .foregroundStyle(Color.black.opacity(0.64))
                     }
 
                     CoorditInputMethodPanel(metrics: metrics) {
-                        ForEach(CoorditGarmentCaptureController.featureEnabled ? [CoorditClosetAddMethod.photo, .link, .sizeChart] : [.link, .sizeChart]) { method in
+                        ForEach([CoorditClosetAddMethod.photo, .link, .sizeChart]) { method in
                             CoorditInputMethodCard(
                                 title: method.title, subtitle: method.description, symbol: method.symbolName, metrics: metrics
-                            ) { onSelect(method) }
+                            ) {
+                                if method == .photo, !CoorditGarmentCaptureController.featureEnabled {
+                                    showsCameraComingSoon = true
+                                } else {
+                                    onSelect(method)
+                                }
+                            }
                             .accessibilityIdentifier("closet-add-method-\(method.rawValue)")
                         }
                     }
                     .closetTutorialTarget(.method)
 
-                    HStack {
-                        Spacer()
-                        CoorditCompactActionButton(title: "직접 입력", symbol: "square.and.pencil", metrics: metrics) {
-                            onSelect(.manual)
-                        }
-                        .accessibilityIdentifier("closet-add-method-manual")
-                    }
                 }
                 .padding(.horizontal, metrics.value(33))
                 .padding(.bottom, metrics.value(120))
@@ -309,6 +309,9 @@ private struct CoorditClosetAddMethodScreen: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("coordit-screen-closet-add-method")
+        .alert("카메라 측정 기능은 준비 중입니다!", isPresented: $showsCameraComingSoon) {
+            Button("확인", role: .cancel) { }
+        }
     }
 }
 
@@ -345,11 +348,8 @@ private struct CoorditClosetLinkInputScreen: View {
                     CoorditExampleNotice()
                 }
                 CoorditClosetFormCard(title: "상품 링크", subtitle: "사이즈 정보가 있는 상품 페이지 주소를 붙여넣어 주세요.", metrics: metrics) {
-                    HStack(spacing: metrics.value(10)) {
-                        Image(systemName: "link")
-                            .foregroundStyle(CoorditClosetColors.navy.opacity(0.56))
-                        TextField("https://", text: $draft.productLink)
-                            .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
+                    CoorditLinkInputRow(text: $draft.productLink, metrics: metrics, pasteIdentifier: "closet-link-paste") {
+                        TextField("상품 링크 입력", text: $draft.productLink)
                             .keyboardType(.URL)
                             .submitLabel(.done)
                             .onSubmit { isLinkFocused = false }
@@ -358,12 +358,8 @@ private struct CoorditClosetLinkInputScreen: View {
                             .focused($isLinkFocused)
                             .onTapGesture { isLinkFocused = true }
                             .accessibilityIdentifier("closet-product-link")
-                            .disabled(isExtracting)
                     }
-                    .padding(.horizontal, metrics.value(13))
-                    .frame(height: metrics.value(45))
-                    .background(CoorditClosetColors.field)
-                    .clipShape(RoundedRectangle(cornerRadius: metrics.value(8)))
+                    .disabled(isExtracting)
                 }
 
                 .closetTutorialTarget(.link)
@@ -374,7 +370,7 @@ private struct CoorditClosetLinkInputScreen: View {
                 if let extractionError {
                     CoorditClosetFormCard(title: "링크에서 표를 찾지 못했어요", subtitle: extractionError, metrics: metrics) {
                         HStack(spacing: metrics.value(8)) {
-                            Button("내 옷 촬영하기", action: onSwitchToPhoto)
+                            Button("직접 입력하기", action: onSwitchToManual)
                                 .buttonStyle(
                                     CoorditContentActionButtonStyle(
                                         prominence: .primary,
@@ -627,7 +623,8 @@ private struct CoorditClosetPhotoInputScreen: View {
                             imageData: $draft.sizeChartImageData,
                             metrics: metrics,
                             identifier: "closet-size-chart-photo",
-                            onImageSelected: { pendingCropImage = $0 }
+                            onImageSelected: { pendingCropImage = $0 },
+                            onLoadFailure: { recognitionError = "사진을 열지 못했어요. 다른 사진을 선택하거나 직접 입력으로 계속해주세요." }
                         )
                         Button(action: requestCamera) {
                             Label(CoorditSizeChartCopy.camera, systemImage: "camera")
@@ -641,6 +638,7 @@ private struct CoorditClosetPhotoInputScreen: View {
                             )
                         )
                         .accessibilityIdentifier("closet-size-chart-camera")
+                        .disabled(!CoorditGarmentCaptureController.featureEnabled)
                     }
                 }
                 .closetTutorialTarget(.link, title: "사이즈표 사진으로 등록하기", message: "의류 이름을 입력하고 사이즈표 사진을 골라 표 부분을 잘라주세요. 읽어 온 사이즈 중 내 사이즈를 선택한 뒤 등록하면 결과를 확인할 수 있어요.")
@@ -818,6 +816,7 @@ private struct CoorditClosetPhotoInputScreen: View {
     }
 
     private func requestCamera() {
+        guard CoorditGarmentCaptureController.featureEnabled else { return }
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
             recognitionError = "이 기기에서는 카메라를 사용할 수 없어요. 사진 보관함에서 선택해 주세요."
             return
@@ -1158,6 +1157,7 @@ private struct CoorditClosetPhotoPickerSlot: View {
     let metrics: CoorditResponsiveMetrics
     let identifier: String
     let onImageSelected: (UIImage) -> Void
+    let onLoadFailure: () -> Void
 
     @State private var pickerItem: PhotosPickerItem?
 
@@ -1216,12 +1216,13 @@ private struct CoorditClosetPhotoPickerSlot: View {
         .accessibilityValue(imageData == nil ? "empty" : "selected")
         .onChange(of: pickerItem) { _, newItem in
             guard let newItem else { return }
-            Task {
-                guard let data = try? await newItem.loadTransferable(type: Data.self) else { return }
-                await MainActor.run {
-                    guard let image = UIImage(data: data) else { return }
-                    onImageSelected(image)
+            Task { @MainActor in
+                guard let data = try? await newItem.loadTransferable(type: Data.self),
+                      let image = UIImage(data: data) else {
+                    onLoadFailure()
+                    return
                 }
+                onImageSelected(image)
             }
         }
     }

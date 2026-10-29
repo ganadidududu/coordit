@@ -16,12 +16,13 @@ final class CoorditTutorialExampleUITests: XCTestCase {
         capture("unified-fitlab-help", app)
         tap("usage-guide-close", app)
         XCTAssertTrue(element("usage-guide-example", app).waitForNonExistence(timeout: 5))
-        tap("fitlab-source-manual", app)
-        XCTAssertTrue(element("fitlab-manual-form", app).waitForExistence(timeout: 5))
+        XCTAssertFalse(element("fitlab-source-manual", app).exists)
+        tap("fitlab-source-url", app)
+        XCTAssertTrue(element("fitlab-url-field", app).waitForExistence(timeout: 5))
         XCTAssertFalse(element("tutorial-example-notice", app).exists)
     }
 
-    func testClosetHelpAndCompactManualEntryRemainAvailable() {
+    func testClosetHelpAndLinkEntryRemainAvailable() {
         let app = launch(route: "closet-overview")
         tap("closet-tutorial-restart", app)
         XCTAssertTrue(element("usage-guide-example", app).waitForExistence(timeout: 5))
@@ -31,12 +32,10 @@ final class CoorditTutorialExampleUITests: XCTestCase {
         XCTAssertFalse(element("closet-method-example", app).exists)
         XCTAssertTrue(element("closet-add-method-photo", app).exists)
         XCTAssertTrue(element("closet-add-method-link", app).exists)
-        let manual = element("closet-add-method-manual", app)
-        XCTAssertTrue(manual.exists)
-        XCTAssertLessThan(manual.frame.width, element("closet-add-method-link", app).frame.width / 2)
+        XCTAssertFalse(element("closet-add-method-manual", app).exists)
         capture("unified-closet-input", app)
-        tap("closet-add-method-manual", app)
-        XCTAssertTrue(element("coordit-screen-closet-add-manual", app).waitForExistence(timeout: 5))
+        tap("closet-add-method-link", app)
+        XCTAssertTrue(element("closet-product-link", app).waitForExistence(timeout: 5))
         XCTAssertFalse(element("tutorial-example-notice", app).exists)
     }
 
@@ -59,7 +58,7 @@ final class CoorditTutorialExampleUITests: XCTestCase {
         capture("closet-example-result", app)
         XCTAssertFalse(element("closet-detail-delete", app).exists)
         tap("closet-example-finish", app)
-        tap("closet-add-method-manual", app)
+        tap("closet-add-method-link", app)
         XCTAssertFalse(element("tutorial-example-notice", app).exists)
     }
 
@@ -70,11 +69,15 @@ final class CoorditTutorialExampleUITests: XCTestCase {
         XCTAssertEqual(app.staticTexts.matching(identifier: "tutorial-example-notice").count, 1)
         capture("fitlab-example-single-notice", app)
         tap("fitlab-url-import", app)
+        XCTAssertTrue(element("fitlab-free-summary", app).waitForExistence(timeout: 5))
+        tap("fitlab-show-comparison", app)
+        tap("fitlab-choose-closet", app)
         XCTAssertTrue(element("fitlab-reference-tutorial-reference", app).waitForExistence(timeout: 5))
         XCTAssertFalse(element("fitlab-url-confirm", app).exists)
         XCTAssertFalse(element("fitlab-url-continue-to-references", app).exists)
-        XCTAssertEqual(app.staticTexts.matching(identifier: "tutorial-example-notice").count, 1)
         tap("fitlab-reference-tutorial-reference", app)
+        tap("fitlab-reference-picker-done", app)
+        XCTAssertEqual(app.staticTexts.matching(identifier: "tutorial-example-notice").count, 1)
         tap("fitlab-submit-analysis", app)
         XCTAssertTrue(element("fitlab-size-score-M", app).waitForExistence(timeout: 10))
         capture("fitlab-example-result", app)
@@ -82,7 +85,8 @@ final class CoorditTutorialExampleUITests: XCTestCase {
         tap("fitlab-example-finish", app)
         XCTAssertTrue(element("fitlab-history-empty", app).waitForExistence(timeout: 5))
         XCTAssertEqual(element("coordit-thread-balance-probe", app).label, "0")
-        tap("fitlab-source-manual", app)
+        XCTAssertFalse(element("fitlab-source-manual", app).exists)
+        tap("fitlab-source-url", app)
         XCTAssertFalse(element("tutorial-example-notice", app).exists)
     }
 
@@ -119,7 +123,8 @@ final class CoorditTutorialExampleUITests: XCTestCase {
         let target = element(id, app)
         XCTAssertTrue(target.waitForExistence(timeout: 10), id)
         for _ in 0..<16 {
-            let coveredByTabBar = !element("usage-guide-close", app).exists && target.frame.maxY > app.frame.maxY - 110
+            let hasSheet = element("usage-guide-close", app).exists || element("fitlab-reference-picker", app).exists
+            let coveredByTabBar = !hasSheet && target.frame.maxY > app.frame.maxY - 110
             if target.isHittable && !coveredByTabBar { break }
             if target.frame.midY < app.frame.midY { app.swipeDown() } else { app.swipeUp() }
         }

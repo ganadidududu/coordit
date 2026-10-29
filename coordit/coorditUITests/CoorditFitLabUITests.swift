@@ -279,6 +279,7 @@ final class CoorditFitLabUITests: XCTestCase {
             extraArguments: [
                 "--coordit-test-closet-save-success",
                 "--coordit-test-fitlab-reference-registration",
+                "--coordit-test-link-extraction-failure",
             ]
         )
 
@@ -288,7 +289,10 @@ final class CoorditFitLabUITests: XCTestCase {
         app.buttons["새 의류 등록하기"].tap()
 
         XCTAssertTrue(element("coordit-screen-closet-add-method", in: app).waitForExistence(timeout: 5))
-        element("closet-add-method-manual", in: app).tap()
+        element("closet-add-method-link", in: app).tap()
+        tapWhenReachable("closet-add-submit", in: app)
+        XCTAssertTrue(app.buttons["직접 입력하기"].waitForExistence(timeout: 5))
+        app.buttons["직접 입력하기"].tap()
         XCTAssertTrue(element("coordit-screen-closet-add-manual", in: app).waitForExistence(timeout: 5))
 
         fill(element("closet-garment-name", in: app), with: "새 기준 후드")

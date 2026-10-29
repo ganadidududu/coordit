@@ -241,7 +241,11 @@ struct CoorditClosetFamilyView: View {
             case .closetAddLink:
                 addLinkScreen(metrics: metrics)
             case .closetAddPhoto:
-                addPhotoScreen(metrics: metrics)
+                if CoorditGarmentCaptureController.featureEnabled {
+                    addPhotoScreen(metrics: metrics)
+                } else {
+                    addMethodScreen(metrics: metrics)
+                }
             case .closetAddSizeChart:
                 addSizeChartScreen(metrics: metrics)
             case .closetAddManual:

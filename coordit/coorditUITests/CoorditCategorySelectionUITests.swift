@@ -34,8 +34,10 @@ final class CoorditCategorySelectionUITests: XCTestCase {
     }
 
     func testManualAndOCRUseTheSameCategorySheet() {
-        let manual = launch(route: "fitlab-input")
-        tap("fitlab-source-manual", manual)
+        let manual = launch(route: "fitlab-input", fixture: "ocr-errors")
+        tap("fitlab-source-ocr", manual)
+        tap("fitlab-ocr-simulate-unparseable", manual)
+        tap("fitlab-ocr-manual-fallback", manual)
         tap("fitlab-category-picker", manual)
         capture("manual-category-sheet", manual)
         tap("fitlab-category-shirt", manual)

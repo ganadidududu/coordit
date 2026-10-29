@@ -6,36 +6,44 @@ enum CoorditNavigationDirection {
     case backward
 }
 
+enum CoorditMotion {
+    static func navigation(reduceMotion: Bool) -> Animation {
+        reduceMotion ? .easeOut(duration: 0.14) : .easeInOut(duration: 0.30)
+    }
+}
+
 extension AnyTransition {
     static func coorditMenuPush(
         direction: CoorditNavigationDirection,
         reduceMotion: Bool
     ) -> AnyTransition {
-        let removalDuration = reduceMotion ? 0.06 : 0.10
-        let insertionDuration = reduceMotion ? 0.08 : 0.14
-        let outgoingOffset: CGFloat
-        let incomingOffset: CGFloat
+        guard !reduceMotion else { return .opacity }
+        let sign: CGFloat = direction == .forward ? 1 : -1
+        return .asymmetric(
+            insertion: .opacity.combined(with: .offset(x: 56 * sign)),
+            removal: .opacity.combined(with: .offset(x: -32 * sign))
+        )
+    }
+}
 
-        switch direction {
-        case .forward:
-            outgoingOffset = reduceMotion ? 0 : -18
-            incomingOffset = reduceMotion ? 0 : 22
-        case .backward:
-            outgoingOffset = reduceMotion ? 0 : 18
-            incomingOffset = reduceMotion ? 0 : -22
+private struct CoorditScreenTransition<Value: Hashable>: ViewModifier {
+    let value: Value
+    let direction: CoorditNavigationDirection
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        ZStack(alignment: .top) {
+            content
+                .id(value)
+                .transition(.coorditMenuPush(direction: direction, reduceMotion: reduceMotion))
         }
+        .animation(CoorditMotion.navigation(reduceMotion: reduceMotion), value: value)
+    }
+}
 
-        let removal = AnyTransition.opacity
-            .combined(with: .offset(x: outgoingOffset))
-            .animation(.easeOut(duration: removalDuration))
-        let insertion = AnyTransition.opacity
-            .combined(with: .offset(x: incomingOffset))
-            .animation(
-                .easeOut(duration: insertionDuration)
-                    .delay(removalDuration)
-            )
-
-        return .asymmetric(insertion: insertion, removal: removal)
+extension View {
+    func coorditScreenTransition<Value: Hashable>(value: Value, direction: CoorditNavigationDirection) -> some View {
+        modifier(CoorditScreenTransition(value: value, direction: direction))
     }
 }
 

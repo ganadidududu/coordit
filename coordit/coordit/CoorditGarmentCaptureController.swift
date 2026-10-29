@@ -66,11 +66,7 @@ final class CoorditGarmentCaptureController: ObservableObject {
     }
 
     static var featureEnabled: Bool {
-        #if DEBUG
-        return true
-        #else
         return Bundle.main.object(forInfoDictionaryKey: "CoorditCameraComparisonEnabled") as? Bool == true
-        #endif
     }
 
     init(method: CoorditGarmentMeasurement.Method? = nil, inferenceEngine: any CoorditGarmentInferenceEngine = CoorditHybridGarmentInference()) {

@@ -1,7 +1,7 @@
 import SwiftUI
 
 #if os(iOS)
-enum CoorditFitLabInputDestination: Equatable {
+enum CoorditFitLabInputDestination: Hashable {
     case sources
     case manual
     case ocr
@@ -10,7 +10,6 @@ enum CoorditFitLabInputDestination: Equatable {
 
 struct CoorditFitLabInputScreen: View {
     @EnvironmentObject private var tutorial: CoorditFitLabTutorial
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let metrics: CoorditResponsiveMetrics
     @Binding var draft: CoorditFitLabDraft
     @Binding var destination: CoorditFitLabInputDestination
@@ -18,10 +17,11 @@ struct CoorditFitLabInputScreen: View {
     let fixtureName: String?
     let apiRequestLedger: [String]
     let urlRequestLedger: () -> [String]
-    let urlPrefill: (URL, CoorditFitLabCategory) async throws -> CoorditFitLabURLPrefillResponse
-    let urlReferences: (CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow]
+    let urlPrefill: (URL, CoorditFitLabCategory?) async throws -> CoorditFitLabURLPrefillResponse
     let sharedImportURL: URL?
     let savedHistory: [CoorditFitLabHistorySnapshot]
+    @State private var showsAllHistory = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let historyRecoveryNotice: String?
     let threadBalance: Int
     let onThreadRecharge: () -> Void
@@ -36,11 +36,8 @@ struct CoorditFitLabInputScreen: View {
         fixtureName: String? = nil,
         apiRequestLedger: [String] = [],
         urlRequestLedger: @escaping () -> [String] = { [] },
-        urlPrefill: @escaping (URL, CoorditFitLabCategory) async throws -> CoorditFitLabURLPrefillResponse = { _, _ in
+        urlPrefill: @escaping (URL, CoorditFitLabCategory?) async throws -> CoorditFitLabURLPrefillResponse = { _, _ in
             throw CoorditFitLabError.transport("상품 링크 API를 준비할 수 없어요.")
-        },
-        urlReferences: @escaping (CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow] = { _ in
-            throw CoorditFitLabError.transport("기준 옷 API를 준비할 수 없어요.")
         },
         sharedImportURL: URL? = nil,
         savedHistory: [CoorditFitLabHistorySnapshot] = [],
@@ -58,7 +55,6 @@ struct CoorditFitLabInputScreen: View {
         self.apiRequestLedger = apiRequestLedger
         self.urlRequestLedger = urlRequestLedger
         self.urlPrefill = urlPrefill
-        self.urlReferences = urlReferences
         self.sharedImportURL = sharedImportURL
         self.savedHistory = savedHistory
         self.historyRecoveryNotice = historyRecoveryNotice
@@ -69,12 +65,9 @@ struct CoorditFitLabInputScreen: View {
     }
 
     var body: some View {
-        ZStack(alignment: .top) {
-            destinationContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .id(destination)
-                .transition(destinationTransition)
-        }
+        destinationContent
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .coorditScreenTransition(value: destination, direction: navigationDirection)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .clipped()
         .compositingGroup()
@@ -108,7 +101,6 @@ struct CoorditFitLabInputScreen: View {
                     draft: $draft,
                     requestLedger: urlRequestLedger,
                     prefill: urlPrefill,
-                    loadReferences: urlReferences,
                     initialURL: sharedImportURL,
                     onSwitchToOCR: {
                         if draft.isTutorialExample { draft = CoorditFitLabDraft() }
@@ -123,10 +115,6 @@ struct CoorditFitLabInputScreen: View {
                 )
             }
         }
-    }
-
-    private var destinationTransition: AnyTransition {
-        .coorditMenuPush(direction: navigationDirection, reduceMotion: reduceMotion)
     }
 
     private var sourceSelection: some View {
@@ -144,7 +132,7 @@ struct CoorditFitLabInputScreen: View {
                 CoorditInputMethodPanel(metrics: metrics) {
                     sourceCard(
                         title: "링크로 불러오기",
-                        subtitle: "구매할 옷의 상품 링크",
+                        subtitle: "추천 · 상품과 사이즈를 한 번에",
                         symbol: "link",
                         identifier: "fitlab-source-url"
                     ) {
@@ -165,16 +153,6 @@ struct CoorditFitLabInputScreen: View {
                     }
                 }
                 .fitLabTutorialTarget(.source)
-
-                HStack {
-                    Spacer()
-                    CoorditCompactActionButton(title: "직접 입력", symbol: "square.and.pencil", metrics: metrics) {
-                        if draft.isTutorialExample { draft = CoorditFitLabDraft() }
-                        draft.source = .manual
-                        destination = .manual
-                    }
-                    .accessibilityIdentifier("fitlab-source-manual")
-                }
 
                 VStack(alignment: .leading, spacing: metrics.value(11)) {
                     Text("최근 핏 분석")
@@ -211,11 +189,26 @@ struct CoorditFitLabInputScreen: View {
                         .accessibilityElement(children: .combine)
                         .accessibilityIdentifier("fitlab-history-empty")
                     } else {
+                        if savedHistory.count > 3 {
+                            Button {
+                                withAnimation(CoorditMotion.navigation(reduceMotion: reduceMotion)) {
+                                    showsAllHistory.toggle()
+                                }
+                            } label: {
+                                Label(showsAllHistory ? "최근 3개만 보기" : "전체 \(savedHistory.count)개 보기", systemImage: showsAllHistory ? "chevron.up" : "chevron.down")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+                            .accessibilityIdentifier("fitlab-history-toggle")
+                            .accessibilityValue(showsAllHistory ? "펼쳐짐" : "접힘")
+                        }
                         LazyVStack(spacing: metrics.value(8)) {
-                            ForEach(savedHistory) { snapshot in
+                            ForEach(visibleHistory) { snapshot in
                                 historyCard(snapshot)
                             }
                         }
+                        .id(showsAllHistory)
+
                     }
                 }
                 .padding(metrics.value(14))
@@ -236,8 +229,15 @@ struct CoorditFitLabInputScreen: View {
             .padding(.bottom, metrics.value(120))
         }
         .scrollDismissesKeyboard(.interactively)
-        .defaultScrollAnchor(.bottom, for: .sizeChanges)
+        .defaultScrollAnchor(.top, for: .sizeChanges)
         .onAppear { tutorial.visitSources() }
+    }
+
+    private var visibleHistory: [CoorditFitLabHistorySnapshot] {
+        let sorted = savedHistory.sorted {
+            $0.savedAt == $1.savedAt ? $0.analysisID > $1.analysisID : $0.savedAt > $1.savedAt
+        }
+        return showsAllHistory ? sorted : Array(sorted.prefix(3))
     }
 
     private func historyCard(_ snapshot: CoorditFitLabHistorySnapshot) -> some View {

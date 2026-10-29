@@ -28,6 +28,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
     }
 
     @Published var draft: CoorditFitLabDraft
+    @Published var isComparisonRequested = false
     @Published private(set) var references: [CoorditFitLabReferenceRow] = []
     @Published private(set) var createdProductID: String?
     @Published private(set) var createdSizeIDs: [String] = []
@@ -293,7 +294,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
 
     func prefillProduct(
         from url: URL,
-        category: CoorditFitLabCategory
+        category: CoorditFitLabCategory?
     ) async throws -> CoorditFitLabURLPrefillResponse {
         guard let api else {
             throw CoorditFitLabError.transport("상품 링크 API를 준비할 수 없어요.")
@@ -554,6 +555,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
     }
 
     func discardAndRestart(clearCameraPersistence: Bool = true) {
+        isComparisonRequested = false
         if clearCameraPersistence, fixtureName == nil, let owner = cameraSessionUserID { UserDefaults.standard.removeObject(forKey: cameraSessionKey(owner)) }
         cameraMeasurement = nil; cameraReference = nil; cameraBundleAnalysisID = nil
         cameraCapture.clearCapture()
