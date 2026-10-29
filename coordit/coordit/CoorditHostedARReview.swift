@@ -47,10 +47,12 @@ struct CoorditHostedARReview: View {
                     }.pickerStyle(.segmented).disabled(busy).accessibilityIdentifier("hosted-ar-model")
                     Text("\(category.koreanTitle) · 촬영 프레임 \(snapshot.evidence.frameID.uuidString.prefix(8))")
                         .font(.subheadline)
+                    Text("AI가 대략 짚은 점을 먼저 보여줘요. 위치가 맞으면 확인하고, 다르면 사진에서 옮겨주세요.")
+                        .font(.subheadline)
                     if let reply {
                         Menu {
                             ForEach(reply.points.points) { point in
-                                Button("\(point.title) · \(point.usable ? "확인 필요" : "보정 필요")") {
+                                Button("\(point.title) · \(point.reviewTitle)") {
                                     selectedPoint = point.id
                                 }
                             }
@@ -88,6 +90,10 @@ struct CoorditHostedARReview: View {
                                 move(selectedPoint, x: x / 100, y: y / 100)
                             } label: { Text("좌표 적용").frame(minHeight: 44) }
                         }.textFieldStyle(.roundedBorder).disabled(busy)
+                        Button { confirmPoints() } label: { Text("표시된 점 확인했어요").frame(minHeight: 44) }
+                            .buttonStyle(.bordered)
+                            .disabled(busy || reply?.points.points.contains(where: { $0.position != nil && !$0.userReviewed }) != true)
+                            .accessibilityIdentifier("hosted-ar-confirm-points")
                     }
                     if let reply {
                         Text("\(reply.model) · \(reply.elapsedSeconds, specifier: "%.1f")초 · 비용 \(reply.costUsd.map { String(format: "$%.4f", $0) } ?? "미확인")")
@@ -96,12 +102,16 @@ struct CoorditHostedARReview: View {
                             HStack {
                                 Text(pair.0.title)
                                 Spacer()
-                                if let segment = CoorditHostedSemantics.segment(pair, points: reply.points.points, geometry: snapshot.geometry) {
-                                    Text("\(segment.centimeters, specifier: "%.1f") cm")
-                                } else { Text("점 누락·불확실·평면 밖 · 보정 필요").foregroundStyle(.primary) }
+                                if let segment = CoorditHostedSemantics.segment(pair, points: reply.points.points,
+                                    geometry: snapshot.geometry, allowUncertainDraft: true) {
+                                    VStack(alignment: .trailing) {
+                                        Text("\(segment.centimeters, specifier: "%.1f") cm")
+                                        Text(CoorditHostedSemantics.userReviewed(pair, points: reply.points.points) ? "사용자 확인" : "초안 · 점 확인 필요")
+                                    }
+                                } else { Text("점 누락·평면 밖 · 직접 보정 필요").foregroundStyle(.primary) }
                             }.font(.subheadline).accessibilityIdentifier("hosted-ar-cm-\(pair.0.rawValue)")
                         }
-                        Text("기준점 선택 후 ‘사진에서 점 보정’을 켜고 터치·드래그하세요. 보정 후에는 꺼서 화면을 스크롤하세요. 주황점·빠진 점은 보정이 필요하며 초록점도 확인하세요. 총장은 위에 표시한 기준, 소매는 오른쪽 어깨–커프 기준입니다.")
+                        Text("주황점은 AI 초안, 초록점은 사용자가 확인하거나 옮긴 점이에요. 점이 맞으면 ‘표시된 점 확인했어요’를 누르세요. 다르거나 빠진 점은 기준점을 선택하고 ‘사진에서 점 보정’을 켜서 터치·드래그하세요. 보정 후에는 꺼서 스크롤하세요. 초안 치수는 점 확인 전 값이며 정확도 보증이 아닙니다. 소매는 오른쪽 어깨–커프 기준입니다.")
                             .font(.subheadline)
                         Button { export() } label: { Text("AI·AR 결과 JSON 내보내기").frame(minHeight: 44) }
                             .disabled(busy).accessibilityIdentifier("hosted-ar-export")
@@ -154,11 +164,11 @@ struct CoorditHostedARReview: View {
                 if let reply {
                     ForEach(reply.points.points) { point in
                         if let position = point.position {
-                            Circle().fill(point.usable ? Color.green : Color.orange).frame(width: 22, height: 22)
+                            Circle().fill(point.userReviewed ? Color.green : Color.orange).frame(width: 22, height: 22)
                                 .overlay(Circle().stroke(point.id == selectedPoint ? .black : .white, lineWidth: 3))
                                 .frame(width: 44, height: 44).contentShape(Rectangle())
                                 .accessibilityLabel(point.title)
-                                .accessibilityValue(point.usable ? "확인 필요" : "보정 필요")
+                                .accessibilityValue(point.reviewTitle)
                                 .position(x: position.x * size.size.width, y: position.y * size.size.height)
                                 .accessibilityIdentifier("hosted-ar-point-\(point.id)")
                                 .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("hosted-photo"))
@@ -189,6 +199,16 @@ struct CoorditHostedARReview: View {
         syncInputs()
     }
 
+    private func confirmPoints() {
+        guard var updated = reply else { return }
+        for index in updated.points.points.indices {
+            _ = updated.points.points[index].confirm(geometry: snapshot.geometry)
+        }
+        reply = updated
+        hasUnsavedResults = true
+        notice = "표시된 점의 확인을 반영했어요. 빠진 점이나 평면 밖의 점은 직접 보정해주세요."
+    }
+
     private func infer() {
         guard consent, let client = CoorditHostedARClient.configured, let image = snapshot.image.pngData() else { return }
         busy = true; notice = nil
@@ -202,7 +222,7 @@ struct CoorditHostedARReview: View {
                 selectedPoint = result.points.points.first?.id ?? ""
                 history.append(result)
                 hasUnsavedResults = true
-                notice = "촬영 당시 평면으로 계산했어요. 불확실한 점은 직접 보정해주세요."
+                notice = "촬영 당시 평면으로 초안 치수를 계산했어요. 점 위치를 확인하거나 직접 보정해주세요."
             } catch {
                 if !Task.isCancelled { notice = "서버 연결 또는 AI 추론에 실패했어요. 기존 측정 결과를 유지했어요." }
             }
@@ -214,6 +234,9 @@ struct CoorditHostedARReview: View {
         struct Measurement: Encodable {
             let dimension: String
             let centimeters: Double?
+            let draftCentimeters: Double?
+            let reviewStatus: String
+            let landmarkTypes: [String]
             let groundTruthCm: Double?
             let segment: CoorditMeasurementSegment?
             let failureReason: String?
@@ -233,10 +256,16 @@ struct CoorditHostedARReview: View {
         }
         let pairs = CoorditHostedSemantics.pairs(category)
         let measurements = pairs.map { pair in
-            let segment = CoorditHostedSemantics.segment(pair, points: reply.points.points, geometry: snapshot.geometry)
+            let draft = CoorditHostedSemantics.segment(pair, points: reply.points.points,
+                geometry: snapshot.geometry, allowUncertainDraft: true)
+            let reviewed = CoorditHostedSemantics.userReviewed(pair, points: reply.points.points)
+            let segment = reviewed ? draft : nil
             return Measurement(dimension: pair.0.measurementKey, centimeters: segment?.centimeters,
+                draftCentimeters: reviewed ? nil : draft?.centimeters,
+                reviewStatus: draft == nil ? "failed" : (reviewed ? "user_reviewed" : "draft"),
+                landmarkTypes: [pair.1, pair.2],
                 groundTruthCm: Double(groundTruth[pair.0.measurementKey] ?? ""), segment: segment,
-                failureReason: segment == nil ? "missing_uncertain_outside_plane_or_invalid_range" : nil)
+                failureReason: draft == nil ? "missing_outside_plane_or_invalid_range" : (reviewed ? nil : "user_review_required"))
         }
         var evidence = snapshot.evidence
         evidence.corrected = reply.points.points.contains { $0.status == "user_corrected" }

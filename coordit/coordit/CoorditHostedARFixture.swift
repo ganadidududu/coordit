@@ -11,9 +11,12 @@ enum CoorditHostedARFixture {
         let positions: [(Double, Double)] = [(0.3, 0.3), (0.7, 0.3), (0.3, 0.5), (0.7, 0.5),
             (0.4, 0.25), (0.4, 0.85), (0.7, 0.3), (0.85, 0.45)]
         let names = pairs.flatMap { [$0.1, $0.2] }
-        let points = zip(names, positions).map { name, position in
+        var points = zip(names, positions).map { name, position in
             CoorditHostedPoint(landmarkType: name, x: position.0, y: position.1,
                 status: name == "shoulder_left" ? "uncertain_proposal" : "visible_proposal")
+        }
+        if ProcessInfo.processInfo.arguments.contains("--coordit-hosted-ar-missing-point") {
+            points[0].x = nil; points[0].y = nil; points[0].status = "abstain"
         }
         let reply = CoorditHostedReply(frameId: capture.evidence.frameID, lengthBasis: "high_shoulder_to_hem", category: "tshirt", model: "synthetic_ui_fixture_not_api",
             provider: nil, imageSha256: "synthetic", coordinateSystem: "upright_rgb_normalized_top_left",

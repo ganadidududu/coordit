@@ -10,7 +10,7 @@ final class CoorditHostedARUITests: XCTestCase {
         let point = element("hosted-ar-point-shoulder_left", app)
         XCTAssertTrue(point.waitForExistence(timeout: 5))
         let shoulder = element("hosted-ar-cm-shoulder", app)
-        XCTAssertTrue(app.staticTexts["점 누락·불확실·평면 밖 · 보정 필요"].exists)
+        XCTAssertTrue(app.staticTexts["초안 · 점 확인 필요"].firstMatch.exists)
         capture("hosted-ar-before-correction", app)
         app.buttons["닫기"].tap()
         XCTAssertTrue(app.buttons["결과 버리고 닫기"].waitForExistence(timeout: 3))
@@ -19,9 +19,9 @@ final class CoorditHostedARUITests: XCTestCase {
         element("hosted-ar-edit-points", app).tap()
         let start = point.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 10, dy: 10)))
-        XCTAssertEqual(point.value as? String, "확인 필요")
+        XCTAssertEqual(point.value as? String, "직접 보정")
         XCTAssertTrue(shoulder.exists)
-        XCTAssertFalse(app.staticTexts["점 누락·불확실·평면 밖 · 보정 필요"].exists)
+        XCTAssertFalse(app.staticTexts["점 누락·평면 밖 · 직접 보정 필요"].exists)
         element("hosted-ar-edit-points", app).tap()
         capture("hosted-ar-after-correction", app)
         app.buttons["Gemini 3.8"].firstMatch.tap()
@@ -34,6 +34,42 @@ final class CoorditHostedARUITests: XCTestCase {
         XCTAssertEqual(consent.value as? String, "1")
         XCTAssertFalse(element("hosted-ar-infer", app).isEnabled, "Unconfigured simulator must never make paid requests")
         capture("hosted-ar-consent-and-unconfigured-gate", app)
+    }
+
+    func testDraftPointsCanBeConfirmedWithoutDraggingOrCallingAPI() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--coordit-ar-field-test", "--coordit-hosted-ar-fixture", "--coordit-ui-testing"]
+        app.launch()
+        let point = element("hosted-ar-point-shoulder_left", app)
+        XCTAssertTrue(point.waitForExistence(timeout: 5))
+        XCTAssertEqual(point.value as? String, "AI 초안")
+        capture("hosted-ar-draft-without-moving", app)
+        let confirm = element("hosted-ar-confirm-points", app)
+        for _ in 0..<5 { if confirm.isHittable { break }; app.swipeUp() }
+        XCTAssertTrue(confirm.isHittable)
+        confirm.tap()
+        XCTAssertEqual(point.value as? String, "사용자 확인")
+        XCTAssertFalse(confirm.isEnabled)
+        XCTAssertTrue(app.staticTexts["사용자 확인"].firstMatch.exists)
+        XCTAssertFalse(element("hosted-ar-infer", app).isEnabled)
+        capture("hosted-ar-confirmed-without-moving", app)
+    }
+
+    func testMissingPointStaysMissingUntilUserPlacesIt() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--coordit-ar-field-test", "--coordit-hosted-ar-fixture", "--coordit-ui-testing",
+            "--coordit-hosted-ar-missing-point"]
+        app.launch()
+        let photo = element("hosted-ar-photo", app)
+        XCTAssertTrue(photo.waitForExistence(timeout: 5))
+        let missing = element("hosted-ar-point-shoulder_left", app)
+        XCTAssertFalse(missing.exists)
+        capture("hosted-ar-missing-point", app)
+        element("hosted-ar-edit-points", app).tap()
+        photo.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.3)).tap()
+        XCTAssertTrue(missing.waitForExistence(timeout: 3))
+        XCTAssertEqual(missing.value as? String, "직접 보정")
+        capture("hosted-ar-manually-placed-point", app)
     }
 
 

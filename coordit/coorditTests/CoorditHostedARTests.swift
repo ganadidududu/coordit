@@ -34,6 +34,53 @@ final class CoorditHostedARTests: XCTestCase {
         XCTAssertNil(CoorditHostedSemantics.segment(pair, points: points, geometry: geometry()))
     }
 
+    func testUncertainDraftHasPreviewButRequiresExplicitHumanReview() throws {
+        let pair = CoorditHostedSemantics.pairs(.tshirt)[0]
+        var points = [CoorditHostedPoint(landmarkType: "shoulder_left", x: 0.25, y: 0.5, status: "uncertain_proposal"),
+                      CoorditHostedPoint(landmarkType: "shoulder_right", x: 0.75, y: 0.5, status: "visible_proposal")]
+        let original = points
+        let draft = try XCTUnwrap(CoorditHostedSemantics.segment(pair, points: points, geometry: geometry(), allowUncertainDraft: true))
+        XCTAssertEqual(draft.centimeters, 50, accuracy: 0.001)
+        XCTAssertNil(CoorditHostedSemantics.segment(pair, points: points, geometry: geometry()))
+        XCTAssertFalse(CoorditHostedSemantics.userReviewed(pair, points: points))
+        XCTAssertTrue(points[0].confirm(geometry: geometry()))
+        XCTAssertFalse(CoorditHostedSemantics.userReviewed(pair, points: points))
+        XCTAssertTrue(points[1].confirm(geometry: geometry()))
+        XCTAssertTrue(CoorditHostedSemantics.userReviewed(pair, points: points))
+        XCTAssertEqual(points[0].x, original[0].x)
+        XCTAssertEqual(points[0].y, original[0].y)
+        XCTAssertEqual(points[0].status, "user_confirmed")
+        XCTAssertEqual(original[0].status, "uncertain_proposal")
+    }
+
+    func testConfirmPreservesCorrectionsAndCannotInventMissingOrInvalidPoints() {
+        var corrected = CoorditHostedPoint(landmarkType: "shoulder_left", x: 0.25, y: 0.5, status: "user_corrected")
+        XCTAssertTrue(corrected.confirm(geometry: geometry()))
+        XCTAssertEqual(corrected.status, "user_corrected")
+        var missing = CoorditHostedPoint(landmarkType: "shoulder_right", x: nil, y: nil, status: "abstain")
+        XCTAssertFalse(missing.confirm(geometry: geometry()))
+        XCTAssertNil(missing.position)
+        var invalid = CoorditHostedPoint(landmarkType: "shoulder_right", x: 1.2, y: 0.5, status: "uncertain_proposal")
+        XCTAssertFalse(invalid.confirm(geometry: geometry()))
+        let pair = CoorditHostedSemantics.pairs(.tshirt)[0]
+        XCTAssertNil(CoorditHostedSemantics.segment(pair, points: [corrected, missing], geometry: geometry(), allowUncertainDraft: true))
+        XCTAssertNil(CoorditHostedSemantics.segment(pair, points: [corrected, invalid], geometry: geometry(), allowUncertainDraft: true))
+    }
+
+    func testDraftAndHumanConfirmationStillRejectOutsideFrozenPlane() {
+        let base = geometry()
+        let narrowPlane = CoorditARPlaneGeometry(intrinsics: base.intrinsics, cameraTransform: base.cameraTransform,
+            planeTransform: base.planeTransform,
+            boundary: [SIMD2(-0.1, -0.1), SIMD2(0.1, -0.1), SIMD2(0.1, 0.1), SIMD2(-0.1, 0.1)],
+            imageSize: base.imageSize, orientation: base.orientation)
+        var outside = CoorditHostedPoint(landmarkType: "shoulder_left", x: 0.25, y: 0.5, status: "uncertain_proposal")
+        let other = CoorditHostedPoint(landmarkType: "shoulder_right", x: 0.75, y: 0.5, status: "visible_proposal")
+        XCTAssertFalse(outside.confirm(geometry: narrowPlane))
+        XCTAssertEqual(outside.status, "uncertain_proposal")
+        XCTAssertNil(CoorditHostedSemantics.segment(CoorditHostedSemantics.pairs(.tshirt)[0],
+            points: [outside, other], geometry: narrowPlane, allowUncertainDraft: true))
+    }
+
     func testEveryCategoryKeepsItsMeasurementSchemaAndSkirtHasNoCrotch() {
         for category in CoorditFitLabCategory.allCases {
             XCTAssertEqual(CoorditHostedSemantics.pairs(category).map(\.0), category.cameraDimensions)

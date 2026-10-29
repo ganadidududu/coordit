@@ -40,7 +40,22 @@ struct CoorditHostedPoint: Codable, Identifiable {
         default: landmarkType
         }
     }
-    var usable: Bool { position != nil && ["visible_proposal", "user_corrected"].contains(status) }
+    var usable: Bool { position != nil && ["visible_proposal", "user_corrected", "user_confirmed"].contains(status) }
+    var userReviewed: Bool { position != nil && ["user_corrected", "user_confirmed"].contains(status) }
+    var reviewTitle: String {
+        switch status {
+        case "user_corrected": "직접 보정"
+        case "user_confirmed": "사용자 확인"
+        default: position == nil ? "직접 지정 필요" : "AI 초안"
+        }
+    }
+
+    mutating func confirm(geometry: CoorditARPlaneGeometry) -> Bool {
+        guard usable || status == "uncertain_proposal", let position,
+              (try? geometry.worldPoint(position)) != nil else { return false }
+        if status != "user_corrected" { status = "user_confirmed" }
+        return true
+    }
 }
 
 struct CoorditHostedReply: Codable {
@@ -88,12 +103,18 @@ enum CoorditHostedSemantics {
     }
 
     static func segment(_ pair: (CoorditGarmentDimension, String, String), points: [CoorditHostedPoint],
-                        geometry: CoorditARPlaneGeometry) -> CoorditMeasurementSegment? {
-        guard let a = points.first(where: { $0.id == pair.1 }), a.usable, let p = a.position,
-              let b = points.first(where: { $0.id == pair.2 }), b.usable, let q = b.position,
+                        geometry: CoorditARPlaneGeometry, allowUncertainDraft: Bool = false) -> CoorditMeasurementSegment? {
+        guard let a = points.first(where: { $0.id == pair.1 }),
+              a.usable || (allowUncertainDraft && a.status == "uncertain_proposal"), let p = a.position,
+              let b = points.first(where: { $0.id == pair.2 }),
+              b.usable || (allowUncertainDraft && b.status == "uncertain_proposal"), let q = b.position,
               let start = try? geometry.worldPoint(p), let end = try? geometry.worldPoint(q) else { return nil }
         let segment = CoorditMeasurementSegment(start: start, end: end)
         return pair.0.validRange.contains(segment.centimeters) ? segment : nil
+    }
+
+    static func userReviewed(_ pair: (CoorditGarmentDimension, String, String), points: [CoorditHostedPoint]) -> Bool {
+        [pair.1, pair.2].allSatisfy { id in points.first { $0.id == id }?.userReviewed == true }
     }
 }
 
