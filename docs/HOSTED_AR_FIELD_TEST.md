@@ -87,7 +87,7 @@ iOS 시뮬레이터는 먼저 AGENTS.md의 SimSlim list/on/verify/doctor를 수�
 
 ## 2026-10-29 초안 우선·사용자 보정 변경 검증
 
-기존 `codex/camera-auto-guides`에서 진행했다. 추가 유료 API 호출 0회, 가중치/프롬프트/학습 데이터 변경 0건, Phase 3 변경 0건이다. 공급자 응답을 더 정확하게 만들었다고 주장하지 않는다. 기존 좌표를 초안으로 보여주고 사용자가 수치 계산 기준점을 빠르게 확인/수정하게 한 변경이다. 서버/Android/운영 플래그/결제·옷장 API는 수정하지 않았다. 이번 버전은 시뮬레이터에 빌드·실행했으며 goofy에 재설치하지 않았다.
+기존 `codex/camera-auto-guides`에서 진행했다. 추가 유료 API 호출 0회, 가중치/프롬프트/학습 데이터 변경 0건, Phase 3 변경 0건이다. 공급자 응답을 더 정확하게 만들었다고 주장하지 않는다. 기존 좌표를 초안으로 보여주고 사용자가 수치 계산 기준점을 빠르게 확인/수정하게 한 변경이다. 서버/Android/운영 플래그/결제·옷장 API는 수정하지 않았다. 시뮬레이터 검증 후 사용자 요청으로 같은 날 아래와 같이 goofy에 재설치했다.
 
 SimSlim list → profile on → verify와 push/StoreKit/links/keychain/photos doctor 5/5를 수행했다. 증거 루트는 `/tmp/coordit-landmark-draft-review/`다.
 
@@ -101,3 +101,5 @@ SimSlim list → profile on → verify와 push/StoreKit/links/keychain/photos do
 - 자체 시각 검수: 한 개 세로 ScrollView, 기존 NavigationStack/메뉴/토글/좌표 입력 유지, 주황 초안·초록 사용자 확인 상태의 텍스트 대안, 44pt 이상 확인 버튼, 큰 글자 스크롤/닫기/내보내기, 명시적 외부 전송 동의와 비활성 버튼을 확인했다. 웹/데스크톱·AR 센서·실제 봉제점 정확도는 대상이 아니다. 새 독립 리뷰어 검수는 실행하지 않았다.
 
 캡처 도구 제한: 최초 `before-dark-top.png`는 테마 전환 중이라 유효한 다크 기준 화면으로 사용하지 않았다. 일부 XCTest 다크 캡처에는 글자가 누락된 합성 프레임이 있어 실제 UI의 최종 상단/본문을 다시 캡처해 확인했다. 재실행 뒤 XcodeBuildMCP의 의미 UI snapshot이 루트 1개만 반환하는 경우가 있었으나 실제 스크린샷은 정상이고 XCTest UI 시나리오는 통과했다. 이 도구 문제를 제품 성공이나 센서 검증으로 대신하지 않는다. 최종 빌드의 참고 경고 3개는 기존 capture controller의 actor 초기화/ARPlaneAnchor.extent 사용이며 이번 변경에서 발생한 컴파일 오류는 없다.
+
+2026-10-29 goofy 설치: 코드 `2528f9a`, Team `T25ML3HYK2`, 기존 별도 앱 ID `com.insihwan.coordit.arfieldtest`로 Debug 서명 빌드와 `devicectl` 설치가 성공했다. 증거는 `/tmp/coordit-ar-field.7U6Dey/{build.log,install.json,launch.json}`, 빌드 산출물은 Git 제외 `ml/artifacts/hosted-ar/device-derived-data/`다. 기존 게이트웨이 연결 설정을 유지했고 공급자 API 요청/추론 버튼 실행/Phase 3 변경은 없었다. 자동 실행은 iPhone 잠금으로 거부됐다(`FBSOpenApplicationErrorDomain/7`, `Locked`). 설치 실패나 신뢰 거부로 해석하지 않으며, 사용자가 잠금을 풀고 `Coordit AR Test`를 직접 열어야 한다. 새 빌드의 실기기 화면 진입과 센서 cm 정확도는 아직 확인하지 않았다.
