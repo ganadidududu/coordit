@@ -1,5 +1,7 @@
 # Public aRTF hosted vision API benchmark
 
+Follow-up: [2026-10-29 확대 재검토 및 추가 사진 부분 평가](ARTF_VISION_REFINEMENT.md). 이 후속 보고서는 불확실 좌표를 포함한 점수와 앱에서 사용할 수 있는 좌표의 점수를 구분한다. 추가 유료 호출은 사용자 예산 지시로 중단했다.
+
 The user's locally stored credential belongs to OpenRouter. Initial authentication against OpenAI returned HTTP 401; no photograph or inference request was sent to that endpoint. Authentication against OpenRouter returned HTTP 200. The existing ignored `ml/.env` variable `OPENAI_API_KEY` is accepted as a legacy local key name; `OPENROUTER_API_KEY` takes precedence when set. Neither value is printed, included in model prompts, or committed.
 
 ## Fixed scope and inputs

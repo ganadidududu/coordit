@@ -103,3 +103,29 @@ def test_truncated_completion_cannot_be_reported_as_success() -> None:
     annotation, failure = parse_annotation(response, fixture_photo())
     assert annotation is None
     assert failure == "incomplete_or_refused"
+
+
+def test_photo_count_scales_budget_reservation_before_egress(tmp_path: Path) -> None:
+    # Given identical current prices and a larger declared frozen photo grid.
+    original = fixture_config(tmp_path).model_copy(update={"spending_limit_usd": 10})
+    expanded = original.model_copy(update={"images_per_model": 16})
+    # When reserving both runs, then doubling exposure doubles reservation rather than retaining the old eight cap.
+    assert reserve_total(expanded) == pytest.approx(2 * reserve_total(original))
+
+
+def test_budget_error_diagnostics_do_not_persist_private_metadata() -> None:
+    # Given a provider budget rejection with documented routing reason and unrelated secret-bearing fields.
+    response = ApiResponse.model_validate(
+        {
+            "error": {
+                "code": 402,
+                "message": "private-fragment",
+                "metadata": {"limit_source": "openrouter_in_flight_budget", "account_secret": "private-fragment"},
+            }
+        }
+    )
+    # When retaining the allowlisted receipt, then budget cause survives but arbitrary text does not.
+    assert response.error is not None
+    assert response.error.metadata is not None
+    assert response.error.metadata.limit_source == "openrouter_in_flight_budget"
+    assert "private-fragment" not in response.model_dump_json()

@@ -26,8 +26,8 @@ def load_public_photos(config: BenchmarkConfig) -> tuple[PilotReceipt, list[Publ
     if sha256(config.receipt) != config.receipt_sha256 or sha256(config.protocol) != config.protocol_sha256:
         raise PipelineError("API packet or protocol changed")
     receipt = PilotReceipt.model_validate_json(config.receipt.read_bytes())
-    if len(receipt.cases) != 8 or len({c.case_id for c in receipt.cases}) != 8:
-        raise PipelineError("API benchmark requires the frozen eight unique public photos")
+    if len(receipt.cases) != config.images_per_model or len({c.case_id for c in receipt.cases}) != len(receipt.cases):
+        raise PipelineError("API benchmark requires the declared unique public-photo count")
     if sha256(receipt.preparation.manifest) != receipt.manifest_sha256:
         raise PipelineError("API source manifest changed")
     registry = read_registry(REGISTRY_ROOT / "DATASET_MANIFEST.json")
@@ -71,7 +71,7 @@ def reserve_total(config: BenchmarkConfig) -> float:
             "structured_outputs", "reasoning",
         } <= set(model.supported_parameters):
             raise PipelineError("API model lacks required image/JSON/reasoning controls")
-        total += 8 * (
+        total += config.images_per_model * (
             config.input_token_reservation * model.pricing.prompt + config.max_tokens * model.pricing.completion
         )
     if total > config.spending_limit_usd:

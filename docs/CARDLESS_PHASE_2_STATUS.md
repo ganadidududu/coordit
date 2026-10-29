@@ -93,3 +93,7 @@ Final tree verification: `phase2-acceptance-ios.xcresult` passed **54/54** unit 
 ## 2026-10-28 hosted AR field integration
 
 Astra/Gemini의 정규화 봉제점과 촬영 시점 AR 평면으로 계산하는 Debug 전용 화면·독립 인증 게이트웨이를 구현했다. 생산 플래그/모델 승인/Phase 3는 변경하지 않았다. [실행·개인정보·실제 시험·검증 기록](HOSTED_AR_FIELD_TEST.md)을 따른다. 공개 aRTF 1장/모델별 실제 요청 성공은 연결 검증이며 이 경로의 cm 정확도 검증이 아니다.
+
+## 2026-10-29 공개 사진 추론 재검토
+
+[확대 재검토 실험](ARTF_VISION_REFINEMENT.md)은 개발 8장과 추가 장소 사진 16장을 사용했다. Astra 9장/Gemini 13장의 전후 비교만 완료했으며 추가 유료 API는 예산 지시로 중단했다. Astra 일부 개선과 Gemini 악화를 모두 기록했다. 이 결과로 새 체크포인트나 운영 승인을 만들지 않았고 앱의 추가 호출도 활성화하지 않았다. 실제 봉제선/cm 정확도, 미확보 카테고리의 정답과 실기기 검증은 여전히 미완료다. AI Hub 외부 전송과 Phase 3 변경은 없다.

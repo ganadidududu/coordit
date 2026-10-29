@@ -1,7 +1,7 @@
 """Typed public-photo API experiment, sanitized responses and provider-reported billing."""
 
 from pathlib import Path
-from typing import Annotated, ClassVar
+from typing import Annotated, ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -10,7 +10,7 @@ from coordit_ml.schema import BoundaryModel
 
 
 class BenchmarkConfig(BoundaryModel):
-    """A frozen eight-photo packet; explicit models, one sample each, no training or model fallback."""
+    """A frozen public-photo packet; explicit models, one sample each, no training or model fallback."""
 
     receipt: Path
     receipt_sha256: str
@@ -24,6 +24,7 @@ class BenchmarkConfig(BoundaryModel):
     input_token_reservation: Annotated[int, Field(ge=4096, le=32768)] = 8192
     spending_limit_usd: Annotated[float, Field(gt=0, le=10)] = 5
     seed: int = 20261028
+    images_per_model: Annotated[int, Field(ge=1, le=40)] = 8
 
 
 class CatalogPrice(BaseModel):
@@ -104,11 +105,19 @@ class ApiChoice(BaseModel):
     native_finish_reason: str | None = None
 
 
+class ApiErrorMetadata(BaseModel):
+    """Persist documented budget categories only; never vendor messages or arbitrary metadata."""
+
+    model_config: ClassVar[ConfigDict] = ConfigDict(frozen=True, extra="ignore")
+    limit_source: Literal["openrouter_in_flight_budget", "openrouter_key_limit", "openrouter_credits"] | None = None
+
+
 class ApiError(BaseModel):
     """Keep numeric/string error identity only; vendor messages may contain credential fragments."""
 
     model_config: ClassVar[ConfigDict] = ConfigDict(frozen=True, extra="ignore")
     code: str | int | None = None
+    metadata: ApiErrorMetadata | None = None
 
 
 class ApiResponse(BaseModel):
@@ -137,3 +146,4 @@ class ApiAttempt(BoundaryModel):
     response: ApiResponse | None
     annotation: ApiAnnotation | None
     failure: str | None
+    retry_after_seconds: Annotated[int, Field(ge=0, le=3600)] | None = None

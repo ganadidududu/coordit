@@ -26,6 +26,7 @@ class ScheduledPhoto:
 
     model: str
     photo: PublicPhoto
+    payload: bytes | None = None
 
 
 def parse_annotation(response: ApiResponse, photo: PublicPhoto) -> tuple[ApiAnnotation | None, str | None]:
@@ -48,7 +49,7 @@ def parse_annotation(response: ApiResponse, photo: PublicPhoto) -> tuple[ApiAnno
 def make_attempt(client: httpx2.Client, item: ScheduledPhoto, config: BenchmarkConfig) -> ApiAttempt:
     """A start receipt is durable before egress; a crash cannot silently trigger a duplicate paid request."""
     model, photo = item.model, item.photo
-    payload = request_bytes(model, photo, config)
+    payload = item.payload if item.payload is not None else request_bytes(model, photo, config)
     request_hash = hashlib.sha256(payload).hexdigest()
     started = datetime.now(UTC).isoformat()
     filename = model.replace("/", "--") + "-" + photo.case.case_id
@@ -57,6 +58,7 @@ def make_attempt(client: httpx2.Client, item: ScheduledPhoto, config: BenchmarkC
             "requested_model": model, "case_id": photo.case.case_id, "started_utc": started,
             "request_sha256": request_hash, "image_sha256": photo.case.image_sha256,
         }) + "\n")
+    retry_after: int | None = None
     status: int | None = None
     envelope: ApiResponse | None = None
     annotation: ApiAnnotation | None = None
@@ -71,6 +73,9 @@ def make_attempt(client: httpx2.Client, item: ScheduledPhoto, config: BenchmarkC
         )
         elapsed = time.perf_counter() - before
         status, response_hash = response.status_code, hashlib.sha256(response.content).hexdigest()
+        header = response.headers.get("Retry-After", "")
+        if header.isdecimal() and int(header) <= 3600:
+            retry_after = int(header)
         try:
             envelope = ApiResponse.model_validate_json(response.content)
         except ValidationError:
@@ -86,7 +91,7 @@ def make_attempt(client: httpx2.Client, item: ScheduledPhoto, config: BenchmarkC
         model_requested=model, case_id=photo.case.case_id, image_sha256=photo.case.image_sha256,
         started_utc=started, elapsed_seconds=elapsed, http_status=status,
         request_sha256=request_hash, response_sha256=response_hash, response=envelope,
-        annotation=annotation, failure=failure,
+        annotation=annotation, failure=failure, retry_after_seconds=retry_after,
     )
     with (config.output / (filename + ".result.json")).open("x") as stream:
         _ = stream.write(attempt.model_dump_json(indent=2) + "\n")

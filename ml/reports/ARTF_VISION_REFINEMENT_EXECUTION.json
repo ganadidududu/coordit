@@ -1,0 +1,54 @@
+{
+  "additional_calls_stopped_by_user": true,
+  "further_paid_calls_authorized": false,
+  "unique_public_artf_images": 24,
+  "development_images": 8,
+  "heldout_scene_images": 16,
+  "aihub_images_transmitted": 0,
+  "new_training_images": 0,
+  "new_checkpoints": 0,
+  "phase_3_changed": false,
+  "requests": 88,
+  "successful_inference_calls": 86,
+  "provider_usage_cost_usd": "1.39460650",
+  "billing_scope": "Sum of locally saved response usage.cost; no independent account-ledger reconciliation; preflight rejects have no usage cost",
+  "preregistered_call_limit": 80,
+  "protocol_deviation": "Second development output-frame comparison added 16 calls; final run stopped with 86 successful calls and 2 preflight rejects. No holdout-result-driven tuning.",
+  "runs": [
+    {
+      "directory": "development-review",
+      "requests": 16,
+      "successes": 16,
+      "rejected": 0,
+      "provider_usage_cost_usd": "0.28653800"
+    },
+    {
+      "directory": "development-original-review",
+      "requests": 16,
+      "successes": 16,
+      "rejected": 0,
+      "provider_usage_cost_usd": "0.27869100"
+    },
+    {
+      "directory": "holdout-baseline",
+      "requests": 32,
+      "successes": 32,
+      "rejected": 0,
+      "provider_usage_cost_usd": "0.50480475"
+    },
+    {
+      "directory": "holdout-original-review",
+      "requests": 1,
+      "successes": 0,
+      "rejected": 1,
+      "provider_usage_cost_usd": "0"
+    },
+    {
+      "directory": "holdout-original-recovered",
+      "requests": 23,
+      "successes": 22,
+      "rejected": 1,
+      "provider_usage_cost_usd": "0.32457275"
+    }
+  ]
+}
