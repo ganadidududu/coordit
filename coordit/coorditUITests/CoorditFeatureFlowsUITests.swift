@@ -139,7 +139,7 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         XCTAssertFalse(element("coordit-thread-charge-balance", in: app).exists)
     }
 
-    func testGuestStartGrantsThreeThreadsAndSurvivesColdRelaunch() throws {
+    func testGuestStartHasNoWelcomeGrantAndSurvivesColdRelaunch() throws {
         addTeardownBlock {
             let cleanup = self.launchApp(
                 at: "splash",
@@ -160,6 +160,7 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         let guest = started.buttons["splash-auth-guest"]
         XCTAssertTrue(guest.waitForExistence(timeout: 5))
         guest.tap()
+        started.alerts["비회원으로 둘러볼까요?"].buttons["비회원으로 둘러보기"].tap()
         assertScreen("main04", in: started)
         started.terminate()
 

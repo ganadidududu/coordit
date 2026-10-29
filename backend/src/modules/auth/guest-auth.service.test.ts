@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { AuthResponse } from "./auth.service";
 import {
   claimGuestWelcome,
+  guestClaimStates,
   createGuestSession,
   type DeviceWelcomeRegistry,
   type GuestClaimState,
@@ -43,88 +44,22 @@ describe("guest authentication", () => {
     ]);
   });
 
-  it("grants exactly three threads when a device has not redeemed the welcome offer", async () => {
-    // Given
+  it.each(guestClaimStates)("does not grant or query DeviceCheck for %s guests", async (state) => {
     const events: string[] = [];
-    const repository = welcomeRepository("pending", events, 3);
-    const registry = deviceRegistry(false, events);
-
-    // When
-    const result = await claimGuestWelcome(
-      guestSession.user.id,
-      "device-token",
-      { repository, deviceRegistry: registry }
-    );
-
-    // Then
-    expect(result).toEqual({ availableThreads: 3, status: "granted" });
-    expect(events).toEqual(["prepare", "device-query", "eligible", "device-mark", "complete", "release"]);
-  });
-
-  it("does not grant more threads when the device already redeemed the offer", async () => {
-    // Given
-    const events: string[] = [];
-    const repository = welcomeRepository("pending", events, 0);
-    const registry = deviceRegistry(true, events);
-
-    // When
-    const result = await claimGuestWelcome(
-      guestSession.user.id,
-      "device-token",
-      { repository, deviceRegistry: registry }
-    );
-
-    // Then
-    expect(result).toEqual({ availableThreads: 0, status: "already_claimed" });
-    expect(events).toEqual(["prepare", "device-query", "deny", "balance", "release"]);
-  });
-
-  it("rechecks an interrupted eligible claim instead of granting after another device redemption", async () => {
-    // Given
-    const events: string[] = [];
-    const repository = welcomeRepository("eligible", events, 0);
-    const registry = deviceRegistry(true, events);
-
-    // When
-    const result = await claimGuestWelcome(
-      guestSession.user.id,
-      "device-token",
-      { repository, deviceRegistry: registry }
-    );
-
-    // Then
-    expect(result).toEqual({ availableThreads: 0, status: "already_claimed" });
-    expect(events).toEqual(["prepare", "device-query", "deny", "balance", "release"]);
-  });
-
-  it("returns the spent balance without calling Apple or topping up on guest reentry", async () => {
-    const events: string[] = [];
-    const result = await claimGuestWelcome(guestSession.user.id, "device-token", {
-      repository: welcomeRepository("granted", events, 2), deviceRegistry: deviceRegistry(true, events),
+    const result = await claimGuestWelcome(guestSession.user.id, "old-client-token", {
+      repository: welcomeRepository(state, events, 0), deviceRegistry: deviceRegistry(false, events),
     });
-    expect(result).toEqual({ availableThreads: 2, status: "already_claimed" });
-    expect(events).toEqual(["prepare", "balance"]);
+    expect(result).toEqual({ availableThreads: 0, status: "already_claimed" });
+    expect(events).toEqual(["balance"]);
   });
 
-  it("never credits on Apple failure and releases the global gate", async () => {
+  it("preserves earned guest threads", async () => {
     const events: string[] = [];
-    await expect(claimGuestWelcome(guestSession.user.id, "device-token", {
-      repository: welcomeRepository("pending", events, 0),
-      deviceRegistry: {
-        ...deviceRegistry(false, events),
-        markWelcomeClaimed: async () => { throw new TypeError("Apple unavailable"); },
-      },
-    })).rejects.toThrow("Apple unavailable");
-    expect(events).toEqual(["prepare", "device-query", "eligible", "release"]);
-  });
-
-  it("marks a legacy device as redeemed while preserving its spent balance", async () => {
-    const events: string[] = [];
-    const result = await claimGuestWelcome(guestSession.user.id, "device-token", {
-      repository: welcomeRepository("legacy", events, 2), deviceRegistry: deviceRegistry(false, events),
+    const result = await claimGuestWelcome(guestSession.user.id, "token", {
+      repository: welcomeRepository("granted", events, 5), deviceRegistry: deviceRegistry(true, events),
     });
-    expect(result).toEqual({ availableThreads: 2, status: "already_claimed" });
-    expect(events).toEqual(["prepare", "device-mark", "complete", "release"]);
+    expect(result.availableThreads).toBe(5);
+    expect(events).toEqual(["balance"]);
   });
 });
 

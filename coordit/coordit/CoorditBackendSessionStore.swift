@@ -241,9 +241,9 @@ final class CoorditBackendSessionStore: ObservableObject {
             try? tokenStore.save(guestSession)
             session = guestSession
             if Self.shouldSimulateGuestBootstrap {
-                statusText = "비회원으로 시작했어요."
+                statusText = "비회원으로 둘러보는 중이에요."
                 isWarning = false
-                return 3
+                return 0
             }
         }
 #endif
@@ -286,22 +286,18 @@ final class CoorditBackendSessionStore: ObservableObject {
                 )
             }
 #endif
-            let deviceToken = try await deviceTokenProvider()
-            guard generation == authenticationGeneration, session?.user.id == activeSession.user.id else { return nil }
-            let welcome = try await authenticatedValue { token in
-                try await client.claimGuestWelcome(token: token, deviceToken: deviceToken)
+            let balance = try await authenticatedValue { token in
+                try await client.threadBalance(token: token)
             }
             guard generation == authenticationGeneration, session?.user.id == activeSession.user.id else { return nil }
-            statusText = welcome.status == "granted"
-                ? "첫 이용 실타래 3개를 받았어요."
-                : "비회원으로 시작했어요."
+            statusText = "비회원으로 둘러보는 중이에요. 광고를 보고 실타래를 충전할 수 있어요."
             isWarning = false
-            return welcome.availableThreads
+            return balance.availableThreads
         } catch {
             guard generation == authenticationGeneration, session?.user.id == activeSession.user.id else { return nil }
             let availableThreads = await fetchThreadBalance() ?? 0
             guard generation == authenticationGeneration, session?.user.id == activeSession.user.id else { return nil }
-            statusText = "비회원 로그인은 완료됐어요. 실타래 지급만 잠시 후 다시 시도해주세요."
+            statusText = "비회원으로 시작했어요. 실타래 잔액을 불러오지 못해 잠시 후 다시 확인할게요."
             isWarning = true
             return availableThreads
         }

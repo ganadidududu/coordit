@@ -12,6 +12,7 @@ struct CoorditSplashAuthenticationSheet: View {
     @State private var mode: AuthenticationMode = .providers
     @State private var email = ""
     @State private var password = ""
+    @State private var showsGuestNotice = false
     @FocusState private var focusedField: AuthenticationField?
 
     var body: some View {
@@ -25,7 +26,7 @@ struct CoorditSplashAuthenticationSheet: View {
 
                 Text(requiresAccountLink
                      ? "실타래와 옷장, 분석 기록을 그대로 이어가요.\nApple 또는 Google 계정을 연결해 주세요."
-                     : mode == .providers ? "비회원으로 시작하거나 계정을 연결하세요." : "이메일과 비밀번호를 입력하세요.")
+                     : mode == .providers ? "Google·Apple로 처음 가입하면 실타래 3개를 드려요." : "이메일과 비밀번호를 입력하세요.")
                     .font(CoorditTypography.gmarketMedium(size: CoorditSplashAuthenticationDesign.subtitleSize, relativeTo: .subheadline))
                     .foregroundStyle(Main01DesignTokens.Colors.chrome.opacity(0.6))
                     .multilineTextAlignment(.center)
@@ -92,6 +93,18 @@ struct CoorditSplashAuthenticationSheet: View {
         .presentationCornerRadius(CoorditSplashAuthenticationDesign.sheetCornerRadius)
         .interactiveDismissDisabled(backendSession.isWorking)
         .preferredColorScheme(.light)
+        .alert("비회원으로 둘러볼까요?", isPresented: $showsGuestNotice) {
+            Button("로그인하기", role: .cancel) { }
+            Button("비회원으로 둘러보기") {
+                Task {
+                    guard let balance = await backendSession.bootstrapGuestIfNeeded() else { return }
+                    onGuestAuthenticated(balance)
+                    dismiss()
+                }
+            }
+        } message: {
+            Text("Google·Apple로 처음 가입하면 실타래 3개를 드려요. 비회원에게는 기본 실타래가 지급되지 않지만, 광고를 보고 충전할 수 있어요.")
+        }
         .task {
             guard backendSession.shouldAutomaticallyAuthenticateAppleForUITest else { return }
             await authenticate { await backendSession.loginWithApple() }
@@ -117,12 +130,8 @@ struct CoorditSplashAuthenticationSheet: View {
             }
 
             if !requiresAccountLink {
-                providerButton(title: "비회원으로 계속하기", identifier: "splash-auth-guest", mark: .guest) {
-                    Task {
-                        guard let balance = await backendSession.bootstrapGuestIfNeeded() else { return }
-                        onGuestAuthenticated(balance)
-                        dismiss()
-                    }
+                providerButton(title: "비회원으로 둘러보기", identifier: "splash-auth-guest", mark: .guest) {
+                    showsGuestNotice = true
                 }
 
                 secondaryActionButton(title: "이메일로 로그인", identifier: "splash-auth-email") {

@@ -135,24 +135,21 @@ describe("POST /auth/guest/welcome", () => {
     // Then: the existing balance is preserved without querying Apple or topping up.
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ availableThreads: 2, status: "already_claimed" });
-    expect(spies.events).toEqual(["prepare", "balance"]);
+    expect(spies.events).toEqual(["balance"]);
     expect(spies.complete).not.toHaveBeenCalled();
     expect(spies.query).not.toHaveBeenCalled();
     expect(spies.mark).not.toHaveBeenCalled();
   });
 
-  it("credits three threads only after a fresh device is marked redeemed", async () => {
-    // Given: neither the guest nor the device has redeemed the welcome grant.
-    const spies = stubWelcomeDependencies("pending", 3);
-    // When: the guest sends a valid current DeviceCheck token.
+  it("leaves a new guest at zero even with a fresh device token", async () => {
+    const spies = stubWelcomeDependencies("pending", 0);
     const response = await requestWelcome("fresh-device-token");
-    // Then: marking the device precedes one atomic credit and the gate is released.
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ availableThreads: 3, status: "granted" });
-    expect(spies.events).toEqual(["prepare", "device-query", "eligible", "device-mark", "complete", "release"]);
-    expect(spies.complete).toHaveBeenCalledOnce();
-    expect(spies.query).toHaveBeenCalledWith("fresh-device-token");
-    expect(spies.mark).toHaveBeenCalledWith("fresh-device-token");
+    expect(await response.json()).toEqual({ availableThreads: 0, status: "already_claimed" });
+    expect(spies.events).toEqual(["balance"]);
+    expect(spies.complete).not.toHaveBeenCalled();
+    expect(spies.query).not.toHaveBeenCalled();
+    expect(spies.mark).not.toHaveBeenCalled();
   });
 
   it.each([" ", "x".repeat(8193)])("rejects a blank or oversized token before Apple verification", async (token) => {
@@ -167,23 +164,14 @@ describe("POST /auth/guest/welcome", () => {
     expect(spies.query).not.toHaveBeenCalled();
   });
 
-  it.each(["query", "mark"] as const)("returns 5xx and releases the gate when Apple %s fails", async (failurePoint) => {
-    // Given: Apple becomes unavailable at one of the two verification operations.
-    const spies = stubWelcomeDependencies("pending", 3);
-    const failure = async (): Promise<never> => {
-      spies.events.push(failurePoint === "query" ? "device-query" : "device-mark");
-      throw createHttpError(502, "DeviceCheck is unavailable");
-    };
+  it.each(["query", "mark"] as const)("guest balance remains available when DeviceCheck %s is down", async (failurePoint) => {
+    const spies = stubWelcomeDependencies("pending", 2);
+    const failure = async (): Promise<never> => { throw createHttpError(502, "DeviceCheck is unavailable"); };
     if (failurePoint === "query") spies.query.mockImplementation(failure);
     else spies.mark.mockImplementation(failure);
-    // When: the valid authenticated request reaches the failing Apple operation.
     const response = await requestWelcome("device-token");
-    // Then: no credit is created and the lease is released for a safe retry.
-    expect(response.status).toBe(502);
-    expect(spies.complete).not.toHaveBeenCalled();
-    expect(spies.release).toHaveBeenCalledOnce();
-    expect(spies.events).toEqual(failurePoint === "query"
-      ? ["prepare", "device-query", "release"]
-      : ["prepare", "device-query", "eligible", "device-mark", "release"]);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ availableThreads: 2, status: "already_claimed" });
+    expect(spies.events).toEqual(["balance"]);
   });
 });

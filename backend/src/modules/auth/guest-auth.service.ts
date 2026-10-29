@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import type { AuthResponse } from "./auth.service";
 
 export const guestClaimStates = ["pending", "eligible", "granted", "denied", "legacy"] as const;
@@ -41,52 +40,12 @@ export const createGuestSession = async (
   return session;
 };
 
+// Keep the endpoint compatible with older clients without granting guest credit.
 export const claimGuestWelcome = async (
   userId: string,
-  deviceToken: string,
+  _deviceToken: string,
   dependencies: GuestWelcomeDependencies
-): Promise<GuestWelcomeResult> => {
-  const leaseId = randomUUID();
-  const repository = dependencies.repository;
-  const claimState = await repository.prepareClaim(userId, leaseId);
-  switch (claimState) {
-    case "legacy": try {
-      await dependencies.deviceRegistry.markWelcomeClaimed(deviceToken);
-      return {
-        availableThreads: await repository.completeClaim(userId, leaseId),
-        status: "already_claimed",
-      };
-    } finally {
-      await repository.releaseLease(leaseId);
-    }
-    case "eligible":
-    case "pending": try {
-      const claimed = await dependencies.deviceRegistry.hasClaimedWelcome(deviceToken);
-      if (claimed) {
-        await repository.denyClaim(userId, leaseId);
-        return {
-          availableThreads: await repository.getBalance(userId),
-          status: "already_claimed",
-        };
-      }
-      await repository.markEligible(userId, leaseId);
-      await dependencies.deviceRegistry.markWelcomeClaimed(deviceToken);
-      return {
-        availableThreads: await repository.completeClaim(userId, leaseId),
-        status: "granted",
-      };
-    } finally {
-      await repository.releaseLease(leaseId);
-    }
-    case "granted":
-    case "denied":
-      return {
-        availableThreads: await repository.getBalance(userId),
-        status: "already_claimed",
-      };
-    default: {
-      const exhaustiveClaimState: never = claimState;
-      return exhaustiveClaimState;
-    }
-  }
-};
+): Promise<GuestWelcomeResult> => ({
+  availableThreads: await dependencies.repository.getBalance(userId),
+  status: "already_claimed",
+});

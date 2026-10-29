@@ -232,11 +232,12 @@ final class CoorditGuestSessionRecoveryTests: XCTestCase {
         store.logout()
     }
 
-    func testAnonymousStartupChecksDeviceWelcomeAndKeepsLegacyRemainingBalance() async throws {
+    func testAnonymousStartupLoadsBalanceWithoutClaimingWelcome() async throws {
         let (store, _) = try makeStore(activeGuest: true)
         await store.bootstrap()
         XCTAssertEqual(store.session?.user.id, "original-guest")
-        XCTAssertTrue(RecoveryURLProtocol.state.paths.contains("/auth/guest/welcome"))
+        XCTAssertFalse(RecoveryURLProtocol.state.paths.contains("/auth/guest/welcome"))
+        XCTAssertTrue(RecoveryURLProtocol.state.paths.contains("/thread-wallet/balance"))
         XCTAssertFalse(RecoveryURLProtocol.state.paths.contains("/auth/guest"))
         let balance = await store.fetchThreadBalance()
         XCTAssertEqual(balance, 2)
