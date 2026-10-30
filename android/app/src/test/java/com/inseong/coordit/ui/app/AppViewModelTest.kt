@@ -355,7 +355,88 @@ class AppViewModelTest {
         assertEquals(0, api.statusCalls)
     }
 
+    @Test fun feedbackConsentIsUnknownAndDisabledUntilLoaded() = runTest {
+        store.value = savedSession
+        val loaded = CompletableDeferred<UserConsents>()
+        api.consentResult = { loaded.await() }
+        val model = model(); runCurrent()
+        model.refreshFeedbackConsent()
+        assertNull(model.state.value.feedbackConsent.accepted)
+        assertFalse(model.state.value.feedbackConsent.canChange)
+        runCurrent()
+        loaded.complete(consentResponse(true)); runCurrent()
+        assertEquals(true, model.state.value.feedbackConsent.accepted)
+        assertTrue(model.state.value.feedbackConsent.canChange)
+    }
+
+    @Test fun feedbackConsentPatchDisablesDuplicateEditsAndUsesServerValue() = runTest {
+        store.value = savedSession
+        val saved = CompletableDeferred<UserConsents>()
+        api.updateConsentResult = { saved.await() }
+        val model = model(); runCurrent()
+        model.refreshFeedbackConsent(); runCurrent()
+        model.saveFeedbackConsent(false)
+        assertEquals(false, model.state.value.feedbackConsent.accepted)
+        assertFalse(model.state.value.feedbackConsent.canChange)
+        model.saveFeedbackConsent(true); runCurrent()
+        assertEquals(listOf(false), api.consentUpdates)
+        saved.complete(consentResponse(true)); runCurrent()
+        assertEquals(true, model.state.value.feedbackConsent.accepted)
+        assertTrue(model.state.value.feedbackConsent.canChange)
+    }
+
+    @Test fun failedFeedbackPatchRevertsToLoadedValue() = runTest {
+        store.value = savedSession
+        api.updateConsentResult = { throw http(400) }
+        val model = model(); runCurrent()
+        model.refreshFeedbackConsent(); runCurrent()
+        model.saveFeedbackConsent(false); runCurrent()
+        assertEquals(true, model.state.value.feedbackConsent.accepted)
+        assertTrue(model.state.value.feedbackConsent.canChange)
+        assertNotNull(model.state.value.feedbackConsent.message)
+    }
+
+    @Test fun unavailableFeedbackLoadNeverInventsConsent() = runTest {
+        store.value = savedSession
+        val model = model(); runCurrent()
+        listOf(http(404), IOException("offline")).forEach { error ->
+            api.consentResult = { throw error }
+            model.refreshFeedbackConsent(); runCurrent()
+            assertNull(model.state.value.feedbackConsent.accepted)
+            assertFalse(model.state.value.feedbackConsent.canChange)
+            assertNotNull(model.state.value.feedbackConsent.message)
+            model.saveFeedbackConsent(true); runCurrent()
+            assertTrue(api.consentUpdates.isEmpty())
+        }
+    }
+
+    @Test fun unavailableFeedbackPatchRevertsAndDisablesConsent() = runTest {
+        store.value = savedSession
+        val model = model(); runCurrent()
+        listOf(http(404), IOException("offline")).forEach { error ->
+            model.refreshFeedbackConsent(); runCurrent()
+            api.updateConsentResult = { throw error }
+            model.saveFeedbackConsent(false); runCurrent()
+            assertEquals(true, model.state.value.feedbackConsent.accepted)
+            assertFalse(model.state.value.feedbackConsent.canChange)
+            assertNotNull(model.state.value.feedbackConsent.message)
+        }
+    }
+
+    @Test fun logoutCancelsPendingFeedbackConsentLoad() = runTest {
+        store.value = savedSession
+        val loaded = CompletableDeferred<UserConsents>()
+        api.consentResult = { loaded.await() }
+        val model = model(); runCurrent()
+        model.refreshFeedbackConsent(); runCurrent()
+        model.logout(); runCurrent()
+        loaded.complete(consentResponse(true)); runCurrent()
+        assertEquals(FeedbackConsentState(), model.state.value.feedbackConsent)
+        assertNull(session.session.value)
+    }
+
     companion object {
+        private fun consentResponse(accepted: Boolean) = UserConsents(mapOf("fit_data_improvement" to UserConsent(accepted, "2026-07-07", null)))
         private val savedSession = AuthSession("access", "refresh", AuthUser("user", "test@example.com"))
         private val accountProfile = UserProfile("user", "test@example.com", "코디")
         private val onboardingRequest = OnboardingRequest("코디", consents = mapOf("terms" to OnboardingRequest.Consent(true, "1.0")))
@@ -375,6 +456,14 @@ class AppViewModelTest {
         override suspend fun markCompleted() { completed = true }
     }
     private class AccountApi : CoorditApi {
+        var consentResult: suspend () -> UserConsents = { consentResponse(true) }
+        var updateConsentResult: suspend (UpdateConsentsRequest) -> UserConsents = { consentResponse(it.consents.getValue("fit_data_improvement").accepted) }
+        val consentUpdates = mutableListOf<Boolean>()
+        override suspend fun consents(authorization: String) = consentResult()
+        override suspend fun updateConsents(authorization: String, request: UpdateConsentsRequest): UserConsents {
+            consentUpdates.add(request.consents.getValue("fit_data_improvement").accepted)
+            return updateConsentResult(request)
+        }
         var refreshResult: suspend () -> AuthSession = { savedSession }
         var statusResult: suspend () -> OnboardingStatus = { OnboardingStatus(true) }
         var profileResult: suspend () -> UserProfile = { accountProfile }

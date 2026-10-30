@@ -13,6 +13,8 @@ internal class ClosetMemoryStore : SessionStore {
     override suspend fun clear() { value = null }
 }
 internal class ClosetAuthApi : CoorditApi {
+    override suspend fun consents(authorization: String): UserConsents = error("not used")
+    override suspend fun updateConsents(authorization: String, request: UpdateConsentsRequest): UserConsents = error("not used")
     private val profile = UserProfile("closet-test-user", "closet@example.invalid", "옷장테스트")
     override suspend fun health() = BackendHealth(true, "test")
     override suspend fun loginGoogle(request: SocialAuthRequest) = AuthSession("test-access", "test-refresh", AuthUser(profile.id, profile.email))

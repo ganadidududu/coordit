@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -40,9 +41,10 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
     val photos = remember(state.userId) { com.inseong.coordit.ui.closet.ClosetPhotos(context.applicationContext, state.userId) }
     val nav = rememberNavController()
     val scope = rememberCoroutineScope()
-    var accountVisible by remember { mutableStateOf(false) }
+    var accountVisible by rememberSaveable { mutableStateOf(false) }
     var unavailableFeature by remember { mutableStateOf<String?>(null) }
-    var openThreadCharge by remember { mutableStateOf(false) }
+    var openThreadCharge by rememberSaveable { mutableStateOf(false) }
+    var navigatedStage by rememberSaveable { mutableStateOf<AppStage?>(null) }
     var pendingShare by remember { mutableStateOf<String?>(null) }
     fun navigateFeature(route: String) {
         accountVisible = false
@@ -53,12 +55,16 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
         if (fitLabModel != null && !fitState.busy) navigateFeature("FitLab")
     }
     LaunchedEffect(state.stage) {
-        if (state.stage == AppStage.Authentication || state.stage == AppStage.Welcome) photos.clear()
-        accountVisible = false
-        unavailableFeature = null
-        nav.navigate(state.stage.name) {
-            popUpTo(nav.graph.id) { inclusive = true }
-            launchSingleTop = true
+        if (navigatedStage != state.stage) {
+            if (state.stage == AppStage.Authentication || state.stage == AppStage.Welcome) photos.clear()
+            accountVisible = false
+            openThreadCharge = false
+            unavailableFeature = null
+            nav.navigate(state.stage.name) {
+                popUpTo(nav.graph.id) { inclusive = true }
+                launchSingleTop = true
+            }
+            navigatedStage = state.stage
         }
     }
     fun acceptShare(url: String) {
@@ -161,7 +167,8 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
             onRefreshAdPrivacy = model::refreshAdPrivacy, onShowAdPrivacyOptions = model::showAdPrivacyOptions,
             onSaveProfile = model::saveProfile, onSaveBody = model::saveBody,
             onLogout = onLogout, onDeleteAccount = onDeleteAccount, onClearMessage = model::clearSettingsMessage,
-            initiallyShowThreadCharge = openThreadCharge)
+            initiallyShowThreadCharge = openThreadCharge, feedbackConsent = state.feedbackConsent,
+            onRefreshFeedbackConsent = model::refreshFeedbackConsent, onSaveFeedbackConsent = model::saveFeedbackConsent)
     }
     unavailableFeature?.let { feature ->
         Dialog(onDismissRequest = { unavailableFeature = null }) {

@@ -164,6 +164,37 @@ class SessionRepositoryTest {
         assertEquals("DELETE", server.takeRequest().method)
         assertNull(store.value); assertNull(repository.session.value)
     }
+    @Test fun feedbackConsentUsesAuthenticatedGetAndPatchWithoutChangingMarketing() = runTest {
+        server.enqueue(MockResponse().setBody(authJson))
+        repository.loginGoogle("token", "nonce"); server.takeRequest()
+        val json = """{"consents":{"fit_data_improvement":{"accepted":true,"version":"2026-07-07","updatedAt":"2026-10-29T00:00:00Z"},"marketing":{"accepted":false,"version":"2026-07-07","updatedAt":null}}}"""
+        server.enqueue(MockResponse().setBody(json))
+        assertTrue(repository.loadFeedbackConsent())
+        server.takeRequest().also {
+            assertEquals("GET", it.method); assertEquals("/users/me/consents", it.path)
+            assertEquals("Bearer new-access", it.getHeader("Authorization"))
+        }
+        val decoded = CoorditJson.create().fromJson(json, UserConsents::class.java)
+        assertEquals("2026-07-07", decoded.consents.getValue("fit_data_improvement").version)
+        assertEquals("2026-10-29T00:00:00Z", decoded.consents.getValue("fit_data_improvement").updatedAt)
+        assertNull(decoded.consents.getValue("marketing").updatedAt)
+        server.enqueue(MockResponse().setBody(json.replace("\"accepted\":true", "\"accepted\":false")))
+        assertFalse(repository.updateFeedbackConsent(false))
+        server.takeRequest().also {
+            assertEquals("PATCH", it.method); assertEquals("/users/me/consents", it.path)
+            assertEquals("Bearer new-access", it.getHeader("Authorization"))
+            val body = JsonParser.parseString(it.body.readUtf8()).asJsonObject
+            assertEquals(JsonParser.parseString("""{"consents":{"fit_data_improvement":{"accepted":false}}}"""), body)
+        }
+    }
+    @Test fun missingFeedbackConsentIsNotInvented() = runTest {
+        server.enqueue(MockResponse().setBody(authJson))
+        repository.loginGoogle("token", "nonce"); server.takeRequest()
+        listOf("""{"consents":{}}""", """{"consents":{"fit_data_improvement":{"accepted":null}}}""").forEach {
+            server.enqueue(MockResponse().setBody(it))
+            try { repository.loadFeedbackConsent(); fail("Expected missing consent rejection") } catch (_: java.io.IOException) { }
+        }
+    }
     private class MemoryStore : SessionStore {
         var value: AuthSession? = null
         var readFailure: Exception? = null

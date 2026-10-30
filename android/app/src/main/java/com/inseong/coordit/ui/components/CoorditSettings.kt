@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.*
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.inseong.coordit.ui.theme.*
 
@@ -27,15 +29,16 @@ fun SettingsCard(scale: Float, modifier: Modifier = Modifier, content: @Composab
 }
 
 @Composable
-fun SettingsDetailRow(title: String, scale: Float, modifier: Modifier = Modifier, subtitle: String? = null,
+fun SettingsDetailRow(title: String, scale: Float, modifier: Modifier = Modifier, subtitle: String? = null, value: String? = null,
     trailing: @Composable RowScope.() -> Unit = {}) {
     Row(modifier.fillMaxWidth().height((55 * scale).dp).padding(horizontal = (13 * scale).dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy((12 * scale).dp)) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy((3 * scale).dp)) {
+        Column(if (value == null) Modifier.weight(1f) else Modifier, verticalArrangement = Arrangement.spacedBy((3 * scale).dp)) {
             CoorditText(title, CoorditTypography.gmarketBold(12 * scale).copy(color = Color.Black))
             if (subtitle != null) CoorditText(subtitle, CoorditTypography.gmarketMedium(9 * scale).copy(color = AppColors.muted))
         }
-        trailing()
+        if (value != null) Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) { SettingsValuePill(value, scale) }
+        else trailing()
     }
 }
 
@@ -48,18 +51,18 @@ fun SettingsDivider(scale: Float, modifier: Modifier = Modifier) {
 fun SettingsValuePill(text: String, scale: Float, modifier: Modifier = Modifier) {
     Box(modifier.height((26 * scale).dp).background(AppColors.settingsValue, CircleShape)
         .padding(horizontal = (10 * scale).dp), contentAlignment = Alignment.Center) {
-        CoorditText(text, CoorditTypography.gmarketBold(9 * scale))
+        BasicText(text, style = CoorditTypography.gmarketBold(9 * scale), maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
 @Composable
-fun SettingsToggle(isOn: Boolean, onValueChange: (Boolean) -> Unit, label: String, scale: Float, modifier: Modifier = Modifier) {
-    Pressable({ onValueChange(!isOn) }, modifier.size((44 * scale).dp).semantics {
-        contentDescription = label; stateDescription = if (isOn) "켜짐" else "꺼짐"; role = Role.Switch
-    }) {
+fun SettingsToggle(isOn: Boolean?, onValueChange: (Boolean) -> Unit, label: String, scale: Float, modifier: Modifier = Modifier, enabled: Boolean = true) {
+    Pressable({ onValueChange(isOn != true) }, modifier.size((44 * scale).dp).semantics {
+        contentDescription = label; stateDescription = when (isOn) { true -> "켜짐"; false -> "꺼짐"; null -> "확인 불가" }; role = Role.Switch
+    }, enabled = enabled && isOn != null) {
         Box(Modifier.size((42 * scale).dp, (24 * scale).dp)
-            .background(if (isOn) AppColors.ink else AppColors.toggleOff, CircleShape).padding((2 * scale).dp),
-            contentAlignment = if (isOn) Alignment.CenterEnd else Alignment.CenterStart) {
+            .background(if (isOn == true) AppColors.ink else AppColors.toggleOff, CircleShape).padding((2 * scale).dp),
+            contentAlignment = when (isOn) { true -> Alignment.CenterEnd; false -> Alignment.CenterStart; null -> Alignment.Center }) {
             Box(Modifier.size((20 * scale).dp).coorditShadow(Color.Black.copy(alpha = .12f), (1.5f * scale).dp, CircleShape, (1 * scale).dp).background(Color.White, CircleShape))
         }
     }

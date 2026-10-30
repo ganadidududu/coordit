@@ -17,6 +17,8 @@ interface CoorditApi {
     @POST("auth/refresh") suspend fun refresh(@Body request: RefreshAuthRequest): AuthSession
     @GET("users/me") suspend fun me(@Header("Authorization") authorization: String): UserProfile
     @PATCH("users/me") suspend fun updateMe(@Header("Authorization") authorization: String, @Body request: UpdateProfileRequest): UserProfile
+    @GET("users/me/consents") suspend fun consents(@Header("Authorization") authorization: String): UserConsents
+    @PATCH("users/me/consents") suspend fun updateConsents(@Header("Authorization") authorization: String, @Body request: UpdateConsentsRequest): UserConsents
     @DELETE("users/me") suspend fun deleteMe(@Header("Authorization") authorization: String)
     @GET("auth/onboarding/status") suspend fun onboardingStatus(@Header("Authorization") authorization: String): OnboardingStatus
     @POST("auth/onboarding") suspend fun completeOnboarding(@Header("Authorization") authorization: String, @Body request: OnboardingRequest): OnboardingCompletion
