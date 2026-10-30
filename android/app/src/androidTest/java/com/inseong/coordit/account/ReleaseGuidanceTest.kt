@@ -37,8 +37,10 @@ class ReleaseGuidanceTest {
     private val fitApi = FitLabFixture()
     private val homeApi = ReleaseHomeApi()
     private var sharedConsumed = 0
+    private var currentFontScale = 1f
 
     private fun start(firstUse: Boolean, comparisonBalance: Int = 7, fontScale: Float = 1f, sharedUrl: String? = null) {
+        currentFontScale = fontScale
         val preferences = compose.activity.getSharedPreferences("coordit-first-use-guidance-v2", 0)
         preferences.edit().clear().apply()
         if (!firstUse) preferences.edit().putBoolean("closet-test-user.FitLab", true).putBoolean("closet-test-user.Closet", true).apply()
@@ -82,6 +84,7 @@ class ReleaseGuidanceTest {
             compose.onNodeWithTag("practice-hint").assertDoesNotExist()
             capture("login-home-no-guide")
             tap("coordit-main04-new-fit-button")
+            startIntroduction()
             compose.waitUntil(10_000) { fit.state.value.draft.isExample }
             compose.onNodeWithTag("usage-guide").assertDoesNotExist()
             compose.onNodeWithTag("fitlab-product-url").assertTextContains(FitLabExample.link)
@@ -97,6 +100,7 @@ class ReleaseGuidanceTest {
             compose.onNodeWithTag("coordit-screen-main04").assertIsDisplayed()
             compose.onNodeWithTag("usage-guide").assertDoesNotExist()
             tap("coordit-main04-closet-button")
+            startIntroduction()
             compose.waitUntil(10_000) { closet.state.value.draft.isExample }
             compose.onNodeWithTag("closet-url").assertTextContains(FitLabExample.link)
             capture("first-closet-entry")
@@ -124,6 +128,7 @@ class ReleaseGuidanceTest {
         try {
             start(true, comparisonBalance = 0)
             tap("coordit-main04-new-fit-button")
+            startIntroduction()
             compose.waitUntil(10_000) { fit.state.value.draft.isExample }
             tap("fitlab-url-import")
             compose.waitUntil(10_000) { !fit.state.value.busy }
@@ -170,6 +175,7 @@ class ReleaseGuidanceTest {
         try {
             start(true)
             tap("coordit-main04-new-fit-button")
+            startIntroduction()
             compose.waitUntil(10_000) { fit.state.value.draft.isExample }
             tap("practice-skip")
             compose.onNodeWithText("이번에는 건너뛰기").performClick()
@@ -203,6 +209,7 @@ class ReleaseGuidanceTest {
         try {
             val url = "https://shop.example/shared-product"
             start(true, sharedUrl = url)
+            startIntroduction()
             compose.waitUntil(10_000) { fit.state.value.draft.isExample }
             assertEquals(0, sharedConsumed)
             tap("practice-skip")
@@ -219,6 +226,7 @@ class ReleaseGuidanceTest {
         try {
             start(true, fontScale = 1.7f)
             tap("coordit-main04-new-fit-button")
+            startIntroduction()
             compose.waitUntil(10_000) { fit.state.value.draft.isExample }
             tap("fitlab-url-import")
             compose.waitUntil(10_000) { !fit.state.value.busy }
@@ -236,6 +244,46 @@ class ReleaseGuidanceTest {
             tap("fitlab-review-continue")
             compose.onNodeWithTag("fitlab-references").assertExists()
         } finally { compose.runOnUiThread { models.clear() } }
+    }
+
+    @Test fun deferringIntroductionPreservesSharedProductAndKeepsFeaturesIndependent() {
+        try {
+            val url = "https://shop.example/preserved-product"
+            start(true, sharedUrl = url)
+            compose.waitUntil(10_000) { compose.onAllNodesWithTag("practice-introduction").fetchSemanticsNodes().isNotEmpty() }
+            assertFalse(fit.state.value.draft.isExample)
+            capture("intro-fitlab-before-start")
+            tap("practice-intro-later")
+            compose.waitUntil(10_000) { sharedConsumed == 1 && !fit.state.value.busy }
+            assertEquals(url, fit.state.value.draft.productUrl)
+            assertFalse(fit.state.value.draft.isExample)
+            assertEquals(0, fitApi.productCalls)
+            capture("intro-deferred-shared-product")
+            compose.onNodeWithContentDescription("HOME").performClick()
+            tap("coordit-main04-new-fit-button")
+            compose.onNodeWithTag("practice-introduction").assertDoesNotExist()
+            compose.onNodeWithContentDescription("HOME").performClick()
+            tap("coordit-main04-closet-button")
+            compose.onNodeWithTag("practice-introduction").assertIsDisplayed()
+            assertFalse(closet.state.value.draft.isExample)
+            capture("intro-closet-before-start")
+            tap("practice-intro-later")
+            compose.onNodeWithTag("closet-overview").assertExists()
+            assertTrue(closetApi.requests.isEmpty())
+        } finally { compose.runOnUiThread { models.clear() } }
+    }
+
+    private fun startIntroduction() {
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("practice-introduction").fetchSemanticsNodes().isNotEmpty() }
+        assertFalse(fit.state.value.draft.isExample)
+        assertFalse(closet.state.value.draft.isExample)
+        val name = if (compose.onAllNodesWithText("옷장 등록, 예시로 함께 해볼까요?").fetchSemanticsNodes().isNotEmpty()) "first-closet-introduction" else "first-fitlab-introduction"
+        capture(name + if (currentFontScale > 1f) "-large" else "")
+        if (currentFontScale > 1f) {
+            compose.onNodeWithTag("practice-intro-step-3").performScrollTo().assertIsDisplayed()
+            capture(name + "-large-end")
+        }
+        tap("practice-intro-start")
     }
 
     private fun completeClosetExample(returnToFitLab: Boolean = false) {
@@ -328,6 +376,7 @@ class ReleaseGuidanceTest {
         try {
             start(true)
             tap("coordit-main04-new-fit-button")
+            startIntroduction()
             compose.waitUntil(10_000) { fit.state.value.draft.isExample }
             tap("fitlab-url-import")
             compose.waitUntil(10_000) { !fit.state.value.busy }
@@ -376,6 +425,11 @@ class ReleaseGuidanceTest {
         @Suppress("UNCHECKED_CAST") override fun <V : ViewModel> create(modelClass: Class<V>): V = factory() as V
     })[type]
     private fun tap(tag: String) {
+        if (tag.startsWith("practice-intro-")) {
+            compose.onNodeWithTag(tag).assertIsDisplayed().performTouchInput { click(center) }
+            compose.waitForIdle()
+            return
+        }
         InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("input keyevent 111").close()
         compose.waitForIdle()
         val node = compose.onNodeWithTag(tag).performScrollTo()

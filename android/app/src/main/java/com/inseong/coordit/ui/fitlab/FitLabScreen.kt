@@ -92,7 +92,7 @@ fun FitLabScreen(model: FitLabViewModel, onHome: () -> Unit, onCloset: () -> Uni
                         FitLabRoute.Result -> "사이즈별 핏 비교하기" to "추천 사이즈와 핏 점수를 확인합니다. 아래 사이즈를 누르면 해당 사이즈의 점수와 부위별 차이를 비교할 수 있습니다. 예시는 체험 마치기로 끝내요."
                         else -> "읽지 못한 값 보완하기" to "누락되거나 잘못 읽힌 값만 수정해주세요. 정상적으로 읽힌 사이즈표는 바로 넘어가요."
                     }
-                    com.inseong.coordit.ui.guidance.PracticeHint("FIT LAB 체험 · 저장·차감 없음", hint.first, hint.second, { leave {} }, s)
+                    com.inseong.coordit.ui.guidance.PracticeHint(when (state.screen) { FitLabRoute.Review -> "2/3 · 무료 리포트"; FitLabRoute.References, FitLabRoute.Result -> "3/3 · 내 옷과 비교"; else -> "1/3 · 상품 링크" }, hint.first, hint.second, { leave {} }, s)
                 }
                 when (state.screen) {
                     FitLabRoute.Sources -> Sources(state, s, model::chooseSource, model::openHistory)

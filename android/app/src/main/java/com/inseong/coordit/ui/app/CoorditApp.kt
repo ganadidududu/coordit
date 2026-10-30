@@ -48,6 +48,7 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
     val context = LocalContext.current
     val guidancePreferences = remember { context.getSharedPreferences("coordit-first-use-guidance-v2", android.content.Context.MODE_PRIVATE) }
     var practice by rememberSaveable(state.profile?.id) { mutableStateOf<com.inseong.coordit.ui.guidance.UsageGuide?>(null) }
+    var practiceIntroduction by rememberSaveable(state.profile?.id) { mutableStateOf<com.inseong.coordit.ui.guidance.UsageGuide?>(null) }
     var referencePractice by rememberSaveable(state.profile?.id) { mutableStateOf(false) }
     fun markPracticed(guide: com.inseong.coordit.ui.guidance.UsageGuide) {
         state.profile?.id?.let { guidancePreferences.edit().putBoolean("$it.${guide.name}", true).apply() }
@@ -69,20 +70,20 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
         } else finishPractice()
     }
     val closetState = closetModel?.state?.collectAsStateWithLifecycle()?.value
-    LaunchedEffect(state.stage, state.profile?.id, fitLabState?.accountReady, route?.destination?.route, accountVisible, fitLabState?.busy, closetState?.busy, practice) {
-        if (state.stage != AppStage.Home) { practice = null; referencePractice = false; registeringReference = false; return@LaunchedEffect }
-        if (accountVisible || practice != null || referencePractice) return@LaunchedEffect
+    LaunchedEffect(state.stage, state.profile?.id, fitLabState?.accountReady, route?.destination?.route, accountVisible, fitLabState?.busy, closetState?.busy, practice, practiceIntroduction) {
+        if (state.stage != AppStage.Home) { practice = null; practiceIntroduction = null; referencePractice = false; registeringReference = false; return@LaunchedEffect }
+        if (accountVisible || practice != null || practiceIntroduction != null || referencePractice) return@LaunchedEffect
         when (route?.destination?.route) {
             "FitLab" -> if (fitLabModel != null && fitLabState?.accountReady == true && fitLabState.busy == false && fitLabState.screen !in setOf(com.inseong.coordit.data.fitlab.FitLabScreen.Loading, com.inseong.coordit.data.fitlab.FitLabScreen.Result, com.inseong.coordit.data.fitlab.FitLabScreen.HistoryDetail) && needsPractice(com.inseong.coordit.ui.guidance.UsageGuide.FitLab)) {
-                if (fitLabModel.beginExample()) practice = com.inseong.coordit.ui.guidance.UsageGuide.FitLab
+                practiceIntroduction = com.inseong.coordit.ui.guidance.UsageGuide.FitLab
             }
             "Closet" -> if (closetModel != null && closetState?.busy == false && needsPractice(com.inseong.coordit.ui.guidance.UsageGuide.Closet)) {
-                if (closetModel.beginExample()) practice = com.inseong.coordit.ui.guidance.UsageGuide.Closet
+                practiceIntroduction = com.inseong.coordit.ui.guidance.UsageGuide.Closet
             }
         }
     }
-    LaunchedEffect(state.stage, fitLabState?.accountReady, route?.destination?.route, accountVisible, sharedProductUrl, fitLabState?.busy, fitLabState?.draft?.isExample, practice) {
-        if (state.stage == AppStage.Home && !accountVisible && sharedProductUrl != null && fitLabModel != null && fitLabState?.accountReady == true && fitLabState.busy == false && practice == null) {
+    LaunchedEffect(state.stage, fitLabState?.accountReady, route?.destination?.route, accountVisible, sharedProductUrl, fitLabState?.busy, fitLabState?.draft?.isExample, practice, practiceIntroduction) {
+        if (state.stage == AppStage.Home && !accountVisible && sharedProductUrl != null && fitLabModel != null && fitLabState?.accountReady == true && fitLabState.busy == false && practice == null && practiceIntroduction == null) {
             if (needsPractice(com.inseong.coordit.ui.guidance.UsageGuide.FitLab)) {
                 nav.navigate("FitLab") { popUpTo(AppStage.Home.name); launchSingleTop = true }
             } else {
@@ -199,6 +200,17 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
                 onDismiss = { fitLabModel?.dismissNotice() },
                 onOpen = { fitLabModel?.dismissNotice(); nav.navigate("FitLab") { launchSingleTop = true } })
         }
+    }
+    practiceIntroduction?.let { guide ->
+        com.inseong.coordit.ui.guidance.GuidanceIntroduction(guide,
+            onStart = {
+                val started = when (guide) {
+                    com.inseong.coordit.ui.guidance.UsageGuide.Closet -> closetModel?.beginExample() == true
+                    else -> fitLabModel?.beginExample() == true
+                }
+                if (started) { practice = guide; practiceIntroduction = null }
+            },
+            onLater = { markPracticed(guide); practiceIntroduction = null })
     }
     if (accountVisible) {
         MyPageScreen(state.profile, state.body, state.threadBalance, state.threadCharge, state.busy, state.error, state.settingsMessage,

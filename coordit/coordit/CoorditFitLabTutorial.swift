@@ -84,7 +84,8 @@ private struct CoorditFitLabTutorialTarget: ViewModifier {
         if enabled {
             content.modifier(CoorditTutorialTarget(
                 isActive: enabled && tutorial.step == step,
-                progress: "FIT LAB 체험 · 저장·차감 없음",
+                progress: [CoorditFitLabTutorial.Step.source, .link, .importLink].contains(step) ? "1/3 · 상품 링크"
+                    : ([CoorditFitLabTutorial.Step.review, .continueToReferences].contains(step) ? "2/3 · 무료 리포트" : "3/3 · 내 옷과 비교"),
                 title: title ?? step.title,
                 message: message ?? step.message,
                 identifier: "fitlab-tutorial",

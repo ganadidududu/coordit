@@ -111,7 +111,7 @@ private struct CoorditClosetTutorialTarget: ViewModifier {
     func body(content: Content) -> some View {
         content.modifier(CoorditTutorialTarget(
             isActive: tutorial.step == step,
-            progress: "CLOSET 체험 · 저장·차감 없음",
+            progress: step == .size ? "2/3 · 보유 사이즈" : (step == .register || step == .score ? "3/3 · 등록 확인" : "1/3 · 내 옷 링크"),
             title: title ?? step.title,
             message: message ?? step.message,
             identifier: "closet-tutorial",
@@ -141,35 +141,37 @@ struct CoorditTutorialTarget: ViewModifier {
         VStack(alignment: .leading, spacing: 12) {
             if isActive {
                 VStack(alignment: .leading, spacing: 6) {
+                    Text("예시 따라하기")
+                        .font(CoorditTypography.gmarketBold(size: CoorditGuidanceStyle.caption, relativeTo: .caption))
+                        .foregroundStyle(CoorditGuidanceStyle.accent)
                     HStack(spacing: 8) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(progress)
-                                .font(CoorditTypography.gmarketMedium(size: 10, relativeTo: .caption))
-                                .foregroundStyle(CoorditDesignTokens.ColorToken.muted)
+                                .font(CoorditTypography.gmarketMedium(size: CoorditGuidanceStyle.caption, relativeTo: .caption))
+                                .foregroundStyle(.white.opacity(0.85))
                             Text(title)
-                                .font(CoorditTypography.gmarketBold(size: 14, relativeTo: .headline))
+                                .font(CoorditTypography.gmarketBold(size: CoorditGuidanceStyle.title, relativeTo: .headline))
                         }
                         Spacer(minLength: 0)
                         Button(requiresSkipConfirmation ? "건너뛰기" : "도움말 닫기") {
                             if requiresSkipConfirmation { showsSkipConfirmation = true } else { dismiss() }
                         }
-                        .font(CoorditTypography.gmarketMedium(size: 11, relativeTo: .caption))
+                        .font(CoorditTypography.gmarketMedium(size: CoorditGuidanceStyle.caption, relativeTo: .caption))
                         .frame(minWidth: 48, minHeight: 48)
                         .accessibilityIdentifier("\(identifier)-dismiss")
                     }
                     Text(message)
-                        .font(CoorditTypography.gmarketMedium(size: 12, relativeTo: .body))
+                        .font(CoorditTypography.gmarketMedium(size: CoorditGuidanceStyle.body, relativeTo: .body))
                         .fixedSize(horizontal: false, vertical: true)
                     if let finishTitle {
                         Button(finishTitle, action: finish ?? dismiss)
-                            .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary))
+                            .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
                             .accessibilityIdentifier("\(identifier)-finish")
                     }
                 }
-                .foregroundStyle(CoorditDesignTokens.ColorToken.ink)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(CoorditFitLabPalette.field, in: RoundedRectangle(cornerRadius: 10))
+                .foregroundStyle(.white)
+                .padding(CoorditGuidanceStyle.inset)
+                .background(CoorditGuidanceStyle.background, in: RoundedRectangle(cornerRadius: CoorditGuidanceStyle.radius))
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier(stepIdentifier)
             }
