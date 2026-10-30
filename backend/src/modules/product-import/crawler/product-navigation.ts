@@ -1,5 +1,4 @@
 import { errors as playwrightErrors } from "playwright";
-import { assertCrawlAllowed } from "../security/robots-policy";
 import { env } from "../../../config/env";
 import type { ProductSite } from "../product-import.types";
 export const productIdFromUrl = (url: URL): string | null => {
@@ -29,7 +28,6 @@ export const fetchMusinsaSizeCandidate = async (
   if (!productId) return null;
   try {
     const sizeUrl = new URL(`https://goods-detail.musinsa.com/api2/goods/${productId}/actual-size`);
-    await assertCrawlAllowed(sizeUrl);
     const response = await page.context().request.get(
       sizeUrl.href,
       { timeout: Math.min(env.crawlTimeoutMs, 10_000), maxRedirects: 0 }
