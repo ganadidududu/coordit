@@ -13,18 +13,22 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class ClosetViewModel(private val repository: ClosetRepository, private val sessions: SessionRepository) : ViewModel() {
+class ClosetViewModel(private val repository: ClosetRepository, private val sessions: SessionRepository, private val homeRepository: com.inseong.coordit.data.home.HomeRepository? = null) : ViewModel() {
     private val mutableState = MutableStateFlow(ClosetState())
     val state = mutableState.asStateFlow()
     private var work: Job? = null
     private var generation = 0L
     private var pendingKey: String? = null
     private var owner = sessions.session.value?.user?.id
+    private var beforeExample: ClosetState? = null
+    private var beforeExampleKey: String? = null
+    private var beforeExampleRegistration = false
+    private var registeringForFitLab = false
     init {
         viewModelScope.launch {
             sessions.session.map { it?.user?.id }.distinctUntilChanged().collect { id ->
                 if (owner != id) {
-                    generation++; work?.cancel(); owner = id; pendingKey = null
+                    generation++; work?.cancel(); owner = id; pendingKey = null; beforeExample = null; beforeExampleKey = null; beforeExampleRegistration = false; registeringForFitLab = false
                     mutableState.value = ClosetState()
                 }
             }
@@ -78,8 +82,35 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
     }
     fun startAdd() {
         if (state.value.busy) return
+        registeringForFitLab = false
         pendingKey = null
         mutableState.value = state.value.copy(screen = ClosetScreen.Method, draft = ClosetDraft(), error = null)
+    }
+    fun startReferenceRegistration() {
+        if (state.value.busy) return
+        startAdd()
+        registeringForFitLab = true
+        chooseMethod(ClosetMethod.Link)
+    }
+    fun beginExample(): Boolean {
+        if (state.value.busy) return false
+        if (!state.value.draft.isExample) {
+            beforeExample = state.value
+            beforeExampleKey = pendingKey
+            beforeExampleRegistration = registeringForFitLab
+        }
+        mutableState.value = state.value.copy(screen = ClosetScreen.Link, detail = null, error = null,
+            draft = ClosetDraft(method = ClosetMethod.Link, productLink = com.inseong.coordit.data.fitlab.FitLabExample.link, isExample = true))
+        return true
+    }
+    fun finishExample() {
+        if (!state.value.draft.isExample) return
+        mutableState.value = beforeExample ?: ClosetState()
+        pendingKey = beforeExampleKey
+        registeringForFitLab = beforeExampleRegistration
+        beforeExample = null
+        beforeExampleKey = null
+        beforeExampleRegistration = false
     }
     fun chooseMethod(method: ClosetMethod) {
         if (state.value.busy) return
@@ -102,7 +133,11 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
     fun setSizeRows(rows: List<ClosetSizeRow>) = editDraft { it.copy(sizeRows = rows, selectedSizeRowId = null) }
     fun selectSize(id: String) = editDraft { it.copy(selectedSizeRowId = id) }
     fun prefill() = runOperation { token, ticket ->
-        val result = repository.prefill(token, state.value.draft)
+        val draft = state.value.draft
+        val result = if (draft.isExample) {
+            val example = com.inseong.coordit.data.fitlab.FitLabExample.product(draft.category)
+            ClosetPrefill(example.productName, example.sizes.mapIndexed { index, row -> row.row(index) }, draft.category)
+        } else repository.prefill(token, draft)
         if (current(ticket)) {
             pendingKey = null
             mutableState.value = state.value.copy(draft = state.value.draft.copy(name = result.name.orEmpty(), category = result.category ?: state.value.draft.category, sizeRows = result.rows, selectedSizeRowId = null))
@@ -119,11 +154,21 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
     fun save() {
         if (state.value.busy) return
         val draft = state.value.draft
-        val key = pendingKey ?: UUID.randomUUID().toString().also { pendingKey = it }
+        val key = if (draft.isExample) "tutorial-example" else pendingKey ?: UUID.randomUUID().toString().also { pendingKey = it }
         try { draft.request(key) } catch (failure: IllegalArgumentException) { error(failure.message ?: "입력값을 확인해 주세요."); return }
+        if (draft.isExample) {
+            val item = ClosetItem("tutorial-clothing", draft.name, draft.category, draft.selectedSizeRow?.label)
+            val row = draft.selectedSizeRow ?: ClosetSizeRow("example-size", "예시", draft.measurements())
+            mutableState.value = state.value.copy(screen = ClosetScreen.Detail, detail = ClosetDetail(item, listOf(row)), error = null)
+            return
+        }
         mutableState.value = state.value.copy(screen = ClosetScreen.Saving)
         runOperation { token, ticket ->
             val detail = repository.create(token, draft, key)
+            if (current(ticket) && registeringForFitLab) {
+                val item = detail.item
+                requireNotNull(homeRepository).registerReference(token, com.inseong.coordit.data.home.HomeGarment(item.id, item.name, item.category))
+            }
             if (current(ticket)) {
                 pendingKey = null
                 mutableState.value = state.value.copy(screen = ClosetScreen.Detail, detail = detail, items = listOf(detail.item) + state.value.items.filter { it.id != detail.item.id })

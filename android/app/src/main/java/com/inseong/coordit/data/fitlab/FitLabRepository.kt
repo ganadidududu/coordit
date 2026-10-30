@@ -18,9 +18,12 @@ interface FitLabApi {
 class FitLabRepository(private val api: FitLabApi) {
     private fun auth(token: String) = "Bearer ${token.also { require(it.isNotBlank()) { "로그인이 필요해요." } }}"
     suspend fun balance(token: String) = api.balance(auth(token)).availableThreads
-    suspend fun references(token: String, category: String) = api.references(auth(token), category).filter { it.isActive }
-    suspend fun prefill(token: String, url: String, category: String) = api.prefill(auth(token), ClosetPrefillRequest(url, category))
-    suspend fun product(token: String, draft: FitLabDraft) = api.product(auth(token), FitLabProductRequest(draft.productName.trim(), draft.brand.trim().ifBlank { null }, productUrl = draft.productUrl.ifBlank { null }, category = draft.category.wireName))
+    suspend fun references(token: String, category: String): List<FitLabReference> {
+        val requested = requireNotNull(com.inseong.coordit.data.home.HomeCategory.entries.firstOrNull { it.wireName == category })
+        return api.references(auth(token), category).filter { it.isActive && referenceIsCompatible(it.category, requested) }
+    }
+    suspend fun prefill(token: String, url: String, category: String?) = api.prefill(auth(token), ClosetPrefillRequest(url, category))
+    suspend fun product(token: String, draft: FitLabDraft) = api.product(auth(token), FitLabProductRequest(draft.productName.trim(), draft.brand.trim().ifBlank { null }, mallName = draft.mallName.ifBlank { null }, productUrl = draft.productUrl.ifBlank { null }, category = draft.category.wireName))
     suspend fun size(token: String, productId: String, row: FitLabSizeDraft, source: FitLabSource): FitLabSizeResponse {
         val m = row.measurements
         val parsingStatus = when (source) { FitLabSource.Manual -> null; FitLabSource.Ocr -> "parsed"; FitLabSource.Url -> "confirmed" }

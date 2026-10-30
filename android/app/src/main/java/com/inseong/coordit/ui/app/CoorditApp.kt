@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -17,6 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.inseong.coordit.ui.auth.AuthenticationScreen
 import com.inseong.coordit.ui.components.*
 import com.inseong.coordit.ui.home.HomeScreen
@@ -27,17 +30,73 @@ import com.inseong.coordit.ui.screens.SplashScreen
 import com.inseong.coordit.ui.theme.*
 
 @Composable
-fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit, onLogout: () -> Unit, onDeleteAccount: () -> Unit = {}, closetModel: com.inseong.coordit.ui.closet.ClosetViewModel? = null, fitLabModel: com.inseong.coordit.ui.fitlab.FitLabViewModel? = null) {
+fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit, onLogout: () -> Unit, onDeleteAccount: () -> Unit = {}, closetModel: com.inseong.coordit.ui.closet.ClosetViewModel? = null, fitLabModel: com.inseong.coordit.ui.fitlab.FitLabViewModel? = null, sharedProductUrl: String? = null, onSharedProductConsumed: () -> Unit = {}) {
     val state by model.state.collectAsStateWithLifecycle()
     val photos = remember { com.inseong.coordit.ui.closet.ClosetPhotos() }
     val nav = rememberNavController()
+    val route by nav.currentBackStackEntryAsState()
     var accountVisible by remember { mutableStateOf(false) }
+    var rechargeFromFitLab by remember { mutableStateOf(false) }
+    LaunchedEffect(accountVisible) { if (!accountVisible) rechargeFromFitLab = false }
     var unavailableFeature by remember { mutableStateOf<String?>(null) }
+    var registeringReference by rememberSaveable { mutableStateOf(false) }
+    val fitLabState = fitLabModel?.state?.collectAsStateWithLifecycle()?.value
+    val context = LocalContext.current
+    val guidancePreferences = remember { context.getSharedPreferences("coordit-first-use-guidance-v2", android.content.Context.MODE_PRIVATE) }
+    var practice by rememberSaveable(state.profile?.id) { mutableStateOf<com.inseong.coordit.ui.guidance.UsageGuide?>(null) }
+    var referencePractice by rememberSaveable(state.profile?.id) { mutableStateOf(false) }
+    fun markPracticed(guide: com.inseong.coordit.ui.guidance.UsageGuide) {
+        state.profile?.id?.let { guidancePreferences.edit().putBoolean("$it.${guide.name}", true).apply() }
+    }
+    fun needsPractice(guide: com.inseong.coordit.ui.guidance.UsageGuide): Boolean = state.profile?.id?.let {
+        !guidancePreferences.getBoolean("$it.${guide.name}", false)
+    } == true
+    fun finishPractice() {
+        practice?.let(::markPracticed)
+        practice = null
+    }
+    fun finishClosetPractice(completed: Boolean) {
+        if (referencePractice) {
+            referencePractice = false
+            registeringReference = false
+            markPracticed(com.inseong.coordit.ui.guidance.UsageGuide.Closet)
+            if (completed) fitLabModel?.registerExampleReference()
+            nav.navigate("FitLab") { popUpTo(AppStage.Home.name); launchSingleTop = true }
+        } else finishPractice()
+    }
+    val closetState = closetModel?.state?.collectAsStateWithLifecycle()?.value
+    LaunchedEffect(state.stage, state.profile?.id, route?.destination?.route, accountVisible, fitLabState?.busy, closetState?.busy, practice) {
+        if (state.stage != AppStage.Home) { practice = null; referencePractice = false; registeringReference = false; return@LaunchedEffect }
+        if (accountVisible || practice != null || referencePractice) return@LaunchedEffect
+        when (route?.destination?.route) {
+            "FitLab" -> if (fitLabModel != null && fitLabState?.busy == false && fitLabState.screen !in setOf(com.inseong.coordit.data.fitlab.FitLabScreen.Loading, com.inseong.coordit.data.fitlab.FitLabScreen.Result, com.inseong.coordit.data.fitlab.FitLabScreen.HistoryDetail) && needsPractice(com.inseong.coordit.ui.guidance.UsageGuide.FitLab)) {
+                if (fitLabModel.beginExample()) practice = com.inseong.coordit.ui.guidance.UsageGuide.FitLab
+            }
+            "Closet" -> if (closetModel != null && closetState?.busy == false && needsPractice(com.inseong.coordit.ui.guidance.UsageGuide.Closet)) {
+                if (closetModel.beginExample()) practice = com.inseong.coordit.ui.guidance.UsageGuide.Closet
+            }
+        }
+    }
+    LaunchedEffect(state.stage, route?.destination?.route, accountVisible, sharedProductUrl, fitLabState?.busy, fitLabState?.draft?.isExample, practice) {
+        if (state.stage == AppStage.Home && !accountVisible && sharedProductUrl != null && fitLabModel != null && fitLabState?.busy == false && practice == null) {
+            if (needsPractice(com.inseong.coordit.ui.guidance.UsageGuide.FitLab)) {
+                nav.navigate("FitLab") { popUpTo(AppStage.Home.name); launchSingleTop = true }
+            } else if (fitLabModel.importSharedProduct(sharedProductUrl)) {
+                nav.navigate("FitLab") { popUpTo(AppStage.Home.name); launchSingleTop = true }
+                onSharedProductConsumed()
+            }
+        }
+    }
     LaunchedEffect(state.stage) {
         if (state.stage == AppStage.Authentication || state.stage == AppStage.Welcome) photos.clear()
         accountVisible = false
         unavailableFeature = null
-        nav.navigate(state.stage.name) {
+        val destination = if (state.stage == AppStage.Home) when (practice) {
+            com.inseong.coordit.ui.guidance.UsageGuide.FitLab, com.inseong.coordit.ui.guidance.UsageGuide.References -> "FitLab"
+            com.inseong.coordit.ui.guidance.UsageGuide.Closet -> "Closet"
+            null -> state.stage.name
+        } else state.stage.name
+        nav.navigate(destination) {
             popUpTo(nav.graph.id) { inclusive = true }
             launchSingleTop = true
         }
@@ -72,13 +131,19 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
             HomeScreen(state.home, model::refreshHome, model::saveReferences,
                 onCloset = { if (closetModel != null) { closetModel.load(); nav.navigate("Closet") } else unavailableFeature = "옷장" },
                 onFitLab = { if (fitLabModel != null) { fitLabModel.open(); nav.navigate("FitLab") } else unavailableFeature = "FIT LAB" },
-                onProfile = { accountVisible = true })
+                onProfile = { accountVisible = true },
+                history = fitLabState?.history.orEmpty(),
+                onOpenHistory = { snapshot -> fitLabModel?.openHistory(snapshot); nav.navigate("FitLab") { launchSingleTop = true } },
+                reduceMotion = reduceMotion,
+                onAddGarment = { closetModel?.startAdd(); nav.navigate("Closet") { launchSingleTop = true } })
         }
         composable("Closet") {
             closetModel?.let { closet -> com.inseong.coordit.ui.closet.ClosetScreen(closet, photos,
                 onHome = { nav.popBackStack(); model.refreshHome() },
                 onProfile = { accountVisible = true },
-                onFitLab = { if (fitLabModel != null) { fitLabModel.open(); nav.navigate("FitLab") } else unavailableFeature = "FIT LAB" }) }
+                onFitLab = { if (fitLabModel != null) { if (registeringReference) fitLabModel.loadReferences() else fitLabModel.open(); registeringReference = false; nav.navigate("FitLab") { popUpTo(AppStage.Home.name); launchSingleTop = true } } else unavailableFeature = "FIT LAB" },
+                returningToFitLab = registeringReference, onExampleFinished = ::finishClosetPractice, referencePractice = referencePractice,
+                onStartExample = { if (closet.beginExample()) practice = com.inseong.coordit.ui.guidance.UsageGuide.Closet }) }
         }
         composable("FitLab") {
             fitLabModel?.let { fitLab -> com.inseong.coordit.ui.fitlab.FitLabScreen(
@@ -91,19 +156,48 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
                     } else unavailableFeature = "옷장"
                 },
                 onProfile = { accountVisible = true },
+                onRegisterReference = {
+                    if (closetModel != null) {
+                        if (fitLab.state.value.draft.isExample) {
+                            if (closetModel.beginExample()) {
+                                referencePractice = true
+                                nav.navigate("Closet") { launchSingleTop = true }
+                            }
+                        } else {
+                            registeringReference = true
+                            closetModel.startReferenceRegistration()
+                            nav.navigate("Closet") { launchSingleTop = true }
+                        }
+                    }
+                },
+                onExampleFinished = ::finishPractice,
+                onRecharge = { rechargeFromFitLab = true; accountVisible = true },
+                onStartExample = { if (fitLab.beginExample()) practice = com.inseong.coordit.ui.guidance.UsageGuide.FitLab },
             ) }
+        }
+    }
+    if (!accountVisible && practice == null && state.stage == AppStage.Home && route?.destination?.route != "FitLab" && fitLabState?.draft?.isExample == false &&
+        fitLabState.screen in setOf(com.inseong.coordit.data.fitlab.FitLabScreen.Loading, com.inseong.coordit.data.fitlab.FitLabScreen.Result)) {
+        Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
+            Pressable({ nav.navigate("FitLab") { launchSingleTop = true } }, Modifier.fillMaxWidth().heightIn(min = 44.dp)
+                .background(AppColors.ink, ContinuousRoundedShape(12.dp)).testTag("fitlab-global-notice")
+                .semantics { liveRegion = LiveRegionMode.Polite }) {
+                CoorditText(if (fitLabState.busy) "핏 분석을 만들고 있어요 · 진행 상황 보기" else if (fitLabState.recommendation != null) "핏 분석이 준비됐어요 · 결과 보기" else "핏 분석을 이어서 완료할 수 있어요",
+                    CoorditTypography.gmarketMedium(12f).copy(color = androidx.compose.ui.graphics.Color.White), Modifier.padding(12.dp))
+            }
         }
     }
     if (accountVisible) {
         MyPageScreen(state.profile, state.body, state.threadBalance, state.threadCharge, state.busy, state.error, state.settingsMessage,
-            onBack = { accountVisible = false },
+            onBack = { accountVisible = false; rechargeFromFitLab = false; fitLabModel?.updateBalance(state.threadBalance) },
             onHome = { accountVisible = false; nav.navigate(AppStage.Home.name) { popUpTo(AppStage.Home.name); launchSingleTop = true }; model.refreshHome() },
             onCloset = { accountVisible = false; closetModel?.load(); nav.navigate("Closet") { popUpTo(AppStage.Home.name) } },
             onFitLab = { accountVisible = false; fitLabModel?.open(); nav.navigate("FitLab") { popUpTo(AppStage.Home.name) } },
             onRefresh = model::refreshMyPage, onOpenThreadCharge = model::openThreadCharge, onShowRewardedAd = model::showRewardedAd, onRetryRewardedAd = model::retryRewardedAd,
             onRefreshAdPrivacy = model::refreshAdPrivacy, onShowAdPrivacyOptions = model::showAdPrivacyOptions,
             onSaveProfile = model::saveProfile, onSaveBody = model::saveBody,
-            onLogout = onLogout, onDeleteAccount = onDeleteAccount, onClearMessage = model::clearSettingsMessage)
+            onLogout = onLogout, onDeleteAccount = onDeleteAccount, onClearMessage = model::clearSettingsMessage,
+            startAtThreadCharge = rechargeFromFitLab)
     }
     unavailableFeature?.let { feature ->
         Dialog(onDismissRequest = { unavailableFeature = null }) {

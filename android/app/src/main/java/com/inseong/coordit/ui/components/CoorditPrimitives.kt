@@ -55,13 +55,13 @@ fun Pressable(
 
 @Composable
 fun CoorditButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, secondary: Boolean = false,
-    enabled: Boolean = true, height: Float = 48f, fontSize: Float = 13f, cornerRadius: Float = 7f) {
+    enabled: Boolean = true, height: Float = 48f, fontSize: Float = 13f, cornerRadius: Float = 7f, danger: Boolean = false) {
     Pressable(onClick, modifier, enabled, cornerRadius) {
         Box(Modifier.fillMaxWidth().heightIn(min = height.dp)
-            .background(if (secondary) AppColors.placeholder else AppColors.ink).padding(horizontal = 12.dp, vertical = 12.dp),
+            .background(if (danger) AppColors.danger else if (secondary) AppColors.placeholder else AppColors.ink).padding(horizontal = 12.dp, vertical = 12.dp),
             contentAlignment = Alignment.Center) {
             BasicText(text, style = CoorditTypography.gmarketBold(fontSize).copy(
-                color = if (secondary) AppColors.ink else Color.White, textAlign = TextAlign.Center), maxLines = 2)
+                color = if (secondary && !danger) AppColors.ink else Color.White, textAlign = TextAlign.Center), maxLines = 2)
         }
     }
 }

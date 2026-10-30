@@ -1,5 +1,7 @@
 # Coordit Android
 
+2026-10-29: `codex/release-link-first-fitlab`의 최신 iOS 기준으로 링크 → 무료 상품 요약 → 기준 옷 선택 → 유료 비교, 홈 매거진·실제 최근 기록, 첫 사용 안내·예시 체험과 관련 팝업을 맞췄다. 범위와 검증, 플랫폼별 남은 차이는 [release flow parity](docs/RELEASE_LINK_FLOW_PARITY.md)를 참고한다.
+
 기존 SwiftUI 원본을 기준으로 진행 중인 Kotlin/Jetpack Compose 포팅이다. 현재 앱은 main 브랜치의 `android/` 폴더에 통합되어 있다. Android Studio에서는 저장소 루트 아래 `android/`를 연다.
 
 현재는 **Foundation + 계정·홈 + 옷장 + FitLab 분석·히스토리 + 마이페이지·설정 단계**다. MainActivity가 제품 시작점이며 Google 로그인, 세션 복원, 온보딩, 홈 기준 의류 조회·선택·저장, 로그아웃을 연결했다. 실제 Google 계정의 서버 인증·프로필 조회·홈 진입과 앱 재시작 후 세션 복원을 확인했다. 옷장 검색·직접 입력·링크 추출·사진 OCR·수정·삭제, FitLab 추천·리포트·히스토리, 프로필·신체정보·알림·개인정보·회원탈퇴를 연결했다. Apple 로그인·Google Play 결제는 남아 있어 아직 출시 가능한 전체 앱은 아니다.

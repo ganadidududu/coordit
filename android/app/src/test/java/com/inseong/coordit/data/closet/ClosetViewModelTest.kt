@@ -22,6 +22,39 @@ import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ClosetViewModelTest {
+    @Test fun exampleRestoresPendingSaveKeyAfterAnAmbiguousRealSave() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            MockWebServer().use { server ->
+                server.start()
+                val retrofit = Retrofit.Builder().baseUrl(server.url("/")).addConverterFactory(GsonConverterFactory.create()).build()
+                val sessions = SessionRepository(retrofit.create(CoorditApi::class.java), object : SessionStore {
+                    override suspend fun read(): AuthSession? = null
+                    override suspend fun write(session: AuthSession) {}
+                    override suspend fun clear() {}
+                })
+                server.enqueue(MockResponse().setBody("""{"accessToken":"token","refreshToken":"refresh","user":{"id":"user1","email":"a@b.com"}}"""))
+                sessions.loginGoogle("token", "nonce")
+                val api = FailingApi(retrofit.create(ClosetApi::class.java))
+                val model = ClosetViewModel(ClosetRepository(api), sessions)
+                runCurrent()
+                model.startAdd(); model.chooseMethod(ClosetMethod.Manual)
+                model.editDraft { it.copy(name = "실제 셔츠", measurement1 = "45", measurement2 = "54", measurement3 = "70", measurement4 = "61") }
+                model.save(); runCurrent()
+                val original = model.state.value
+                val key = api.keys.single()
+                model.beginExample(); model.prefill(); runCurrent()
+                model.selectSize(model.state.value.draft.sizeRows.first().id)
+                model.save(); runCurrent()
+                assertEquals(1, api.keys.size)
+                model.finishExample()
+                assertEquals(original, model.state.value)
+                model.save(); runCurrent()
+                assertEquals(listOf(key, key), api.keys)
+            }
+        } finally { Dispatchers.resetMain() }
+    }
+
     @Test fun retryKeepsKeyEditsChangeKeyAndLogoutClearsDraft() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {

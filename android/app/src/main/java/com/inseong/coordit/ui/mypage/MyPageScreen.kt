@@ -122,9 +122,13 @@ fun MyPageScreen(
     onRefreshAdPrivacy: (Activity?) -> Unit, onShowAdPrivacyOptions: (Activity?) -> Unit,
     onSaveProfile: (String) -> Unit, onSaveBody: (Double, Double) -> Unit,
     onLogout: () -> Unit, onDeleteAccount: () -> Unit, onClearMessage: () -> Unit,
+    startAtThreadCharge: Boolean = false,
 ) {
-    var page by rememberSaveable { mutableStateOf(Page.Root) }
+    var page by rememberSaveable { mutableStateOf(if (startAtThreadCharge) Page.ThreadCharge else Page.Root) }
     val activity = LocalContext.current.findActivity()
+    LaunchedEffect(Unit) {
+        if (startAtThreadCharge) { onRefresh(); onOpenThreadCharge(activity) }
+    }
     val contentScroll = rememberScrollState()
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
@@ -136,7 +140,7 @@ fun MyPageScreen(
     LaunchedEffect(threadCharge.status) {
         if (page == Page.ThreadCharge) contentScroll.scrollTo(0)
     }
-    val leave = { if (page == Page.Root) onBack() else { page = parent(page); onClearMessage() } }
+    val leave = { if (page == Page.Root || (startAtThreadCharge && page == Page.ThreadCharge)) onBack() else { page = parent(page); onClearMessage() } }
     BackHandler(enabled = !busy, onBack = leave)
     BoxWithConstraints(Modifier.fillMaxSize().testTag("mypage-screen")) {
         val scale = (maxWidth.value / MyPageDesign.designWidth).coerceIn(.82f, 1.25f)

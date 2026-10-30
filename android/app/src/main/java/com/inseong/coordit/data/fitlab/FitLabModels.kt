@@ -23,6 +23,9 @@ data class FitLabDraft(
     val productUrl: String = "",
     val sizes: List<FitLabSizeDraft> = listOf(FitLabSizeDraft("size-1")),
     val selectedReferenceIds: Set<String> = emptySet(),
+    val mallName: String = "",
+    val automaticCategory: Boolean = true,
+    val isExample: Boolean = false,
 ) {
     val upper get() = category.upper
     fun validationError(): String? {
@@ -31,7 +34,7 @@ data class FitLabDraft(
         val labels = sizes.map { Normalizer.normalize(it.label.trim(), Normalizer.Form.NFKC).lowercase(Locale.ROOT) }
         if (labels.any(String::isBlank)) return "모든 사이즈명을 입력해 주세요."
         if (labels.distinct().size != labels.size) return "사이즈명은 중복될 수 없어요."
-        val allowed = measurementKeys(upper).toSet()
+        val allowed = measurementKeys(category).toSet()
         if (sizes.any { row -> row.measurements.isEmpty() || row.measurements.any { (key, value) -> key !in allowed || !value.isFinite() || value <= 0 } }) {
             return "카테고리에 맞는 측정값을 사이즈마다 하나 이상 입력해 주세요."
         }
@@ -45,6 +48,7 @@ data class FitLabReference(
     val nickname: String?,
     val category: String,
     @SerializedName("is_active") val isActive: Boolean,
+    @SerializedName("fit_type") val fitType: String = "regular",
 )
 
 data class FitLabProductRequest(val productName: String, val brand: String?, val mallName: String? = null, val productUrl: String?, val category: String, val fitType: String = "regular")
@@ -140,7 +144,29 @@ data class FitLabState(
     val history: List<FitLabHistorySnapshot> = emptyList(),
     val selectedHistory: FitLabHistorySnapshot? = null,
     val historySaved: Boolean = false,
+    val referencePickerVisible: Boolean = false,
+    val historyReturnScreen: FitLabScreen = FitLabScreen.Sources,
+    val requiresThreads: Boolean = false,
+    val threadBalanceKnown: Boolean = false,
 )
+
+fun referenceIsCompatible(category: String, requested: HomeCategory): Boolean =
+    HomeCategory.entries.firstOrNull { it.wireName == category }?.upper == requested.upper
+
+fun measurementKeys(category: HomeCategory): List<String> = if (category == HomeCategory.Skirt) {
+    listOf("waist_width", "hip_width", "total_length", "outseam")
+} else measurementKeys(category.upper)
+
+fun normalizedFitLabMeasurements(category: HomeCategory, measurements: Map<String, Double>): Map<String, Double> {
+    val values = measurements.toMutableMap()
+    if (!category.upper) {
+        val length = if (category == HomeCategory.Skirt) "total_length" else "outseam"
+        val alternate = if (category == HomeCategory.Skirt) "outseam" else "total_length"
+        if (values[length] == null) values[alternate]?.let { values[length] = it }
+    }
+    val keys = if (category == HomeCategory.Skirt) setOf("waist_width", "hip_width", "total_length") else measurementKeys(category.upper).toSet()
+    return values.filter { (key, value) -> key in keys && value.isFinite() && value > 0 }
+}
 
 fun measurementKeys(upper: Boolean): List<String> = if (upper) {
     listOf("shoulder_width", "chest_width", "total_length", "sleeve_length")

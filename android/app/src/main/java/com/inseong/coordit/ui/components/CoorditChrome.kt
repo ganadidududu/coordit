@@ -171,6 +171,7 @@ fun CoorditBottomNavigation(selectedTab: CoorditTab?, scale: Float, onTabSelecti
                             BasicText(
                                 tab.title,
                                 style = CoorditTypography.climate2010(tab.fontSize * scale)
+                                    .copy(fontSize = (tab.fontSize * scale * androidx.compose.ui.platform.LocalDensity.current.fontScale.coerceAtMost(1.2f) / androidx.compose.ui.platform.LocalDensity.current.fontScale).sp)
                                     .copy(color = AppColors.foreground, letterSpacing = (tab.tracking * scale).sp),
                                 maxLines = 1,
                             )

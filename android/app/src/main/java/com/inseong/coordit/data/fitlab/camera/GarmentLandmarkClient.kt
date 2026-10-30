@@ -80,7 +80,10 @@ class GarmentLandmarkClient {
                 if (!result.isSuccessful || body == null || body.contentLength() > 1_000_000L) {
                     return@withContext Outcome.Fallback("server_unavailable")
                 }
-                val raw = body.byteStream().use { it.readNBytes(1_000_001) }
+                val raw = body.source().use { source ->
+                    source.request(1_000_001L)
+                    source.buffer.readByteArray(minOf(source.buffer.size, 1_000_001L))
+                }
                 if (raw.size > 1_000_000) return@withContext Outcome.Fallback("response_too_large")
                 val parsed: Response? = Gson().fromJson(raw.toString(Charsets.UTF_8), Response::class.java)
                 if (parsed?.validatedEndpoints(input.category, BuildConfig.DEBUG && BuildConfig.AI_LANDMARKS_DEVELOPMENT_ENABLED) == null) Outcome.Fallback("model_or_landmarks_unapproved")

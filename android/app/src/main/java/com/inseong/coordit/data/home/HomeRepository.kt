@@ -48,6 +48,7 @@ data class HomeGarment(val id: String, val name: String, val category: HomeCateg
 data class HomeSnapshot(val items: List<HomeGarment> = emptyList(), val selectedIds: Set<String> = emptySet())
 
 class HomeRepository(private val api: HomeApi) {
+    suspend fun registerReference(token: String, item: HomeGarment) = api.select(authorization(token), HomeReferenceRequest(item.id, item.name, item.category.wireName))
     suspend fun load(token: String): HomeSnapshot = coroutineScope {
         val clothing = async { api.clothing(authorization(token)) }
         val references = async { api.references(authorization(token)) }

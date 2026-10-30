@@ -22,6 +22,7 @@ data class ClosetDraft(
     val hasGarmentImage: Boolean = false,
     val hasSizeChartImage: Boolean = false,
     val cameraMetadata: Map<String, String> = emptyMap(),
+    val isExample: Boolean = false,
 ) {
     val selectedSizeRow get() = sizeRows.firstOrNull { it.id == selectedSizeRowId }
     val measurementKeys get() = GarmentMeasurementPolicy.dimensions(category.wireName)

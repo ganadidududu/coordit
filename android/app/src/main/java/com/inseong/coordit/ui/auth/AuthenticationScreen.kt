@@ -92,6 +92,10 @@ fun AuthenticationScreen(
     var mode by rememberSaveable { mutableStateOf(AuthenticationMode.Providers) }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    var guestNotice by rememberSaveable { mutableStateOf(false) }
+    if (guestNotice) com.inseong.coordit.ui.components.CoorditConfirmationDialog("비회원으로 둘러볼까요?",
+        "Google·Apple로 처음 가입하면 실타래 3개를 드려요. 비회원에게는 기본 실타래가 지급되지 않지만, 광고를 보고 충전할 수 있어요.",
+        "로그인하기", "비회원으로 둘러보기", { guestNotice = false }, { guestNotice = false; onGuest() }, "splash-auth-guest-confirm")
     val leave = {
         if (mode == AuthenticationMode.Email) {
             mode = AuthenticationMode.Providers
@@ -148,7 +152,7 @@ fun AuthenticationScreen(
             Spacer(Modifier.height((AuthenticationDesign.subtitleToProviderSpacing * scale).dp))
 
             if (mode == AuthenticationMode.Providers) {
-                ProviderChoices(scale, busy, onGoogle, onApple, onGuest) { mode = AuthenticationMode.Email }
+                ProviderChoices(scale, busy, onGoogle, onApple, { guestNotice = true }) { mode = AuthenticationMode.Email }
             } else {
                 EmailLoginForm(
                     scale = scale,
