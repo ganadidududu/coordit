@@ -26,7 +26,7 @@ Android 제약: Apple Services ID와 HTTPS return endpoint의 form_post 처리 �
 
 현재 구현: Apple 제공자 버튼은 유지하며 미지원 상태를 명시한다. 임의 로그인 성공, iOS client ID 재사용, 미검증 custom scheme token 수신을 넣지 않는다. backend를 수정하지 않는 이번 작업 경계를 유지한다.
 
-UI 차이: SF Symbols 대신 Apple 공식 로그인 마크 자산을 사용하며 배경색에 차이가 있다. 출처는 `apple-sign-in-logo-PROVENANCE.md`.
+UI: SF Symbols 대신 Apple 공식 로그인 마크 자산을 사용한다. Google·Apple 버튼은 iOS와 같은 흰 배경·공통 테두리·남색 글자를 사용한다. 출처는 `apple-sign-in-logo-PROVENANCE.md`.
 
 기능 차이: Android Apple OAuth는 아직 실행할 수 없다. Services ID/return endpoint 확정 후 구현해야 한다.
 

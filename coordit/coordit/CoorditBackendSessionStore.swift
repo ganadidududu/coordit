@@ -79,7 +79,16 @@ final class CoorditBackendSessionStore: ObservableObject {
 
     init() {
         self.client = CoorditBackendClient(baseURL: CoorditBackendConfig.baseURL())
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--coordit-ui-testing"), arguments.contains("--coordit-ui-testing-isolated-session") {
+            self.tokenStore = CoorditBackendTokenStore(service: "app.coordit.ui-testing.\(UUID().uuidString)")
+        } else {
+            self.tokenStore = CoorditBackendTokenStore()
+        }
+        #else
         self.tokenStore = CoorditBackendTokenStore()
+        #endif
         self.deviceTokenProvider = { try await CoorditDeviceCheck.token() }
 #if DEBUG
         Self.configurePersistedSessionFixture(in: tokenStore)

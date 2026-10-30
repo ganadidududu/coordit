@@ -63,16 +63,18 @@ private object AuthenticationDesign {
     const val providerStackSpacing = 12f
     const val providerHeight = 56f
     const val providerHorizontalInset = 16f
-    const val providerCornerRadius = 16f
+    const val providerCornerRadius = 14f
     const val providerTitleSize = 14f
-    const val providerMarkFrame = 28f
+    const val providerMarkFrame = 24f
+    const val providerMarkSize = 20f
+    const val appleAssetSize = 48f
     const val secondaryActionHeight = 44f
     const val emailEntrySize = 12f
     const val statusTopSpacing = 18f
     const val statusSize = 11.5f
     const val footerMinimumSpacing = 16f
     const val legalSize = 11f
-    val providerSurface = Color(0xFFF6F7FA)
+    val providerSurface = Color.White
     val errorForeground = Color(0xFF9E0A14)
 }
 
@@ -245,13 +247,21 @@ private fun ProviderChoices(
                     style = TextStyle(
                         fontFamily = FontFamily.SansSerif,
                         fontWeight = FontWeight.Bold,
-                        fontSize = (16 * scale).sp,
+                        fontSize = (AuthenticationDesign.providerMarkSize * scale).sp,
                         color = Color(0xFF4273D4),
                     ),
                 )
             }
         }
-        AppleProviderButton(scale, !busy, onApple)
+        SocialProviderButton("Apple로 계속하기", !busy, scale, "splash-auth-apple", onApple) {
+            Box(Modifier.size((AuthenticationDesign.providerMarkFrame * scale).dp), contentAlignment = Alignment.Center) {
+                Image(
+                    painterResource(R.drawable.apple_sign_in_logo),
+                    contentDescription = null,
+                    modifier = Modifier.requiredSize((AuthenticationDesign.appleAssetSize * scale).dp),
+                )
+            }
+        }
         OutlineProviderButton("비회원으로 로그인하기", "splash-auth-guest", scale, !busy, onGuest)
         SecondaryActionButton("이메일로 로그인", "splash-auth-email", scale, !busy, onEmail)
     }
@@ -271,7 +281,7 @@ private fun SocialProviderButton(
         Row(
             Modifier.fillMaxWidth().height((AuthenticationDesign.providerHeight * scale).dp)
                 .background(AuthenticationDesign.providerSurface, shape)
-                .border(1.dp, AppColors.ink.copy(alpha = .09f), shape)
+                .border(1.dp, AppColors.line, shape)
                 .padding(horizontal = (AuthenticationDesign.providerHorizontalInset * scale).dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy((12 * scale).dp),
@@ -279,34 +289,11 @@ private fun SocialProviderButton(
             mark()
             BasicText(
                 title,
+                modifier = Modifier.weight(1f),
                 style = CoorditTypography.gmarketMedium(AuthenticationDesign.providerTitleSize * scale)
-                    .copy(color = AppColors.ink),
+                    .copy(color = AppColors.ink, textAlign = TextAlign.Center),
             )
-        }
-    }
-}
-
-@Composable
-private fun AppleProviderButton(scale: Float, enabled: Boolean, onClick: () -> Unit) {
-    val shape = RoundedCornerShape((AuthenticationDesign.providerCornerRadius * scale).dp)
-    Pressable(onClick, Modifier.fillMaxWidth().testTag("splash-auth-apple"), enabled, AuthenticationDesign.providerCornerRadius * scale) {
-        Row(
-            Modifier.fillMaxWidth().height((AuthenticationDesign.providerHeight * scale).dp)
-                .background(AppColors.ink, shape)
-                .padding(horizontal = (AuthenticationDesign.providerHorizontalInset * scale).dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy((12 * scale).dp),
-        ) {
-            Image(
-                painterResource(R.drawable.apple_sign_in_logo),
-                contentDescription = null,
-                modifier = Modifier.size((AuthenticationDesign.providerMarkFrame * scale).dp),
-            )
-            BasicText(
-                "Apple로 계속하기",
-                style = CoorditTypography.gmarketMedium(AuthenticationDesign.providerTitleSize * scale)
-                    .copy(color = Color.White),
-            )
+            Spacer(Modifier.width((AuthenticationDesign.providerMarkFrame * scale).dp))
         }
     }
 }

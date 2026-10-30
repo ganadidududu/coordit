@@ -9,7 +9,7 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
     func testFreshInstallShowsSplashThenSocialAuthenticationEntry() throws {
         let app = launchApp(
             at: "splash",
-            extraArguments: ["--coordit-welcome-state", "fresh"]
+            extraArguments: ["--coordit-welcome-state", "fresh", "--coordit-ui-testing-isolated-session"]
         )
         assertScreen("splash", in: app)
 
