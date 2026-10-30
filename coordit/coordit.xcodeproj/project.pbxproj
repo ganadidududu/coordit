@@ -13,6 +13,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		C0D170000000000000000001 = {isa = PBXContainerItemProxy; containerPortal = E1ED08FB2FFCE8A70048FDDE; proxyType = 1; remoteGlobalIDString = E1ED09022FFCE8A70048FDDE; remoteInfo = coordit; };
 		E1ED09182FFCF0010048FDDE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E1ED08FB2FFCE8A70048FDDE /* Project object */;
@@ -44,6 +45,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C0D170000000000000000002 /* coorditTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = coorditTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A7D45AE628A4917AB362C6F /* CoorditShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CoorditShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1ED09032FFCE8A70048FDDE /* coordit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = coordit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1ED09112FFCF0010048FDDE /* coorditUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = coorditUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -67,6 +69,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		C0D170000000000000000003 /* coorditTests */ = {isa = PBXFileSystemSynchronizedRootGroup; path = coorditTests; sourceTree = "<group>"; };
 		4D00EA8AFC5D4D0DB53F57C1 /* CoorditShareExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -91,6 +94,7 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		C0D170000000000000000004 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		BE7705CAF5554C2492EF04F9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -123,6 +127,7 @@
 				E1ED09052FFCE8A70048FDDE /* coordit */,
 				4D00EA8AFC5D4D0DB53F57C1 /* CoorditShareExtension */,
 				E1ED09122FFCF0010048FDDE /* coorditUITests */,
+				C0D170000000000000000003 /* coorditTests */,
 				E1ED09042FFCE8A70048FDDE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -133,6 +138,7 @@
 				E1ED09032FFCE8A70048FDDE /* coordit.app */,
 				0A7D45AE628A4917AB362C6F /* CoorditShareExtension.appex */,
 				E1ED09112FFCF0010048FDDE /* coorditUITests.xctest */,
+				C0D170000000000000000002 /* coorditTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -140,6 +146,18 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		C0D170000000000000000005 /* coorditTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0D170000000000000000006;
+			buildPhases = (C0D170000000000000000007, C0D170000000000000000004, C0D170000000000000000008);
+			buildRules = ();
+			dependencies = (C0D170000000000000000009);
+			fileSystemSynchronizedGroups = (C0D170000000000000000003);
+			name = coorditTests;
+			productName = coorditTests;
+			productReference = C0D170000000000000000002;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		E1ED09022FFCE8A70048FDDE /* coordit */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E1ED090E2FFCE8A80048FDDE /* Build configuration list for PBXNativeTarget "coordit" */;
@@ -221,6 +239,7 @@
 				LastSwiftUpdateCheck = 2650;
 				LastUpgradeCheck = 2650;
 				TargetAttributes = {
+					C0D170000000000000000005 = {CreatedOnToolsVersion = 26.5; TestTargetID = E1ED09022FFCE8A70048FDDE; };
 					E1ED09022FFCE8A70048FDDE = {
 						CreatedOnToolsVersion = 26.5;
 					};
@@ -251,6 +270,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				C0D170000000000000000005 /* coorditTests */,
 				E1ED09022FFCE8A70048FDDE /* coordit */,
 				E6DB292085C64610AF7286EF /* CoorditShareExtension */,
 				E1ED09162FFCF0010048FDDE /* coorditUITests */,
@@ -259,6 +279,7 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		C0D170000000000000000008 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		A3DEC7A37D3244B0BE77BDBA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -283,6 +304,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		C0D170000000000000000007 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		98352FCE4FC9439694481BE1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -307,6 +329,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		C0D170000000000000000009 = {isa = PBXTargetDependency; target = E1ED09022FFCE8A70048FDDE; targetProxy = C0D170000000000000000001; };
 		54D3E7F32A0E4D7BAC219820 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E6DB292085C64610AF7286EF /* CoorditShareExtension */;
@@ -320,13 +343,43 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		C0D17000000000000000000A = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.inseong.coorditTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/coordit.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/coordit";
+			};
+			name = Debug;
+		};
+		C0D17000000000000000000B = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.inseong.coorditTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/coordit.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/coordit";
+			};
+			name = Release;
+		};
 		7B0996500A524B948C5105D9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = CoorditShareExtension/CoorditShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 87V7WR9QND;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = CoorditShareExtension/Info.plist;
@@ -336,7 +389,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.inseong.coordit.CoorditShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -356,7 +409,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = CoorditShareExtension/CoorditShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 87V7WR9QND;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = CoorditShareExtension/Info.plist;
@@ -366,7 +419,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.inseong.coordit.CoorditShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -506,7 +559,7 @@
 				CODE_SIGN_ENTITLEMENTS = coordit/coordit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COORDIT_API_BASE_URL = "https://coordit-backend-staging-789827940031.asia-northeast3.run.app";
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 87V7WR9QND;
 				ENABLE_PREVIEWS = YES;
 				EXCLUDED_SOURCE_FILE_NAMES = Info.plist;
@@ -519,7 +572,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.inseong.coordit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -541,7 +594,7 @@
 				CODE_SIGN_ENTITLEMENTS = coordit/coordit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COORDIT_API_BASE_URL = "https://coordit-backend-staging-789827940031.asia-northeast3.run.app";
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 87V7WR9QND;
 				ENABLE_PREVIEWS = YES;
 				EXCLUDED_SOURCE_FILE_NAMES = Info.plist;
@@ -554,7 +607,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.inseong.coordit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -572,7 +625,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -580,7 +633,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.inseong.coorditUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -594,7 +647,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -602,7 +655,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.inseong.coorditUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -615,6 +668,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		C0D170000000000000000006 = {isa = XCConfigurationList; buildConfigurations = (C0D17000000000000000000A, C0D17000000000000000000B); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 		B2FFD72B0F9A42E093CD04DF /* Build configuration list for PBXNativeTarget "CoorditShareExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

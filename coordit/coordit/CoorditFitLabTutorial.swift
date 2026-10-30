@@ -12,8 +12,8 @@ final class CoorditFitLabTutorial: ObservableObject {
             case .source: "입력 방식 선택하기"
             case .link: "상품 링크 입력하기"
             case .importLink: "상품 정보 불러오기"
-            case .review: "사이즈표 확인하기"
-            case .continueToReferences: "기준 옷 선택으로 이동하기"
+            case .review: "읽지 못한 값 보완하기"
+            case .continueToReferences: "무료 분석 확인하고 비교하기"
             case .references: "나에게 잘 맞는 기준 옷 선택하기"
             case .analyze: "핏 분석 시작하기"
             case .result: "사이즈별 핏 비교하기"
@@ -23,20 +23,22 @@ final class CoorditFitLabTutorial: ObservableObject {
 
         var message: String {
             switch self {
-            case .source: "실제 핏 분석에는 Closet에 등록하고 기준 의류로 선택한 옷이 필요해요. 준비됐다면 링크·사진·직접 입력 중 편한 방식을 고르세요. 예시 체험에는 샘플 기준 의류가 제공돼요."
+            case .source: "상품 링크로 시작하는 걸 추천해요. 링크가 없으면 사이즈표 캡처를 선택해주세요. 불러오지 못하면 직접 입력으로 이어갈 수 있어요."
             case .link: "상품 페이지 주소를 입력하거나 붙여넣고 다음을 누릅니다. 옷 종류도 상품에 맞게 선택합니다."
-            case .importLink: "링크에서 가져오기를 누르면 상품 정보와 사이즈표를 불러옵니다. 아직 분석이나 실타래 사용은 진행되지 않습니다."
-            case .review: "위의 상품명과 사이즈별 실측을 확인합니다. 잘못된 값은 수정하고 확인 버튼을 누릅니다."
-            case .continueToReferences: "확인한 사이즈표로 비교를 준비합니다. 기준 옷 선택으로 버튼을 누릅니다."
-            case .references: "비슷한 종류와 길이의 기준 옷을 한 개 이상 선택합니다. 기준 옷이 없다면 먼저 선택·등록합니다."
-            case .analyze: "선택한 기준 옷과 상품의 사이즈를 비교합니다. 핏 분석을 시작하면 실타래 1개가 사용됩니다."
+            case .importLink: "다음을 누르면 링크의 상품과 사이즈 정보를 무료로 정리해요."
+            case .review: "누락되거나 잘못 읽힌 값만 수정해주세요. 정상적으로 읽힌 사이즈표는 바로 넘어가요."
+            case .continueToReferences: "아래 리포트를 읽고 ‘내 옷과 비교하기’를 눌러주세요."
+            case .references: "‘옷장에서 골라 비교’를 누르고, 방금 등록한 예시 옷을 선택해주세요."
+            case .analyze: "선택한 내 옷과 상품의 사이즈를 비교해요. 예시 체험에서는 실타래를 사용하지 않아요."
             case .result: "추천 사이즈와 핏 점수를 확인합니다. 아래 사이즈를 누르면 해당 사이즈의 점수와 부위별 차이를 비교할 수 있습니다."
-            case .save: "히스토리에 추가를 누르면 리포트를 저장합니다. 확인하기를 누르면 저장하지 않고 Fit Lab으로 돌아갑니다."
+            case .save: "실제 분석은 히스토리에 추가해 다시 볼 수 있어요. 예시는 체험 마치기로 끝내요."
             }
         }
     }
 
     @Published private(set) var step: Step?
+    @Published private(set) var completionRevision = 0
+    var requiresSkipConfirmation = false
     private let defaults: UserDefaults
     private let seenKey = "coordit.fitLabTutorial.v1.seen"
 
@@ -44,12 +46,10 @@ final class CoorditFitLabTutorial: ObservableObject {
 
     func visitSources() {
         if step != nil { step = .source; return }
-        guard !defaults.bool(forKey: seenKey) else { return }
 #if DEBUG
         let arguments = ProcessInfo.processInfo.arguments
-        if arguments.contains("--coordit-ui-testing") && !arguments.contains("--coordit-test-fitlab-tutorial") { return }
+        if arguments.contains("--coordit-test-fitlab-tutorial") { step = .source }
 #endif
-        step = .source
     }
 
     func restart() { step = .source }
@@ -68,12 +68,14 @@ final class CoorditFitLabTutorial: ObservableObject {
     func dismiss() {
         defaults.set(true, forKey: seenKey)
         step = nil
+        completionRevision += 1
     }
 }
 
 private struct CoorditFitLabTutorialTarget: ViewModifier {
     @EnvironmentObject private var tutorial: CoorditFitLabTutorial
     let step: CoorditFitLabTutorial.Step
+    let title: String?
     let message: String?
     let enabled: Bool
 
@@ -82,11 +84,12 @@ private struct CoorditFitLabTutorialTarget: ViewModifier {
         if enabled {
             content.modifier(CoorditTutorialTarget(
                 isActive: enabled && tutorial.step == step,
-                progress: "FIT LAB 가이드",
-                title: step.title,
+                progress: "FIT LAB 체험 · 저장·차감 없음",
+                title: title ?? step.title,
                 message: message ?? step.message,
                 identifier: "fitlab-tutorial",
                 stepIdentifier: "fitlab-tutorial-step-\(step.rawValue)",
+                requiresSkipConfirmation: tutorial.requiresSkipConfirmation,
                 dismiss: tutorial.dismiss
             ))
             .id(step)
@@ -99,10 +102,11 @@ private struct CoorditFitLabTutorialTarget: ViewModifier {
 extension View {
     func fitLabTutorialTarget(
         _ step: CoorditFitLabTutorial.Step,
+        title: String? = nil,
         message: String? = nil,
         enabled: Bool = true
     ) -> some View {
-        modifier(CoorditFitLabTutorialTarget(step: step, message: message, enabled: enabled))
+        modifier(CoorditFitLabTutorialTarget(step: step, title: title, message: message, enabled: enabled))
     }
 
 }

@@ -1,0 +1,250 @@
+{
+  "scope": "historical synthetic evaluation; not current deployed accuracy or real garment cm error",
+  "architecture": "coordit-spatial-multitask-v2",
+  "synthetic_generated": 1320,
+  "synthetic_train": 1108,
+  "synthetic_validation": 110,
+  "synthetic_test": 102,
+  "real_train": 524,
+  "distinct_training_pool": 1632,
+  "epochs_per_model": 35,
+  "exposures_per_model": 55370,
+  "normalization": "L2 on upright normalized square input coordinates / sqrt(2); PCK threshold 0.05; image-weighted means, not pooled landmark counts",
+  "evaluations": [
+    {
+      "model": "shared",
+      "split": "validation",
+      "images": 110,
+      "pck_005_image_weighted": 1,
+      "nme_image_weighted": 0.004025516752153635,
+      "checkpoint_sha256": "bc5992b7572b5f451a3e2389fef3f9de915c4f540ec6cb66d2b84a141ed17798",
+      "manifest_sha256": "3d6cd938f359c4e89d45c9843634630bfced1bf83628412a47bbf5730460ac5d",
+      "per_category": [
+        {
+          "category": "synthetic/tshirt",
+          "images": 10,
+          "pck_005": 1.0,
+          "nme": 0.004546044557355344
+        },
+        {
+          "category": "synthetic/shirt",
+          "images": 14,
+          "pck_005": 1.0,
+          "nme": 0.003315242040636284
+        },
+        {
+          "category": "synthetic/sweatshirt",
+          "images": 7,
+          "pck_005": 1.0,
+          "nme": 0.004326745069452694
+        },
+        {
+          "category": "synthetic/hoodie",
+          "images": 14,
+          "pck_005": 1.0,
+          "nme": 0.003370828369432794
+        },
+        {
+          "category": "synthetic/knit",
+          "images": 11,
+          "pck_005": 1.0,
+          "nme": 0.0036806303753771567
+        },
+        {
+          "category": "synthetic/jacket",
+          "images": 6,
+          "pck_005": 1.0,
+          "nme": 0.0031208842992782593
+        },
+        {
+          "category": "synthetic/coat",
+          "images": 13,
+          "pck_005": 1.0,
+          "nme": 0.0031836538915880597
+        },
+        {
+          "category": "synthetic/pants",
+          "images": 10,
+          "pck_005": 1.0,
+          "nme": 0.005050543555989861
+        },
+        {
+          "category": "synthetic/jeans",
+          "images": 11,
+          "pck_005": 1.0,
+          "nme": 0.00504176729274067
+        },
+        {
+          "category": "synthetic/shorts",
+          "images": 5,
+          "pck_005": 1.0,
+          "nme": 0.003223069617524743
+        },
+        {
+          "category": "synthetic/skirt",
+          "images": 9,
+          "pck_005": 1.0,
+          "nme": 0.0056415812836753
+        }
+      ]
+    },
+    {
+      "model": "shared",
+      "split": "test",
+      "images": 102,
+      "pck_005_image_weighted": 0.9987745098039216,
+      "nme_image_weighted": 0.003818628638434936,
+      "checkpoint_sha256": "bc5992b7572b5f451a3e2389fef3f9de915c4f540ec6cb66d2b84a141ed17798",
+      "manifest_sha256": "3d6cd938f359c4e89d45c9843634630bfced1bf83628412a47bbf5730460ac5d",
+      "per_category": [
+        {
+          "category": "synthetic/tshirt",
+          "images": 8,
+          "pck_005": 0.984375,
+          "nme": 0.004042122222017497
+        },
+        {
+          "category": "synthetic/shirt",
+          "images": 11,
+          "pck_005": 1.0,
+          "nme": 0.0036789863793687387
+        },
+        {
+          "category": "synthetic/sweatshirt",
+          "images": 10,
+          "pck_005": 1.0,
+          "nme": 0.002786503138486296
+        },
+        {
+          "category": "synthetic/hoodie",
+          "images": 7,
+          "pck_005": 1.0,
+          "nme": 0.0053411793362881455
+        },
+        {
+          "category": "synthetic/knit",
+          "images": 12,
+          "pck_005": 1.0,
+          "nme": 0.0036733023977528014
+        },
+        {
+          "category": "synthetic/jacket",
+          "images": 11,
+          "pck_005": 1.0,
+          "nme": 0.0036172792315483093
+        },
+        {
+          "category": "synthetic/coat",
+          "images": 11,
+          "pck_005": 1.0,
+          "nme": 0.0028448039983314547
+        },
+        {
+          "category": "synthetic/pants",
+          "images": 7,
+          "pck_005": 1.0,
+          "nme": 0.003747415928436177
+        },
+        {
+          "category": "synthetic/jeans",
+          "images": 8,
+          "pck_005": 1.0,
+          "nme": 0.004532474733423442
+        },
+        {
+          "category": "synthetic/shorts",
+          "images": 6,
+          "pck_005": 1.0,
+          "nme": 0.00405508594121784
+        },
+        {
+          "category": "synthetic/skirt",
+          "images": 11,
+          "pck_005": 1.0,
+          "nme": 0.004496021556075324
+        }
+      ]
+    },
+    {
+      "model": "category-heads",
+      "split": "validation",
+      "images": 110,
+      "pck_005_image_weighted": 0.9875,
+      "nme_image_weighted": 0.006509786135178398,
+      "checkpoint_sha256": "78892d145d3e5db36666f2b27cb4586c03ac193c05c8de8634aa556b14cd504b",
+      "manifest_sha256": "3d6cd938f359c4e89d45c9843634630bfced1bf83628412a47bbf5730460ac5d",
+      "per_category": [
+        {
+          "category": "synthetic/tshirt",
+          "images": 10,
+          "pck_005": 0.975,
+          "nme": 0.006369985942728818
+        },
+        {
+          "category": "synthetic/shirt",
+          "images": 14,
+          "pck_005": 1.0,
+          "nme": 0.004489946910845382
+        },
+        {
+          "category": "synthetic/sweatshirt",
+          "images": 7,
+          "pck_005": 1.0,
+          "nme": 0.005077288752155644
+        },
+        {
+          "category": "synthetic/hoodie",
+          "images": 14,
+          "pck_005": 1.0,
+          "nme": 0.005895659344137779
+        },
+        {
+          "category": "synthetic/knit",
+          "images": 11,
+          "pck_005": 1.0,
+          "nme": 0.0042885986410758714
+        },
+        {
+          "category": "synthetic/jacket",
+          "images": 6,
+          "pck_005": 1.0,
+          "nme": 0.0037125854287296534
+        },
+        {
+          "category": "synthetic/coat",
+          "images": 13,
+          "pck_005": 1.0,
+          "nme": 0.004213306873750228
+        },
+        {
+          "category": "synthetic/pants",
+          "images": 10,
+          "pck_005": 1.0,
+          "nme": 0.004855009517632425
+        },
+        {
+          "category": "synthetic/jeans",
+          "images": 11,
+          "pck_005": 0.8977272727272727,
+          "nme": 0.020970372567799957
+        },
+        {
+          "category": "synthetic/shorts",
+          "images": 5,
+          "pck_005": 1.0,
+          "nme": 0.004463936109095812
+        },
+        {
+          "category": "synthetic/skirt",
+          "images": 9,
+          "pck_005": 1.0,
+          "nme": 0.0050744606285459464
+        }
+      ]
+    }
+  ],
+  "real_semantic_landmark_accuracy": "unverified",
+  "real_centimeter_accuracy": "unverified",
+  "current_registry_blocks_historical_checkpoints": true,
+  "deployment_approved": false
+}

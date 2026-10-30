@@ -72,7 +72,8 @@ export const createAppleDeviceWelcomeRegistry = (
       const response = await http.post(`${configuration.baseURL ?? endpointBase(configuration.environment)}/v1/${operation}`, {
         headers: { Authorization: `Bearer ${authorizationToken(configuration)}` },
         json,
-        retry: { limit: 2, methods: ["post"] },
+        // The two Apple requests must finish inside the database's fenced 45s lease.
+        retry: 0,
         timeout: 10_000,
       });
       const responseBody = (await response.text()).trim();

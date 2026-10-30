@@ -1,0 +1,32 @@
+{
+  "execution": "actual_openrouter_hosted_vision_api",
+  "images_per_model": 8,
+  "model_count": 5,
+  "actual_inference_requests": 40,
+  "source_images": "public aRTF only",
+  "source_receipt_sha256": "67e41b8192e00bfbf6dc08c1d26e65b285026117d7499d3e8bd01169a62d8e08",
+  "protocol_sha256": "fe6ac24dce3e674b4872a520ec09f99e03228aa5f9cc535b8864c8b281225dd3",
+  "selected_catalog_sha256": "b1de3398cecdb87588270d8781ee2f87073dc94b48845572b14c3e3ebb53ae37",
+  "config_sha256": "e4fd3efaadb5fa48efab57e2d3978c6130dff033cd5943ed71529fc20c4717ca",
+  "attempts_sha256": "686c26ecadc30908cc749df97b451560c3282f9e4c8aeba6fea5d51faba52ab2",
+  "metrics_sha256": "0ca2ca4e7d5c8f0d6644a28a96debf4188b7052ccfdb62986fc8121f4bebbb98",
+  "billing_audit_sha256": "9cf8193e2c6190d74d81aa6fdf13b036be07a139050880415071b3a3f40b624c",
+  "actual_provider_credits_usd": 0.373349,
+  "billing_ledger_matches": 40,
+  "inference_retries": 0,
+  "all_api_annotations_frozen_before_scoring": true,
+  "aihub_photos_sent": 0,
+  "training_images_or_labels_modified": false,
+  "new_weights_trained": false,
+  "phase_3_changed": false,
+  "features_enabled": false,
+  "verification": {
+    "pytest_passed": 100,
+    "ruff": "passed",
+    "new_module_typecheck": "0 errors, 0 warnings",
+    "full_typecheck_errors": 0,
+    "full_typecheck_existing_warnings": 28,
+    "offline_metric_replay": "byte_identical",
+    "mobile_and_sensor_tests_run": false
+  }
+}

@@ -13,23 +13,36 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class ClosetViewModel(private val repository: ClosetRepository, private val sessions: SessionRepository) : ViewModel() {
+class ClosetViewModel(private val repository: ClosetRepository, private val sessions: SessionRepository, private val homeRepository: com.inseong.coordit.data.home.HomeRepository? = null) : ViewModel() {
     private val mutableState = MutableStateFlow(ClosetState())
     val state = mutableState.asStateFlow()
     private var work: Job? = null
     private var generation = 0L
     private var pendingKey: String? = null
     private var owner = sessions.session.value?.user?.id
+    private var beforeExample: ClosetState? = null
+    private var beforeExampleKey: String? = null
+    private var beforeExampleRegistration = false
+    private var registeringForFitLab = false
     init {
         viewModelScope.launch {
             sessions.session.map { it?.user?.id }.distinctUntilChanged().collect { id ->
                 if (owner != id) {
-                    generation++; work?.cancel(); owner = id; pendingKey = null
+                    generation++; work?.cancel(); owner = id; pendingKey = null; beforeExample = null; beforeExampleKey = null; beforeExampleRegistration = false; registeringForFitLab = false
                     mutableState.value = ClosetState()
                 }
             }
         }
     }
+    suspend fun inferGarment(bitmap: android.graphics.Bitmap, category: String): com.inseong.coordit.data.fitlab.camera.GarmentLandmarkClient.Outcome {
+        val client = com.inseong.coordit.data.fitlab.camera.GarmentLandmarkClient()
+        val session = sessions.session.value ?: return com.inseong.coordit.data.fitlab.camera.GarmentLandmarkClient.Outcome.Fallback("login_required")
+        val endpoint = com.inseong.coordit.BuildConfig.API_BASE_URL.trimEnd('/') + "/garment-landmarks"
+        val result = client.infer(com.inseong.coordit.data.fitlab.camera.GarmentLandmarkClient.Input(bitmap, category, endpoint, session.accessToken, true))
+        return if (sessions.session.value?.user?.id == session.user.id) result
+        else com.inseong.coordit.data.fitlab.camera.GarmentLandmarkClient.Outcome.Fallback("session_changed")
+    }
+
     private fun runOperation(block: suspend (String, Long) -> Unit) {
         if (state.value.busy) return
         val session = sessions.session.value ?: run { mutableState.value = state.value.copy(loading = false, error = "로그인이 필요해요."); return }
@@ -69,8 +82,35 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
     }
     fun startAdd() {
         if (state.value.busy) return
+        registeringForFitLab = false
         pendingKey = null
-        mutableState.value = state.value.copy(screen = ClosetScreen.Method, draft = ClosetDraft(), error = null)
+        mutableState.value = state.value.copy(screen = ClosetScreen.Method, draft = ClosetDraft(), registeredFitLabReference = null, error = null)
+    }
+    fun startReferenceRegistration() {
+        if (state.value.busy) return
+        startAdd()
+        registeringForFitLab = true
+        chooseMethod(ClosetMethod.Link)
+    }
+    fun beginExample(): Boolean {
+        if (state.value.busy) return false
+        if (!state.value.draft.isExample) {
+            beforeExample = state.value
+            beforeExampleKey = pendingKey
+            beforeExampleRegistration = registeringForFitLab
+        }
+        mutableState.value = state.value.copy(screen = ClosetScreen.Link, detail = null, error = null,
+            draft = ClosetDraft(method = ClosetMethod.Link, productLink = com.inseong.coordit.data.fitlab.FitLabExample.link, isExample = true))
+        return true
+    }
+    fun finishExample() {
+        if (!state.value.draft.isExample) return
+        mutableState.value = beforeExample ?: ClosetState()
+        pendingKey = beforeExampleKey
+        registeringForFitLab = beforeExampleRegistration
+        beforeExample = null
+        beforeExampleKey = null
+        beforeExampleRegistration = false
     }
     fun chooseMethod(method: ClosetMethod) {
         if (state.value.busy) return
@@ -80,28 +120,24 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
     fun editDraft(edit: (ClosetDraft) -> ClosetDraft) {
         if (state.value.busy) return
         val previous = state.value.draft
-        val edited = edit(previous)
+        val proposed = edit(previous)
+        val changedMeasurements = proposed.category != previous.category || proposed.method != previous.method ||
+            listOf(proposed.measurement1, proposed.measurement2, proposed.measurement3, proposed.measurement4) !=
+            listOf(previous.measurement1, previous.measurement2, previous.measurement3, previous.measurement4)
+        val edited = if (changedMeasurements && proposed.cameraMetadata == previous.cameraMetadata)
+            proposed.copy(cameraMetadata = emptyMap()) else proposed
         val draft = if (edited.productLink != previous.productLink || edited.category != previous.category) edited.copy(sizeRows = emptyList(), selectedSizeRowId = null) else edited
         if (draft != state.value.draft) pendingKey = null
         mutableState.value = state.value.copy(draft = draft, error = null)
     }
     fun setSizeRows(rows: List<ClosetSizeRow>) = editDraft { it.copy(sizeRows = rows, selectedSizeRowId = null) }
     fun selectSize(id: String) = editDraft { it.copy(selectedSizeRowId = id) }
-    fun startExample() {
-        if (state.value.busy) return
-        pendingKey = null
-        mutableState.value = state.value.copy(screen = ClosetScreen.Link, draft = ClosetDraft(method = ClosetMethod.Link, productLink = com.inseong.coordit.data.fitlab.TutorialExample.link), error = null)
-    }
-    fun finishExample() {
-        mutableState.value = state.value.copy(screen = ClosetScreen.Overview, draft = ClosetDraft(), detail = null, error = null)
-    }
     fun prefill() = runOperation { token, ticket ->
-        if (state.value.draft.isTutorialExample) {
-            val draft = state.value.draft
-            mutableState.value = state.value.copy(draft = draft.copy(name = "[예시] 베이직 ${draft.category.title}", sizeRows = com.inseong.coordit.data.fitlab.TutorialExample.rows(draft.category.upper).map { ClosetSizeRow(it.id, it.label, it.measurements) }))
-            return@runOperation
-        }
-        val result = repository.prefill(token, state.value.draft)
+        val draft = state.value.draft
+        val result = if (draft.isExample) {
+            val example = com.inseong.coordit.data.fitlab.FitLabExample.product(draft.category)
+            ClosetPrefill(example.productName, example.sizes.mapIndexed { index, row -> row.row(index) }, draft.category)
+        } else repository.prefill(token, draft)
         if (current(ticket)) {
             pendingKey = null
             mutableState.value = state.value.copy(draft = state.value.draft.copy(name = result.name.orEmpty(), category = result.category ?: state.value.draft.category, sizeRows = result.rows, selectedSizeRowId = null))
@@ -118,26 +154,36 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
     fun save() {
         if (state.value.busy) return
         val draft = state.value.draft
-        val key = pendingKey ?: UUID.randomUUID().toString().also { pendingKey = it }
+        val key = if (draft.isExample) "tutorial-example" else pendingKey ?: UUID.randomUUID().toString().also { pendingKey = it }
         try { draft.request(key) } catch (failure: IllegalArgumentException) { error(failure.message ?: "입력값을 확인해 주세요."); return }
-        if (draft.isTutorialExample) {
-            val row = requireNotNull(draft.selectedSizeRow)
-            mutableState.value = state.value.copy(screen = ClosetScreen.Detail, detail = ClosetDetail(
-                ClosetItem("tutorial-example", draft.name, draft.category, row.label), listOf(row),
-                comparison = ClosetComparison("ready", if (draft.category.upper) "upper" else "lower", 1, 95.0, .5, row.measurements.mapValues { 1.0 }, "예시 점수이며 실제 의류를 분석한 결과가 아니에요."),
-            ))
+        if (draft.isExample) {
+            val item = ClosetItem("tutorial-clothing", draft.name, draft.category, draft.selectedSizeRow?.label)
+            val row = draft.selectedSizeRow ?: ClosetSizeRow("example-size", "예시", draft.measurements())
+            mutableState.value = state.value.copy(screen = ClosetScreen.Detail, detail = ClosetDetail(item, listOf(row)), error = null)
             return
         }
         mutableState.value = state.value.copy(screen = ClosetScreen.Saving)
         runOperation { token, ticket ->
             val detail = repository.create(token, draft, key)
+            val reference = if (current(ticket) && registeringForFitLab) {
+                val item = detail.item
+                val saved = requireNotNull(homeRepository).registerReference(token, com.inseong.coordit.data.home.HomeGarment(item.id, item.name, item.category))
+                require(saved.isActive && saved.clothingItemId == item.id) { "등록한 기준 옷을 확인하지 못했어요. 다시 시도해 주세요." }
+                com.inseong.coordit.data.fitlab.FitLabReference(requireNotNull(saved.id) { "기준 옷 등록 응답을 확인하지 못했어요. 다시 시도해 주세요." }, item.id, item.name, item.category.wireName, true)
+            } else null
             if (current(ticket)) {
                 pendingKey = null
-                mutableState.value = state.value.copy(screen = ClosetScreen.Detail, detail = detail, items = listOf(detail.item) + state.value.items.filter { it.id != detail.item.id })
-                val full = repository.detail(token, detail.item.id)
-                if (current(ticket)) mutableState.value = state.value.copy(detail = full)
+                mutableState.value = state.value.copy(screen = ClosetScreen.Detail, detail = detail, registeredFitLabReference = reference, items = listOf(detail.item) + state.value.items.filter { it.id != detail.item.id })
+                if (reference == null) {
+                    val full = repository.detail(token, detail.item.id)
+                    if (current(ticket)) mutableState.value = state.value.copy(detail = full)
+                }
             }
         }
+    }
+    fun consumeRegisteredFitLabReference() {
+        registeringForFitLab = false
+        mutableState.value = state.value.copy(registeredFitLabReference = null)
     }
     fun rename(name: String) {
         val detail = state.value.detail ?: return

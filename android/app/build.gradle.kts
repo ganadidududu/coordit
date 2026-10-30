@@ -23,8 +23,12 @@ android {
         applicationId = "com.coordit.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = providers.gradleProperty("COORDIT_VERSION_CODE").orElse("10").get().toInt()
-        versionName = providers.gradleProperty("COORDIT_VERSION_NAME").orElse("1.0.1").get()
+        versionCode = providers.gradleProperty("COORDIT_VERSION_CODE").orElse("12").get().toInt()
+        versionName = providers.gradleProperty("COORDIT_VERSION_NAME").orElse("1.0.3").get()
+        buildConfigField("boolean", "CARDLESS_AR_ENABLED", "false")
+        buildConfigField("boolean", "AI_LANDMARKS_ENABLED", "false")
+        buildConfigField("boolean", "AI_LANDMARKS_DEVELOPMENT_ENABLED", "false")
+        buildConfigField("boolean", "RGB_ESTIMATE_ENABLED", "false")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", quoted(providers.gradleProperty("GOOGLE_WEB_CLIENT_ID").orElse("").get()))
     }
@@ -69,6 +73,7 @@ tasks.matching { it.name == "bundleRelease" }.configureEach {
     }
 }
 dependencies {
+    implementation("com.google.ar:core:1.57.0")
     val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -100,4 +105,10 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("debug")) { variant ->
+        variant.applicationId.set("com.inseong.coordit.debug")
+    }
 }

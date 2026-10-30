@@ -973,3 +973,22 @@ category-specific context, deterministic semantic facts, interactions, subscore,
 | 필수 입력 | 없음 또는 Authorization header |
 | 주요 반환값 | 카테고리, fit type, 측정 필드 |
 | 사용 화면 | Closet, Fit Lab |
+
+## Research garment landmarks (default disabled, Phase 2)
+
+`POST /garment-landmarks` requires the existing user `Authorization: Bearer <access token>` and JSON `{ "image_base64": "<metadata-free upright JPEG>", "processing_consent": true, "training_consent": false }`. The centralized `imageRoutes` router authenticates before its isolated 4.1 MB parser. Existing routes keep their smaller parser. There is no wallet debit or wardrobe mutation at this endpoint.
+
+This endpoint forwards only to the separately configured private ML service using a server-held secret. It is disabled unless explicitly configured for research and hard-blocked in `NODE_ENV=production`. A successful reply has schema 1, model version, `upright_rgb_normalized_top_left` coordinates, category, per-point visibility/raw confidence/source/correction status, a segmentation mask, empty `centimeter_values`, and `deployment_approved: false`. `needs_calibration` means a landmark proposal requires an independently established AR/card scale; `failed` means retain local/manual measurement. Raw confidence is not a calibrated error guarantee. Release apps refuse research proposals; deliberate DEBUG builds require a separate research-proposal opt-in and photo-specific processing consent. Photos are not retained or used for training.
+
+Errors: 401 invalid session, 400 invalid body/consent (training collection is refused), 413 oversized body, 429 capacity busy, 503 disabled/unavailable/invalid upstream. Clients preserve previous measurements and offer the existing local/manual path. All responses from the handler use `Cache-Control: no-store`. See [Phase 2 evidence and activation gates](CARDLESS_PHASE_2_STATUS.md).
+
+
+### 출시용 비회원·가입 실타래 정책 (2026-10-29)
+
+- iOS 로그인 선택은 `비회원으로 둘러보기`이며, 새 비회원 지갑은 0개로 시작한다. 광고 보상은 로그인 회원과 동일하게 서버 검증 후 적립한다.
+- 비회원 시작은 세션 생성/복구 후 `/thread-wallet/balance`를 조회한다. DeviceCheck 가입 지급을 요청하지 않는다.
+- 호환용 `POST /auth/guest/welcome`는 기존 요청 형식을 유지하지만 현재 잔액과 `status: "already_claimed"`만 반환한다. 비회원 실타래를 추가하거나 기기를 지급 완료로 표시하지 않는다.
+- 신규 회원 프로필 생성 또는 같은 비회원 ID의 회원 전환 시 가입 실타래 3개를 한 번 지급한다. 기존 광고 잔액과 과거 지급 잔액은 회수하지 않는다. 재로그인은 재지급하지 않는다.
+- 2026-10-29 운영 Supabase DB에 `supabase/migrations/20261029090000_member_only_welcome_threads.sql`을 적용했고, Cloud Run `coordit-backend-staging-member-welcome-1029`로 운영 트래픽 100%를 전환했다. 비회원 0개, 회원 최초 3개, 기존 잔액 보존 및 광고 요청 가능 여부를 검증했다. 상세 기록은 [배포 검증 기록](DEPLOYMENT_MEMBER_WELCOME_20261029.md)을 참고한다.
+- Fit Lab의 무료 상품 정보 확인은 잔액 0개에도 가능하다. 유료 비교 제출 시 잔액이 부족하면 충전 이동/취소 팝업을 표시하고 입력·선택을 보존한다. 서버 402 응답도 같은 안내로 연결한다.
+- 핏랩·옷장의 시작 화면에는 직접 입력을 노출하지 않는다. 링크 수집 실패, 사진 로드/표 인식 실패, 카메라 접근 실패의 복구 경로에서 직접 입력을 제공한다. 읽어온 치수의 수정은 계속 가능하다.

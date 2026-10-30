@@ -1,0 +1,48 @@
+{
+  "expected_registry_sha256": "6d293479ef3eba8c2f5e0bb1ca1b5f9ef31e18b97135e2530826466d9973a9de",
+  "reviewer": "Coordit original publisher garment-geometry rights review 2026-10-28",
+  "original_evidence_urls": [
+    "https://www.research-collection.ethz.ch/items/9d16a4da-0d30-4963-8842-af20fcf82899",
+    "https://libdrive.ethz.ch/index.php/s/4UtC8smtLOGwKoZ",
+    "https://igl.ethz.ch/projects/GarmentCodeData/"
+  ],
+  "dataset": {
+    "id": "garmentcodedata-v2",
+    "name": "garmentcodedata-v2",
+    "original_url": "https://www.research-collection.ethz.ch/items/9d16a4da-0d30-4963-8842-af20fcf82899",
+    "publisher": "Maria Korosteleva et al. / ETH Zurich",
+    "image_rightsholder": "Maria Korosteleva et al. / ETH Zurich, publisher-created garment geometry only",
+    "data_license": "CC-BY-4.0",
+    "annotation_license": "CC-BY-4.0",
+    "license_url": "https://www.research-collection.ethz.ch/items/9d16a4da-0d30-4963-8842-af20fcf82899",
+    "checked_at": "2026-10-28",
+    "terms_url": "https://www.research-collection.ethz.ch/items/9d16a4da-0d30-4963-8842-af20fcf82899",
+    "commercial_basis": "Original ETH v2 deposit explicitly lists CC BY 4.0; DOI confirmed in official libdrive doi.txt. Approval limited to original garment patterns/meshes and own texture-free, body-free renders. Raw human bodies, body measurements, publisher textures and renders excluded; no third-party repack accepted.",
+    "permissions": [
+      "train",
+      "modify",
+      "redistribute_with_attribution"
+    ],
+    "attribution": "GarmentCodeData v2, Maria Korosteleva, Timur Levent Kesdogan, Fabian Kemper, Stephan Wenninger, Jasmin Koller, Yuhan Zhang, Mario Botsch, Olga Sorkine-Hornung (ECCV 2024), ETH Zurich, doi:10.3929/ethz-b-000690432, CC BY 4.0. Coordit derives topology candidates and body-free renders.",
+    "published_image_count": null,
+    "approved_image_count": 0,
+    "categories": [
+      "shirt",
+      "hoodie",
+      "pants",
+      "skirt"
+    ],
+    "annotation_types": [
+      "polygon",
+      "mask",
+      "semantic_keypoints",
+      "3d_keypoints",
+      "camera"
+    ],
+    "provenance_manifest": null,
+    "status": "approved",
+    "approval_reason": "Original publisher deposit license, official documentation and DOI-matching libdrive archive verified. Geometry-only scope; landmarks require explicit topology evidence; unknown points excluded. Zero training images until pilot conversion audit.",
+    "download_url": null,
+    "archive_md5": null
+  }
+}

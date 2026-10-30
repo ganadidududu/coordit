@@ -29,6 +29,20 @@ const expectHttpError = async (promise: Promise<unknown>, statusCode: number): P
 
 const tests: readonly { readonly name: string; readonly run: () => Promise<void> }[] = [
   {
+    name: "rejects anonymous purchases before Apple verification or wallet credit",
+    run: async () => {
+      let verificationCalls = 0;
+      let creditCalls = 0;
+      await expectHttpError(settleAppleIapPurchase({ userId: verifiedTransaction.appAccountToken, signedTransaction: "signed" }, {
+        requireMember: async () => { throw Object.assign(new Error("Account link required"), { statusCode: 403 }); },
+        verifyAppleTransaction: async () => { verificationCalls += 1; return verifiedTransaction; },
+        creditAppleTransaction: async () => { creditCalls += 1; return { availableThreads: 2, status: "credited" }; }
+      }), 403);
+      assert.equal(verificationCalls, 0);
+      assert.equal(creditCalls, 0);
+    }
+  },
+  {
     name: "credits the configured package exactly once after Apple verifies a transaction",
     run: async () => {
       let receivedSignedTransaction = "";
@@ -41,6 +55,7 @@ const tests: readonly { readonly name: string; readonly run: () => Promise<void>
           signedTransaction: "signed-apple-transaction"
         },
         {
+          requireMember: async () => undefined,
           verifyAppleTransaction: async (signedTransaction: string) => {
             receivedSignedTransaction = signedTransaction;
             return verifiedTransaction;
@@ -75,6 +90,7 @@ const tests: readonly { readonly name: string; readonly run: () => Promise<void>
             signedTransaction: "signed-apple-transaction"
           },
           {
+            requireMember: async () => undefined,
             verifyAppleTransaction: async () => verifiedTransaction,
             creditAppleTransaction: async () => {
               creditCalls += 1;
@@ -102,6 +118,7 @@ const tests: readonly { readonly name: string; readonly run: () => Promise<void>
           signedTransaction: "signed-apple-transaction"
         },
         {
+          requireMember: async () => undefined,
           verifyAppleTransaction: async () => sandboxTransaction,
           creditAppleTransaction: async () => {
             creditCalls += 1;
@@ -128,6 +145,7 @@ const tests: readonly { readonly name: string; readonly run: () => Promise<void>
           signedTransaction: "signed-apple-transaction"
         },
         {
+          requireMember: async () => undefined,
           verifyAppleTransaction: async () => ({
             ...verifiedTransaction,
             productId: "com.inseong.coordit.thread.20"

@@ -6,6 +6,16 @@ struct CoorditRootView: View {
     @State private var navigationDirection: CoorditNavigationDirection = .forward
     @StateObject private var closetTutorial = CoorditClosetTutorial()
     @StateObject private var fitLabTutorial = CoorditFitLabTutorial()
+    @StateObject private var firstUseGuidance = CoorditFirstUseGuidance()
+    @State private var showsTutorialExitConfirmation = false
+    @State private var tutorialExitDestination: CoorditFrameRoute?
+    @State private var tutorialReturnRoute: CoorditFrameRoute?
+    @State private var tutorialSavedSharedURL: URL?
+    @State private var pendingPracticeSharedURL: URL?
+    @State private var tutorialSavedClosetDraft: CoorditClosetDraft?
+    @State private var tutorialSavedClosetItemID: String?
+    @State private var tutorialSavedClosetSaveState: CoorditClosetAddSaveState?
+    @State private var isPracticingReferenceRegistration = false
     @State private var closetItems: [CoorditClosetItem]
     @State private var selectedClosetItemID: String?
     @State private var closetDraft = CoorditClosetDraft()
@@ -16,6 +26,7 @@ struct CoorditRootView: View {
     @State private var showsOnboarding = false
     @State private var threadBalance: Int
     @State private var showsThreadRechargePrompt = false
+    @State private var showsInsufficientThreads = false
     @State private var sharedFitLabImportURL: URL?
     @State private var showsAuthenticationEntry = false
     @EnvironmentObject private var backendSession: CoorditBackendSessionStore
@@ -98,12 +109,13 @@ struct CoorditRootView: View {
             CoorditFitLabFamilyView(
                 currentRoute: route,
                 onRouteChange: { navigate(to: $0) },
-                onManageReferences: { showsFitLabReferenceSelection = true },
+                onManageReferences: startFitLabReferenceRegistration,
                 coordinator: fitLabCoordinator,
                 threadBalance: $threadBalance,
                 sharedImportURL: $sharedFitLabImportURL,
                 onInsufficientThread: handleInsufficientThreadForFitLab,
-                onOpenThreadRecharge: openThreadRechargeFromFitLab
+                onOpenThreadRecharge: openThreadRechargeFromFitLab,
+                onStartPractice: { beginFirstUsePractice(.fitLab) }
             )
         case .myPage,
              .myPageThreadCharge,
@@ -131,6 +143,7 @@ struct CoorditRootView: View {
              .closetAddMethod,
              .closetAddLink,
              .closetAddPhoto,
+             .closetAddSizeChart,
              .closetAddManual,
              .closetAddLoading,
              .closetAddResult:
@@ -141,15 +154,16 @@ struct CoorditRootView: View {
                 draft: $closetDraft,
                 selectedReferenceIDs: $selectedReferenceIDs,
                 addSaveState: $closetAddSaveState,
-                onSavedItem: routeAfterSavingClosetItem
+                onSavedItem: routeAfterSavingClosetItem,
+                referencePractice: isPracticingReferenceRegistration,
+                onStartPractice: { beginFirstUsePractice(.closet) }
             ) { navigate(to: $0) }
                     }
                 }
             }
             .environmentObject(closetTutorial)
             .environmentObject(fitLabTutorial)
-            .id(route)
-            .transition(routeTransition)
+            .coorditScreenTransition(value: route, direction: navigationDirection)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .environment(\.coorditShowsScreenChrome, false)
             .environment(\.coorditShowsScreenBackground, false)
@@ -174,17 +188,54 @@ struct CoorditRootView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .buttonStyle(CoorditPressFeedbackButtonStyle())
+        .task(id: firstUseVisitID) {
+            let previousPractice = firstUseGuidance.activePractice
+            firstUseGuidance.prepare(userID: firstUseGuidanceUserID)
+            if previousPractice != nil, firstUseGuidance.activePractice == nil {
+                fitLabTutorial.pause()
+                closetTutorial.pause()
+                tutorialReturnRoute = nil
+                tutorialExitDestination = nil
+                fitLabCoordinator.abandonTutorialPractice()
+                tutorialSavedSharedURL = nil
+                tutorialSavedClosetDraft = nil
+                tutorialSavedClosetItemID = nil
+                tutorialSavedClosetSaveState = nil
+                isPracticingReferenceRegistration = false
+            }
+            startFirstUsePracticeIfNeeded()
+        }
+        .alert("실타래가 부족해요", isPresented: $showsInsufficientThreads) {
+            Button("나중에", role: .cancel) { }
+            Button("실타래 충전하기") { openThreadRechargeFromFitLab() }
+        } message: {
+            Text("상세 비교 리포트를 보려면 실타래 1개가 필요해요. 광고를 보고 무료로 충전할 수 있어요.")
+        }
+        .onChange(of: fitLabTutorial.completionRevision) { _, _ in finishFirstUsePractice(.fitLab) }
+        .onChange(of: closetTutorial.completionRevision) { _, _ in
+            if isPracticingReferenceRegistration { finishReferencePractice() }
+            else { finishFirstUsePractice(.closet) }
+        }
+        .alert("처음이라면 끝까지 따라 해보는 걸 추천해요", isPresented: $showsTutorialExitConfirmation) {
+            Button("계속 따라하기", role: .cancel) { tutorialExitDestination = nil }
+            Button("이번에는 건너뛰기") {
+                if firstUseGuidance.activePractice == .fitLab { fitLabTutorial.dismiss() }
+                if firstUseGuidance.activePractice == .closet { closetTutorial.dismiss() }
+            }
+        } message: {
+            Text("예시로 등록과 비교 흐름을 익힐 수 있어요. 나중에 사용법에서 다시 시작할 수도 있어요.")
+        }
         .task(id: backendSession.isAuthenticated) {
             if backendSession.isAuthenticated {
                 showsAuthenticationEntry = false
                 return
             }
 
+            guard !permitsUnauthenticatedUITestRoute else { return }
             showsAuthenticationEntry = false
             threadBalance = 0
             showsFitLabReferenceSelection = false
             showsThreadRechargePrompt = false
-            guard !permitsUnauthenticatedUITestRoute else { return }
 
             if route != .splash {
                 navigate(to: .splash)
@@ -228,6 +279,32 @@ struct CoorditRootView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: CoorditSharedFitLabImport.didRequestOpenNotification)) { notification in
             openSharedFitLabImport(notification.object as? URL)
+        }
+        .onChange(of: fitLabCoordinator.cameraMeasurement) { _, measurement in
+            guard let measurement, measurement.id == fitLabCoordinator.cameraCapture.identifier,
+                  let receipt = fitLabCoordinator.cameraReference else { return }
+            let backendID = receipt.reference.clothingItemID
+            let photo = fitLabCoordinator.cameraCapture.garmentPhotoData
+            let chart = CoorditClosetSizeChart(sizeLabel: nil, measurements: measurement.clothingSizeRequest.measurements)
+            if let index = closetItems.firstIndex(where: { $0.backendClothingItemId == backendID }) {
+                if let photo { closetItems[index].imageData = photo }
+                closetItems[index].sizeChart = chart
+                closetItems[index].backendReferenceClothingId = receipt.reference.id
+            } else {
+                closetItems.insert(CoorditClosetItem(
+                    id: backendID,
+                    name: measurement.garmentName,
+                    category: measurement.isLower ? .bottom : .top,
+                    exactCategory: measurement.resolvedCategory,
+                    score: 0,
+                    scoreColor: CoorditClosetColors.navy,
+                    route: measurement.isLower ? .closetDetailBottom : .closetDetailTop,
+                    imageData: photo,
+                    sizeChart: chart,
+                    backendClothingItemId: backendID,
+                    backendReferenceClothingId: receipt.reference.id
+                ), at: 0)
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
@@ -285,11 +362,121 @@ struct CoorditRootView: View {
         }
     }
 
-    private var routeTransition: AnyTransition {
-        .coorditMenuPush(direction: navigationDirection, reduceMotion: reduceMotion)
+    private var firstUseGuidanceUserID: String? {
+        guard backendSession.isAuthenticated, backendSession.canUseProduct, route != .splash,
+              !showsOnboarding, !showsAuthenticationEntry else { return nil }
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--coordit-ui-testing") {
+            guard arguments.contains("--coordit-test-first-use-guides") else { return nil }
+            if let index = arguments.firstIndex(of: "--coordit-tutorial-account"), arguments.indices.contains(index + 1) {
+                return arguments[index + 1]
+            }
+        }
+        #endif
+        return backendSession.session?.user.id
+    }
+
+    private var firstUseVisitID: String {
+        "\(firstUseGuidanceUserID ?? "signed-out").\(route.rawValue)"
+    }
+
+    private func startFirstUsePracticeIfNeeded() {
+        guard firstUseGuidanceUserID != nil, firstUseGuidance.activePractice == nil,
+              !isPracticingReferenceRegistration else { return }
+        if route == .fitLabInput, !fitLabCoordinator.isAnalysisRunning,
+           fitLabCoordinator.retryStep == nil, fitLabCoordinator.recommendation == nil,
+           firstUseGuidance.needsPractice(.fitLab) {
+            beginFirstUsePractice(.fitLab)
+        } else if route.navigationSection == 2, !closetAddSaveState.isSaving,
+                  firstUseGuidance.needsPractice(.closet) {
+            beginFirstUsePractice(.closet)
+        }
+    }
+
+    private func beginFirstUsePractice(_ guide: CoorditUsageGuide) {
+        guard firstUseGuidance.activePractice == nil else { return }
+        if guide == .fitLab || guide == .fitLabReferences {
+            guard fitLabCoordinator.beginTutorialPractice() else { return }
+        }
+        if tutorialReturnRoute == nil { tutorialReturnRoute = route }
+        firstUseGuidance.begin(guide)
+        switch guide {
+        case .fitLab, .fitLabReferences:
+            tutorialSavedSharedURL = sharedFitLabImportURL
+            sharedFitLabImportURL = nil
+            fitLabTutorial.requiresSkipConfirmation = true
+            fitLabTutorial.restart()
+            fitLabTutorial.show(.link)
+            navigate(to: .fitLabInput)
+        case .closet:
+            tutorialSavedClosetDraft = closetDraft
+            tutorialSavedClosetItemID = selectedClosetItemID
+            tutorialSavedClosetSaveState = closetAddSaveState
+            selectedClosetItemID = nil
+            closetDraft = CoorditClosetDraft()
+            closetDraft.method = .link
+            closetDraft.productLink = CoorditTutorialExample.link
+            closetAddSaveState.reset()
+            closetTutorial.requiresSkipConfirmation = true
+            closetTutorial.restart()
+            closetTutorial.advance(from: .add, to: .method)
+            closetTutorial.updateLink(closetDraft.productLink)
+            navigate(to: .closetAddLink)
+        }
+    }
+
+    private func finishFirstUsePractice(_ guide: CoorditUsageGuide) {
+        guard firstUseGuidance.activePractice == guide else { return }
+        firstUseGuidance.finish(guide)
+        switch guide {
+        case .fitLab, .fitLabReferences:
+            if isPracticingReferenceRegistration {
+                firstUseGuidance.markCompleted(.closet)
+                closetTutorial.pause()
+                closetTutorial.requiresSkipConfirmation = false
+                restoreClosetAfterPractice()
+                isPracticingReferenceRegistration = false
+            }
+            fitLabTutorial.requiresSkipConfirmation = false
+            fitLabCoordinator.finishTutorialPractice()
+            sharedFitLabImportURL = tutorialSavedSharedURL
+            tutorialSavedSharedURL = nil
+        case .closet:
+            closetTutorial.requiresSkipConfirmation = false
+            restoreClosetAfterPractice()
+        }
+        if let pending = pendingPracticeSharedURL {
+            pendingPracticeSharedURL = nil
+            tutorialReturnRoute = nil
+            tutorialExitDestination = nil
+            openSharedFitLabImport(pending)
+            return
+        }
+        returnAfterFirstUseIfFinished()
+    }
+
+    private func returnAfterFirstUseIfFinished() {
+        if firstUseGuidance.activePractice == nil, let destination = tutorialExitDestination ?? tutorialReturnRoute {
+            tutorialReturnRoute = nil
+            tutorialExitDestination = nil
+            navigate(to: destination)
+        }
     }
 
     private func navigate(to nextRoute: CoorditFrameRoute) {
+        if let practice = firstUseGuidance.activePractice, nextRoute != .splash {
+            let section = practice == .closet ? 2 : 1
+            let isReferenceStep = practice == .fitLab && isPracticingReferenceRegistration && nextRoute.navigationSection == 2
+            let leavesReferencePractice = isPracticingReferenceRegistration && nextRoute.navigationSection != 2
+            let leavesClosetStep = (practice == .closet || isPracticingReferenceRegistration)
+                && [.closetAddMethod, .closetOverview].contains(nextRoute) && closetTutorial.step != nil
+            if leavesReferencePractice || (!isReferenceStep && nextRoute.navigationSection != section) || leavesClosetStep {
+                tutorialExitDestination = nextRoute
+                showsTutorialExitConfirmation = true
+                return
+            }
+        }
         if isRegisteringFitLabReference, nextRoute == .closetOverview {
             isRegisteringFitLabReference = false
         }
@@ -308,9 +495,28 @@ struct CoorditRootView: View {
         } else {
             navigationDirection = .forward
         }
-        withAnimation(.easeOut(duration: reduceMotion ? 0.14 : 0.22)) {
+        withAnimation(CoorditMotion.navigation(reduceMotion: reduceMotion)) {
             route = destination
         }
+    }
+
+    private func restoreClosetAfterPractice() {
+        if let draft = tutorialSavedClosetDraft { closetDraft = draft }
+        selectedClosetItemID = tutorialSavedClosetItemID
+        if let saveState = tutorialSavedClosetSaveState { closetAddSaveState = saveState }
+        tutorialSavedClosetDraft = nil
+        tutorialSavedClosetItemID = nil
+        tutorialSavedClosetSaveState = nil
+    }
+
+    private func finishReferencePractice() {
+        let completed = closetTutorial.completedRegistration
+        closetTutorial.requiresSkipConfirmation = false
+        restoreClosetAfterPractice()
+        isPracticingReferenceRegistration = false
+        firstUseGuidance.markCompleted(.closet)
+        if completed { fitLabCoordinator.registerTutorialReference() }
+        navigate(to: .fitLabInput)
     }
 
     private func startNewClosetRegistration() {
@@ -321,12 +527,33 @@ struct CoorditRootView: View {
     }
 
     private func startFitLabReferenceRegistration() {
+        if isPracticingReferenceRegistration { navigate(to: .closetAddLink); return }
+        if fitLabCoordinator.draft.isTutorialExample {
+            tutorialSavedClosetDraft = closetDraft
+            tutorialSavedClosetItemID = selectedClosetItemID
+            tutorialSavedClosetSaveState = closetAddSaveState
+            selectedClosetItemID = nil
+            closetDraft = CoorditClosetDraft()
+            closetDraft.method = .link
+            closetDraft.productLink = CoorditTutorialExample.link
+            closetDraft.exactCategory = fitLabCoordinator.draft.category
+            closetDraft.category = fitLabCoordinator.draft.category.garmentKind == .upper ? .top : .bottom
+            closetAddSaveState.reset()
+            isPracticingReferenceRegistration = true
+            closetTutorial.requiresSkipConfirmation = true
+            closetTutorial.restart()
+            closetTutorial.advance(from: .add, to: .method)
+            closetTutorial.updateLink(closetDraft.productLink)
+            navigate(to: .closetAddLink)
+            return
+        }
         isRegisteringFitLabReference = true
         closetDraft = CoorditClosetDraft()
         closetDraft.category = fitLabCoordinator.draft.category.garmentKind == .upper ? .top : .bottom
         closetDraft.exactCategory = fitLabCoordinator.draft.category
+        closetDraft.method = .link
         closetAddSaveState.reset()
-        navigate(to: .closetAddMethod)
+        navigate(to: .closetAddLink)
     }
 
     private static func initialClosetItems(
@@ -498,6 +725,7 @@ struct CoorditRootView: View {
               fitLabCoordinator.selectReference(id: referenceID)
         else { return nil }
 
+        fitLabCoordinator.isComparisonRequested = true
         return .fitLabInput
     }
 
@@ -520,6 +748,9 @@ struct CoorditRootView: View {
     }
 
     private func reloadFitLabReferences() async {
+        fitLabCoordinator.configureLandmarkGateway(using: backendSession.session.map {
+            CoorditFitLabHTTPAPI(baseURL: CoorditBackendConfig.baseURL(), accessToken: $0.accessToken)
+        })
         #if DEBUG
         if fitLabCoordinator.fixtureName != nil {
             await fitLabCoordinator.loadCompatibleReferences()
@@ -541,8 +772,7 @@ struct CoorditRootView: View {
     }
 
     private func handleInsufficientThreadForFitLab() {
-        showsThreadRechargePrompt = true
-        navigate(to: .myPageThreadCharge)
+        showsInsufficientThreads = true
     }
 
     private func openThreadRechargeFromFitLab() {
@@ -551,6 +781,8 @@ struct CoorditRootView: View {
     }
 
     private func handleAccountDeletion(userID: String) async -> Bool {
+        do { try CoorditGarmentPhotoStore.shared.removeAll(userID: userID) }
+        catch { return false }
         closetItems = []
         selectedClosetItemID = nil
         closetDraft = CoorditClosetDraft()
@@ -573,6 +805,10 @@ struct CoorditRootView: View {
         // A direct URL notification may arrive before scene activation. Remove
         // its queued copy so activation cannot reset the in-progress Fit Lab flow.
         CoorditSharedFitLabImport.removePendingProductURL(matching: url)
+        if firstUseGuidance.activePractice != nil {
+            pendingPracticeSharedURL = url
+            return
+        }
         fitLabCoordinator.discardAndRestart()
         sharedFitLabImportURL = url
         navigate(to: .fitLabInput)

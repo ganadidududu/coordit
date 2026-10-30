@@ -1,0 +1,40 @@
+{
+  "scope": "Short product-specific free report, same native content order on iOS/Android",
+  "backendTests": 48,
+  "iosUnitTests": 14,
+  "iosNativeCasesPerTheme": 4,
+  "androidUnitTests": 90,
+  "androidNativeCasesPerConfiguration": 2,
+  "finalScreenshots": 32,
+  "nativeBuilds": {
+    "android_apk": {
+      "path": "android/app/build/outputs/apk/debug/app-debug.apk",
+      "sha256": "046e1af616f61d6494a2cf6d860561b04db17fd38b86c46f63c87b9651d5f0c5"
+    },
+    "ios_dylib": {
+      "path": "/tmp/coordit-guidance-ios/Build/Products/Debug-iphonesimulator/coordit.app/coordit.debug.dylib",
+      "sha256": "710c1fc73446e6371bf5c0b954949cde40de8136e092fe3a00fc5dbaffa8d9c8"
+    }
+  },
+  "liveCandidate": {
+    "previewStatus": 422,
+    "walletUnchanged": true,
+    "message": "판매처의 수집 정책을 확인할 수 없거나 자동 수집이 허용되지 않아요. 직접 입력을 이용해 주세요."
+  },
+  "positiveLiveStorefrontExtractionVerified": false,
+  "reason": "Live Musinsa URL refused collection under site policy; no bypass attempted. Positive facts verified through real Chromium extraction fixture and shared JSON/native flows.",
+  "visualReview": "PASS",
+  "integrityReview": "PASS, final round3; no blockers",
+  "rollout": "100% coordit-backend-staging-product-report-1030-final",
+  "productionLive": {
+    "previewStatus": 422,
+    "walletUnchanged": true,
+    "message": "판매처의 수집 정책을 확인할 수 없거나 자동 수집이 허용되지 않아요. 직접 입력을 이용해 주세요."
+  },
+  "commits": {
+    "backend": "98744b2",
+    "ios": "b31fd06",
+    "android": "0c9e745",
+    "ownershipFix": "067d503"
+  }
+}

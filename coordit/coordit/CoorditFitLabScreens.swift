@@ -5,6 +5,7 @@ import UIKit
 
 #if os(iOS)
 struct CoorditFitLabFamilyView: View {
+    @EnvironmentObject private var tutorial: CoorditFitLabTutorial
     let currentRoute: CoorditFrameRoute
     let onRouteChange: (CoorditFrameRoute) -> Void
     let onManageReferences: () -> Void
@@ -14,8 +15,11 @@ struct CoorditFitLabFamilyView: View {
     @Binding var sharedImportURL: URL?
     let onInsufficientThread: () -> Void
     let onOpenThreadRecharge: () -> Void
+    var onStartPractice: (() -> Void)? = nil
     @State private var inputDestination: CoorditFitLabInputDestination = .sources
     @State private var inputNavigationDirection: CoorditNavigationDirection = .forward
+    @State private var showsCameraComparison = false
+    @State private var activeGuide: CoorditUsageGuide?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var inheritedTypeSize
 
@@ -26,11 +30,13 @@ struct CoorditFitLabFamilyView: View {
             contentTop: 115,
             contentBottom: 0
         ) { metrics in
-            VStack(spacing: metrics.value(currentRoute == .fitLabResultTop ? 12 : 22)) {
-                CoorditFitLabTitleCard(
+            VStack(spacing: metrics.value(22)) {
+                CoorditFeatureTitleBar(
                     title: currentRoute == .fitLabHistoryDetail ? "FIT DETAIL" : "FIT LAB",
                     metrics: metrics,
-                    height: currentRoute == .fitLabResultTop ? 51 : 60
+                    accessibilityLabel: "FIT LAB 뒤로가기",
+                    onHelp: { activeGuide = coordinator.isComparisonRequested ? .fitLabReferences : .fitLab },
+                    helpIdentifier: "fitlab-tutorial-restart"
                 ) {
                     handleTitleBack()
                 }
@@ -85,8 +91,28 @@ struct CoorditFitLabFamilyView: View {
         }
         .environment(\.dynamicTypeSize, resolvedTypeSize)
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .sheet(item: $activeGuide) { guide in
+            CoorditUsageGuideSheet(guide: guide) {
+                if let onStartPractice { onStartPractice(); return }
+                sharedImportURL = nil
+                coordinator.draft = CoorditFitLabDraft()
+                coordinator.draft.source = .url
+                coordinator.draft.productURL = URL(string: CoorditTutorialExample.link)
+                tutorial.restart()
+                tutorial.show(.link)
+                inputDestination = .url
+            }
+        }
+        .fullScreenCover(isPresented: $showsCameraComparison, onDismiss: {
+            if coordinator.report != nil { onRouteChange(.fitLabResultTop) }
+        }) {
+            CoorditFitLabCameraComparison(coordinator: coordinator, analyze: analyzeCameraMeasurement, capture: coordinator.cameraCapture)
+        }
         .onChange(of: coordinator.analysisState) { _, state in
             routeToCompletedAnalysis(state)
+        }
+        .onChange(of: coordinator.draft.isSourceConfirmed) { _, confirmed in
+            if !confirmed { coordinator.isComparisonRequested = false }
         }
         .onChange(of: coordinator.authoritativeThreadBalance) { _, balance in
             if let balance { threadBalance = balance }
@@ -113,8 +139,24 @@ struct CoorditFitLabFamilyView: View {
         .onChange(of: sharedImportURL) { _, url in
             openSharedImport(url)
         }
+        .onChange(of: coordinator.draft.productURL) { _, _ in
+            if coordinator.draft.isTutorialExample, !coordinator.draft.isSourceConfirmed {
+                navigateInput(to: .url)
+            }
+        }
+        .onChange(of: coordinator.tutorialRestorationRevision) { _, _ in
+            if let url = sharedImportURL {
+                openSharedImport(url)
+            } else {
+                navigateInput(to: coordinator.draft.source == .url && coordinator.draft.productURL != nil ? .url : .sources)
+            }
+        }
         .onAppear {
-            openSharedImport(sharedImportURL)
+            if tutorial.requiresSkipConfirmation, coordinator.draft.isTutorialExample, !coordinator.draft.isSourceConfirmed {
+                inputDestination = .url
+            } else {
+                openSharedImport(sharedImportURL)
+            }
         }
         .task(id: effectiveHistoryUserID) {
             if coordinator.activeHistoryUserID != effectiveHistoryUserID {
@@ -130,6 +172,7 @@ struct CoorditFitLabFamilyView: View {
             && !fixture.hasPrefix("ocr-")
             && !fixture.hasPrefix("url-")
             && !fixture.hasPrefix("submission-")
+            && !fixture.hasPrefix("camera-")
             && fixture != "upper-result"
             && fixture != "lower-result"
             && fixture != "size-score-numeric-labels"
@@ -157,6 +200,12 @@ struct CoorditFitLabFamilyView: View {
         metrics: CoorditResponsiveMetrics
     ) -> some View {
         if coordinator.recommendation != nil {
+            if CoorditGarmentCaptureController.featureEnabled, coordinator.cameraMeasurement != nil {
+                Button("내 옷과 겹쳐보기") { showsCameraComparison = true }
+                    .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+                    .padding(.horizontal, metrics.value(16))
+                    .accessibilityIdentifier("fitlab-reopen-camera")
+            }
             CoorditFitLabResultScreen(
                 variant: variant,
                 category: coordinator.draft.category,
@@ -185,6 +234,7 @@ struct CoorditFitLabFamilyView: View {
 
     private func routeToCompletedAnalysis(_ state: CoorditFitLabAnalysisState) {
         guard case .completed(let destination) = state,
+              !showsCameraComparison,
               currentRoute == .fitLabInput || currentRoute == .fitLabLoading
         else { return }
         onRouteChange(destination)
@@ -200,7 +250,7 @@ struct CoorditFitLabFamilyView: View {
 
     private func prefillProduct(
         from url: URL,
-        category: CoorditFitLabCategory
+        category: CoorditFitLabCategory?
     ) async throws -> CoorditFitLabURLPrefillResponse {
         #if DEBUG
         if coordinator.fixtureName != nil {
@@ -215,58 +265,89 @@ struct CoorditFitLabFamilyView: View {
         )
     }
 
-    private func compatibleReferences(for category: CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow] {
-        if coordinator.draft.isTutorialExample {
-            return CoorditTutorialExample.references(category: category)
-        }
-        #if DEBUG
-        if coordinator.fixtureName != nil {
-            return try await coordinator.fetchCompatibleReferences(category: category)
-        }
-        #endif
-        guard backendSession.session != nil else { throw CoorditFitLabError.loginRequired }
-        let token = try await backendSession.validAccessToken()
-        let api = CoorditFitLabHTTPAPI(baseURL: CoorditBackendConfig.baseURL(), accessToken: token)
-        return try await coordinator.fetchCompatibleReferences(category: category, using: api)
-    }
-
     @ViewBuilder
     private func fitLabInput(metrics: CoorditResponsiveMetrics) -> some View {
-        if coordinator.draft.isSourceConfirmed {
-            CoorditFitLabSubmissionView(
-                metrics: metrics,
-                coordinator: coordinator,
-                requestLedger: { fixtureAPIRequestLedger },
-                loadReferences: loadSubmissionReferences,
-                manageReferences: onManageReferences,
-                submit: submitAnalysis
-            )
-        } else {
-            CoorditFitLabInputScreen(
-                metrics: metrics,
-                draft: $coordinator.draft,
-                destination: inputDestinationBinding,
-                navigationDirection: inputNavigationDirection,
-                fixtureName: coordinator.fixtureName,
-                apiRequestLedger: fixtureAPIRequestLedger,
-                urlRequestLedger: { fixtureAPIRequestLedger },
-                urlPrefill: prefillProduct,
-                urlReferences: compatibleReferences,
-                sharedImportURL: sharedImportURL,
-                savedHistory: coordinator.savedHistory,
-                historyRecoveryNotice: coordinator.historyRecoveryNotice,
-                threadBalance: threadBalance,
-                onThreadRecharge: onOpenThreadRecharge,
-                onManageReferences: onManageReferences,
-                onOpenHistory: { snapshot in
-                    coordinator.selectHistory(snapshot)
-                    onRouteChange(.fitLabHistoryDetail)
-                }
-            )
+        Group {
+            if coordinator.draft.isSourceConfirmed {
+                CoorditFitLabSubmissionView(
+                    metrics: metrics,
+                    coordinator: coordinator,
+                    requestLedger: { fixtureAPIRequestLedger },
+                    loadReferences: loadSubmissionReferences,
+                    manageReferences: onManageReferences,
+                    submit: submitAnalysis,
+                    measureWithCamera: {
+                        guard CoorditGarmentCaptureController.featureEnabled else { return }
+                        coordinator.cameraCapture.configure(category: coordinator.draft.category)
+                        if coordinator.cameraMeasurement == nil { coordinator.cameraCapture.clearCapture() }
+                        showsCameraComparison = true
+                    },
+                    editProduct: {
+                        coordinator.draft.isSourceConfirmed = false
+                        inputDestination = .manual
+                    }
+                )
+            } else {
+                CoorditFitLabInputScreen(
+                    metrics: metrics,
+                    draft: $coordinator.draft,
+                    destination: inputDestinationBinding,
+                    navigationDirection: inputNavigationDirection,
+                    fixtureName: coordinator.fixtureName,
+                    apiRequestLedger: fixtureAPIRequestLedger,
+                    urlRequestLedger: { fixtureAPIRequestLedger },
+                    urlPrefill: prefillProduct,
+                    sharedImportURL: sharedImportURL,
+                    savedHistory: coordinator.savedHistory,
+                    historyRecoveryNotice: coordinator.historyRecoveryNotice,
+                    threadBalance: threadBalance,
+                    onThreadRecharge: onOpenThreadRecharge,
+                    onManageReferences: onManageReferences,
+                    onOpenHistory: { snapshot in
+                        coordinator.selectHistory(snapshot)
+                        onRouteChange(.fitLabHistoryDetail)
+                    }
+                )
+            }
         }
+        .coorditScreenTransition(
+            value: coordinator.draft.isSourceConfirmed,
+            direction: coordinator.draft.isSourceConfirmed ? .forward : .backward
+        )
+    }
+
+    private func analyzeCameraMeasurement(_ measurement: CoorditGarmentMeasurement) async throws {
+        #if DEBUG
+        if coordinator.fixtureName != nil {
+            guard coordinator.cameraBundleAnalysisID != nil || coordinator.report != nil || threadBalance > 0 else {
+                throw CoorditFitLabError.server(statusCode: 402, message: "실타래가 부족해요. 충전 후 같은 측정으로 이어갈 수 있어요.")
+            }
+            let needsCharge = coordinator.cameraBundleAnalysisID == nil && coordinator.report == nil
+            try await coordinator.analyzeCameraMeasurement(measurement)
+            if needsCharge { threadBalance -= 1 }
+            return
+        }
+        #endif
+        guard let owner = backendSession.session?.user.id else { throw CoorditFitLabError.loginRequired }
+        let token = try await backendSession.validAccessToken()
+        let api = CoorditFitLabHTTPAPI(baseURL: CoorditBackendConfig.baseURL(), accessToken: token)
+        try await coordinator.analyzeCameraMeasurement(measurement, using: api, authenticatedUserID: owner)
     }
 
     private func handleTitleBack() {
+        if tutorial.requiresSkipConfirmation, !coordinator.isComparisonRequested {
+            onRouteChange(.main04)
+            return
+        }
+        if currentRoute == .fitLabInput, coordinator.draft.isSourceConfirmed {
+            if coordinator.isComparisonRequested {
+                coordinator.isComparisonRequested = false
+            } else {
+                coordinator.draft.isSourceConfirmed = false
+                inputDestination = .sources
+            }
+            return
+        }
         if coordinator.draft.isTutorialExample {
             coordinator.discardAndRestart()
             inputDestination = .sources
@@ -294,13 +375,14 @@ struct CoorditFitLabFamilyView: View {
     private func navigateInput(to destination: CoorditFitLabInputDestination) {
         guard destination != inputDestination else { return }
         inputNavigationDirection = destination == .sources ? .backward : .forward
-        withAnimation(.easeOut(duration: reduceMotion ? 0.14 : 0.22)) {
+        withAnimation(CoorditMotion.navigation(reduceMotion: reduceMotion)) {
             inputDestination = destination
         }
     }
 
     private func openSharedImport(_ url: URL?) {
         guard let url else { return }
+        if coordinator.cameraMeasurement != nil { coordinator.discardAndRestart() }
         coordinator.draft.source = .url
         coordinator.draft.productURL = url
         coordinator.draft.isSourceConfirmed = false
@@ -533,6 +615,10 @@ struct CoorditFitLabFamilyView: View {
         if coordinator.draft.isTutorialExample {
             coordinator.startSubmission()
             onRouteChange(.fitLabLoading)
+            return
+        }
+        guard coordinator.report != nil || threadBalance > 0 else {
+            onInsufficientThread()
             return
         }
         #if DEBUG

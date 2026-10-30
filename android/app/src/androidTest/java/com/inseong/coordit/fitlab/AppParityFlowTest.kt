@@ -22,7 +22,7 @@ class AppParityFlowTest {
     @get:Rule val compose = createAndroidComposeRule<AccountPreviewActivity>()
 
     @Test fun backgroundAnalysisCompletionAndHomeHistoryUseTheSameSnapshot() {
-        compose.activity.getSharedPreferences("guided-tutorials", 0).edit().putBoolean("fitlab.seen", true).commit()
+        compose.activity.getSharedPreferences("coordit-first-use-guidance-v2", 0).edit().putBoolean("closet-test-user.FitLab", true).commit()
         val api = FitLabFixture().apply {
             failRecommendation = false; failReport = false
             recommendationGate = CompletableDeferred()
@@ -68,11 +68,11 @@ class AppParityFlowTest {
             compose.onNodeWithTag("fitlab-result").assertExists()
             compose.onNodeWithTag("fitlab-save-history").performScrollTo().performClick()
             compose.waitUntil(5_000) { fit.state.value.history.size == 1 && !fit.state.value.busy }
-            assertEquals(com.inseong.coordit.data.fitlab.FitLabScreen.Sources, fit.state.value.screen)
+            assertEquals(com.inseong.coordit.data.fitlab.FitLabScreen.Result, fit.state.value.screen)
             compose.onNodeWithContentDescription("HOME").performClick()
-            compose.onNodeWithTag("home-history-analysis-1").performScrollTo().assertIsDisplayed()
+            compose.onNodeWithTag("coordit-main04-history-card-analysis-1").performScrollTo().assertIsDisplayed()
             capture("home-saved-history")
-            compose.onNodeWithTag("home-history-analysis-1").performClick()
+            compose.onNodeWithTag("coordit-main04-history-card-analysis-1").performClick()
             compose.onNodeWithTag("fitlab-historydetail").assertExists()
             assertEquals("analysis-1", fit.state.value.selectedHistory?.analysisId)
             assertEquals(1, api.recommendationKeys.size)

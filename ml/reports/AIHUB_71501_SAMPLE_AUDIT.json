@@ -1,0 +1,39 @@
+{
+  "inspected_labels": 12,
+  "matched_unique_images": 12,
+  "missing_images": 0,
+  "duplicate_images": 0,
+  "source_categories": {
+    "02top_01blouse": 1,
+    "01outer_04cardigan": 1,
+    "01outer_01coat": 1,
+    "01outer_02jacket": 1,
+    "01outer_03jumper": 1,
+    "02top_04shirt": 1,
+    "02top_03sweater": 1,
+    "02top_02t-shirt": 1,
+    "02top_05vest": 1,
+    "04bottom_01pants": 1,
+    "03-1onepiece(dress)": 1,
+    "03-2onepiece(jumpsuite)": 1
+  },
+  "measurement_fields": {
+    "metadata.top.front_length": 9,
+    "metadata.top.chest_size": 9,
+    "metadata.top.shoulder_width": 9,
+    "metadata.top.sleeve_length": 8,
+    "metadata.pants.pants_length": 1,
+    "metadata.pants.waist_size": 1,
+    "metadata.pants.hip_size": 1,
+    "metadata.pants.front_rise_length": 1,
+    "metadata.pants.inner_seam_length": 1
+  },
+  "approved_training_images": 0,
+  "seam_ground_truth_images": 0,
+  "blockers": [
+    "download approval and dataset-specific rights evidence",
+    "Coordit endpoint compatibility: chest at armpit vs publisher 1 inch below; back shoulder; waistband basis",
+    "garment/capture identity mapping and independent split review",
+    "semantic seam annotations absent in public polygon schema"
+  ]
+}

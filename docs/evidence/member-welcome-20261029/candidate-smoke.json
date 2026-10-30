@@ -1,0 +1,30 @@
+{
+  "base": "https://rc-member-welcome-1029---coordit-backend-staging-gei6wjuuiq-du.a.run.app",
+  "checkedAt": "2026-10-29T06:52:57.302Z",
+  "health": {
+    "ok": true,
+    "service": "coordit-backend"
+  },
+  "guestSessionCreated": true,
+  "balance": {
+    "availableThreads": 0
+  },
+  "welcome": {
+    "availableThreads": 0,
+    "status": "already_claimed"
+  },
+  "readiness": {
+    "rewardedAdsEnabled": true,
+    "iapEnabled": true
+  },
+  "rewardAttemptCreated": true,
+  "rewardAttemptResponseKeys": [
+    "attemptId",
+    "expiresAt",
+    "status"
+  ],
+  "balanceAfterAttempt": {
+    "availableThreads": 0
+  },
+  "testAccountRemoved": true
+}

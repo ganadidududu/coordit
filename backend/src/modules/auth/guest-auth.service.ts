@@ -1,6 +1,6 @@
 import type { AuthResponse } from "./auth.service";
 
-export const guestClaimStates = ["pending", "eligible", "granted", "denied"] as const;
+export const guestClaimStates = ["pending", "eligible", "granted", "denied", "legacy"] as const;
 export type GuestClaimState = (typeof guestClaimStates)[number];
 
 export interface GuestSessionRepository {
@@ -9,10 +9,12 @@ export interface GuestSessionRepository {
 }
 
 export interface GuestWelcomeRepository {
-  readonly prepareClaim: (userId: string) => Promise<GuestClaimState>;
-  readonly markEligible: (userId: string) => Promise<void>;
-  readonly completeClaim: (userId: string) => Promise<number>;
-  readonly denyClaim: (userId: string) => Promise<number>;
+  readonly prepareClaim: (userId: string, leaseId: string) => Promise<GuestClaimState>;
+  readonly markEligible: (userId: string, leaseId: string) => Promise<void>;
+  readonly completeClaim: (userId: string, leaseId: string) => Promise<number>;
+  readonly denyClaim: (userId: string, leaseId: string) => Promise<void>;
+  readonly releaseLease: (leaseId: string) => Promise<void>;
+  readonly getBalance: (userId: string) => Promise<number>;
 }
 
 export interface DeviceWelcomeRegistry {
@@ -38,47 +40,12 @@ export const createGuestSession = async (
   return session;
 };
 
+// Keep the endpoint compatible with older clients without granting guest credit.
 export const claimGuestWelcome = async (
   userId: string,
-  deviceToken: string,
+  _deviceToken: string,
   dependencies: GuestWelcomeDependencies
-): Promise<GuestWelcomeResult> => {
-  const claimState = await dependencies.repository.prepareClaim(userId);
-  switch (claimState) {
-    case "pending": {
-      const claimed = await dependencies.deviceRegistry.hasClaimedWelcome(deviceToken);
-      if (claimed) {
-        return {
-          availableThreads: await dependencies.repository.denyClaim(userId),
-          status: "already_claimed",
-        };
-      }
-      await dependencies.repository.markEligible(userId);
-      await dependencies.deviceRegistry.markWelcomeClaimed(deviceToken);
-      return {
-        availableThreads: await dependencies.repository.completeClaim(userId),
-        status: "granted",
-      };
-    }
-    case "eligible":
-      await dependencies.deviceRegistry.markWelcomeClaimed(deviceToken);
-      return {
-        availableThreads: await dependencies.repository.completeClaim(userId),
-        status: "granted",
-      };
-    case "granted":
-      return {
-        availableThreads: await dependencies.repository.completeClaim(userId),
-        status: "already_claimed",
-      };
-    case "denied":
-      return {
-        availableThreads: await dependencies.repository.denyClaim(userId),
-        status: "already_claimed",
-      };
-    default: {
-      const exhaustiveClaimState: never = claimState;
-      return exhaustiveClaimState;
-    }
-  }
-};
+): Promise<GuestWelcomeResult> => ({
+  availableThreads: await dependencies.repository.getBalance(userId),
+  status: "already_claimed",
+});

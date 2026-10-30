@@ -50,6 +50,7 @@ struct CoorditFitLabURLPrefillResponse: Codable, Equatable, Sendable {
     let fitType: String
     let parsingStatus: String
     let sizes: [Size]
+    var productFacts: CoorditProductFacts? = nil
 }
 
 struct CoorditFitLabProductRequest: Codable, Equatable, Sendable {
@@ -144,11 +145,13 @@ struct CoorditFitLabRecommendationRequest: Codable, Equatable, Sendable {
     let referenceClothingIDs: [String]
     let externalProductID: String
     let idempotencyKey: String
+    var comparisonBundleAnalysisID: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case referenceClothingIDs = "referenceClothingIds"
         case externalProductID = "externalProductId"
         case idempotencyKey
+        case comparisonBundleAnalysisID = "comparisonBundleAnalysisId"
     }
 }
 
@@ -242,6 +245,13 @@ struct CoorditFitLabReportRequest: Codable, Equatable, Sendable {
     let idempotencyKey: String
     let selectedSizeLabel: String?
     let style: String?
+    var comparisonBundleAnalysisID: String? = nil
+    var cameraComparison: Bool? = nil
+
+    enum CodingKeys: String, CodingKey {
+        case idempotencyKey, selectedSizeLabel, style, cameraComparison
+        case comparisonBundleAnalysisID = "comparisonBundleAnalysisId"
+    }
 }
 
 struct CoorditFitLabReportResponse: Codable, Equatable, Sendable {

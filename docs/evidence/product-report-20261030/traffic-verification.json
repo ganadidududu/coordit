@@ -1,0 +1,94 @@
+{
+  "status": {
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-30T05:07:36.494402Z",
+        "status": "True",
+        "type": "Ready"
+      },
+      {
+        "lastTransitionTime": "2026-10-30T05:04:10.573315Z",
+        "status": "True",
+        "type": "ConfigurationsReady"
+      },
+      {
+        "lastTransitionTime": "2026-10-30T05:07:36.453836Z",
+        "status": "True",
+        "type": "RoutesReady"
+      }
+    ],
+    "traffic": [
+      {
+        "revisionName": "coordit-backend-staging-00016-t62",
+        "tag": "rc-admob-live",
+        "url": "https://rc-admob-live---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-00024-but",
+        "tag": "rc-0ed67217",
+        "url": "https://rc-0ed67217---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-00026-wev",
+        "tag": "rc-gemini-key-20260826",
+        "url": "https://rc-gemini-key-20260826---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-00037-juc",
+        "tag": "rc-gemini-observability",
+        "url": "https://rc-gemini-observability---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-00039-qaf",
+        "tag": "rc-2358bb08",
+        "url": "https://rc-2358bb08---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-00043-foz",
+        "tag": "rc-be32e9e0",
+        "url": "https://rc-be32e9e0---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-00045-sov",
+        "tag": "rc-ce9407",
+        "url": "https://rc-ce9407---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-0bb14fc2",
+        "tag": "rc-0bb14fc2",
+        "url": "https://rc-0bb14fc2---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-52915c03",
+        "tag": "rc-52915c03",
+        "url": "https://rc-52915c03---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-appleiapsetup",
+        "tag": "apple-iap-setup",
+        "url": "https://apple-iap-setup---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-e2ffafe6",
+        "tag": "rc-e2ffafe6",
+        "url": "https://rc-e2ffafe6---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-guest-email-1027",
+        "tag": "rc-guest-email-1027",
+        "url": "https://rc-guest-email-1027---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "revisionName": "coordit-backend-staging-member-welcome-1029",
+        "tag": "rc-member-welcome-1029",
+        "url": "https://rc-member-welcome-1029---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      },
+      {
+        "percent": 100,
+        "revisionName": "coordit-backend-staging-product-report-1030-final",
+        "tag": "rc-product-report-1030",
+        "url": "https://rc-product-report-1030---coordit-backend-staging-gei6wjuuiq-du.a.run.app"
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 import SwiftUI
 
 #if os(iOS)
-enum CoorditFitLabInputDestination: Equatable {
+enum CoorditFitLabInputDestination: Hashable {
     case sources
     case manual
     case ocr
@@ -10,7 +10,6 @@ enum CoorditFitLabInputDestination: Equatable {
 
 struct CoorditFitLabInputScreen: View {
     @EnvironmentObject private var tutorial: CoorditFitLabTutorial
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let metrics: CoorditResponsiveMetrics
     @Binding var draft: CoorditFitLabDraft
     @Binding var destination: CoorditFitLabInputDestination
@@ -18,10 +17,11 @@ struct CoorditFitLabInputScreen: View {
     let fixtureName: String?
     let apiRequestLedger: [String]
     let urlRequestLedger: () -> [String]
-    let urlPrefill: (URL, CoorditFitLabCategory) async throws -> CoorditFitLabURLPrefillResponse
-    let urlReferences: (CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow]
+    let urlPrefill: (URL, CoorditFitLabCategory?) async throws -> CoorditFitLabURLPrefillResponse
     let sharedImportURL: URL?
     let savedHistory: [CoorditFitLabHistorySnapshot]
+    @State private var showsAllHistory = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let historyRecoveryNotice: String?
     let threadBalance: Int
     let onThreadRecharge: () -> Void
@@ -36,11 +36,8 @@ struct CoorditFitLabInputScreen: View {
         fixtureName: String? = nil,
         apiRequestLedger: [String] = [],
         urlRequestLedger: @escaping () -> [String] = { [] },
-        urlPrefill: @escaping (URL, CoorditFitLabCategory) async throws -> CoorditFitLabURLPrefillResponse = { _, _ in
+        urlPrefill: @escaping (URL, CoorditFitLabCategory?) async throws -> CoorditFitLabURLPrefillResponse = { _, _ in
             throw CoorditFitLabError.transport("상품 링크 API를 준비할 수 없어요.")
-        },
-        urlReferences: @escaping (CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow] = { _ in
-            throw CoorditFitLabError.transport("기준 옷 API를 준비할 수 없어요.")
         },
         sharedImportURL: URL? = nil,
         savedHistory: [CoorditFitLabHistorySnapshot] = [],
@@ -58,7 +55,6 @@ struct CoorditFitLabInputScreen: View {
         self.apiRequestLedger = apiRequestLedger
         self.urlRequestLedger = urlRequestLedger
         self.urlPrefill = urlPrefill
-        self.urlReferences = urlReferences
         self.sharedImportURL = sharedImportURL
         self.savedHistory = savedHistory
         self.historyRecoveryNotice = historyRecoveryNotice
@@ -69,12 +65,9 @@ struct CoorditFitLabInputScreen: View {
     }
 
     var body: some View {
-        ZStack(alignment: .top) {
-            destinationContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .id(destination)
-                .transition(destinationTransition)
-        }
+        destinationContent
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .coorditScreenTransition(value: destination, direction: navigationDirection)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .clipped()
         .compositingGroup()
@@ -108,7 +101,6 @@ struct CoorditFitLabInputScreen: View {
                     draft: $draft,
                     requestLedger: urlRequestLedger,
                     prefill: urlPrefill,
-                    loadReferences: urlReferences,
                     initialURL: sharedImportURL,
                     onSwitchToOCR: {
                         if draft.isTutorialExample { draft = CoorditFitLabDraft() }
@@ -125,28 +117,22 @@ struct CoorditFitLabInputScreen: View {
         }
     }
 
-    private var destinationTransition: AnyTransition {
-        .coorditMenuPush(direction: navigationDirection, reduceMotion: reduceMotion)
-    }
-
     private var sourceSelection: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: metrics.value(16)) {
                 VStack(alignment: .leading, spacing: metrics.value(5)) {
-                    Text("사이즈표를 어떻게 가져올까요?")
+                    Text("어떤 옷이 궁금하세요?")
                         .font(CoorditTypography.gmarketBold(size: metrics.value(18), relativeTo: .headline))
                         .foregroundStyle(Color.black)
-                    Text("입력한 값은 확인 전까지 저장되거나 분석되지 않아요.")
+                    Text("상품 링크나 사이즈표 사진을 넣어주세요.")
                         .font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .footnote))
                         .foregroundStyle(Color.black.opacity(0.64))
                 }
 
-                sourceThreadCostNotice
-
-                VStack(alignment: .leading, spacing: metrics.value(8)) {
+                CoorditInputMethodPanel(metrics: metrics) {
                     sourceCard(
                         title: "링크로 불러오기",
-                        subtitle: "링크에서 베타 추출",
+                        subtitle: "추천 · 상품과 사이즈를 한 번에",
                         symbol: "link",
                         identifier: "fitlab-source-url"
                     ) {
@@ -156,8 +142,8 @@ struct CoorditFitLabInputScreen: View {
                         destination = .url
                     }
                     sourceCard(
-                        title: "사진으로 첨부하기",
-                        subtitle: "캡처를 읽고 수정",
+                        title: CoorditSizeChartCopy.title,
+                        subtitle: CoorditSizeChartCopy.subtitle,
                         symbol: "viewfinder",
                         identifier: "fitlab-source-ocr"
                     ) {
@@ -165,34 +151,8 @@ struct CoorditFitLabInputScreen: View {
                         draft.source = .ocr
                         destination = .ocr
                     }
-                    sourceCard(
-                        title: "직접 입력하기",
-                        subtitle: "표를 직접 작성",
-                        symbol: "tablecells",
-                        identifier: "fitlab-source-manual"
-                    ) {
-                        if draft.isTutorialExample { draft = CoorditFitLabDraft() }
-                        draft.source = .manual
-                        destination = .manual
-                    }
                 }
-                .padding(metrics.value(8))
-                .background(CoorditFitLabTexturedPanel(cornerRadius: metrics.value(8), intensity: 1))
-                .clipShape(RoundedRectangle(cornerRadius: metrics.value(8), style: .continuous))
                 .fitLabTutorialTarget(.source)
-
-                referencePrerequisite
-
-                Button("준비된 정보가 없나요? 예시 링크로 체험하기") {
-                    draft = CoorditFitLabDraft()
-                    draft.source = .url
-                    draft.productURL = URL(string: CoorditTutorialExample.link)
-                    tutorial.restart()
-                    tutorial.show(.link)
-                    destination = .url
-                }
-                .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary, height: 44))
-                .accessibilityIdentifier("fitlab-source-example")
 
                 VStack(alignment: .leading, spacing: metrics.value(11)) {
                     Text("최근 핏 분석")
@@ -229,11 +189,26 @@ struct CoorditFitLabInputScreen: View {
                         .accessibilityElement(children: .combine)
                         .accessibilityIdentifier("fitlab-history-empty")
                     } else {
+                        if savedHistory.count > 3 {
+                            Button {
+                                withAnimation(CoorditMotion.navigation(reduceMotion: reduceMotion)) {
+                                    showsAllHistory.toggle()
+                                }
+                            } label: {
+                                Label(showsAllHistory ? "최근 3개만 보기" : "전체 \(savedHistory.count)개 보기", systemImage: showsAllHistory ? "chevron.up" : "chevron.down")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+                            .accessibilityIdentifier("fitlab-history-toggle")
+                            .accessibilityValue(showsAllHistory ? "펼쳐짐" : "접힘")
+                        }
                         LazyVStack(spacing: metrics.value(8)) {
-                            ForEach(savedHistory) { snapshot in
+                            ForEach(visibleHistory) { snapshot in
                                 historyCard(snapshot)
                             }
                         }
+                        .id(showsAllHistory)
+
                     }
                 }
                 .padding(metrics.value(14))
@@ -249,87 +224,20 @@ struct CoorditFitLabInputScreen: View {
                     RoundedRectangle(cornerRadius: metrics.value(8), style: .continuous)
                         .stroke(Color.black.opacity(0.12), lineWidth: 0.8)
                 )
-                Button("Fit Lab 사용법 다시 보기") { tutorial.restart() }
-                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
-                    .foregroundStyle(CoorditFitLabPalette.ink)
-                    .frame(maxWidth: .infinity, minHeight: 44)
-                    .accessibilityIdentifier("fitlab-tutorial-restart")
             }
-            .padding(.horizontal, metrics.value(33))
+            .padding(.horizontal, metrics.value(22))
             .padding(.bottom, metrics.value(120))
         }
         .scrollDismissesKeyboard(.interactively)
-        .defaultScrollAnchor(.bottom, for: .sizeChanges)
+        .defaultScrollAnchor(.top, for: .sizeChanges)
         .onAppear { tutorial.visitSources() }
     }
 
-    private var referencePrerequisite: some View {
-        VStack(alignment: .leading, spacing: metrics.value(10)) {
-            Text("핏 분석 전, 기준 의류가 필요해요")
-                .font(CoorditTypography.gmarketBold(size: metrics.value(16), relativeTo: .headline))
-            Text("나에게 잘 맞는 옷을 Closet에 등록하고 기준 의류로 선택해주세요. 분석할 상품과 종류·길이가 맞는 기준 의류가 1개 이상 있어야 핏을 비교할 수 있어요.")
-                .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
-                .fixedSize(horizontal: false, vertical: true)
-            Button("기준 의류 등록·선택하기", action: onManageReferences)
-                .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
-                .accessibilityIdentifier("fitlab-source-manage-references")
-            Text("먼저 둘러보고 싶다면 아래 예시 링크로 체험해보세요. 샘플 기준 의류가 함께 제공돼요.")
-                .font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .footnote))
-                .fixedSize(horizontal: false, vertical: true)
+    private var visibleHistory: [CoorditFitLabHistorySnapshot] {
+        let sorted = savedHistory.sorted {
+            $0.savedAt == $1.savedAt ? $0.analysisID > $1.analysisID : $0.savedAt > $1.savedAt
         }
-        .foregroundStyle(CoorditFitLabPalette.ink)
-        .padding(metrics.value(14))
-        .background(CoorditFitLabPalette.surface, in: RoundedRectangle(cornerRadius: metrics.value(8)))
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("fitlab-reference-prerequisite")
-    }
-
-    private var sourceThreadCostNotice: some View {
-        VStack(alignment: .leading, spacing: metrics.value(11)) {
-            HStack(alignment: .top, spacing: metrics.value(11)) {
-                Image(CoorditAssetNames.yarn)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: metrics.value(30), height: metrics.value(30))
-                    .accessibilityHidden(true)
-
-                Text("실타래 사용 안내")
-                    .font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))
-                    .foregroundStyle(.white)
-                    .accessibilityIdentifier("fitlab-source-thread-cost-notice")
-
-                Spacer(minLength: 0)
-
-                Text("현재 \(threadBalance)개")
-                    .font(CoorditTypography.gmarketBold(size: metrics.value(12), relativeTo: .caption))
-                    .foregroundStyle(CoorditFitLabPalette.noticeAccent)
-                    .lineLimit(1)
-                    .accessibilityIdentifier("fitlab-source-thread-balance")
-            }
-
-            Text("핏 분석을 시작할 때 실타래 1개가 사용돼요.")
-                .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .caption))
-                .foregroundStyle(.white.opacity(0.86))
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier("fitlab-source-thread-cost-copy")
-
-            if threadBalance == 0 {
-                Button(action: onThreadRecharge) {
-                    Text("실타래 충전하기")
-                        .font(CoorditTypography.gmarketBold(size: metrics.value(11), relativeTo: .headline))
-                        .foregroundStyle(CoorditFitLabPalette.ink)
-                        .frame(maxWidth: .infinity, minHeight: metrics.value(42))
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
-                }
-                .coorditPressFeedback()
-                .accessibilityIdentifier("fitlab-source-thread-charge")
-            }
-        }
-        .padding(metrics.value(15))
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(CoorditFitLabPalette.ink)
-        .clipShape(RoundedRectangle(cornerRadius: metrics.value(8), style: .continuous))
+        return showsAllHistory ? sorted : Array(sorted.prefix(3))
     }
 
     private func historyCard(_ snapshot: CoorditFitLabHistorySnapshot) -> some View {
@@ -386,51 +294,8 @@ struct CoorditFitLabInputScreen: View {
         identifier: String,
         action: @escaping () -> Void
     ) -> some View {
-        Button(action: action) {
-            HStack(alignment: .center, spacing: metrics.value(11)) {
-                Image(systemName: symbol)
-                    .font(.system(size: metrics.value(19), weight: .semibold))
-                    .foregroundStyle(CoorditFitLabPalette.ink)
-                    .frame(width: metrics.value(36), height: metrics.value(36))
-                    .background(CoorditFitLabPalette.field.opacity(0.86))
-                    .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
-
-                VStack(alignment: .leading, spacing: metrics.value(3)) {
-                    Text(title)
-                        .font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))
-                        .foregroundStyle(Color.black)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.9)
-                        .multilineTextAlignment(.leading)
-                    Text(subtitle)
-                        .font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .caption))
-                        .foregroundStyle(Color.black.opacity(0.58))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.9)
-                        .multilineTextAlignment(.leading)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .frame(maxWidth: .infinity, minHeight: metrics.value(60), alignment: .leading)
-            .padding(.horizontal, metrics.value(12))
-            .padding(.vertical, metrics.value(7))
-            .background(
-                LinearGradient(
-                    colors: [.white, CoorditFitLabPalette.empty],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous)
-                    .stroke(.white.opacity(0.85), lineWidth: 1)
-            )
-            .shadow(color: .black.opacity(0.12), radius: metrics.value(7), y: metrics.value(3))
-        }
-        .coorditPressFeedback()
-        .accessibilityLabel(title)
-        .accessibilityIdentifier(identifier)
+        CoorditInputMethodCard(title: title, subtitle: subtitle, symbol: symbol, metrics: metrics, action: action)
+            .accessibilityIdentifier(identifier)
     }
 
 }
@@ -484,33 +349,10 @@ private struct CoorditFitLabManualDraftView: View {
     private var form: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: metrics.value(14)) {
-                section(title: "1. 의류 구분") {
-                    Picker("상의 또는 하의", selection: kindBinding) {
-                        Text("상의")
-                            .accessibilityIdentifier("fitlab-kind-upper")
-                            .tag(CoorditFitLabGarmentKind.upper)
-                        Text("하의")
-                            .accessibilityIdentifier("fitlab-kind-lower")
-                            .tag(CoorditFitLabGarmentKind.lower)
-                    }
-                    .pickerStyle(.segmented)
-                    .accessibilityIdentifier("fitlab-kind-picker")
-                }
+                CoorditGarmentCategorySelector(kind: kindBinding, category: categoryBinding, metrics: metrics, identifier: "fitlab")
                 .fitLabTutorialTarget(.review, message: "상품명과 사이즈별 실측을 cm로 입력하세요. 입력 확인 후 기준 옷을 선택하고 분석 결과를 볼 수 있어요. 화면을 위아래로 움직이며 자유롭게 살펴보세요.")
 
-                section(title: "2. 카테고리와 상품") {
-                    Picker("카테고리", selection: categoryBinding) {
-                        ForEach(availableCategories) { option in
-                            Text(option.koreanTitle)
-                                .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
-                                .tag(option)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .accessibilityIdentifier("fitlab-category-picker")
-
+                section(title: "상품 정보") {
                     HStack(spacing: metrics.value(10)) {
                         Text("현재 카테고리 \(category.koreanTitle)")
                             .accessibilityIdentifier("fitlab-current-category")
@@ -531,7 +373,7 @@ private struct CoorditFitLabManualDraftView: View {
                     labeledField("브랜드 (선택)", placeholder: "예: COORDIT", text: $brand, identifier: "fitlab-product-brand")
                 }
 
-                section(title: "3. 사이즈표") {
+                section(title: "사이즈표") {
                     Text("모든 수치는 옷을 평평하게 놓고 잰 단면(cm)이에요. 가슴·허리·엉덩이는 둘레가 아니라 단면 너비를 입력해 주세요.")
                         .font(CoorditTypography.gmarketLight(size: metrics.value(11), relativeTo: .footnote))
                         .foregroundStyle(Color.black.opacity(0.65))
@@ -580,7 +422,7 @@ private struct CoorditFitLabManualDraftView: View {
                 .coorditPressFeedback()
                 .accessibilityIdentifier("fitlab-manual-continue")
             }
-            .padding(.horizontal, metrics.value(33))
+            .padding(.horizontal, metrics.value(22))
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
@@ -638,7 +480,7 @@ private struct CoorditFitLabManualDraftView: View {
                 RoundedRectangle(cornerRadius: metrics.value(8), style: .continuous)
                     .stroke(Color.black.opacity(0.12), lineWidth: 0.8)
             )
-            .padding(.horizontal, metrics.value(33))
+            .padding(.horizontal, metrics.value(22))
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))

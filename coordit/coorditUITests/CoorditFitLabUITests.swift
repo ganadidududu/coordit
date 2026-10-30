@@ -274,40 +274,33 @@ final class CoorditFitLabUITests: XCTestCase {
     }
 
     func testNewReferenceGarmentReturnsToFitLabAlreadySelected() throws {
-        let app = launchFitLab(
-            fixture: "submission-success",
-            extraArguments: [
-                "--coordit-test-closet-save-success",
-                "--coordit-test-fitlab-reference-registration",
-            ]
-        )
-
+        let app = launchFitLab(fixture: "submission-success", extraArguments: [
+            "--coordit-test-closet-save-success", "--coordit-test-fitlab-reference-registration"
+        ])
+        XCTAssertTrue(element("fitlab-free-summary", in: app).waitForExistence(timeout: 8))
+        tapWhenReachable("fitlab-show-comparison", in: app)
         XCTAssertTrue(element("fitlab-reference-selection", in: app).waitForExistence(timeout: 5))
-        element("fitlab-manage-references", in: app).tap()
-        XCTAssertTrue(app.buttons["새 의류 등록하기"].waitForExistence(timeout: 5))
-        app.buttons["새 의류 등록하기"].tap()
-
-        XCTAssertTrue(element("coordit-screen-closet-add-method", in: app).waitForExistence(timeout: 5))
-        element("closet-add-method-manual", in: app).tap()
-        XCTAssertTrue(element("coordit-screen-closet-add-manual", in: app).waitForExistence(timeout: 5))
-
-        fill(element("closet-garment-name", in: app), with: "새 기준 후드")
+        let original = element("fitlab-draft-isolation-probe", in: app).label
+        tapWhenReachable("fitlab-manage-references", in: app)
+        XCTAssertTrue(element("closet-product-link", in: app).waitForExistence(timeout: 5))
+        fill(element("closet-product-link", in: app), with: "https://shop.example/my-hoodie")
         dismissKeyboard(in: app)
-        for index in 0..<4 {
-            fill(element("closet-manual-measurement-\(index)", in: app), with: "\(index + 50)")
-            dismissKeyboard(in: app)
-        }
-
         tapWhenReachable("closet-add-submit", in: app)
-
-        XCTAssertTrue(element("coordit-screen-fitlab-input", in: app).waitForExistence(timeout: 8))
-        XCTAssertEqual(
-            element("fitlab-reference-reference-fixture-hoodie", in: app).value as? String,
-            "선택됨"
-        )
+        tapWhenReachable("closet-link-size-row-M", in: app)
+        _ = scrollIntoView("closet-add-submit", in: app)
+        settleRendering()
+        capture("reference-size-before-save", app: app)
+        tapWhenReachable("closet-add-submit", in: app)
+        XCTAssertTrue(element("fitlab-selected-reference-summary", in: app).waitForExistence(timeout: 8))
+        XCTAssertEqual(element("fitlab-draft-isolation-probe", in: app).label, original)
         XCTAssertTrue(app.buttons["fitlab-submit-analysis"].isEnabled)
+        XCTAssertFalse(element("fitlab-reference-picker", in: app).exists)
         XCTAssertFalse(element("coordit-screen-closet-add-result", in: app).exists)
-        capture("new-reference-returns-to-fitlab-selected", app: app)
+        let ledger = element("fitlab-submission-ledger", in: app).label
+        XCTAssertTrue(ledger.contains("product=0"), ledger)
+        XCTAssertTrue(ledger.contains("recommend=0"), ledger)
+        settleRendering()
+        capture("reference-auto-selected", app: app)
     }
 
     func testFinalBlockersVisionRunsOffMainWithHeartbeatAndLateCancellationGuard() throws {
@@ -653,7 +646,7 @@ final class CoorditFitLabUITests: XCTestCase {
 
         element("fitlab-history-seed-retention", in: app).tap()
         XCTAssertTrue(waitForLabel(
-            "count=50|unique=50|newest=analysis-51|oldest=analysis-2",
+            "count=51|unique=51|newest=analysis-51|oldest=analysis-1",
             element: element("fitlab-history-edge-probe", in: app),
             timeout: 8
         ))
@@ -664,14 +657,14 @@ final class CoorditFitLabUITests: XCTestCase {
         element("fitlab-history-switch-user-a", in: app).tap()
         let userAProbe = element("fitlab-history-user-probe", in: app)
         XCTAssertTrue(waitForLabel(
-            "user=history-user-a|count=50",
+            "user=history-user-a|count=51",
             element: userAProbe,
             timeout: 8
         ), "Unexpected user A probe: \(userAProbe.label)")
 
         element("fitlab-history-save-duplicate", in: app).tap()
         XCTAssertTrue(waitForLabel(
-            "count=50|unique=50|newest=analysis-51|oldest=analysis-2",
+            "count=51|unique=51|newest=analysis-51|oldest=analysis-1",
             element: element("fitlab-history-edge-probe", in: app),
             timeout: 5
         ))
@@ -922,15 +915,15 @@ final class CoorditFitLabUITests: XCTestCase {
         let app = launchFitLab(fixture: "submission-success")
 
         XCTAssertTrue(element("fitlab-reference-selection", in: app).waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["비교할 기준 옷을 선택해 주세요"].exists)
-        XCTAssertTrue(element("fitlab-similar-reference-notice", in: app).exists)
-        XCTAssertFalse(element("fitlab-submit-analysis", in: app).isEnabled)
+        XCTAssertTrue(app.staticTexts["어떤 옷과 비교할까요?"].exists)
+        XCTAssertFalse(element("fitlab-similar-reference-notice", in: app).exists)
+        XCTAssertFalse(element("fitlab-submit-analysis", in: app).exists)
         capture("task-6-reference-selection", app: app)
 
         let reference = element("fitlab-reference-reference-fixture-hoodie", in: app)
         XCTAssertTrue(reference.waitForExistence(timeout: 5))
         reference.tap()
-        XCTAssertEqual(element("fitlab-selected-reference-count", in: app).label, "선택한 기준 옷 1개")
+        XCTAssertEqual(reference.value as? String, "선택됨")
         element("fitlab-submit-analysis", in: app).tap()
 
         let result = element("fitlab-fixture-result-upper", in: app)

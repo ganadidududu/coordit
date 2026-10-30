@@ -1,9 +1,10 @@
 # Native asset provenance
 
-Source: coordit/coordit/Assets.xcassets at bd1f931. Artwork only, never entire UI screenshots. PNGs are in drawable-nodpi: Compose gives them the original design dimensions. SVGs are rasterized transparently at 4× viewBox size with @resvg/resvg-js 2.6.2, retaining SVG filter nodes. Original SVG content is not altered except explicit viewport width/height replacing percentage dimensions. Reproduce with `npm install --prefix tools` then `node tools/render-assets.cjs`.
+Source: coordit/coordit/Assets.xcassets (Foundation baseline bd1f931; Home editorial added from 52f80b4). Artwork only, never entire UI screenshots. PNGs are in drawable-nodpi: Compose gives them the original design dimensions. SVGs are rasterized transparently at 4× viewBox size with @resvg/resvg-js 2.6.2, retaining SVG filter nodes. Original SVG content is not altered except explicit viewport width/height replacing percentage dimensions. Reproduce with `npm install --prefix tools` then `node tools/render-assets.cjs`.
 
 | Source | Android resource | Pixel dimensions | Source SHA256 prefix |
 |---|---|---|---|
+| CoorditHomeEditorial.imageset/editorial.png | `coordit_home_editorial` | 1024 × 1536 (original) | `08277c9901d7b169` |
 | CoorditClosetFitBottom.imageset/closet-fit-bottom.svg | `coordit_closet_fit_bottom` | 500 × 992 (4× viewBox) | `48a7fc7f05af9402` |
 | CoorditClosetFitTop.imageset/closet-fit-top.svg | `coordit_closet_fit_top` | 500 × 992 (4× viewBox) | `48a7fc7f05af9402` |
 | CoorditFitDetail.imageset/fit-detail.svg | `coordit_fit_detail` | 500 × 992 (4× viewBox) | `f732421def3a602c` |

@@ -7,8 +7,7 @@ struct CoorditFitLabURLInputView: View {
     let metrics: CoorditResponsiveMetrics
     @Binding var draft: CoorditFitLabDraft
     let requestLedger: () -> [String]
-    let prefill: (URL, CoorditFitLabCategory) async throws -> CoorditFitLabURLPrefillResponse
-    let loadReferences: (CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow]
+    let prefill: (URL, CoorditFitLabCategory?) async throws -> CoorditFitLabURLPrefillResponse
     let initialURL: URL?
     let onSwitchToOCR: () -> Void
     let onSwitchToManual: () -> Void
@@ -19,16 +18,11 @@ struct CoorditFitLabURLInputView: View {
     @State private var isLoading = false
     @State private var kind: CoorditFitLabGarmentKind = .upper
     @State private var category: CoorditFitLabCategory = .tshirt
+    @State private var usesAutomaticCategory = true
     @State private var productName = ""
     @State private var brand = ""
     @State private var rows: [EditableRow] = []
     @State private var validationMessage: String?
-    @State private var referenceRefreshIntent: CoorditFitLabCategory?
-    @State private var compatibleReferences: [CoorditFitLabReferenceRow] = []
-    @State private var referenceErrorMessage: String?
-    @State private var discardedReferenceCategory: CoorditFitLabCategory?
-    @State private var referenceRequestGeneration = 0
-    @State private var referenceRequest: Task<Void, Never>?
     @State private var importGeneration = 0
     @State private var importRequest: Task<Void, Never>?
     @FocusState private var focusedField: String?
@@ -52,7 +46,7 @@ struct CoorditFitLabURLInputView: View {
                 ledgerProbe
                 #endif
             }
-            .padding(.horizontal, metrics.value(33))
+            .padding(.horizontal, metrics.value(22))
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
@@ -69,8 +63,6 @@ struct CoorditFitLabURLInputView: View {
         .accessibilityIdentifier("fitlab-url-flow")
         .onDisappear {
             invalidateImport()
-            referenceRequestGeneration += 1
-            referenceRequest?.cancel()
         }
         .onAppear {
             applyInitialURLIfNeeded()
@@ -90,64 +82,38 @@ struct CoorditFitLabURLInputView: View {
 
     private var entry: some View {
         VStack(alignment: .leading, spacing: metrics.value(12)) {
-            Text("상품 링크에서 사이즈표 가져오기")
+            Text("상품 링크를 넣어주세요")
                 .font(CoorditTypography.gmarketBold(size: metrics.value(18), relativeTo: .headline))
                 .foregroundStyle(Color.black)
-            Text("링크를 입력하고 옷 종류를 먼저 선택해 주세요.\n가져온 값은 저장 전에 수정할 수 있어요.")
+            Text("링크의 상품과 사이즈 정보를 무료로 정리해요.")
                 .font(CoorditTypography.gmarketLight(size: metrics.value(12), relativeTo: .body))
                 .foregroundStyle(Color.black.opacity(0.65))
                 .fixedSize(horizontal: false, vertical: true)
 
             VStack(alignment: .leading, spacing: metrics.value(12)) {
-                TextField("https://shop.example/product", text: $urlText)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .keyboardType(.asciiCapable)
-                    .textContentType(.URL)
-                    .submitLabel(.done)
-                    .onSubmit(completeLinkEntry)
-                    .padding(metrics.value(11))
-                    .background(CoorditFitLabPalette.field)
-                    .clipShape(RoundedRectangle(cornerRadius: metrics.value(7), style: .continuous))
-                    .focused($focusedField, equals: "url")
-                    .onTapGesture { focusedField = "url" }
-                    .accessibilityLabel("상품 링크")
-                    .accessibilityIdentifier("fitlab-url-field")
-                    .disabled(isLoading)
+                CoorditLinkInputRow(text: $urlText, metrics: metrics, pasteIdentifier: "fitlab-url-paste") {
+                    TextField("상품 링크 입력", text: $urlText)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.asciiCapable)
+                        .textContentType(.URL)
+                        .submitLabel(.done)
+                        .onSubmit(completeLinkEntry)
+                        .focused($focusedField, equals: "url")
+                        .onTapGesture { focusedField = "url" }
+                        .accessibilityLabel("상품 링크")
+                        .accessibilityIdentifier("fitlab-url-field")
+                }
+                .disabled(isLoading || tutorial.requiresSkipConfirmation)
 
-                HStack(spacing: metrics.value(12)) {
-                    PasteButton(payloadType: String.self) { values in
-                        guard let value = values.first else { return }
-                        focusedField = "url"
-                        urlText = value.trimmingCharacters(in: .whitespacesAndNewlines)
-                    }
-                    .tint(CoorditFitLabPalette.ink)
-                    .disabled(isLoading)
-                    .accessibilityIdentifier("fitlab-url-paste")
-
-                    if tutorial.step == .link {
-                        Button("다음", action: completeLinkEntry)
-                            .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary, height: 44))
-                            .disabled(isLoading || Self.validatedURL(from: urlText) == nil)
-                            .accessibilityIdentifier("fitlab-url-next")
-                    }
+                if tutorial.step == .link {
+                    Button("다음", action: completeLinkEntry)
+                        .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary, height: 44))
+                        .disabled(isLoading || Self.validatedURL(from: urlText) == nil)
+                        .accessibilityIdentifier("fitlab-url-next")
                 }
             }
             .fitLabTutorialTarget(.link)
-
-            Button("링크가 없나요? 예시 링크로 체험하기") {
-                urlText = CoorditTutorialExample.link
-                tutorial.restart()
-                tutorial.show(.link)
-                completeLinkEntry()
-            }
-            .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary, height: 44))
-            .disabled(isLoading)
-            .accessibilityIdentifier("fitlab-example-link")
-
-            Text("가져올 옷 분류")
-                .font(CoorditTypography.gmarketBold(size: metrics.value(13), relativeTo: .headline))
-                .foregroundStyle(Color.black)
 
             classificationControls
 
@@ -162,7 +128,7 @@ struct CoorditFitLabURLInputView: View {
             Button(action: startImport) {
                 HStack {
                     if isLoading { ProgressView().tint(.white) }
-                    Text(isLoading ? "가져오는 중" : "링크에서 가져오기")
+                    Text(isLoading ? "불러오는 중" : "다음")
                 }
                 .font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))
                 .foregroundStyle(.white)
@@ -245,34 +211,6 @@ struct CoorditFitLabURLInputView: View {
             .font(CoorditTypography.gmarketLight(size: metrics.value(10), relativeTo: .caption))
             .foregroundStyle(Color.black.opacity(0.62))
 
-            #if DEBUG
-            if let reference = compatibleReferences.first {
-                Text("\(reference.id)|\(reference.category.rawValue)")
-                    .font(.system(size: 1))
-                    .frame(width: 1, height: 1)
-                    .opacity(0.01)
-                    .accessibilityIdentifier("fitlab-url-reference-result")
-            } else if let referenceErrorMessage {
-                Text(referenceErrorMessage)
-                    .font(CoorditTypography.gmarketLight(size: metrics.value(10), relativeTo: .caption))
-                    .foregroundStyle(Color.black.opacity(0.62))
-                    .accessibilityIdentifier("fitlab-url-reference-error")
-            }
-            if let discardedReferenceCategory {
-                Text(discardedReferenceCategory.rawValue)
-                    .font(.system(size: 1))
-                    .frame(width: 1, height: 1)
-                    .opacity(0.01)
-                    .accessibilityIdentifier("fitlab-url-reference-stale-discarded")
-            }
-            #else
-            if let referenceErrorMessage {
-                Text(referenceErrorMessage)
-                    .font(CoorditTypography.gmarketLight(size: metrics.value(10), relativeTo: .caption))
-                    .foregroundStyle(Color.black.opacity(0.62))
-            }
-            #endif
-
             TextField("상품명", text: $productName)
                 .padding(metrics.value(10))
                 .background(CoorditFitLabPalette.field)
@@ -317,8 +255,8 @@ struct CoorditFitLabURLInputView: View {
                     .accessibilityIdentifier("fitlab-url-validation-error")
             }
 
-            Button(action: confirm) {
-                Text("확인하고 기준 옷 선택으로")
+            Button { confirm() } label: {
+                Text("확인하고 1차 분석 보기")
                     .font(CoorditTypography.gmarketBold(size: metrics.value(14), relativeTo: .headline))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -337,13 +275,6 @@ struct CoorditFitLabURLInputView: View {
                 .opacity(0.01)
                 .accessibilityIdentifier("fitlab-url-field-preserved")
 
-            if let referenceRefreshIntent {
-                Text(referenceRefreshIntent.rawValue)
-                    .font(.system(size: 1))
-                    .frame(width: 1, height: 1)
-                    .opacity(0.01)
-                    .accessibilityIdentifier("fitlab-url-reference-refresh-intent")
-            }
             #endif
         }
         .padding(metrics.value(15))
@@ -479,23 +410,15 @@ struct CoorditFitLabURLInputView: View {
 
     private var classificationControls: some View {
         VStack(alignment: .leading, spacing: metrics.value(10)) {
-            Picker("상의 또는 하의", selection: kindBinding) {
-                Text("상의").tag(CoorditFitLabGarmentKind.upper)
-                Text("하의").tag(CoorditFitLabGarmentKind.lower)
+            if stage == .entry {
+                Toggle("링크에서 옷 종류 자동으로 찾기", isOn: $usesAutomaticCategory)
+                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
+                    .tint(CoorditFitLabPalette.ink)
+                    .accessibilityIdentifier("fitlab-url-automatic-category")
             }
-            .pickerStyle(.segmented)
-            .accessibilityIdentifier("fitlab-url-kind-picker")
-
-            Picker("세부 카테고리", selection: categoryBinding) {
-                ForEach(availableCategories) { option in
-                    Text(title(for: option))
-                        .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
-                        .tag(option)
-                }
+            if !usesAutomaticCategory || stage == .review {
+                CoorditGarmentCategorySelector(kind: kindBinding, category: categoryBinding, metrics: metrics, identifier: "fitlab-url")
             }
-            .pickerStyle(.menu)
-            .font(CoorditTypography.gmarketMedium(size: metrics.value(12)))
-            .accessibilityIdentifier("fitlab-url-category-picker")
         }
         .disabled(isLoading)
     }
@@ -509,7 +432,7 @@ struct CoorditFitLabURLInputView: View {
                 category = newKind == .upper ? .tshirt : .pants
                 if stage == .review {
                     rows = rows.map { EditableRow(id: $0.id, label: $0.label) }
-                    invalidateReferences(for: category)
+                    draft.selectedReferenceIDs.removeAll()
                 }
             }
         )
@@ -523,42 +446,10 @@ struct CoorditFitLabURLInputView: View {
                 category = newCategory
                 kind = newCategory.garmentKind
                 if stage == .review {
-                    invalidateReferences(for: newCategory)
+                    draft.selectedReferenceIDs.removeAll()
                 }
             }
         )
-    }
-
-    private func invalidateReferences(for category: CoorditFitLabCategory) {
-        draft.selectedReferenceIDs.removeAll()
-        referenceRefreshIntent = category
-        compatibleReferences.removeAll()
-        referenceErrorMessage = nil
-        referenceRequestGeneration += 1
-        let generation = referenceRequestGeneration
-        referenceRequest?.cancel()
-        referenceRequest = Task { @MainActor in
-            do {
-                let loaded = try await loadReferences(category)
-                guard !Task.isCancelled,
-                      generation == referenceRequestGeneration,
-                      self.category == category
-                else {
-                    discardedReferenceCategory = category
-                    return
-                }
-                compatibleReferences = loaded.filter {
-                    $0.category.isCompatible(with: category) && $0.isActive
-                }
-            } catch {
-                guard !Task.isCancelled,
-                      generation == referenceRequestGeneration,
-                      self.category == category
-                else { return }
-                referenceErrorMessage = (error as? CoorditFitLabError)?.errorDescription
-                    ?? "기준 옷을 다시 불러오지 못했어요."
-            }
-        }
     }
 
     private func completeLinkEntry() {
@@ -588,12 +479,13 @@ struct CoorditFitLabURLInputView: View {
                 if CoorditTutorialExample.matches(url) {
                     response = CoorditTutorialExample.product(category: category)
                 } else {
-                    response = try await prefill(url, category)
+                    response = try await prefill(url, usesAutomaticCategory ? nil : category)
                 }
                 guard !Task.isCancelled, generation == importGeneration, stage == .entry else { return }
                 apply(response)
                 stage = .review
                 isLoading = false
+                confirm(automatically: true)
             } catch let error as CoorditFitLabError {
                 guard !Task.isCancelled, generation == importGeneration, stage == .entry else { return }
                 errorMessage = error.errorDescription ?? "상품 정보를 가져오지 못했어요."
@@ -642,15 +534,15 @@ struct CoorditFitLabURLInputView: View {
         rows = response.sizes.map(EditableRow.init)
         if rows.isEmpty { rows = [EditableRow()] }
         draft.source = .url
+        draft.productFacts = response.productFacts
         draft.productURL = response.productUrl
         draft.mallName = response.mallName
         draft.selectedReferenceIDs.removeAll()
         draft.isSourceConfirmed = false
-        invalidateReferences(for: response.category)
         validationMessage = nil
     }
 
-    private func confirm() {
+    private func confirm(automatically: Bool = false) {
         focusedField = nil
         let trimmedName = productName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty, !rows.isEmpty else {
@@ -687,6 +579,10 @@ struct CoorditFitLabURLInputView: View {
             parsedRows.append(CoorditFitLabSizeDraft(id: row.id, label: label, measurements: measurements))
         }
 
+        if automatically, !CoorditFitLabImportAcceptance.canContinue(sizes: parsedRows, kind: kind) {
+            validationMessage = "읽지 못한 치수만 확인해주세요."
+            return
+        }
         draft.source = .url
         draft.garmentKind = kind
         draft.category = category
@@ -695,7 +591,7 @@ struct CoorditFitLabURLInputView: View {
         draft.brand = trimmedBrand.isEmpty ? nil : trimmedBrand
         draft.sizes = parsedRows
         draft.ocrMetadata = nil
-        draft.isSourceConfirmed = false
+        draft.isSourceConfirmed = true
         draft.selectedReferenceIDs.removeAll()
         validationMessage = nil
         stage = .confirmed
@@ -781,7 +677,7 @@ struct CoorditFitLabURLInputView: View {
         case .coat: "코트"
         case .pants: "팬츠"
         case .jeans: "데님"
-        case .shorts: "쇼츠"
+        case .shorts: "반바지"
         case .skirt: "스커트"
         }
     }

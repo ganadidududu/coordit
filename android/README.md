@@ -1,5 +1,6 @@
 # Coordit Android
 
+2026-10-29: `codex/release-link-first-fitlab`의 최신 iOS 기준으로 링크 → 무료 상품 요약 → 기준 옷 선택 → 유료 비교, 홈 매거진·실제 최근 기록, 첫 사용 안내·예시 체험과 관련 팝업을 맞췄다. 범위와 검증, 플랫폼별 남은 차이는 [release flow parity](docs/RELEASE_LINK_FLOW_PARITY.md)를 참고한다.
 2026-10-27: 최신 원격 `main`(`a4c1f0b831c090040a56d44ceca02b4dad46bb9e`)의 iOS를 기준으로 로그인 시트·공통 제목·홈 히스토리·백그라운드 분석 알림·공유 입력·사용 가이드·예시 체험·의류 사진 보관을 맞췄다. API 36, iOS와 같은 staging 서버, 별도 업로드 키로 서명한 App Bundle을 생성한다. 앞선 기능 브랜치의 iOS 변경은 포함하지 않는다. 최신 변경·검증·출시 제한과 재빌드 방법은 [main 대응 및 App Bundle](docs/MAIN_PARITY_RELEASE.md)을 따른다. 아래 Foundation 기록은 기존 구현의 배경이다.
 
 기존 SwiftUI 원본을 기준으로 진행 중인 Kotlin/Jetpack Compose 포팅이다. 현재 앱은 main 브랜치의 `android/` 폴더에 통합되어 있다. Android Studio에서는 저장소 루트 아래 `android/`를 연다.

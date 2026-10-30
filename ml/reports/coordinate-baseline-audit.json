@@ -1,0 +1,107 @@
+{
+  "checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+  "manifest_sha256": "ae9806f8ad98e2ede7add42f7591ccb60b294de984ad632dcee75aea1d79fa00",
+  "images": 561,
+  "diagnostic_only": true,
+  "ground_truth_modified": false,
+  "cm_accuracy": null,
+  "normalization": "normalized square-input diagonal",
+  "per_category_variant": {
+    "shorts/original": {
+      "points": 832,
+      "pck_005": 0.21995192307692307,
+      "nme": 0.14152272554362683
+    },
+    "shorts/endpoint_names_swapped": {
+      "points": 832,
+      "pck_005": 0.17427884615384615,
+      "nme": 0.16007060213108232
+    },
+    "shorts/mirror_x": {
+      "points": 832,
+      "pck_005": 0.07572115384615384,
+      "nme": 0.16979654414675538
+    },
+    "shorts/mirror_y": {
+      "points": 832,
+      "pck_005": 0.07932692307692307,
+      "nme": 0.20312754313636106
+    },
+    "shorts/rotate_180": {
+      "points": 832,
+      "pck_005": 0.052884615384615384,
+      "nme": 0.2226466994313971
+    },
+    "shorts/transpose_xy": {
+      "points": 832,
+      "pck_005": 0.09375,
+      "nme": 0.17817372776195184
+    },
+    "shorts/heatmap_argmax_diagnostic": {
+      "points": 832,
+      "pck_005": 0.31971153846153844,
+      "nme": 0.17393181637572314
+    },
+    "shorts/ordered_bilateral_only": {
+      "points": 326,
+      "pck_005": 0.1656441717791411,
+      "nme": 0.15757493944010165
+    },
+    "shorts/global_side_swap_oracle_bilateral_only": {
+      "points": 326,
+      "pck_005": 0.19631901840490798,
+      "nme": 0.14545118755181005
+    },
+    "tshirt/original": {
+      "points": 1536,
+      "pck_005": 0.20768229166666666,
+      "nme": 0.14490727970769512
+    },
+    "tshirt/endpoint_names_swapped": {
+      "points": 1536,
+      "pck_005": 0.024088541666666668,
+      "nme": 0.2117651604779288
+    },
+    "tshirt/mirror_x": {
+      "points": 1536,
+      "pck_005": 0.07096354166666667,
+      "nme": 0.1863388516271698
+    },
+    "tshirt/mirror_y": {
+      "points": 1536,
+      "pck_005": 0.055338541666666664,
+      "nme": 0.21461338461995183
+    },
+    "tshirt/rotate_180": {
+      "points": 1536,
+      "pck_005": 0.020182291666666668,
+      "nme": 0.24526811291222353
+    },
+    "tshirt/transpose_xy": {
+      "points": 1536,
+      "pck_005": 0.035807291666666664,
+      "nme": 0.21451017271980768
+    },
+    "tshirt/heatmap_argmax_diagnostic": {
+      "points": 1536,
+      "pck_005": 0.2884114583333333,
+      "nme": 0.16623417838976215
+    },
+    "tshirt/ordered_bilateral_only": {
+      "points": 1516,
+      "pck_005": 0.20580474934036938,
+      "nme": 0.14503704526247874
+    },
+    "tshirt/global_side_swap_oracle_bilateral_only": {
+      "points": 1516,
+      "pck_005": 0.21437994722955145,
+      "nme": 0.13639580641964102
+    }
+  },
+  "projected_2d_pair_length_mean_relative_error_not_cm": {
+    "shorts/waist_left/waist_right": 0.3406350485275864,
+    "tshirt/shoulder_left/shoulder_right": 0.37965754383005473,
+    "tshirt/armpit_left/armpit_right": 0.32715650058035256
+  },
+  "limitation": "One global side permutation per garment is an oracle diagnostic on jointly visible bilateral targets; never substitute for ordered PCK or inference"
+}

@@ -4,6 +4,10 @@ import { normalizeCategory } from "../normalization/product-normalizer";
 import { ProductImportError } from "../product-import.error";
 import { assertPublicUrl, parseProductUrl } from "../security/url-validator";
 import type { ProductCrawlContext, ProductImportPreview, ProductSite } from "../product-import.types";
+import { decodeHydrationMarkup } from "./size-chart-parser";
+import { factsFromHtml, factsForIdentity, matchesProductPage, mergeProductFacts } from "./product-facts";
+import { productIdFromUrl, fetchMusinsaSizeCandidate, navigationWaitUntil, shouldRevealSizeContent, effectiveCrawlerSite, revealSizeContent } from "./product-navigation";
+export { productIdFromUrl, navigationWaitUntil, shouldRevealSizeContent, effectiveCrawlerSite } from "./product-navigation";
 import { browserManager } from "./browser-manager";
 import { extractDomProduct } from "./dom-parser";
 import { NetworkJsonObserver } from "./network-json-observer";
@@ -41,56 +45,6 @@ const firstNetworkSizeImage = (candidates: readonly unknown[]): string | null =>
   return null;
 };
 
-export const productIdFromUrl = (url: URL): string | null => {
-  const pathSegments = url.pathname.split("/");
-  for (let index = pathSegments.length - 1; index >= 0; index -= 1) {
-    const value = pathSegments[index];
-    if (value && /^\d{4,}$/.test(value)) return value;
-  }
-
-  const productIDParameterNames = new Set([
-    "productid", "product_id", "productno", "product_no",
-    "goodsid", "goods_id", "goodsno", "goods_no"
-  ]);
-  for (const [name, value] of url.searchParams) {
-    if (productIDParameterNames.has(name.toLowerCase()) && /^\d{4,}$/.test(value)) {
-      return value;
-    }
-  }
-  return null;
-};
-
-const fetchMusinsaSizeCandidate = async (
-  page: import("playwright").Page,
-  productUrl: URL
-): Promise<unknown | null> => {
-  const productId = productIdFromUrl(productUrl);
-  if (!productId) return null;
-  try {
-    const response = await page.context().request.get(
-      `https://goods-detail.musinsa.com/api2/goods/${productId}/actual-size`,
-      { timeout: Math.min(env.crawlTimeoutMs, 10_000) }
-    );
-    if (!response.ok()) return null;
-    return await response.json();
-  } catch {
-    return null;
-  }
-};
-
-export const navigationWaitUntil = (site: ProductSite): "commit" | "domcontentloaded" =>
-  site === "musinsa" ? "commit" : "domcontentloaded";
-
-export const shouldRevealSizeContent = (site: ProductSite): boolean => site !== "musinsa";
-
-export const effectiveCrawlerSite = (requestedSite: ProductSite, resolvedUrl: URL): ProductSite => {
-  if (requestedSite !== "generic") return requestedSite;
-  const hostname = resolvedUrl.hostname.toLowerCase();
-  const isMusinsaProduct = (hostname === "musinsa.com" || hostname.endsWith(".musinsa.com"))
-    && resolvedUrl.pathname.includes("/products/");
-  return isMusinsaProduct ? "musinsa" : requestedSite;
-};
-
 const resolvePublicImages = (images: readonly string[], baseUrl: URL): readonly string[] => {
   const resolved: string[] = [];
   for (const image of images) {
@@ -102,34 +56,6 @@ const resolvePublicImages = (images: readonly string[], baseUrl: URL): readonly 
     }
   }
   return resolved;
-};
-
-const revealSizeContent = async (page: import("playwright").Page): Promise<void> => {
-  const controls = page.locator("button:visible, [role='button']:visible, [role='tab']:visible, a:visible").filter({
-    hasText: /사이즈\s*(정보|표|가이드)?|실측|상품\s*정보|상세\s*정보|SIZE\s*(INFO|GUIDE|CHART)?|MEASUREMENTS?/i
-  });
-  try {
-    await controls.first().waitFor({ state: "visible", timeout: Math.min(env.pageLoadTimeoutMs, 15_000) });
-  } catch (error) {
-    if (error instanceof playwrightErrors.TimeoutError) return;
-    throw error;
-  }
-  const count = Math.min(await controls.count(), 3);
-  for (let index = 0; index < count; index += 1) {
-    const control = controls.nth(index);
-    if (await control.isVisible()) {
-      try {
-        await control.click({ timeout: 1_000 });
-      } catch (error) {
-        if (!(error instanceof playwrightErrors.TimeoutError)) throw error;
-      }
-    }
-  }
-  try {
-    await page.locator("table:visible").first().waitFor({ state: "visible", timeout: 5_000 });
-  } catch (error) {
-    if (!(error instanceof playwrightErrors.TimeoutError)) throw error;
-  }
 };
 
 const navigationError = (error: unknown, blocked: ProductImportError | null): ProductImportError => {
@@ -196,8 +122,8 @@ export const crawlProductPage = async (
       ...(musinsaSizeCandidate ? [musinsaSizeCandidate] : []),
       ...observer.getCandidates()
     ];
-    const structured = extractStructuredProduct(html);
-    const network = firstNetworkProduct(networkCandidates);
+    const structuredCandidate = extractStructuredProduct(html);
+    const networkCandidate = firstNetworkProduct(networkCandidates);
     const networkSizeTable = firstNetworkSizeTable(networkCandidates);
     const dom = extractDomProduct({
       html,
@@ -205,10 +131,20 @@ export const crawlProductPage = async (
       includeImages: effectiveContext.includeImages,
       includeDetailImages: effectiveContext.includeDetailImages
     });
-    const name = structured?.name ?? network?.name ?? dom.name;
+    const pageIdentity = { pageName: dom.name, productId: productIdFromUrl(effectiveContext.url) };
+    const structured = matchesProductPage(structuredCandidate, pageIdentity) ? structuredCandidate : null;
+    const network = matchesProductPage(networkCandidate, pageIdentity) ? networkCandidate : null;
+    const name = structured?.name ?? network?.name ?? dom.name ?? structuredCandidate?.name ?? networkCandidate?.name;
     if (!name) {
       throw new ProductImportError("PRODUCT_NAME_NOT_FOUND", "상품명을 찾을 수 없습니다.", false, 422);
     }
+    const identity = { ...pageIdentity, name };
+    const facts = mergeProductFacts(
+      factsForIdentity(structured, identity),
+      factsForIdentity(network, identity),
+      dom.name ? factsFromHtml(html, dom.name) : [],
+      dom.name ? factsFromHtml(decodeHydrationMarkup(html) ?? "", dom.name) : []
+    );
     const brand = structured?.brand ?? network?.brand ?? dom.brand;
     const rawCategory = structured?.category ?? network?.category ?? dom.category;
     const description = structured?.description ?? network?.description ?? dom.description;
@@ -252,7 +188,8 @@ export const crawlProductPage = async (
           currency: structured?.currency ?? network?.currency ?? null
         } : null,
         gender: null,
-        materials: [],
+        materials: facts.filter((fact) => fact.kind === "material").map((fact) => fact.value),
+        facts,
         description,
         soldOut: null
       },

@@ -1,0 +1,158 @@
+{
+  "checkpoint": "artifacts/aihub-coat-jacket-mask-pretrain-v2/checkpoint.pt",
+  "sha256": "0baeadd24aeb788b1a575c3f4762643b1b6a1b8b486d84ec1ceb0fb9cae96ddf",
+  "architecture": "coordit-spatial-multitask-v2",
+  "device": "mps",
+  "completed_epochs": 5,
+  "unique_training_images": 2482,
+  "source_training_pool": 2482,
+  "synthetic_images_used": 0,
+  "total_steps": 780,
+  "image_exposures": 12410,
+  "per_epoch": [
+    {
+      "epoch": 0,
+      "loss": 1.1954024097858331,
+      "steps": 156,
+      "images_seen_this_epoch": 2482,
+      "unique_images_seen_this_epoch": 2473,
+      "categories_seen": {
+        "tshirt": 0,
+        "shirt": 0,
+        "sweatshirt": 0,
+        "hoodie": 0,
+        "knit": 0,
+        "jacket": 1241,
+        "coat": 1241,
+        "pants": 0,
+        "jeans": 0,
+        "shorts": 0,
+        "skirt": 0
+      }
+    },
+    {
+      "epoch": 1,
+      "loss": 0.8660077223410974,
+      "steps": 156,
+      "images_seen_this_epoch": 2482,
+      "unique_images_seen_this_epoch": 2473,
+      "categories_seen": {
+        "tshirt": 0,
+        "shirt": 0,
+        "sweatshirt": 0,
+        "hoodie": 0,
+        "knit": 0,
+        "jacket": 1241,
+        "coat": 1241,
+        "pants": 0,
+        "jeans": 0,
+        "shorts": 0,
+        "skirt": 0
+      }
+    },
+    {
+      "epoch": 2,
+      "loss": 0.7203808375276052,
+      "steps": 156,
+      "images_seen_this_epoch": 2482,
+      "unique_images_seen_this_epoch": 2473,
+      "categories_seen": {
+        "tshirt": 0,
+        "shirt": 0,
+        "sweatshirt": 0,
+        "hoodie": 0,
+        "knit": 0,
+        "jacket": 1241,
+        "coat": 1241,
+        "pants": 0,
+        "jeans": 0,
+        "shorts": 0,
+        "skirt": 0
+      }
+    },
+    {
+      "epoch": 3,
+      "loss": 0.6772047201028237,
+      "steps": 156,
+      "images_seen_this_epoch": 2482,
+      "unique_images_seen_this_epoch": 2473,
+      "categories_seen": {
+        "tshirt": 0,
+        "shirt": 0,
+        "sweatshirt": 0,
+        "hoodie": 0,
+        "knit": 0,
+        "jacket": 1241,
+        "coat": 1241,
+        "pants": 0,
+        "jeans": 0,
+        "shorts": 0,
+        "skirt": 0
+      }
+    },
+    {
+      "epoch": 4,
+      "loss": 0.6218219307752756,
+      "steps": 156,
+      "images_seen_this_epoch": 2482,
+      "unique_images_seen_this_epoch": 2473,
+      "categories_seen": {
+        "tshirt": 0,
+        "shirt": 0,
+        "sweatshirt": 0,
+        "hoodie": 0,
+        "knit": 0,
+        "jacket": 1241,
+        "coat": 1241,
+        "pants": 0,
+        "jeans": 0,
+        "shorts": 0,
+        "skirt": 0
+      }
+    }
+  ],
+  "independent_validation_images": 0,
+  "independent_test_images": 0,
+  "real_landmark_supervision_images": 0,
+  "cm_regression_supervision_images": 0,
+  "landmark_pck": null,
+  "landmark_nme": null,
+  "cm_mae": null,
+  "cm_p95": null,
+  "trained_tasks": [
+    "classification",
+    "segmentation"
+  ],
+  "native_clothing_cm": "Preserved in source_measurements.jsonl; not used as regression or fabricated landmark targets",
+  "deployment_approved": false,
+  "registry_sha256": "6d293479ef3eba8c2f5e0bb1ca1b5f9ef31e18b97135e2530826466d9973a9de",
+  "manifest_sha256": "631e3065ed187f9e68f8a2211c46b1b1c0b16202c2ca53303994cd5418c382d6",
+  "training_metrics_only": {
+    "coat": {
+      "images": 1250,
+      "segmentation_images": 1250,
+      "landmark_images": 0,
+      "classification_accuracy": 0.7136,
+      "segmentation_iou": 0.9380602828251066,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": 6.997668693596279,
+      "status": "development_only"
+    },
+    "jacket": {
+      "images": 1232,
+      "segmentation_images": 1232,
+      "landmark_images": 0,
+      "classification_accuracy": 0.887987012987013,
+      "segmentation_iou": 0.9255087556555869,
+      "landmark_pck_005": null,
+      "landmark_nme": null,
+      "landmark_missing_rate": null,
+      "inference_ms_mean": 7.0476603003227964,
+      "status": "development_only"
+    }
+  },
+  "not_generalization_accuracy": true,
+  "initial_run": "v1 stopped after two epochs to pin final reviewed registry count; excluded from final-run epoch/exposure totals"
+}

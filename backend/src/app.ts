@@ -3,7 +3,7 @@ import express from "express";
 import { env } from "./config/env";
 import { errorMiddleware } from "./middleware/error.middleware";
 import { privacyPageHtml, supportPageHtml } from "./public-pages";
-import { routes } from "./routes";
+import { routes, imageRoutes } from "./routes";
 
 export const app = express();
 
@@ -21,6 +21,7 @@ app.use(
     }
   })
 );
+app.use(imageRoutes);
 app.use(express.json());
 
 app.get("/health", (_req, res) => {

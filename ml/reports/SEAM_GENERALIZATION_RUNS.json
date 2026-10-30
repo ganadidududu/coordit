@@ -1,0 +1,145 @@
+{
+  "date": "2026-10-28",
+  "phase3_changed": false,
+  "deployment_approved": false,
+  "cm_accuracy": null,
+  "aihub_human_verified_seam_images": 0,
+  "aihub_training_review_images": 16,
+  "aihub_unverified_proposal_points": 64,
+  "aihub_blank_blind_candidates": 2,
+  "runs": [
+    {
+      "name": "seam-real-augmentation-v1",
+      "checkpoint": "artifacts/seam-real-augmentation-v1/checkpoint.pt",
+      "sha256": "2ba32df955ad6f5329f2c5636b7425f5d1408c39356087aebf79095adeaf4d54",
+      "artifact_sha256": "172d117218c9d1e19c5e139995c3a00385ff09caf4d7056a04739f0b5dd6f708",
+      "parent_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "epochs": 30,
+      "steps": 1920,
+      "exposures": 30720,
+      "synthetic_exposures": 1530,
+      "unique_images": 2355,
+      "source_unique_images": {
+        "aihub-71501": 1783,
+        "artf-1.0.1": 524,
+        "garmentcodedata-v2": 48
+      },
+      "category_unique_images": {
+        "coat": 900,
+        "jacket": 883,
+        "shorts": 104,
+        "aux_towel": 210,
+        "tshirt": 210,
+        "pants": 8,
+        "skirt": 16,
+        "shirt": 24
+      },
+      "visible_label_images_by_source": {
+        "artf-1.0.1": 314,
+        "garmentcodedata-v2": 17
+      },
+      "per_epoch_source_exposures": {
+        "aihub-71501": 103,
+        "artf-1.0.1": 870,
+        "garmentcodedata-v2": 51
+      },
+      "final_loss": 4.190452553331852,
+      "architecture": "coordit-spatial-multitask-v2",
+      "device": "mps",
+      "augmentation": {
+        "rotation_degrees": 20.0,
+        "shift_fraction": 0.06,
+        "scale_min": 0.85,
+        "scale_max": 1.15,
+        "brightness_min": 0.7,
+        "brightness_max": 1.3
+      }
+    },
+    {
+      "name": "seam-diverse-real-augmentation-v1",
+      "checkpoint": "artifacts/seam-diverse-real-augmentation-v1/checkpoint.pt",
+      "sha256": "894f41af2aaa05a76b93431be81030c4fe1d14c7bd5fdb979a26ca7584f1d018",
+      "artifact_sha256": "a913325611f9a72ccd075ade54d810378182bea58195b23c95d4a4538de6f7ea",
+      "parent_sha256": "0baeadd24aeb788b1a575c3f4762643b1b6a1b8b486d84ec1ceb0fb9cae96ddf",
+      "registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "epochs": 60,
+      "steps": 3840,
+      "exposures": 61440,
+      "synthetic_exposures": 3060,
+      "unique_images": 12671,
+      "source_unique_images": {
+        "aihub-71501": 1745,
+        "artf-1.0.1": 524,
+        "garmentcodedata-v2": 48,
+        "secondhand-fashion-v3-front": 10354
+      },
+      "category_unique_images": {
+        "coat": 880,
+        "jacket": 1923,
+        "shorts": 767,
+        "aux_towel": 210,
+        "tshirt": 2389,
+        "pants": 2122,
+        "skirt": 825,
+        "shirt": 1434,
+        "knit": 700,
+        "jeans": 1052,
+        "hoodie": 367,
+        "sweatshirt": 2
+      },
+      "visible_label_images_by_source": {
+        "artf-1.0.1": 314,
+        "garmentcodedata-v2": 17
+      },
+      "per_epoch_source_exposures": {
+        "aihub-71501": 51,
+        "artf-1.0.1": 615,
+        "garmentcodedata-v2": 51,
+        "secondhand-fashion-v3-front": 307
+      },
+      "final_loss": 4.754172742366791,
+      "architecture": "coordit-spatial-multitask-v2",
+      "device": "mps",
+      "augmentation": {
+        "rotation_degrees": 20.0,
+        "shift_fraction": 0.06,
+        "scale_min": 0.85,
+        "scale_max": 1.15,
+        "brightness_min": 0.7,
+        "brightness_max": 1.3
+      }
+    }
+  ],
+  "unseen_training_evaluation": {
+    "images": 561,
+    "category_images": {
+      "tshirt": 389,
+      "shorts": 172
+    },
+    "independent_study": false,
+    "normalization": "128x128 input diagonal",
+    "evaluations": [
+      "reports/artf-unseen-before-augmentation.json",
+      "reports/artf-unseen-after-augmentation.json",
+      "reports/artf-unseen-diverse-augmentation.json"
+    ],
+    "publisher_pool_used_for_subsequent_development_comparisons": true,
+    "limitation": "publisher garment/session independence unresolved; previous 16-photo heuristic development from the same publisher test family; no new tape-measured study"
+  },
+  "verification": {
+    "pytest_passed": 65,
+    "ruff_passed": true,
+    "changed_modules_basedpyright_errors": 0,
+    "changed_modules_basedpyright_warnings": 0,
+    "full_basedpyright_errors": 0,
+    "full_basedpyright_existing_warnings": 27,
+    "full_basedpyright_exit": 1,
+    "via_javascript_static_syntax_passed": true,
+    "via_analytics_removed": true,
+    "via_network_csp_present": true,
+    "via_browser_ui_tested": false,
+    "via_browser_qa_blocker": "file URL rejected by automatic browser approval; no HTTP or alternate-surface workaround attempted",
+    "ios_android_tested_this_change": false
+  }
+}

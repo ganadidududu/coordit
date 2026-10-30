@@ -4,10 +4,20 @@ on:
   pull_request:
     paths:
       - "backend/**"
+      - "shared/fitlab/**"
+      - "coordit/coordit/CoorditNarrativeRules.generated.swift"
+      - "coordit/coorditTests/NarrativeCases.json"
+      - "android/app/src/main/java/com/inseong/coordit/data/fitlab/NarrativeRules.generated.kt"
+      - "android/app/src/test/resources/narrative-cases.json"
       - ".github/workflows/backend-ci.yml"
   push:
     paths:
       - "backend/**"
+      - "shared/fitlab/**"
+      - "coordit/coordit/CoorditNarrativeRules.generated.swift"
+      - "coordit/coorditTests/NarrativeCases.json"
+      - "android/app/src/main/java/com/inseong/coordit/data/fitlab/NarrativeRules.generated.kt"
+      - "android/app/src/test/resources/narrative-cases.json"
       - ".github/workflows/backend-ci.yml"
 
 permissions:
@@ -39,6 +49,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Verify shared native narrative rules
+        run: |
+          npm run check:narrative-rules
+          npx tsc --noEmit --strict --esModuleInterop --skipLibCheck --module CommonJS --target ES2022 scripts/generate-narrative-rules.ts
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium

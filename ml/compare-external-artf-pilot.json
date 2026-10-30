@@ -1,0 +1,8 @@
+{
+  "receipt": "artifacts/external-artf-vision-pilot-v1/packet.json",
+  "receipt_sha256": "67e41b8192e00bfbf6dc08c1d26e65b285026117d7499d3e8bd01169a62d8e08",
+  "predictions": "artifacts/external-artf-vision-pilot-v1/external-proposals.json",
+  "predictions_sha256": "56c505738a465e2f2b80972aa39cc3e14da304f7863befcc3f4a21c81a4e5b93",
+  "protocol": "protocols/external-artf-vision-v1.md",
+  "output": "reports/EXTERNAL_ARTF_VISION_PILOT.json"
+}

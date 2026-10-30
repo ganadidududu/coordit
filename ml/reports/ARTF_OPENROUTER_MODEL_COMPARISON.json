@@ -1,0 +1,1712 @@
+{
+  "provider": "OpenRouter",
+  "config": {
+    "receipt": "artifacts/external-artf-vision-pilot-v1/packet.json",
+    "receipt_sha256": "67e41b8192e00bfbf6dc08c1d26e65b285026117d7499d3e8bd01169a62d8e08",
+    "protocol": "protocols/artf-api-comparison-v1.md",
+    "protocol_sha256": "fe6ac24dce3e674b4872a520ec09f99e03228aa5f9cc535b8864c8b281225dd3",
+    "catalog": "artifacts/artf-api-model-benchmark-v1/selected-models.json",
+    "catalog_sha256": "b1de3398cecdb87588270d8781ee2f87073dc94b48845572b14c3e3ebb53ae37",
+    "models": [
+      "openai/gpt-5.4-mini",
+      "openai/gpt-5.4",
+      "openai/gpt-6-astra",
+      "google/gemini-3.8-flash",
+      "anthropic/claude-sonnet-4.6"
+    ],
+    "output": "artifacts/artf-api-model-benchmark-v1/run-01",
+    "max_tokens": 4096,
+    "input_token_reservation": 8192,
+    "spending_limit_usd": 5.0,
+    "seed": 20261028
+  },
+  "attempts_sha256": "686c26ecadc30908cc749df97b451560c3282f9e4c8aeba6fea5d51faba52ab2",
+  "images_per_model": 8,
+  "models": [
+    {
+      "requested_model": "openai/gpt-5.4-mini",
+      "returned_models": [
+        "openai/gpt-5.4-mini"
+      ],
+      "providers": [
+        "Azure"
+      ],
+      "attempts": 8,
+      "valid_annotation_responses": 8,
+      "valid_response_rate": 1.0,
+      "metric_status": "measured",
+      "accuracy_including_failed_calls": {
+        "tshirt": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 11,
+          "abstentions_on_visible_gt": 4,
+          "coverage": 0.7333333333333333,
+          "pck_005_all_visible_gt": 0.13333333333333333,
+          "nme_supplied_only": 0.15397520949654472,
+          "nme_with_abstention_penalty_1": 0.37958182029746607
+        },
+        "tshirt/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 3,
+          "failed_pairs": 1,
+          "coverage": 0.75,
+          "mean_absolute_error_pixels_supplied_only": 24.619065881429645,
+          "mean_relative_error_supplied_only": 0.19530880053627267
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 2,
+          "failed_pairs": 1,
+          "coverage": 0.6666666666666666,
+          "mean_absolute_error_pixels_supplied_only": 25.063171960814074,
+          "mean_relative_error_supplied_only": 0.20256651924168823
+        },
+        "all": {
+          "images": 8,
+          "visible_gt_points": 30,
+          "supplied_points": 26,
+          "abstentions_on_visible_gt": 4,
+          "coverage": 0.8666666666666667,
+          "pck_005_all_visible_gt": 0.23333333333333334,
+          "nme_supplied_only": 0.11830689141180312,
+          "nme_with_abstention_penalty_1": 0.235865972556896
+        },
+        "all/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 3,
+          "failed_pairs": 1,
+          "coverage": 0.75,
+          "mean_absolute_error_pixels_supplied_only": 24.619065881429645,
+          "mean_relative_error_supplied_only": 0.19530880053627267
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 2,
+          "failed_pairs": 1,
+          "coverage": 0.6666666666666666,
+          "mean_absolute_error_pixels_supplied_only": 25.063171960814074,
+          "mean_relative_error_supplied_only": 0.20256651924168823
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 25.93277213839017,
+          "mean_relative_error_supplied_only": 0.22731450903661482
+        },
+        "shorts": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.3333333333333333,
+          "nme_supplied_only": 0.09215012481632592,
+          "nme_with_abstention_penalty_1": 0.09215012481632598
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 25.93277213839017,
+          "mean_relative_error_supplied_only": 0.22731450903661482
+        }
+      },
+      "lengths_on_same_pairs_supplied_by_all_models": {
+        "tshirt/chest_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 24.619065881429645,
+          "mean_relative_error_supplied_only": 0.19530880053627267
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 2,
+          "supplied_pairs": 2,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 25.063171960814074,
+          "mean_relative_error_supplied_only": 0.20256651924168823
+        },
+        "all/chest_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 24.619065881429645,
+          "mean_relative_error_supplied_only": 0.19530880053627267
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 2,
+          "supplied_pairs": 2,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 25.063171960814074,
+          "mean_relative_error_supplied_only": 0.20256651924168823
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 25.93277213839017,
+          "mean_relative_error_supplied_only": 0.22731450903661482
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 25.93277213839017,
+          "mean_relative_error_supplied_only": 0.22731450903661482
+        }
+      },
+      "api_roundtrip_seconds_all_attempts": {
+        "mean": 6.02702403649937,
+        "median": 6.318542062497727,
+        "p95_sample_quantile": 7.562889012401138,
+        "max": 7.5892338330013445
+      },
+      "provider_reported_cost_usd": {
+        "total_known": 0.0185145,
+        "calls_with_cost": 8,
+        "billing_complete": true,
+        "mean_per_scheduled_photo": 0.0023143125,
+        "known_cost_per_valid_response": 0.0023143125
+      },
+      "tokens": {
+        "prompt": 6032,
+        "completion_including_reasoning": 3109
+      },
+      "per_photo": [
+        {
+          "case_id": "P01",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.0378372206593016,
+            "shoulder_right": 0.09955936449865713,
+            "armpit_left": 0.06728031889093412,
+            "armpit_right": 0.0898220831531703
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 103.89985253750467,
+              "predicted_pixels": 131.76840246189522,
+              "absolute_error_pixels": 27.86854992439055,
+              "relative_error": 0.26822511527945486
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 116.03727946426856,
+              "predicted_pixels": 98.253320269597,
+              "absolute_error_pixels": 17.783959194671567,
+              "relative_error": 0.1532607389347472
+            }
+          ]
+        },
+        {
+          "case_id": "P02",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_right": 0.02570558803072718,
+            "armpit_left": 0.20950271615896177,
+            "armpit_right": 0.08335650655471218
+          },
+          "lengths": [
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 110.76213470760096,
+              "predicted_pixels": 74.83086251006333,
+              "absolute_error_pixels": 35.93127219753764,
+              "relative_error": 0.3244003222977959
+            }
+          ]
+        },
+        {
+          "case_id": "P03",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": null,
+            "shoulder_right": null,
+            "armpit_left": null,
+            "armpit_right": null
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 60.23388726386973,
+              "predicted_pixels": null,
+              "absolute_error_pixels": null,
+              "relative_error": null
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 87.09661435680034,
+              "predicted_pixels": null,
+              "absolute_error_pixels": null,
+              "relative_error": null
+            }
+          ]
+        },
+        {
+          "case_id": "P04",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.364898028725317,
+            "shoulder_right": 0.41712486428019674,
+            "armpit_left": 0.1368256979385419,
+            "armpit_right": 0.16181491557147215
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 162.5749151426763,
+              "predicted_pixels": 184.8327091399139,
+              "absolute_error_pixels": 22.2577939972376,
+              "relative_error": 0.13690792320392162
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 186.0426077457159,
+              "predicted_pixels": 165.9006414936362,
+              "absolute_error_pixels": 20.141966252079726,
+              "relative_error": 0.10826534037627487
+            }
+          ]
+        },
+        {
+          "case_id": "P05",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.07792643676630244,
+            "waist_right": 0.040629923116669166,
+            "crotch": 0.050997802905212684,
+            "side_hem": 0.07686218964348931
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 99.18519681255877,
+              "predicted_pixels": 84.97696252514562,
+              "absolute_error_pixels": 14.208234287413148,
+              "relative_error": 0.1432495447305914
+            }
+          ]
+        },
+        {
+          "case_id": "P06",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.10354177259147215,
+            "waist_right": 0.2323707922454981,
+            "crotch": 0.0544140419579845
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 74.49974122876249,
+              "predicted_pixels": 62.373705229046635,
+              "absolute_error_pixels": 12.126035999715853,
+              "relative_error": 0.162766149247164
+            }
+          ]
+        },
+        {
+          "case_id": "P07",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.09527666467438563,
+            "waist_right": 0.028261813738108384,
+            "crotch": 0.049451304331992095,
+            "side_hem": 0.027876712702740104
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 162.31839805827005,
+              "predicted_pixels": 215.06194173772354,
+              "absolute_error_pixels": 52.743543679453495,
+              "relative_error": 0.32493878888897915
+            }
+          ]
+        },
+        {
+          "case_id": "P08",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.2808225380294382,
+            "waist_right": 0.1235356811584577,
+            "crotch": 0.12663506453885875,
+            "side_hem": 0.013649133844279597
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 88.58411722181289,
+              "predicted_pixels": 63.93084263483471,
+              "absolute_error_pixels": 24.653274586978178,
+              "relative_error": 0.27830355327972467
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "requested_model": "openai/gpt-5.4",
+      "returned_models": [
+        "openai/gpt-5.4"
+      ],
+      "providers": [
+        "Azure"
+      ],
+      "attempts": 8,
+      "valid_annotation_responses": 8,
+      "valid_response_rate": 1.0,
+      "metric_status": "measured",
+      "accuracy_including_failed_calls": {
+        "tshirt": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.06666666666666667,
+          "nme_supplied_only": 0.12202422458397245,
+          "nme_with_abstention_penalty_1": 0.12202422458397257
+        },
+        "tshirt/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 54.06202569284119,
+          "mean_relative_error_supplied_only": 0.39440676305463834
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 71.84419245630284,
+          "mean_relative_error_supplied_only": 0.7059033876537546
+        },
+        "all": {
+          "images": 8,
+          "visible_gt_points": 30,
+          "supplied_points": 30,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.26666666666666666,
+          "nme_supplied_only": 0.10108298818160631,
+          "nme_with_abstention_penalty_1": 0.10108298818160624
+        },
+        "all/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 54.06202569284119,
+          "mean_relative_error_supplied_only": 0.39440676305463834
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 71.84419245630284,
+          "mean_relative_error_supplied_only": 0.7059033876537546
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 18.833849298281546,
+          "mean_relative_error_supplied_only": 0.15687540699244001
+        },
+        "shorts": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.4666666666666667,
+          "nme_supplied_only": 0.08014175177924018,
+          "nme_with_abstention_penalty_1": 0.08014175177924017
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 18.833849298281546,
+          "mean_relative_error_supplied_only": 0.15687540699244001
+        }
+      },
+      "lengths_on_same_pairs_supplied_by_all_models": {
+        "tshirt/chest_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 64.76290570938836,
+          "mean_relative_error_supplied_only": 0.44183343663928737
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 2,
+          "supplied_pairs": 2,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 84.3400504908756,
+          "mean_relative_error_supplied_only": 0.6699338403368535
+        },
+        "all/chest_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 64.76290570938836,
+          "mean_relative_error_supplied_only": 0.44183343663928737
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 2,
+          "supplied_pairs": 2,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 84.3400504908756,
+          "mean_relative_error_supplied_only": 0.6699338403368535
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 18.833849298281546,
+          "mean_relative_error_supplied_only": 0.15687540699244001
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 18.833849298281546,
+          "mean_relative_error_supplied_only": 0.15687540699244001
+        }
+      },
+      "api_roundtrip_seconds_all_attempts": {
+        "mean": 8.397676031250285,
+        "median": 7.705536333500277,
+        "p95_sample_quantile": 11.495411208549557,
+        "max": 12.026017042000603
+      },
+      "provider_reported_cost_usd": {
+        "total_known": 0.06743,
+        "calls_with_cost": 8,
+        "billing_complete": true,
+        "mean_per_scheduled_photo": 0.00842875,
+        "known_cost_per_valid_response": 0.00842875
+      },
+      "tokens": {
+        "prompt": 6032,
+        "completion_including_reasoning": 3490
+      },
+      "per_photo": [
+        {
+          "case_id": "P01",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.11908123890372946,
+            "shoulder_right": 0.14941156292289043,
+            "armpit_left": 0.08587930623387877,
+            "armpit_right": 0.12455490958935501
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 103.89985253750467,
+              "predicted_pixels": 190.93086866193218,
+              "absolute_error_pixels": 87.03101612442751,
+              "relative_error": 0.8376433074629435
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 116.03727946426856,
+              "predicted_pixels": 182.15348956306053,
+              "absolute_error_pixels": 66.11621009879197,
+              "relative_error": 0.5697842142115299
+            }
+          ]
+        },
+        {
+          "case_id": "P02",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_right": 0.03207082040899394,
+            "armpit_left": 0.1910091978985495,
+            "armpit_right": 0.17979946340319883
+          },
+          "lengths": [
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 110.76213470760096,
+              "predicted_pixels": 129.04025294457543,
+              "absolute_error_pixels": 18.278118236974464,
+              "relative_error": 0.16502136118292185
+            }
+          ]
+        },
+        {
+          "case_id": "P03",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.0936767577250936,
+            "shoulder_right": 0.08147454062508942,
+            "armpit_left": 0.07344758331813311,
+            "armpit_right": 0.13266536498634185
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 60.23388726386973,
+              "predicted_pixels": 107.08636365102703,
+              "absolute_error_pixels": 46.852476387157296,
+              "relative_error": 0.7778424822875569
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 87.09661435680034,
+              "predicted_pixels": 109.05600000000001,
+              "absolute_error_pixels": 21.959385643199667,
+              "relative_error": 0.25212674230069104
+            }
+          ]
+        },
+        {
+          "case_id": "P04",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.1456747754698872,
+            "shoulder_right": 0.18307804339471279,
+            "armpit_left": 0.12905171282612968,
+            "armpit_right": 0.10948809105360317
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 162.5749151426763,
+              "predicted_pixels": 244.224,
+              "absolute_error_pixels": 81.64908485732369,
+              "relative_error": 0.5022243732107636
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 186.0426077457159,
+              "predicted_pixels": 295.93699653811456,
+              "absolute_error_pixels": 109.89438879239864,
+              "relative_error": 0.5906947345234105
+            }
+          ]
+        },
+        {
+          "case_id": "P05",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.06001089170793969,
+            "waist_right": 0.04240161474118268,
+            "crotch": 0.0704924636750294,
+            "side_hem": 0.012141514150790213
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 99.18519681255877,
+              "predicted_pixels": 108.04291887948972,
+              "absolute_error_pixels": 8.857722066930947,
+              "relative_error": 0.08930487967544555
+            }
+          ]
+        },
+        {
+          "case_id": "P06",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.12788472362295053,
+            "waist_right": 0.19266708875572278,
+            "crotch": 0.027869214470170555
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 74.49974122876249,
+              "predicted_pixels": 74.1993819920355,
+              "absolute_error_pixels": 0.3003592367269903,
+              "relative_error": 0.00403168161087557
+            }
+          ]
+        },
+        {
+          "case_id": "P07",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.07366014147818636,
+            "waist_right": 0.008399516356719084,
+            "crotch": 0.03895601324221833,
+            "side_hem": 0.0248417211785156
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 162.31839805827005,
+              "predicted_pixels": 203.83404198514043,
+              "absolute_error_pixels": 41.51564392687038,
+              "relative_error": 0.2557667179044414
+            }
+          ]
+        },
+        {
+          "case_id": "P08",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.2285647293573464,
+            "waist_right": 0.12144574487245532,
+            "crotch": 0.13423528250182762,
+            "side_hem": 0.038555616577548114
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 88.58411722181289,
+              "predicted_pixels": 113.24578918441075,
+              "absolute_error_pixels": 24.661671962597865,
+              "relative_error": 0.2783983487789975
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "requested_model": "openai/gpt-6-astra",
+      "returned_models": [
+        "openai/gpt-6-astra"
+      ],
+      "providers": [
+        "Azure"
+      ],
+      "attempts": 8,
+      "valid_annotation_responses": 8,
+      "valid_response_rate": 1.0,
+      "metric_status": "measured",
+      "accuracy_including_failed_calls": {
+        "tshirt": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.9333333333333333,
+          "nme_supplied_only": 0.020895017271349948,
+          "nme_with_abstention_penalty_1": 0.020895017271349896
+        },
+        "tshirt/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 10.5710502874749,
+          "mean_relative_error_supplied_only": 0.09906922629732423
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 7.8089797543541595,
+          "mean_relative_error_supplied_only": 0.07602453098832276
+        },
+        "all": {
+          "images": 8,
+          "visible_gt_points": 30,
+          "supplied_points": 30,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.8666666666666667,
+          "nme_supplied_only": 0.03010858438222313,
+          "nme_with_abstention_penalty_1": 0.030108584382223094
+        },
+        "all/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 10.5710502874749,
+          "mean_relative_error_supplied_only": 0.09906922629732423
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 7.8089797543541595,
+          "mean_relative_error_supplied_only": 0.07602453098832276
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 8.009707261826343,
+          "mean_relative_error_supplied_only": 0.08934156085321253
+        },
+        "shorts": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.8,
+          "nme_supplied_only": 0.039322151493096306,
+          "nme_with_abstention_penalty_1": 0.03932215149309629
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 8.009707261826343,
+          "mean_relative_error_supplied_only": 0.08934156085321253
+        }
+      },
+      "lengths_on_same_pairs_supplied_by_all_models": {
+        "tshirt/chest_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 10.790210521102571,
+          "mean_relative_error_supplied_only": 0.09415141022744723
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 2,
+          "supplied_pairs": 2,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 7.894841687107622,
+          "mean_relative_error_supplied_only": 0.05064012530808102
+        },
+        "all/chest_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 10.790210521102571,
+          "mean_relative_error_supplied_only": 0.09415141022744723
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 2,
+          "supplied_pairs": 2,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 7.894841687107622,
+          "mean_relative_error_supplied_only": 0.05064012530808102
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 8.009707261826343,
+          "mean_relative_error_supplied_only": 0.08934156085321253
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 8.009707261826343,
+          "mean_relative_error_supplied_only": 0.08934156085321253
+        }
+      },
+      "api_roundtrip_seconds_all_attempts": {
+        "mean": 13.837967114624917,
+        "median": 12.824976520500059,
+        "p95_sample_quantile": 22.018156727198583,
+        "max": 23.370707999998558
+      },
+      "provider_reported_cost_usd": {
+        "total_known": 0.20937,
+        "calls_with_cost": 8,
+        "billing_complete": true,
+        "mean_per_scheduled_photo": 0.02617125,
+        "known_cost_per_valid_response": 0.02617125
+      },
+      "tokens": {
+        "prompt": 6032,
+        "completion_including_reasoning": 2981
+      },
+      "per_photo": [
+        {
+          "case_id": "P01",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.025520974164266196,
+            "shoulder_right": 0.01228612186393135,
+            "armpit_left": 0.00729088544340631,
+            "armpit_right": 0.0026245119925191597
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 103.89985253750467,
+              "predicted_pixels": 102.70291197429601,
+              "absolute_error_pixels": 1.1969405632086563,
+              "relative_error": 0.011520137266572129
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 116.03727946426856,
+              "predicted_pixels": 115.76749111905292,
+              "absolute_error_pixels": 0.26978834521564465,
+              "relative_error": 0.0023250143959012825
+            }
+          ]
+        },
+        {
+          "case_id": "P02",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_right": 0.032136795621484436,
+            "armpit_left": 0.07156200082474266,
+            "armpit_right": 0.01644399620204086
+          },
+          "lengths": [
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 110.76213470760096,
+              "predicted_pixels": 81.31335378644766,
+              "absolute_error_pixels": 29.4487809211533,
+              "relative_error": 0.26587408231969006
+            }
+          ]
+        },
+        {
+          "case_id": "P03",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.009261129130139076,
+            "shoulder_right": 0.015612344315607695,
+            "armpit_left": 0.009851268713932316,
+            "armpit_right": 0.0327830918622369
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 60.23388726386973,
+              "predicted_pixels": 52.5966313750225,
+              "absolute_error_pixels": 7.6372558888472355,
+              "relative_error": 0.12679334234880624
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 87.09661435680034,
+              "predicted_pixels": 77.18304477020845,
+              "absolute_error_pixels": 9.91356958659189,
+              "relative_error": 0.11382267450695524
+            }
+          ]
+        },
+        {
+          "case_id": "P04",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.04612006611071943,
+            "shoulder_right": 0.02609134682291094,
+            "armpit_left": 0.004812651280048571,
+            "armpit_right": 0.001028074722263315
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 162.5749151426763,
+              "predicted_pixels": 147.98217233166972,
+              "absolute_error_pixels": 14.592742811006588,
+              "relative_error": 0.08976011334958992
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 186.0426077457159,
+              "predicted_pixels": 183.39054544877715,
+              "absolute_error_pixels": 2.652062296938766,
+              "relative_error": 0.014255133966750346
+            }
+          ]
+        },
+        {
+          "case_id": "P05",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.004922748427909353,
+            "waist_right": 0.0003954658103884573,
+            "crotch": 0.005591982214570208,
+            "side_hem": 0.004438386700351629
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 99.18519681255877,
+              "predicted_pixels": 97.96775828812255,
+              "absolute_error_pixels": 1.2174385244362185,
+              "relative_error": 0.012274397425827028
+            }
+          ]
+        },
+        {
+          "case_id": "P06",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.003327972725705842,
+            "waist_right": 0.0014127910300005073,
+            "crotch": 0.006545446786772282
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 74.49974122876249,
+              "predicted_pixels": 73.984,
+              "absolute_error_pixels": 0.5157412287624936,
+              "relative_error": 0.006922725102881013
+            }
+          ]
+        },
+        {
+          "case_id": "P07",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.0040137071846621155,
+            "waist_right": 0.0019548787565262966,
+            "crotch": 0.0210594346356291,
+            "side_hem": 0.004333333333333351
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 162.31839805827005,
+              "predicted_pixels": 161.54959055348914,
+              "absolute_error_pixels": 0.7688075047809093,
+              "relative_error": 0.004736416290314288
+            }
+          ]
+        },
+        {
+          "case_id": "P08",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.24056550634108093,
+            "waist_right": 0.14364730983890373,
+            "crotch": 0.14695532830084973,
+            "side_hem": 0.0006679803097610944
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 88.58411722181289,
+              "predicted_pixels": 59.04727543248714,
+              "absolute_error_pixels": 29.53684178932575,
+              "relative_error": 0.3334327045938278
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "requested_model": "google/gemini-3.8-flash",
+      "returned_models": [
+        "google/gemini-3.8-flash"
+      ],
+      "providers": [
+        "Google"
+      ],
+      "attempts": 8,
+      "valid_annotation_responses": 8,
+      "valid_response_rate": 1.0,
+      "metric_status": "measured",
+      "accuracy_including_failed_calls": {
+        "tshirt": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.6,
+          "nme_supplied_only": 0.07199615282763965,
+          "nme_with_abstention_penalty_1": 0.07199615282763953
+        },
+        "tshirt/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 9.3837798900372,
+          "mean_relative_error_supplied_only": 0.08798202689954483
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 35.78192025708194,
+          "mean_relative_error_supplied_only": 0.316573434960054
+        },
+        "all": {
+          "images": 8,
+          "visible_gt_points": 30,
+          "supplied_points": 30,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.7666666666666667,
+          "nme_supplied_only": 0.042595044138246954,
+          "nme_with_abstention_penalty_1": 0.04259504413824698
+        },
+        "all/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 9.3837798900372,
+          "mean_relative_error_supplied_only": 0.08798202689954483
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 35.78192025708194,
+          "mean_relative_error_supplied_only": 0.316573434960054
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 2.924577607943842,
+          "mean_relative_error_supplied_only": 0.028798186012942862
+        },
+        "shorts": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.9333333333333333,
+          "nme_supplied_only": 0.01319393544885426,
+          "nme_with_abstention_penalty_1": 0.013193935448854313
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 2.924577607943842,
+          "mean_relative_error_supplied_only": 0.028798186012942862
+        }
+      },
+      "lengths_on_same_pairs_supplied_by_all_models": {
+        "tshirt/chest_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 10.6210022251904,
+          "mean_relative_error_supplied_only": 0.09560124301306705
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 2,
+          "supplied_pairs": 2,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 40.34367491317799,
+          "mean_relative_error_supplied_only": 0.25356934625231203
+        },
+        "all/chest_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 10.6210022251904,
+          "mean_relative_error_supplied_only": 0.09560124301306705
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 2,
+          "supplied_pairs": 2,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 40.34367491317799,
+          "mean_relative_error_supplied_only": 0.25356934625231203
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 2.924577607943842,
+          "mean_relative_error_supplied_only": 0.028798186012942862
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 2.924577607943842,
+          "mean_relative_error_supplied_only": 0.028798186012942862
+        }
+      },
+      "api_roundtrip_seconds_all_attempts": {
+        "mean": 7.258925161249408,
+        "median": 6.57367156249893,
+        "p95_sample_quantile": 13.339862110200738,
+        "max": 13.772286833002
+      },
+      "provider_reported_cost_usd": {
+        "total_known": 0.0276105,
+        "calls_with_cost": 8,
+        "billing_complete": true,
+        "mean_per_scheduled_photo": 0.0034513125,
+        "known_cost_per_valid_response": 0.0034513125
+      },
+      "tokens": {
+        "prompt": 14804,
+        "completion_including_reasoning": 4402
+      },
+      "per_photo": [
+        {
+          "case_id": "P01",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.020423024089330357,
+            "shoulder_right": 0.009985109595982292,
+            "armpit_left": 0.010124417523719915,
+            "armpit_right": 0.013210567809379719
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 103.89985253750467,
+              "predicted_pixels": 100.78209872789907,
+              "absolute_error_pixels": 3.1177538096056026,
+              "relative_error": 0.030007297733942295
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 116.03727946426856,
+              "predicted_pixels": 116.89000367867219,
+              "absolute_error_pixels": 0.8527242144036222,
+              "relative_error": 0.007348709124693002
+            }
+          ]
+        },
+        {
+          "case_id": "P02",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_right": 0.04153265140605712,
+            "armpit_left": 0.08689035835050286,
+            "armpit_right": 0.039967436158974703
+          },
+          "lengths": [
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 110.76213470760096,
+              "predicted_pixels": 79.89333048509117,
+              "absolute_error_pixels": 30.868804222509794,
+              "relative_error": 0.2786945584246802
+            }
+          ]
+        },
+        {
+          "case_id": "P03",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.15790172036863248,
+            "shoulder_right": 0.17158762932736524,
+            "armpit_left": 0.17338842953113714,
+            "armpit_right": 0.2020683727041755
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 60.23388726386973,
+              "predicted_pixels": 86.89229820875958,
+              "absolute_error_pixels": 26.65841094488985,
+              "relative_error": 0.44258161237553806
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 87.09661435680034,
+              "predicted_pixels": 81.42450147222274,
+              "absolute_error_pixels": 5.672112884577601,
+              "relative_error": 0.0651243785589782
+            }
+          ]
+        },
+        {
+          "case_id": "P04",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.04644896285420206,
+            "shoulder_right": 0.09252831651604981,
+            "armpit_left": 0.006134486313233586,
+            "armpit_right": 0.007750809865851826
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 162.5749151426763,
+              "predicted_pixels": 240.14451115942668,
+              "absolute_error_pixels": 77.56959601675038,
+              "relative_error": 0.4771313947706818
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 186.0426077457159,
+              "predicted_pixels": 185.90112950705813,
+              "absolute_error_pixels": 0.14147823865778264,
+              "relative_error": 0.0007604614898279425
+            }
+          ]
+        },
+        {
+          "case_id": "P05",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.0012085136426952749,
+            "waist_right": 0.0015442325202997703,
+            "crotch": 0.04459574565794976,
+            "side_hem": 0.0015441376372982596
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 99.18519681255877,
+              "predicted_pixels": 99.38109920905487,
+              "absolute_error_pixels": 0.19590239649609487,
+              "relative_error": 0.0019751172835429593
+            }
+          ]
+        },
+        {
+          "case_id": "P06",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.0037714656551107065,
+            "waist_right": 0.005792594478917732,
+            "crotch": 0.03392762317609662
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 74.49974122876249,
+              "predicted_pixels": 71.93782204098201,
+              "absolute_error_pixels": 2.5619191877804752,
+              "relative_error": 0.03438829646285244
+            }
+          ]
+        },
+        {
+          "case_id": "P07",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.004884713304577049,
+            "waist_right": 0.002635631035011848,
+            "crotch": 0.08027437985011464,
+            "side_hem": 0.005011098792790971
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 162.31839805827005,
+              "predicted_pixels": 158.00924732432588,
+              "absolute_error_pixels": 4.309150733944165,
+              "relative_error": 0.026547518861030402
+            }
+          ]
+        },
+        {
+          "case_id": "P08",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.0052934383999370905,
+            "waist_right": 0.0040903280277141425,
+            "crotch": 0.0026671492445389327,
+            "side_hem": 0.0006679803097610944
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 88.58411722181289,
+              "predicted_pixels": 83.95277910825826,
+              "absolute_error_pixels": 4.631338113554634,
+              "relative_error": 0.05228181144434565
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "requested_model": "anthropic/claude-sonnet-4.6",
+      "returned_models": [
+        "anthropic/claude-sonnet-4.6"
+      ],
+      "providers": [
+        "Amazon Bedrock"
+      ],
+      "attempts": 8,
+      "valid_annotation_responses": 8,
+      "valid_response_rate": 1.0,
+      "metric_status": "measured",
+      "accuracy_including_failed_calls": {
+        "tshirt": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 11,
+          "abstentions_on_visible_gt": 4,
+          "coverage": 0.7333333333333333,
+          "pck_005_all_visible_gt": 0.06666666666666667,
+          "nme_supplied_only": 0.17612260160065973,
+          "nme_with_abstention_penalty_1": 0.39582324117381706
+        },
+        "tshirt/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 3,
+          "failed_pairs": 1,
+          "coverage": 0.75,
+          "mean_absolute_error_pixels_supplied_only": 24.996753498028085,
+          "mean_relative_error_supplied_only": 0.18695725103971558
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 2,
+          "failed_pairs": 1,
+          "coverage": 0.6666666666666666,
+          "mean_absolute_error_pixels_supplied_only": 67.48019658053317,
+          "mean_relative_error_supplied_only": 0.4334588201413206
+        },
+        "all": {
+          "images": 8,
+          "visible_gt_points": 30,
+          "supplied_points": 26,
+          "abstentions_on_visible_gt": 4,
+          "coverage": 0.8666666666666667,
+          "pck_005_all_visible_gt": 0.16666666666666666,
+          "nme_supplied_only": 0.1374755084350048,
+          "nme_with_abstention_penalty_1": 0.2524787739770041
+        },
+        "all/chest_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 3,
+          "failed_pairs": 1,
+          "coverage": 0.75,
+          "mean_absolute_error_pixels_supplied_only": 24.996753498028085,
+          "mean_relative_error_supplied_only": 0.18695725103971558
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 2,
+          "failed_pairs": 1,
+          "coverage": 0.6666666666666666,
+          "mean_absolute_error_pixels_supplied_only": 67.48019658053317,
+          "mean_relative_error_supplied_only": 0.4334588201413206
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 49.65779200862223,
+          "mean_relative_error_supplied_only": 0.5355797137830016
+        },
+        "shorts": {
+          "images": 4,
+          "visible_gt_points": 15,
+          "supplied_points": 15,
+          "abstentions_on_visible_gt": 0,
+          "coverage": 1.0,
+          "pck_005_all_visible_gt": 0.26666666666666666,
+          "nme_supplied_only": 0.10913430678019118,
+          "nme_with_abstention_penalty_1": 0.10913430678019106
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 49.65779200862223,
+          "mean_relative_error_supplied_only": 0.5355797137830016
+        }
+      },
+      "lengths_on_same_pairs_supplied_by_all_models": {
+        "tshirt/chest_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 24.996753498028085,
+          "mean_relative_error_supplied_only": 0.18695725103971558
+        },
+        "tshirt/shoulder_width": {
+          "eligible_pairs": 2,
+          "supplied_pairs": 2,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 67.48019658053317,
+          "mean_relative_error_supplied_only": 0.4334588201413206
+        },
+        "all/chest_width": {
+          "eligible_pairs": 3,
+          "supplied_pairs": 3,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 24.996753498028085,
+          "mean_relative_error_supplied_only": 0.18695725103971558
+        },
+        "all/shoulder_width": {
+          "eligible_pairs": 2,
+          "supplied_pairs": 2,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 67.48019658053317,
+          "mean_relative_error_supplied_only": 0.4334588201413206
+        },
+        "all/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 49.65779200862223,
+          "mean_relative_error_supplied_only": 0.5355797137830016
+        },
+        "shorts/waist_width": {
+          "eligible_pairs": 4,
+          "supplied_pairs": 4,
+          "failed_pairs": 0,
+          "coverage": 1.0,
+          "mean_absolute_error_pixels_supplied_only": 49.65779200862223,
+          "mean_relative_error_supplied_only": 0.5355797137830016
+        }
+      },
+      "api_roundtrip_seconds_all_attempts": {
+        "mean": 8.864394109375098,
+        "median": 4.795611166498929,
+        "p95_sample_quantile": 20.145186452198867,
+        "max": 20.621544749999885
+      },
+      "provider_reported_cost_usd": {
+        "total_known": 0.050424,
+        "calls_with_cost": 8,
+        "billing_complete": true,
+        "mean_per_scheduled_photo": 0.006303,
+        "known_cost_per_valid_response": 0.006303
+      },
+      "tokens": {
+        "prompt": 9688,
+        "completion_including_reasoning": 1424
+      },
+      "per_photo": [
+        {
+          "case_id": "P01",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.16358941669909013,
+            "shoulder_right": 0.12466184016899516,
+            "armpit_left": 0.20217184999409182,
+            "armpit_right": 0.16143646292454678
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 103.89985253750467,
+              "predicted_pixels": 114.48668044798924,
+              "absolute_error_pixels": 10.586827910484573,
+              "relative_error": 0.10189454221470672
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 116.03727946426856,
+              "predicted_pixels": 100.98218456737803,
+              "absolute_error_pixels": 15.055094896890537,
+              "relative_error": 0.12974360452432412
+            }
+          ]
+        },
+        {
+          "case_id": "P02",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_right": 0.04585375458068354,
+            "armpit_left": 0.17729592608087366,
+            "armpit_right": 0.17620843412694392
+          },
+          "lengths": [
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 110.76213470760096,
+              "predicted_pixels": 140.59038942971884,
+              "absolute_error_pixels": 29.828254722117876,
+              "relative_error": 0.26930010694413725
+            }
+          ]
+        },
+        {
+          "case_id": "P03",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": null,
+            "shoulder_right": null,
+            "armpit_left": null,
+            "armpit_right": null
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 60.23388726386973,
+              "predicted_pixels": null,
+              "absolute_error_pixels": null,
+              "relative_error": null
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 87.09661435680034,
+              "predicted_pixels": null,
+              "absolute_error_pixels": null,
+              "relative_error": null
+            }
+          ]
+        },
+        {
+          "case_id": "P04",
+          "category": "tshirt",
+          "point_errors": {
+            "shoulder_left": 0.22054975528444395,
+            "shoulder_right": 0.43611214574795837,
+            "armpit_left": 0.11193630506196942,
+            "armpit_right": 0.11753272693766051
+          },
+          "lengths": [
+            {
+              "dimension": "shoulder_width",
+              "ground_truth_pixels": 162.5749151426763,
+              "predicted_pixels": 286.9484803932581,
+              "absolute_error_pixels": 124.37356525058178,
+              "relative_error": 0.7650230980679344
+            },
+            {
+              "dimension": "chest_width",
+              "ground_truth_pixels": 186.0426077457159,
+              "predicted_pixels": 216.14951862079175,
+              "absolute_error_pixels": 30.10691087507584,
+              "relative_error": 0.1618280416506854
+            }
+          ]
+        },
+        {
+          "case_id": "P05",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.05635949137908897,
+            "waist_right": 0.011021936491762325,
+            "crotch": 0.10702239443226645,
+            "side_hem": 0.07820236508265706
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 99.18519681255877,
+              "predicted_pixels": 118.01016905334897,
+              "absolute_error_pixels": 18.824972240790203,
+              "relative_error": 0.18979618779570337
+            }
+          ]
+        },
+        {
+          "case_id": "P06",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.13449745027442467,
+            "waist_right": 0.12877925071566218,
+            "crotch": 0.15530472253940844
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 74.49974122876249,
+              "predicted_pixels": 128.2301930124103,
+              "absolute_error_pixels": 53.73045178364781,
+              "relative_error": 0.7212166230035686
+            }
+          ]
+        },
+        {
+          "case_id": "P07",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.04770547548930315,
+            "waist_right": 0.0339861733191403,
+            "crotch": 0.14261814188122698,
+            "side_hem": 0.11582290120889065
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 162.31839805827005,
+              "predicted_pixels": 199.74563024006306,
+              "absolute_error_pixels": 37.427232181793016,
+              "relative_error": 0.2305791125929986
+            }
+          ]
+        },
+        {
+          "case_id": "P08",
+          "category": "shorts",
+          "point_errors": {
+            "waist_left": 0.1058962200422681,
+            "waist_right": 0.048462380889450145,
+            "crotch": 0.29066375216939117,
+            "side_hem": 0.18067194578792709
+          },
+          "lengths": [
+            {
+              "dimension": "waist_width",
+              "ground_truth_pixels": 88.58411722181289,
+              "predicted_pixels": 177.23262905007078,
+              "absolute_error_pixels": 88.6485118282579,
+              "relative_error": 1.0007269317397358
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "total_provider_reported_cost_usd": 0.373349,
+  "normalization": "normalized square-input diagonal; PCK@0.05; no calibrated centimeter tolerance",
+  "nme_missing_points": "Report native supplied-only NME and explicit missing-point penalty=1 separately",
+  "cm_accuracy": null,
+  "training_data_created": false,
+  "deployment_approved": false,
+  "aihub_images_transmitted": false,
+  "phase_3_changed": false,
+  "attribution": "aRTF Clothes, Thomas Lips, Victor-Louis De Gusseme and Francis wyffels, CC BY 4.0, doi:10.5281/zenodo.14501499. Resized/converted; cite Learning Keypoints for Robotic Cloth Manipulation using Synthetic Data (2024).",
+  "limitations": [
+    "Eight reused development photos; not a new independent garment or device study",
+    "Publisher anatomical labels are not certified tailoring seam or cm truth",
+    "One request per photo/model, no inference retries or favorable-output selection",
+    "Identical prompt, original pixels, high detail and low effort; effective compute may differ",
+    "Requested model IDs may be aliases; response model/provider IDs are preserved, not invented snapshots",
+    "Latency includes this Mac-to-OpenRouter round trip, not the complete mobile upload/AR workflow",
+    "Eight latency samples per model give a descriptive P95 only, not a service guarantee",
+    "Reported cost is actual response usage.cost credits; credit-purchase fees, taxes and own hosting excluded",
+    "Public-pretraining exposure and physical garment/session independence are unknown"
+  ]
+}

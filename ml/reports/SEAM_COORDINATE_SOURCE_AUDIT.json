@@ -1,0 +1,62 @@
+{
+  "train": {
+    "manifest_sha256": "156fac9f1c88d9136fd17dcc8c86e8cc412e6256c3f6bb24797f6424f06a2498",
+    "images": 524,
+    "sizes": {
+      "512x256": 524
+    },
+    "exif_orientation": {
+      "1": 524
+    },
+    "dimension_mismatches": 0,
+    "side_ordering": {
+      "shorts/waist_left/jointly_visible": 101,
+      "shorts/waist_left/left_x_greater": 18,
+      "tshirt/shoulder_left/jointly_visible": 196,
+      "tshirt/shoulder_left/left_x_greater": 62,
+      "tshirt/armpit_left/jointly_visible": 199,
+      "tshirt/armpit_left/left_x_greater": 56
+    }
+  },
+  "unseen_training": {
+    "manifest_sha256": "ae9806f8ad98e2ede7add42f7591ccb60b294de984ad632dcee75aea1d79fa00",
+    "images": 561,
+    "sizes": {
+      "512x256": 561
+    },
+    "exif_orientation": {
+      "1": 561
+    },
+    "dimension_mismatches": 0,
+    "side_ordering": {
+      "shorts/waist_left/jointly_visible": 163,
+      "shorts/waist_left/left_x_greater": 36,
+      "tshirt/shoulder_left/jointly_visible": 382,
+      "tshirt/shoulder_left/left_x_greater": 94,
+      "tshirt/armpit_left/jointly_visible": 376,
+      "tshirt/armpit_left/left_x_greater": 88
+    }
+  },
+  "aihub_original_label_schema": {
+    "files": 6161,
+    "annotation_types": {
+      "Polygon": 6183
+    },
+    "annotation_fields": [
+      "annotation_id",
+      "annotation_point",
+      "annotation_point_count",
+      "annotation_type"
+    ],
+    "seam_coordinate_fields_found": false,
+    "original_photos_sent": false,
+    "local_annotation_permission_already_approved": true
+  },
+  "publisher_ordering_source": {
+    "url": "https://github.com/tlpss/aRTF-Clothes-dataset/blob/e3eda811bca47584f1bb9432e3f11366ccef1e4a/artf_clothes/scripts/keypoint_ordering.py",
+    "sha256": "207bd6b46ff25a32f3459abad5d86ec9dc2f449cfedf8ffa8f0a256b00abf114",
+    "upper_left_rule": "side whose waist/hem endpoint is nearest bbox bottom-left in original pixel units; swap every bilateral source keypoint together",
+    "lower_left_rule": "side whose waist endpoint is nearest bbox top-left; not wearer anatomy or simply sorting each pair by x"
+  },
+  "ground_truth_modified": false
+}

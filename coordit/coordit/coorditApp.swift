@@ -15,6 +15,9 @@ struct coorditApp: App {
                 .environmentObject(backendSession)
                 .background(CoorditTouchResponsivenessTuner())
                 .task {
+                    #if DEBUG
+                    if CoorditARFieldTestMode.enabled { return }
+                    #endif
                     await CoorditAdPrivacyService.shared.refreshConsent()
                 }
                 .onOpenURL { url in

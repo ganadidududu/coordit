@@ -68,6 +68,8 @@ enum CoorditMockData {
             CoorditRouteContent(eyebrow: "CLOSET", title: "Link Input", detail: route.rawValue)
         case .closetAddPhoto:
             CoorditRouteContent(eyebrow: "CLOSET", title: "Photo Input", detail: route.rawValue)
+        case .closetAddSizeChart:
+            CoorditRouteContent(eyebrow: "CLOSET", title: "Size Chart", detail: route.rawValue)
         case .closetAddManual:
             CoorditRouteContent(eyebrow: "CLOSET", title: "Manual Input", detail: route.rawValue)
         case .closetAddLoading:

@@ -1,0 +1,129 @@
+{
+  "runs": [
+    {
+      "config": "config-seam-teacher-control.json",
+      "config_sha256": "42e39d5f82fa252dd81547c1740750441549a37ab2514567bfd1e462c40f6880",
+      "directory": "artifacts/seam-teacher-control-v1",
+      "checkpoint_sha256": "61576f4c77c4af3c57e842c4e0d6529cc58d3eb2fe0da87940d8b8ce6786c006",
+      "artifact_sha256": "9c7704795f2a2fff763e3b81f027d98c29f6570bd9f4a4bf0687c6747b3313a6",
+      "parent_checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+      "fingerprint": "292e008f5abf9bae9dd583b4f190f574381bf74b4330892e897d243c4199bcd8",
+      "fingerprint_matches_pretraining": true,
+      "epochs": 12,
+      "total_optimizer_steps": 1536,
+      "total_image_exposures": 6144,
+      "unique_images_exposed": 1114,
+      "unique_by_source": {
+        "aihub-71501": 542,
+        "artf-1.0.1": 524,
+        "garmentcodedata-v2": 48
+      },
+      "exposures_by_source": {
+        "aihub-71501": 612,
+        "artf-1.0.1": 5220,
+        "garmentcodedata-v2": 312
+      },
+      "teacher_photo_exposures": 0,
+      "teacher_unique_exposed": 0,
+      "eligible_teacher_targets": null,
+      "source_pins": [
+        {
+          "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/aihub71501/approved-v1/records.jsonl",
+          "sha256": "631e3065ed187f9e68f8a2211c46b1b1c0b16202c2ca53303994cd5418c382d6"
+        },
+        {
+          "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/artf-landmarks-v1/records.jsonl",
+          "sha256": "156fac9f1c88d9136fd17dcc8c86e8cc412e6256c3f6bb24797f6424f06a2498"
+        },
+        {
+          "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/garmentcodedata-v2/body-free-pilot-v3/records.jsonl",
+          "sha256": "acb5cf33afa7756ad9e07dffebc7995e2691994456f111ead2aefe63017b0c72"
+        }
+      ],
+      "source_snapshot": "artifacts/seam-teacher-control-v1/training-source",
+      "device": "mps",
+      "deployment_approved": false
+    },
+    {
+      "config": "config-seam-visual-teacher.json",
+      "config_sha256": "8ba95115da9a66aceb0201146ae093b29f0855332fa7d981cebccb54eac6b4ea",
+      "directory": "artifacts/seam-artf-visual-teacher-v1",
+      "checkpoint_sha256": "5038e2660a02334e49344eaae401404c2b4750e223d90d28a7c9d9872f6bd087",
+      "artifact_sha256": "f183632940671ce7adb967f5e463aeaaee5bde87866a81df409f24423cd4827a",
+      "parent_checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+      "fingerprint": "c1ceb5dfa783b7fefb72f1ae3b4c9295ff361fc81b4ca8ce3a7675b9f012b280",
+      "fingerprint_matches_pretraining": true,
+      "epochs": 12,
+      "total_optimizer_steps": 1536,
+      "total_image_exposures": 6144,
+      "unique_images_exposed": 1114,
+      "unique_by_source": {
+        "aihub-71501": 542,
+        "artf-1.0.1": 524,
+        "garmentcodedata-v2": 48
+      },
+      "exposures_by_source": {
+        "aihub-71501": 612,
+        "artf-1.0.1": 5220,
+        "garmentcodedata-v2": 312
+      },
+      "teacher_photo_exposures": 222,
+      "teacher_unique_exposed": 22,
+      "eligible_teacher_targets": {
+        "publisher_disagreement": 5,
+        "accepted_existing_target": 73,
+        "accepted_new_unverified_target": 49,
+        "publisher_not_visible": 4,
+        "abstained": 25
+      },
+      "source_pins": [
+        {
+          "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/aihub71501/approved-v1/records.jsonl",
+          "sha256": "631e3065ed187f9e68f8a2211c46b1b1c0b16202c2ca53303994cd5418c382d6"
+        },
+        {
+          "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/artf-landmarks-v1/records.jsonl",
+          "sha256": "156fac9f1c88d9136fd17dcc8c86e8cc412e6256c3f6bb24797f6424f06a2498"
+        },
+        {
+          "path": "/Users/insihwan/Documents/Project/coordit/coordit-dev/ml/artifacts/garmentcodedata-v2/body-free-pilot-v3/records.jsonl",
+          "sha256": "acb5cf33afa7756ad9e07dffebc7995e2691994456f111ead2aefe63017b0c72"
+        }
+      ],
+      "source_snapshot": "artifacts/seam-artf-visual-teacher-v1/training-source",
+      "device": "mps",
+      "deployment_approved": false
+    }
+  ],
+  "teacher_input": {
+    "images": 24,
+    "supplied_proposals": 131,
+    "abstentions": 25,
+    "eligible_proposals": 122,
+    "existing_target_proposals": 73,
+    "new_unverified_target_proposals": 49,
+    "new_target_types": {
+      "length_start": 9,
+      "hem_center": 11,
+      "sleeve_start": 9,
+      "sleeve_end": 9,
+      "waist_center": 11
+    },
+    "alias_note": "sleeve_start repeats shoulder_right; new target counts are not independent physical points",
+    "human_verified_teacher_targets": 0
+  },
+  "verification": {
+    "pytest": "95 passed in 4.41s",
+    "ruff": "passed",
+    "basedpyright_errors": 0,
+    "basedpyright_warnings": 28,
+    "new_module_typecheck": "0 errors, 0 warnings",
+    "sensor_cm_accuracy_tested": false,
+    "mobile_tests_run": false,
+    "parent_checkpoints_preserved": true,
+    "new_features_enabled": false
+  },
+  "decision": "No promotion; does not beat parent overall",
+  "aihub_photo_transfer": false,
+  "phase_3_changed": false
+}

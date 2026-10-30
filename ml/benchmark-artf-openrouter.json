@@ -1,0 +1,20 @@
+{
+  "receipt": "artifacts/external-artf-vision-pilot-v1/packet.json",
+  "receipt_sha256": "67e41b8192e00bfbf6dc08c1d26e65b285026117d7499d3e8bd01169a62d8e08",
+  "protocol": "protocols/artf-api-comparison-v1.md",
+  "protocol_sha256": "fe6ac24dce3e674b4872a520ec09f99e03228aa5f9cc535b8864c8b281225dd3",
+  "catalog": "artifacts/artf-api-model-benchmark-v1/selected-models.json",
+  "catalog_sha256": "b1de3398cecdb87588270d8781ee2f87073dc94b48845572b14c3e3ebb53ae37",
+  "models": [
+    "openai/gpt-5.4-mini",
+    "openai/gpt-5.4",
+    "openai/gpt-6-astra",
+    "google/gemini-3.8-flash",
+    "anthropic/claude-sonnet-4.6"
+  ],
+  "output": "artifacts/artf-api-model-benchmark-v1/run-01",
+  "max_tokens": 4096,
+  "input_token_reservation": 8192,
+  "spending_limit_usd": 5.0,
+  "seed": 20261028
+}

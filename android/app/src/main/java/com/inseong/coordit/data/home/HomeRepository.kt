@@ -42,12 +42,13 @@ enum class HomeCategory(val wireName: String, val title: String, val upper: Bool
     Sweatshirt("sweatshirt", "스웨트셔츠", true), Hoodie("hoodie", "후드", true),
     Knit("knit", "니트", true), Jacket("jacket", "재킷", true), Coat("coat", "코트", true),
     Pants("pants", "팬츠", false), Jeans("jeans", "데님", false),
-    Shorts("shorts", "쇼츠", false), Skirt("skirt", "스커트", false),
+    Shorts("shorts", "반바지", false), Skirt("skirt", "스커트", false),
 }
 data class HomeGarment(val id: String, val name: String, val category: HomeCategory)
 data class HomeSnapshot(val items: List<HomeGarment> = emptyList(), val selectedIds: Set<String> = emptySet())
 
 class HomeRepository(private val api: HomeApi) {
+    suspend fun registerReference(token: String, item: HomeGarment) = api.select(authorization(token), HomeReferenceRequest(item.id, item.name, item.category.wireName))
     suspend fun load(token: String): HomeSnapshot = coroutineScope {
         val clothing = async { api.clothing(authorization(token)) }
         val references = async { api.references(authorization(token)) }

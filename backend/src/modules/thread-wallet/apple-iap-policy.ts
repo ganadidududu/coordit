@@ -23,9 +23,19 @@ export type AppleNotificationEnvelope = {
   readonly environment: AppleIapEnvironment;
   readonly signedTransaction: string | null;
   readonly reconcilesPurchase: boolean;
+  readonly revokesPurchase: boolean;
 };
 
 export type AppleIapVerifiedNotification =
+  | {
+      readonly kind: "revoke";
+      readonly notificationUUID: string;
+      readonly notificationType: "REFUND" | "REVOKE";
+      readonly subtype: string | null;
+      readonly environment: AppleIapEnvironment;
+      readonly transaction: AppleIapVerifiedTransaction;
+      readonly revokedAt: string;
+    }
   | {
       readonly kind: "record";
       readonly notificationUUID: string;
@@ -79,6 +89,24 @@ const notificationClaimsSchema = z.object({
   })
 });
 
+const revokedTransactionClaimsSchema = transactionClaimsSchema.extend({
+  revocationDate: z.number().int().positive().max(8_640_000_000_000_000),
+  revocationReason: z.number().int().nonnegative().optional()
+});
+
+export const parseAppleRevokedTransactionClaims = (
+  payload: unknown,
+  configuration: AppleVerifierConfiguration
+): { readonly transaction: AppleIapVerifiedTransaction; readonly revokedAt: string } => {
+  const parsed = revokedTransactionClaimsSchema.safeParse(payload);
+  if (!parsed.success) return invalidTransaction();
+  const { revocationDate, revocationReason: _revocationReason, ...claims } = parsed.data;
+  return {
+    transaction: parseAppleTransactionClaims(claims, configuration),
+    revokedAt: new Date(revocationDate).toISOString()
+  };
+};
+
 const invalidTransaction = (): never => {
   throw createHttpError(400, "Apple 구매 거래 정보를 확인할 수 없어요.");
 };
@@ -117,7 +145,8 @@ export const parseAppleNotificationClaims = (
   }
   const signedTransaction = parsed.data.data.signedTransactionInfo ?? null;
   const reconcilesPurchase = parsed.data.notificationType === "ONE_TIME_CHARGE";
-  if (reconcilesPurchase && signedTransaction === null) {
+  const revokesPurchase = parsed.data.notificationType === "REFUND" || parsed.data.notificationType === "REVOKE";
+  if ((reconcilesPurchase || revokesPurchase) && signedTransaction === null) {
     throw createHttpError(400, "Apple 구매 거래가 없는 서버 알림이에요.");
   }
   return {
@@ -126,6 +155,7 @@ export const parseAppleNotificationClaims = (
     subtype: parsed.data.subtype ?? null,
     environment: parsed.data.data.environment,
     signedTransaction,
-    reconcilesPurchase
+    reconcilesPurchase,
+    revokesPurchase
   };
 };

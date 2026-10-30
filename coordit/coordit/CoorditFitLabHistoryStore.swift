@@ -9,6 +9,11 @@ protocol CoorditFitLabHistoryStoring: Sendable {
     func delete(snapshotID: String, userID: String) async throws
     func deleteAll(userID: String) async throws
     func recoveryNotice(userID: String) async -> String?
+    func completePendingGuestTransfers(to userID: String) async throws
+}
+
+extension CoorditFitLabHistoryStoring {
+    func completePendingGuestTransfers(to userID: String) async throws {}
 }
 
 enum CoorditFitLabHistoryStoreError: LocalizedError, Equatable {
@@ -26,6 +31,7 @@ enum CoorditFitLabHistoryStoreError: LocalizedError, Equatable {
 }
 
 actor CoorditFitLabFileHistoryStore: CoorditFitLabHistoryStoring {
+    static let shared = CoorditFitLabFileHistoryStore()
     private struct Envelope: Codable {
         let schemaVersion: Int
         let snapshots: [CoorditFitLabHistorySnapshot]
@@ -78,6 +84,10 @@ actor CoorditFitLabFileHistoryStore: CoorditFitLabHistoryStoring {
         let directory = try validatedDirectory(for: userID)
         let fileURL = directory.appendingPathComponent("history.json", isDirectory: false)
         guard manager.fileExists(atPath: fileURL.path) else {
+            if try manager.contentsOfDirectory(atPath: directory.path).contains(where: { $0.hasPrefix("history.json.corrupt-") }) {
+                notices[userID] = "이전 히스토리 원본을 보관하고 있어요. 복구 전에는 기록을 이전하지 않아요."
+                return []
+            }
             notices[userID] = nil
             return []
         }
@@ -124,6 +134,7 @@ actor CoorditFitLabFileHistoryStore: CoorditFitLabHistoryStoring {
     }
 
     func save(_ snapshot: CoorditFitLabHistorySnapshot) throws {
+        try Task.checkCancellation()
         guard snapshot.schemaVersion == CoorditFitLabHistorySnapshot.currentSchemaVersion else {
             throw CoorditFitLabHistoryStoreError.writeFailed
         }
@@ -142,7 +153,60 @@ actor CoorditFitLabFileHistoryStore: CoorditFitLabHistoryStoring {
         try writeEnvelope(snapshots, userID: userID)
     }
 
+    func scheduleGuestTransfer(from guestID: String, to memberID: String) throws {
+        guard guestID != memberID else { return }
+        let file = try transferQueueURL(for: memberID)
+        var guests = try pendingGuestIDs(at: file)
+        if !guests.contains(guestID) { guests.append(guestID) }
+        try JSONEncoder().encode(guests).write(to: file, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+    }
+
+    func completePendingGuestTransfers(to memberID: String) async throws {
+        let file = try transferQueueURL(for: memberID)
+        var guests = try pendingGuestIDs(at: file)
+        while let guestID = guests.first {
+            let source = try load(userID: guestID)
+            let target = try load(userID: memberID)
+            guard notices[guestID] == nil, notices[memberID] == nil else {
+                throw CoorditFitLabHistoryStoreError.writeFailed
+            }
+            let moved = source.map { snapshot in
+                CoorditFitLabHistorySnapshot(
+                    id: snapshot.id, analysisID: snapshot.analysisID, userID: memberID,
+                    savedAt: snapshot.savedAt, product: snapshot.product, category: snapshot.category,
+                    garmentKind: snapshot.garmentKind, references: snapshot.references,
+                    originalSource: snapshot.originalSource, recommendation: snapshot.recommendation,
+                    report: snapshot.report, chartData: snapshot.chartData
+                )
+            }
+            var merged = Dictionary(target.map { ($0.analysisID, $0) }, uniquingKeysWith: { first, _ in first })
+            for snapshot in moved {
+                if let existing = merged[snapshot.analysisID], existing.savedAt >= snapshot.savedAt { continue }
+                merged[snapshot.analysisID] = snapshot
+            }
+            try writeEnvelope(normalized(Array(merged.values)), userID: memberID)
+            try removeHistoryFiles(userID: guestID)
+            guests.removeFirst()
+            try JSONEncoder().encode(guests).write(to: file, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+        }
+    }
+
+    private func transferQueueURL(for memberID: String) throws -> URL {
+        let file = try validatedDirectory(for: memberID).appendingPathComponent("guest-transfers.json")
+        try rejectSymbolicLink(at: file)
+        return file
+    }
+
+    private func pendingGuestIDs(at file: URL) throws -> [String] {
+        guard manager.fileExists(atPath: file.path) else { return [] }
+        return try JSONDecoder().decode([String].self, from: Data(contentsOf: file))
+    }
+
     func deleteAll(userID: String) throws {
+        try removeHistoryFiles(userID: userID)
+    }
+
+    private func removeHistoryFiles(userID: String) throws {
         guard !userID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw CoorditFitLabHistoryStoreError.invalidUser
         }
@@ -173,7 +237,6 @@ actor CoorditFitLabFileHistoryStore: CoorditFitLabHistoryStoring {
                     if $0.savedAt == $1.savedAt { return $0.analysisID > $1.analysisID }
                     return $0.savedAt > $1.savedAt
                 }
-                .prefix(50)
         )
     }
 

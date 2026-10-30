@@ -209,6 +209,7 @@ enum CoorditFitLabContractProbe {
 @MainActor
 final class CoorditFitLabFixtureAPI: CoorditFitLabAPI {
     private(set) var requestLedger: [String] = []
+    private(set) var recommendationRequests: [CoorditFitLabRecommendationRequest] = []
     private(set) var lastProductRequest: CoorditFitLabProductRequest?
     private let fixtureName: String?
     private var prefillAttempts = 0
@@ -221,8 +222,14 @@ final class CoorditFitLabFixtureAPI: CoorditFitLabAPI {
         self.fixtureName = fixtureName
     }
 
+    func saveCameraReference(measurement: CoorditGarmentMeasurement, existing: CoorditCameraReference?) async throws -> CoorditCameraReference {
+        requestLedger.append("camera-reference:\(measurement.method.rawValue)")
+        return .init(reference: .init(id: "reference-camera-fixture", clothingItemID: "clothing-camera-fixture", nickname: measurement.garmentName, category: measurement.resolvedCategory, fitType: "regular", preferenceScore: 100, isActive: true), clothingSizeID: "size-camera-fixture")
+    }
+
     func compatibleReferences(category: CoorditFitLabCategory) async throws -> [CoorditFitLabReferenceRow] {
         requestLedger.append("references:\(category.rawValue)")
+        if fixtureName?.hasPrefix("camera-") == true { return [] }
         if fixtureName == "url-category-race" {
             if category == .shirt {
                 try? await Task.sleep(for: .seconds(30))
@@ -271,7 +278,7 @@ final class CoorditFitLabFixtureAPI: CoorditFitLabAPI {
         if fixtureName == "url-server-error", prefillAttempts == 1 {
             throw CoorditFitLabError.server(statusCode: 500, message: "상품 정보를 가져오지 못했어요.")
         }
-        let json = #"{"productName":"리넨 셔츠","brand":"Coordit","mallName":"shop.example","productUrl":"https://shop.example/products/linen-shirt","category":"shirt","fitType":"regular","parsingStatus":"mocked","sizes":[{"sizeLabel":"M","shoulderWidth":45,"chestWidth":56,"totalLength":70,"sleeveLength":61,"waistWidth":null,"hipWidth":null,"rise":null,"outseam":null},{"sizeLabel":"L","shoulderWidth":47,"chestWidth":58,"totalLength":72,"sleeveLength":63,"waistWidth":null,"hipWidth":null,"rise":null,"outseam":null}]}"#
+        let json = #"{"productName":"리넨 셔츠","brand":"Coordit","mallName":"shop.example","productUrl":"https://shop.example/products/linen-shirt","category":"shirt","fitType":"regular","parsingStatus":"mocked","productFacts":{"productName":"리넨 셔츠","sourceUrl":"https://shop.example/products/linen-shirt","capturedAt":"2026-10-30T03:00:00.000Z","items":[{"kind":"material","value":"리넨 55%, 면 45%"},{"kind":"lining","value":"없음"},{"kind":"fit","value":"루즈핏"},{"kind":"model","value":"178cm · M 착용"},{"kind":"care","value":"단독 손세탁"}]},"sizes":[{"sizeLabel":"M","shoulderWidth":45,"chestWidth":56,"totalLength":70,"sleeveLength":61,"waistWidth":null,"hipWidth":null,"rise":null,"outseam":null},{"sizeLabel":"L","shoulderWidth":47,"chestWidth":58,"totalLength":72,"sleeveLength":63,"waistWidth":null,"hipWidth":null,"rise":null,"outseam":null}]}"#
         let response = try JSONDecoder().decode(CoorditFitLabURLPrefillResponse.self, from: Data(json.utf8))
         let category = request.category ?? response.category
         let lowerSizes = [
@@ -295,7 +302,8 @@ final class CoorditFitLabFixtureAPI: CoorditFitLabAPI {
             category: category,
             fitType: response.fitType,
             parsingStatus: response.parsingStatus,
-            sizes: category.garmentKind == .lower ? lowerSizes : response.sizes
+            sizes: category.garmentKind == .lower ? lowerSizes : response.sizes,
+            productFacts: category.garmentKind == .upper && !request.url.absoluteString.contains("facts-missing") ? response.productFacts : nil
         )
     }
 
@@ -322,6 +330,7 @@ final class CoorditFitLabFixtureAPI: CoorditFitLabAPI {
     }
 
     func recommend(_ request: CoorditFitLabRecommendationRequest) async throws -> CoorditFitLabRecommendationResponse {
+        recommendationRequests.append(request)
         requestLedger.append("recommend")
         if fixtureName == "submission-recommendation-race" {
             await withCheckedContinuation { continuation in

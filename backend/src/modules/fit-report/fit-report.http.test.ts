@@ -52,6 +52,7 @@ const main = async (): Promise<void> => {
     })
   });
   let debits = 0;
+  let conflict = true;
   Object.defineProperty(supabase, "rpc", {
     value: (name: string, params: Record<string, string>) => ({
       single: async () => {
@@ -59,6 +60,7 @@ const main = async (): Promise<void> => {
         if (name === "get_thread_balance") return { data: { available_threads: 34 }, error: null };
         assert.equal(name, "consume_fit_report_thread");
         assert.equal(params.p_fit_analysis_result_id, fitResultId);
+        if (conflict) return { data: null, error: { code: "23505", message: "thread_idempotency_conflict" } };
         debits += 1;
         return { data: { available_threads: 34, status: "consumed" }, error: null };
       }
@@ -76,6 +78,10 @@ const main = async (): Promise<void> => {
     const unauthorized = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
     const invalid = await fetch(url, { method: "POST", headers, body: "{}" });
     const body = JSON.stringify({ idempotencyKey: "77777777-7777-4777-8777-777777777777" });
+    const mismatchedKey = await fetch(url, { method: "POST", headers, body });
+    assert.equal(mismatchedKey.status, 409);
+    assert.equal(debits, 0);
+    conflict = false;
     const first = await fetch(url, { method: "POST", headers, body });
     assert.equal(first.status, 201, JSON.stringify(await first.clone().json()));
     const firstBody = responseSchema.parse(await first.json());

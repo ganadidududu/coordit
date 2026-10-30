@@ -32,6 +32,7 @@ struct CoorditMyPageFamilyView: View {
     @State var weightMeasurement = ""
     @State var bodyMeasurementsSaved = false
     @State var bodyMeasurementSaveError = ""
+    @State var showsPurchaseAccountLink = false
     @StateObject var rewardedAdService = CoorditRewardedAdService()
     @StateObject var adPrivacyService = CoorditAdPrivacyService.shared
     @StateObject var threadPurchaseService = CoorditThreadPurchaseService()
@@ -132,6 +133,23 @@ struct CoorditMyPageFamilyView: View {
             guard route == .myPageThreadCharge, let balance else { return }
             threadBalance = balance
         }
+        .sheet(isPresented: $showsPurchaseAccountLink) {
+            CoorditSplashAuthenticationSheet(
+                onAuthenticated: {
+                    showsPurchaseAccountLink = false
+                    Task {
+                        if let balance = await backendSession.fetchThreadBalance() { threadBalance = balance }
+                        await refreshChargeServices()
+                    }
+                },
+                onGuestAuthenticated: { _ in },
+                requiresAccountLink: true
+            )
+        }
+        .task(id: backendSession.session?.user.id) {
+            guard route == .myPageThreadCharge else { return }
+            await refreshChargeServices()
+        }
     }
 
 
@@ -160,7 +178,7 @@ struct CoorditMyPageFamilyView: View {
         let readiness = await backendSession.refreshMonetizationReadiness()
         guard !Task.isCancelled else { return }
 
-        if readiness?.iapEnabled == true {
+        if readiness?.iapEnabled == true && backendSession.isMember {
             await prepareThreadPurchases()
         } else {
             threadPurchaseService.deactivate(clearProducts: true)
@@ -183,6 +201,7 @@ struct CoorditMyPageFamilyView: View {
 
     private func prepareThreadPurchases() async {
         guard
+            backendSession.isMember,
             let userID = backendSession.session?.user.id,
             let accountID = UUID(uuidString: userID)
         else {

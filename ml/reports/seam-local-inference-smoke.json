@@ -1,0 +1,14 @@
+{
+  "http_status": 200,
+  "status": "failed",
+  "reason": "landmarks_missing_or_occluded",
+  "category": "tshirt",
+  "landmarks": [
+    "shoulder_left",
+    "shoulder_right",
+    "armpit_left",
+    "armpit_right"
+  ],
+  "centimeter_values": {},
+  "deployment_approved": false
+}

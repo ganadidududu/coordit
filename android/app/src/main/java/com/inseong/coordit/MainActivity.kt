@@ -8,6 +8,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.inseong.coordit.auth.GoogleIdentity
@@ -52,7 +53,7 @@ class MainActivity : ComponentActivity() {
         val closet = ViewModelProvider(this, object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                com.inseong.coordit.ui.closet.ClosetViewModel(container.closetRepository, container.repository) as T
+                com.inseong.coordit.ui.closet.ClosetViewModel(container.closetRepository, container.repository, container.homeRepository) as T
         })[com.inseong.coordit.ui.closet.ClosetViewModel::class.java]
         val fitLab = ViewModelProvider(this, object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -62,6 +63,7 @@ class MainActivity : ComponentActivity() {
         val identity = GoogleIdentity(applicationContext)
         val reduceMotion = Settings.Global.getFloat(contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
         setContent {
+            val imports = container.sharedImports.pending.collectAsStateWithLifecycle().value
             CoorditApp(model, reduceMotion,
                 onGoogle = {
                     val attempt = model.beginGoogle()
@@ -79,7 +81,8 @@ class MainActivity : ComponentActivity() {
                 onDeleteAccount = { model.deleteAccount { identity.clear() } },
                 closetModel = closet,
                 fitLabModel = fitLab,
-                sharedImports = container.sharedImports,
+                sharedProductUrl = imports.firstOrNull(),
+                onSharedProductConsumed = { imports.firstOrNull()?.let(container.sharedImports::consume) },
             )
         }
     }

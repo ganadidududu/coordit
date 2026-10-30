@@ -74,7 +74,12 @@ import {
 } from "./modules/styling/styling.controller";
 import { authMiddleware } from "./middleware/auth.middleware";
 import { onboardingMiddleware } from "./middleware/onboarding.middleware";
+import { garmentLandmarksRouter } from "./modules/garment-landmarks/garment-landmarks.gateway";
 import { previewProductImportController } from "./modules/product-import/product-import.controller";
+
+// Scoped image parser must run before app.ts's ordinary JSON parser.
+export const imageRoutes = Router();
+imageRoutes.use("/garment-landmarks", garmentLandmarksRouter(authMiddleware));
 
 export const routes = Router();
 

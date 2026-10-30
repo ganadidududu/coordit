@@ -1,0 +1,93 @@
+[
+  {
+    "source_path": "front_2024_02_19_11_36_49.jpg",
+    "original_sha256": "51bb69222d145784bc7d6a1e6b676bc50b79581014919bf602734d0327a7b83e",
+    "category": "coat",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible long outer-garment body with coat closure/collar; coarse source Outerwear narrowed visually"
+  },
+  {
+    "source_path": "front_2023_04_21_08_35_53.jpg",
+    "original_sha256": "f7d919b5b6225acecd4e7702a66c758b73c9857ef980b6703d2c98a382418ead",
+    "category": "coat",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible long outer-garment body with coat closure/collar; coarse source Outerwear narrowed visually"
+  },
+  {
+    "source_path": "front_2023_06_27_13_21_08.jpg",
+    "original_sha256": "8d58a6c7e41fdace502b81b73ce276cc4087c5d01861be3f0eedfdffef574921",
+    "category": "coat",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible long outer-garment body with coat closure/collar; coarse source Outerwear narrowed visually"
+  },
+  {
+    "source_path": "front_2023_09_11_08_49_38.jpg",
+    "original_sha256": "f6ebce878b03228a9f79da19c84c7afbe18d219f50886e06dbf5c9b53d82c4dd",
+    "category": "coat",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible long outer-garment body with coat closure/collar; coarse source Outerwear narrowed visually"
+  },
+  {
+    "source_path": "front_2023_09_27_10_54_35.jpg",
+    "original_sha256": "7369dcfee7175b1456cf538c77486b82d7a5fa373f74ff12e7be32968a19d248",
+    "category": "coat",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible long outer-garment body with coat closure/collar; coarse source Outerwear narrowed visually"
+  },
+  {
+    "source_path": "front_2024_01_08_12_58_20.jpg",
+    "original_sha256": "e33560dc41777df764fc56f71fb9bb8d9af14a9f79ec425a6d90d59b617057fc",
+    "category": "coat",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible long outer-garment body with coat closure/collar; coarse source Outerwear narrowed visually"
+  },
+  {
+    "source_path": "front_2023_05_29_13_20_10.jpg",
+    "original_sha256": "b9151d3ca4663d1acc6e5678fa2a164c41e438c5f8a211d5a57cc5022add53df",
+    "category": "coat",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible long outer-garment body with coat closure/collar; coarse source Outerwear narrowed visually"
+  },
+  {
+    "source_path": "front_2024_01_19_09_27_54.jpg",
+    "original_sha256": "d0029a118eda0ff7d7f0c1d5d19282ea379cc6173e6a7e2251db83eb8d438203",
+    "category": "coat",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible long outer-garment body with coat closure/collar; coarse source Outerwear narrowed visually"
+  },
+  {
+    "source_path": "front_2023_10_12_08_52_14.jpg",
+    "original_sha256": "9814a627ad0d54788d5abcf8da879037775f232ae777d13dceb9fa5344f408df",
+    "category": "coat",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible long outer-garment body with coat closure/collar; coarse source Outerwear narrowed visually"
+  },
+  {
+    "source_path": "front_2023_11_20_10_06_06.jpg",
+    "original_sha256": "3289b9a4e35bd1edf6e1668fbbd619c85b8fc48782bf2629727026cb3c60256a",
+    "category": "sweatshirt",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible crewneck cotton jersey/sweatshirt construction with rib cuffs/hem; coarse source Sweater narrowed visually"
+  },
+  {
+    "source_path": "front_2023_07_17_07_26_40.jpg",
+    "original_sha256": "cb34cd027b5caf62d3d248805ed9b28f0e823f72f5282b2c833c729a37603a42",
+    "category": "sweatshirt",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible crewneck cotton jersey/sweatshirt construction with rib cuffs/hem; coarse source Sweater narrowed visually"
+  },
+  {
+    "source_path": "front_2024_02_20_08_29_09.jpg",
+    "original_sha256": "2dc30b9a48c5fda3e346be37a1352a46d2d2636439b81b280873dc7a4274fa66",
+    "category": "sweatshirt",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible crewneck cotton jersey/sweatshirt construction with rib cuffs/hem; coarse source Sweater narrowed visually"
+  },
+  {
+    "source_path": "front_2023_10_02_11_10_37.jpg",
+    "original_sha256": "d9b3ac081608fbb9e0778d0a1c6c7fd3cf426e49628cb2fdd814f3d211fd2044",
+    "category": "sweatshirt",
+    "reviewer": "Codex visual category curation — weak fine label, not human seam annotation",
+    "reason": "Visible crewneck cotton jersey/sweatshirt construction with rib cuffs/hem; coarse source Sweater narrowed visually"
+  }
+]

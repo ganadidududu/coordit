@@ -1,0 +1,40 @@
+{
+  "manifests": [
+    "artifacts/aihub71501/approved-v1/records.jsonl",
+    "artifacts/artf-landmarks-v1/records.jsonl",
+    "artifacts/garmentcodedata-v2/body-free-pilot-v3/records.jsonl"
+  ],
+  "output": "artifacts/seam-resolution-256-v1",
+  "epochs": 20,
+  "batch_size": 4,
+  "learning_rate": 0.0003,
+  "seed": 42,
+  "device": "mps",
+  "architecture": "coordit-spatial-multitask-v3-256",
+  "category_heads": false,
+  "max_steps": null,
+  "resume": false,
+  "balance_real_categories": false,
+  "source_sampling": {
+    "weights": {
+      "aihub-71501": 0.1,
+      "artf-1.0.1": 0.85,
+      "garmentcodedata-v2": 0.05
+    },
+    "epoch_images": 512
+  },
+  "initialize_from": {
+    "directory": "artifacts/seam-integrated-finetune-v1",
+    "checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+    "artifact_sha256": "397acad1b759ef6f866c2eec59f4f30c0854d9c1f722f44dca4ce2accf1ef6fb",
+    "allow_resolution_transfer": true
+  },
+  "augmentation": {
+    "rotation_degrees": 0,
+    "shift_fraction": 0,
+    "scale_min": 1,
+    "scale_max": 1,
+    "brightness_min": 0.7,
+    "brightness_max": 1.3
+  }
+}

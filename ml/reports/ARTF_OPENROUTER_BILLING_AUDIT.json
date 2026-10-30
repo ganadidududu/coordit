@@ -1,0 +1,369 @@
+{
+  "attempts_sha256": "686c26ecadc30908cc749df97b451560c3282f9e4c8aeba6fea5d51faba52ab2",
+  "generation_count": 40,
+  "all_response_costs_match_ledger": true,
+  "total_cost_usd": 0.373349,
+  "generations": [
+    {
+      "id": "gen-1793165767-NHSOwHazG6YyIBicNG2T",
+      "model": "openai/gpt-5.4-20260305",
+      "provider_name": "Azure",
+      "total_cost": 0.00756,
+      "is_byok": false,
+      "generation_time": 7216.0,
+      "latency": 7216.0
+    },
+    {
+      "id": "gen-1793165775-eEgsZ8sulihhtpNUEvH5",
+      "model": "openai/gpt-5.4-20260305",
+      "provider_name": "Azure",
+      "total_cost": 0.007295,
+      "is_byok": false,
+      "generation_time": 6089.0,
+      "latency": 6072.0
+    },
+    {
+      "id": "gen-1793165782-V9zT3l6njo624oHPCJmU",
+      "model": "openai/gpt-5.4-mini-20260317",
+      "provider_name": "Azure",
+      "total_cost": 0.002004,
+      "is_byok": false,
+      "generation_time": 5711.0,
+      "latency": 5711.0
+    },
+    {
+      "id": "gen-1793165789-RkcCKQ13FseHhtZ3blZJ",
+      "model": "anthropic/claude-4.6-sonnet-20260217",
+      "provider_name": "Amazon Bedrock",
+      "total_cost": 0.005376,
+      "is_byok": false,
+      "generation_time": 20139.0,
+      "latency": 19688.0
+    },
+    {
+      "id": "gen-1793165809-AkEHyoEnCtI2tJmzD3DT",
+      "model": "openai/gpt-5.4-mini-20260317",
+      "provider_name": "Azure",
+      "total_cost": 0.003246,
+      "is_byok": false,
+      "generation_time": 7066.0,
+      "latency": 7066.0
+    },
+    {
+      "id": "gen-1793165817-KIjibH7WZ8RdnnSnM2yY",
+      "model": "anthropic/claude-4.6-sonnet-20260217",
+      "provider_name": "Amazon Bedrock",
+      "total_cost": 0.005901,
+      "is_byok": false,
+      "generation_time": 4024.0,
+      "latency": 2526.0
+    },
+    {
+      "id": "gen-1793165821-pv0QoOpvEivdILrxN13s",
+      "model": "openai/gpt-6-astra-20260903",
+      "provider_name": "Azure",
+      "total_cost": 0.03316,
+      "is_byok": false,
+      "generation_time": 19063.0,
+      "latency": 18173.0
+    },
+    {
+      "id": "gen-1793165841-rSJJxjpfnL76xa5E1cWl",
+      "model": "openai/gpt-5.4-20260305",
+      "provider_name": "Azure",
+      "total_cost": 0.010275,
+      "is_byok": false,
+      "generation_time": 10001.0,
+      "latency": 9650.0
+    },
+    {
+      "id": "gen-1793165851-Pp1Op8B0B3PF79bYxrp4",
+      "model": "openai/gpt-5.4-20260305",
+      "provider_name": "Azure",
+      "total_cost": 0.006365,
+      "is_byok": false,
+      "generation_time": 6290.0,
+      "latency": 6289.0
+    },
+    {
+      "id": "gen-1793165858-owZeT3iabKHMkrLIqWmY",
+      "model": "openai/gpt-6-astra-20260903",
+      "provider_name": "Azure",
+      "total_cost": 0.01787,
+      "is_byok": false,
+      "generation_time": 7612.0,
+      "latency": 7609.0
+    },
+    {
+      "id": "gen-1793165866-nNIjwNInQl0Nc0CVXTOX",
+      "model": "openai/gpt-6-astra-20260903",
+      "provider_name": "Azure",
+      "total_cost": 0.04052,
+      "is_byok": false,
+      "generation_time": 23122.0,
+      "latency": 22240.0
+    },
+    {
+      "id": "gen-1793165889-FlVTwj6mPf3gYnez6UK3",
+      "model": "anthropic/claude-4.6-sonnet-20260217",
+      "provider_name": "Amazon Bedrock",
+      "total_cost": 0.005811,
+      "is_byok": false,
+      "generation_time": 18860.0,
+      "latency": 17427.0
+    },
+    {
+      "id": "gen-1793165909-66PNJsNP2lJhYD8Rx3Uw",
+      "model": "openai/gpt-6-astra-20260903",
+      "provider_name": "Azure",
+      "total_cost": 0.01947,
+      "is_byok": false,
+      "generation_time": 7642.0,
+      "latency": 7642.0
+    },
+    {
+      "id": "gen-1793165917-SBms1iFf1j2H6JvC2ihm",
+      "model": "google/gemini-3.8-flash-20260902",
+      "provider_name": "Google",
+      "total_cost": 0.00437175,
+      "is_byok": false,
+      "generation_time": 7556.0,
+      "latency": 6818.0
+    },
+    {
+      "id": "gen-1793165925-ImQG5G88fJGTtJqSZMgB",
+      "model": "openai/gpt-5.4-mini-20260317",
+      "provider_name": "Azure",
+      "total_cost": 0.00234,
+      "is_byok": false,
+      "generation_time": 4607.0,
+      "latency": 4250.0
+    },
+    {
+      "id": "gen-1793165930-bentgUwOtASW83KmKX8f",
+      "model": "google/gemini-3.8-flash-20260902",
+      "provider_name": "Google",
+      "total_cost": 0.001929,
+      "is_byok": false,
+      "generation_time": 5993.0,
+      "latency": 4854.0
+    },
+    {
+      "id": "gen-1793165937-OPfzWZxaFtPuX58UEznW",
+      "model": "openai/gpt-5.4-20260305",
+      "provider_name": "Azure",
+      "total_cost": 0.012855,
+      "is_byok": false,
+      "generation_time": 9395.0,
+      "latency": 8748.0
+    },
+    {
+      "id": "gen-1793165947-aDCKGtWiT9X2PR2oeVR1",
+      "model": "anthropic/claude-4.6-sonnet-20260217",
+      "provider_name": "Amazon Bedrock",
+      "total_cost": 0.006,
+      "is_byok": false,
+      "generation_time": 3788.0,
+      "latency": 2343.0
+    },
+    {
+      "id": "gen-1793165951-J9jStwiinBRlgwSYQoq8",
+      "model": "google/gemini-3.8-flash-20260902",
+      "provider_name": "Google",
+      "total_cost": 0.00613425,
+      "is_byok": false,
+      "generation_time": 11936.0,
+      "latency": 11151.0
+    },
+    {
+      "id": "gen-1793165963-n2A5UiW0nHrhh3T4HXLr",
+      "model": "google/gemini-3.8-flash-20260902",
+      "provider_name": "Google",
+      "total_cost": 0.0073665,
+      "is_byok": false,
+      "generation_time": 13496.0,
+      "latency": 12378.0
+    },
+    {
+      "id": "gen-1793165977-Y2xsIgWEuzQDEQxFMhBW",
+      "model": "google/gemini-3.8-flash-20260902",
+      "provider_name": "Google",
+      "total_cost": 0.001893,
+      "is_byok": false,
+      "generation_time": 3175.0,
+      "latency": 2335.0
+    },
+    {
+      "id": "gen-1793165981-cjStn4PkAcQKrkZr0sv3",
+      "model": "google/gemini-3.8-flash-20260902",
+      "provider_name": "Google",
+      "total_cost": 0.0021015,
+      "is_byok": false,
+      "generation_time": 6462.0,
+      "latency": 5676.0
+    },
+    {
+      "id": "gen-1793165988-28BA25qc8ralJoFuBDYR",
+      "model": "openai/gpt-5.4-mini-20260317",
+      "provider_name": "Azure",
+      "total_cost": 0.0022455,
+      "is_byok": false,
+      "generation_time": 6300.0,
+      "latency": 6298.0
+    },
+    {
+      "id": "gen-1793165995-kBszMp1rdixMlthdQhg5",
+      "model": "openai/gpt-6-astra-20260903",
+      "provider_name": "Azure",
+      "total_cost": 0.02372,
+      "is_byok": false,
+      "generation_time": 10484.0,
+      "latency": 10483.0
+    },
+    {
+      "id": "gen-1793166008-Ez7mMifrBS5DOSAvK4Ly",
+      "model": "openai/gpt-6-astra-20260903",
+      "provider_name": "Azure",
+      "total_cost": 0.02511,
+      "is_byok": false,
+      "generation_time": 12158.0,
+      "latency": 12158.0
+    },
+    {
+      "id": "gen-1793166021-31BLgbPo8u7zLJ27hREp",
+      "model": "openai/gpt-5.4-mini-20260317",
+      "provider_name": "Azure",
+      "total_cost": 0.002085,
+      "is_byok": false,
+      "generation_time": 4173.0,
+      "latency": 4173.0
+    },
+    {
+      "id": "gen-1793166025-SjqD60HnDlTFHKpb3EWv",
+      "model": "google/gemini-3.8-flash-20260902",
+      "provider_name": "Google",
+      "total_cost": 0.00190275,
+      "is_byok": false,
+      "generation_time": 3552.0,
+      "latency": 2682.0
+    },
+    {
+      "id": "gen-1793166029-Hvvu7X6XhSQFcye1cRGl",
+      "model": "openai/gpt-6-astra-20260903",
+      "provider_name": "Azure",
+      "total_cost": 0.02606,
+      "is_byok": false,
+      "generation_time": 12927.0,
+      "latency": 12408.0
+    },
+    {
+      "id": "gen-1793166043-ybKLMtGxLowBFGQdnCGa",
+      "model": "openai/gpt-5.4-mini-20260317",
+      "provider_name": "Azure",
+      "total_cost": 0.002391,
+      "is_byok": false,
+      "generation_time": 5099.0,
+      "latency": 5099.0
+    },
+    {
+      "id": "gen-1793166048-ibUWIjGBwnvBvqV6UEK6",
+      "model": "openai/gpt-5.4-20260305",
+      "provider_name": "Azure",
+      "total_cost": 0.00614,
+      "is_byok": false,
+      "generation_time": 5624.0,
+      "latency": 5620.0
+    },
+    {
+      "id": "gen-1793166055-ciK1cSDoReFaQKpkn4gQ",
+      "model": "openai/gpt-5.4-mini-20260317",
+      "provider_name": "Azure",
+      "total_cost": 0.0026055,
+      "is_byok": false,
+      "generation_time": 5398.0,
+      "latency": 4897.0
+    },
+    {
+      "id": "gen-1793166061-EoG5ePsylfRQ90Fzh7eJ",
+      "model": "openai/gpt-6-astra-20260903",
+      "provider_name": "Azure",
+      "total_cost": 0.02346,
+      "is_byok": false,
+      "generation_time": 11323.0,
+      "latency": 11323.0
+    },
+    {
+      "id": "gen-1793166073-T3cQ6SzRLrf13mSd2B99",
+      "model": "openai/gpt-5.4-20260305",
+      "provider_name": "Azure",
+      "total_cost": 0.00723,
+      "is_byok": false,
+      "generation_time": 6700.0,
+      "latency": 6700.0
+    },
+    {
+      "id": "gen-1793166081-q0W08uw1boh7rw9dvkwi",
+      "model": "google/gemini-3.8-flash-20260902",
+      "provider_name": "Google",
+      "total_cost": 0.00191175,
+      "is_byok": false,
+      "generation_time": 2986.0,
+      "latency": 2247.0
+    },
+    {
+      "id": "gen-1793166084-8cNTbRtPY3mfyM7gBtga",
+      "model": "anthropic/claude-4.6-sonnet-20260217",
+      "provider_name": "Amazon Bedrock",
+      "total_cost": 0.00591,
+      "is_byok": false,
+      "generation_time": 4038.0,
+      "latency": 2493.0
+    },
+    {
+      "id": "gen-1793166089-A6SthVB22wrpjCzbsGUb",
+      "model": "openai/gpt-5.4-20260305",
+      "provider_name": "Azure",
+      "total_cost": 0.00971,
+      "is_byok": false,
+      "generation_time": 11308.0,
+      "latency": 10741.0
+    },
+    {
+      "id": "gen-1793166101-aQVRk3JdfymJ4kGL076s",
+      "model": "openai/gpt-5.4-mini-20260317",
+      "provider_name": "Azure",
+      "total_cost": 0.0015975,
+      "is_byok": false,
+      "generation_time": 2914.0,
+      "latency": 2909.0
+    },
+    {
+      "id": "gen-1793166104-4TSJ536HTQg4aipR8Sfs",
+      "model": "anthropic/claude-4.6-sonnet-20260217",
+      "provider_name": "Amazon Bedrock",
+      "total_cost": 0.00996,
+      "is_byok": false,
+      "generation_time": 7071.0,
+      "latency": 4401.0
+    },
+    {
+      "id": "gen-1793166113-EscoGaMpSyRh4y9uarvs",
+      "model": "anthropic/claude-4.6-sonnet-20260217",
+      "provider_name": "Amazon Bedrock",
+      "total_cost": 0.005736,
+      "is_byok": false,
+      "generation_time": 2838.0,
+      "latency": 1486.0
+    },
+    {
+      "id": "gen-1793166117-FGSwPer0JS6dYv2LVU1j",
+      "model": "anthropic/claude-4.6-sonnet-20260217",
+      "provider_name": "Amazon Bedrock",
+      "total_cost": 0.00573,
+      "is_byok": false,
+      "generation_time": 4406.0,
+      "latency": 1654.0
+    }
+  ],
+  "inference_requests_made_by_audit": 0
+}

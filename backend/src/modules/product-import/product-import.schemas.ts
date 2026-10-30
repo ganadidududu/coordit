@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { NORMALIZED_CATEGORIES, PRODUCT_SITES } from "./product-import.types";
+import { NORMALIZED_CATEGORIES, PRODUCT_SITES, PRODUCT_FACT_KINDS } from "./product-import.types";
 
 export const productImportRequestSchema = z.object({
   url: z.string().trim().min(1).max(2048),
@@ -39,6 +39,7 @@ export const productImportPreviewSchema = z.object({
     }).nullable(),
     gender: z.string().nullable(),
     materials: z.array(z.string()),
+    facts: z.array(z.object({ kind: z.enum(PRODUCT_FACT_KINDS), value: z.string().min(1).max(80) })).max(8).optional(),
     description: z.string().nullable(),
     soldOut: z.boolean().nullable()
   }),

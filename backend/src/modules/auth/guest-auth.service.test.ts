@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { AuthResponse } from "./auth.service";
 import {
   claimGuestWelcome,
+  guestClaimStates,
   createGuestSession,
   type DeviceWelcomeRegistry,
   type GuestClaimState,
@@ -43,58 +44,22 @@ describe("guest authentication", () => {
     ]);
   });
 
-  it("grants exactly three threads when a device has not redeemed the welcome offer", async () => {
-    // Given
+  it.each(guestClaimStates)("does not grant or query DeviceCheck for %s guests", async (state) => {
     const events: string[] = [];
-    const repository = welcomeRepository("pending", events, 3);
-    const registry = deviceRegistry(false, events);
-
-    // When
-    const result = await claimGuestWelcome(
-      guestSession.user.id,
-      "device-token",
-      { repository, deviceRegistry: registry }
-    );
-
-    // Then
-    expect(result).toEqual({ availableThreads: 3, status: "granted" });
-    expect(events).toEqual(["prepare", "device-query", "eligible", "device-mark", "complete"]);
-  });
-
-  it("does not grant more threads when the device already redeemed the offer", async () => {
-    // Given
-    const events: string[] = [];
-    const repository = welcomeRepository("pending", events, 0);
-    const registry = deviceRegistry(true, events);
-
-    // When
-    const result = await claimGuestWelcome(
-      guestSession.user.id,
-      "device-token",
-      { repository, deviceRegistry: registry }
-    );
-
-    // Then
+    const result = await claimGuestWelcome(guestSession.user.id, "old-client-token", {
+      repository: welcomeRepository(state, events, 0), deviceRegistry: deviceRegistry(false, events),
+    });
     expect(result).toEqual({ availableThreads: 0, status: "already_claimed" });
-    expect(events).toEqual(["prepare", "device-query", "deny"]);
+    expect(events).toEqual(["balance"]);
   });
 
-  it("completes an eligible claim after a retry without querying eligibility again", async () => {
-    // Given
+  it("preserves earned guest threads", async () => {
     const events: string[] = [];
-    const repository = welcomeRepository("eligible", events, 3);
-    const registry = deviceRegistry(true, events);
-
-    // When
-    const result = await claimGuestWelcome(
-      guestSession.user.id,
-      "device-token",
-      { repository, deviceRegistry: registry }
-    );
-
-    // Then
-    expect(result).toEqual({ availableThreads: 3, status: "granted" });
-    expect(events).toEqual(["prepare", "device-mark", "complete"]);
+    const result = await claimGuestWelcome(guestSession.user.id, "token", {
+      repository: welcomeRepository("granted", events, 5), deviceRegistry: deviceRegistry(true, events),
+    });
+    expect(result.availableThreads).toBe(5);
+    expect(events).toEqual(["balance"]);
   });
 });
 
@@ -116,6 +81,12 @@ const welcomeRepository = (
   },
   denyClaim: async () => {
     events.push("deny");
+  },
+  releaseLease: async () => {
+    events.push("release");
+  },
+  getBalance: async () => {
+    events.push("balance");
     return balance;
   },
 });

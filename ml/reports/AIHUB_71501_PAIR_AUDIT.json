@@ -1,0 +1,25 @@
+{
+  "inspected_labels": 6161,
+  "matched_unique_images": 6160,
+  "missing_images": 0,
+  "duplicate_images": 1,
+  "conflicting_duplicate_images": 0,
+  "source_categories": {
+    "01outer_01coat": 3053,
+    "01outer_02jacket": 3107
+  },
+  "measurement_fields": {
+    "metadata.top.front_length": 6156,
+    "metadata.top.chest_size": 6160,
+    "metadata.top.shoulder_width": 6160,
+    "metadata.top.sleeve_length": 6142
+  },
+  "approved_training_images": 0,
+  "seam_ground_truth_images": 0,
+  "blockers": [
+    "download approval and dataset-specific rights evidence",
+    "Coordit endpoint compatibility: chest at armpit vs publisher 1 inch below; back shoulder; waistband basis",
+    "garment/capture identity mapping and independent split review",
+    "semantic seam annotations absent in public polygon schema"
+  ]
+}

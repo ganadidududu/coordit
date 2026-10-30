@@ -18,6 +18,11 @@ export const generateFitReportController = async (
   try {
     const style = asOptionalString(req.body.style);
     const idempotencyKey = asOptionalString(req.body.idempotencyKey);
+    const comparisonBundleAnalysisId = asOptionalString(req.body.comparisonBundleAnalysisId);
+    if (comparisonBundleAnalysisId !== null && !isIdempotencyKey(comparisonBundleAnalysisId)) {
+      res.status(400).json({ message: "A valid comparisonBundleAnalysisId is required" });
+      return;
+    }
     if (!isIdempotencyKey(idempotencyKey)) {
       res.status(400).json({ message: "A valid idempotencyKey is required" });
       return;
@@ -27,6 +32,8 @@ export const generateFitReportController = async (
       asRequiredString(req.params.id, "fit analysis result id"),
       {
         idempotencyKey,
+        ...(comparisonBundleAnalysisId ? { comparisonBundleAnalysisId } : {}),
+        ...(req.body.cameraComparison === true ? { cameraComparison: true } : {}),
         selectedSizeLabel: asOptionalString(req.body.selectedSizeLabel) ?? undefined,
         style: isReportStyle(style) ? style : undefined,
         includeDebug: req.body.includeDebug === true

@@ -35,7 +35,8 @@ import com.inseong.coordit.data.home.HomeSnapshot
 import com.inseong.coordit.ui.components.*
 import com.inseong.coordit.ui.theme.*
 import kotlinx.coroutines.delay
-import com.inseong.coordit.data.fitlab.FitLabHistorySnapshot
+import kotlinx.coroutines.launch
+import androidx.compose.ui.semantics.contentDescription
 
 data class HomeUiState(
     val snapshot: HomeSnapshot = HomeSnapshot(),
@@ -52,8 +53,10 @@ fun HomeScreen(
     onCloset: () -> Unit,
     onFitLab: () -> Unit,
     onProfile: () -> Unit,
-    history: List<FitLabHistorySnapshot> = emptyList(),
-    onHistory: (FitLabHistorySnapshot) -> Unit = {},
+    history: List<com.inseong.coordit.data.fitlab.FitLabHistorySnapshot> = emptyList(),
+    onOpenHistory: (com.inseong.coordit.data.fitlab.FitLabHistorySnapshot) -> Unit = {},
+    reduceMotion: Boolean = false,
+    onAddGarment: () -> Unit = onCloset,
 ) {
     var picker by remember { mutableStateOf(false) }
     var awaitingSave by remember { mutableStateOf(false) }
@@ -67,13 +70,13 @@ fun HomeScreen(
     BoxWithConstraints(Modifier.fillMaxSize().testTag("coordit-screen-main04")) {
         val s = maxWidth.value / AppDimensions.designWidth
         SharedAppBackground(s)
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(top = (121 * s).dp, bottom = (106 * s).dp),
+        Column(Modifier.fillMaxSize().padding(top = (117 * s).dp).verticalScroll(rememberScrollState()).testTag("home-scroll")
+            .padding(bottom = (110 * s).dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy((16 * s).dp)) {
-            MagazineCard(s)
-            FitHistoryCard(s, onFitLab, history, onHistory)
+            verticalArrangement = Arrangement.spacedBy((12 * s).dp)) {
+            MagazineCard(s, onFitLab, reduceMotion)
             ReferenceCard(state, s, { picker = true }, onRetry)
+            FitHistoryCard(s, history, onOpenHistory)
             Pressable(onCloset, Modifier.width((361 * s).dp).height((43 * s).dp)
                 .coorditShadow(Color.Black.copy(alpha = .035f), (9 * s).dp, ContinuousRoundedShape((10 * s).dp), (3 * s).dp)
                 .background(Brush.verticalGradient(listOf(AppColors.panel, Color(235, 238, 247))), ContinuousRoundedShape((10 * s).dp))
@@ -89,100 +92,93 @@ fun HomeScreen(
     }
     if (picker) ReferencePicker(state, onDismiss = { if (!state.saving) picker = false }, onAdd = {
         picker = false
-        onCloset()
+        onAddGarment()
     }, onCommit = onReferenceCommit)
 }
 
-private data class MagazineIssue(val kicker: String, val status: String, val title: String, val body: String, val tags: List<String>, val tint: Color)
+private data class MagazineIssue(val kicker: String, val title: String, val body: String)
 private val issues = listOf(
-    MagazineIssue("SALE RADAR", "지난 세일 체크", "무진장·직잭팟은 끝. 다음은 장바구니 정리",
-        "여름 대형 세일은 대부분 6월 말에 종료. 지금은 위시템 사이즈를 먼저 검증할 타이밍.", listOf("MUSINSA", "ZIGZAG", "SIZE CHECK"), Color(55, 75, 156)),
-    MagazineIssue("NEXT DROP", "곧 볼 구간", "에이블리 여름 클리어런스는 7월 말부터 주시",
-        "플랫폼별 시즌오프가 이어지는 구간. 인기 옵션은 빠르게 빠지니 대체 사이즈까지 준비.", listOf("ABLY", "CLEARANCE", "WISHLIST"), Color(24, 132, 122)),
-    MagazineIssue("TREND NOW", "2026 S/S", "레드 포인트, 포엣 코어, 가벼운 로맨틱 무드",
-        "작은 포인트가 쉬운 시즌. 키링, 셔츠, 얇은 레이어로 시작.", listOf("RED", "POET CORE", "LAYER"), Color(177, 51, 68)),
+    MagazineIssue("FIT GUIDE", "새 옷,\n잘 맞을까?", "평소 잘 맞는 옷과 비교해\n사이즈 선택을 가볍게."),
+    MagazineIssue("MY REFERENCE", "잘 맞는 옷이\n기준이 되니까", "내 옷장에서 기준을 고르고\n실측 차이를 확인해요."),
+    MagazineIssue("LAYERING", "겹쳐 입어도,\n나답게", "어깨부터 소매까지,\n옷의 여유를 살펴보세요."),
 )
 
 @Composable
-private fun MagazineCard(s: Float) {
+private fun MagazineCard(s: Float, onFitLab: () -> Unit, reduceMotion: Boolean) {
     val pager = rememberPagerState(pageCount = { issues.size })
-    LaunchedEffect(pager) {
-        while (true) {
-            delay(4_000)
-            if (!pager.isScrollInProgress) pager.animateScrollToPage((pager.currentPage + 1) % issues.size)
+    val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val accessibility = context.getSystemService(android.content.Context.ACCESSIBILITY_SERVICE) as android.view.accessibility.AccessibilityManager
+    val largeText = LocalDensity.current.fontScale >= 1.5f
+    LaunchedEffect(pager, reduceMotion, largeText) {
+        if (!reduceMotion && !largeText) while (true) {
+            delay(7_000)
+            if (!pager.isScrollInProgress && !accessibility.isTouchExplorationEnabled) pager.animateScrollToPage((pager.currentPage + 1) % issues.size)
         }
     }
-    Column(Modifier.width((361 * s).dp).height((259 * s).dp)
-        .coorditShadow(Color.Black.copy(alpha = .035f), (12 * s).dp, ContinuousRoundedShape((10 * s).dp), (4 * s).dp)
-        .background(Brush.linearGradient(listOf(AppColors.panel, Color(238, 242, 250), Color(228, 233, 246))), ContinuousRoundedShape((10 * s).dp))
-        .testTag("coordit-main04-banner"), verticalArrangement = Arrangement.spacedBy((8 * s).dp)) {
-        BasicText("MAGAZINE", Modifier.padding(top = (15 * s).dp, start = (14 * s).dp),
-            style = CoorditTypography.climate2019(17 * s).copy(letterSpacing = (-.6f * s).sp))
-        HorizontalPager(pager, Modifier.height((186 * s).dp).testTag("coordit-main04-fashion-magazine-carousel")) { index ->
-            val issue = issues[index]
-            Column(Modifier.padding(horizontal = (14 * s).dp).fillMaxSize()
-                .background(Color.White.copy(alpha = .58f), ContinuousRoundedShape((8 * s).dp))
-                .border((.8f * s).dp, Color.White.copy(alpha = .75f), ContinuousRoundedShape((8 * s).dp)).padding((15 * s).dp),
-                verticalArrangement = Arrangement.spacedBy((9 * s).dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy((7 * s).dp)) {
-                    Box(Modifier.background(issue.tint, CircleShape).height((20 * s).dp).padding(horizontal = (8 * s).dp), contentAlignment = Alignment.Center) {
-                        Label(issue.kicker, CoorditTypography.mona12(10 * s).copy(color = Color.White))
+    Box(Modifier.width((366 * s).dp).background(AppColors.panel, ContinuousRoundedShape((12 * s).dp))
+        .border(.7.dp, AppColors.line.copy(alpha = .65f), ContinuousRoundedShape((12 * s).dp)).clip(ContinuousRoundedShape((12 * s).dp)).testTag("coordit-main04-banner")) {
+        if (!largeText) androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(com.inseong.coordit.R.drawable.coordit_home_editorial), null,
+            Modifier.align(Alignment.CenterEnd).offset(x = (9 * s).dp).size((205 * s).dp, (248 * s).dp), contentScale = androidx.compose.ui.layout.ContentScale.Fit)
+        Column(Modifier.fillMaxWidth().padding(top = (14 * s).dp), verticalArrangement = Arrangement.spacedBy((12 * s).dp)) {
+            HorizontalPager(pager, Modifier.fillMaxWidth().then(if (largeText) Modifier else Modifier.height((180 * s).dp)).testTag("coordit-main04-fashion-magazine-carousel")) { index ->
+                val issue = issues[index]
+                Column(Modifier.padding(horizontal = (18 * s).dp).then(if (largeText) Modifier.fillMaxWidth() else Modifier.width((160 * s).dp)), verticalArrangement = Arrangement.spacedBy((12 * s).dp)) {
+                    Box(Modifier.background(AppColors.ink, CircleShape).padding(horizontal = (10 * s).dp, vertical = (7 * s).dp)) {
+                        CoorditText(issue.kicker, CoorditTypography.gmarketBold(9 * s).copy(color = Color.White))
                     }
-                    Label(issue.status, CoorditTypography.gmarketBold(8.5f * s).copy(color = issue.tint))
+                    CoorditText(issue.title, CoorditTypography.gmarketBold(27 * s))
+                    CoorditText(issue.body, CoorditTypography.gmarketMedium(10 * s).copy(color = AppColors.muted))
+                    CoorditText("COORDIT MAGAZINE", CoorditTypography.gmarketMedium(7 * s).copy(color = AppColors.muted, letterSpacing = (.8f * s).sp))
+                    if (largeText) androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(com.inseong.coordit.R.drawable.coordit_home_editorial), null, Modifier.fillMaxWidth().height((140 * s).dp))
                 }
-                FittedMagazineText(issue.title, CoorditTypography.gmarketBold(25 * s), minimumScale = .78f)
-                FittedMagazineText(issue.body, CoorditTypography.gmarketMedium(10.5f * s).copy(color = AppColors.ink.copy(alpha = .62f)), minimumScale = .82f)
+            }
+            Row(Modifier.fillMaxWidth().padding(horizontal = (16 * s).dp).padding(bottom = (14 * s).dp), verticalAlignment = Alignment.CenterVertically) {
+                Pressable(onFitLab, Modifier.heightIn(min = 44.dp).background(AppColors.ink, CircleShape).padding(horizontal = (16 * s).dp).testTag("coordit-main04-new-fit-button"), cornerRadius = 30f) {
+                    CoorditText("새로운 옷 찾기", CoorditTypography.gmarketBold(12 * s).copy(color = Color.White))
+                }
                 Spacer(Modifier.weight(1f))
-                Row(horizontalArrangement = Arrangement.spacedBy((6 * s).dp)) {
-                    issue.tags.forEach { tag ->
-                        Box(Modifier.background(Color.White.copy(alpha = .55f), CircleShape).height((21 * s).dp).padding(horizontal = (7 * s).dp), contentAlignment = Alignment.Center) {
-                            Label(tag, CoorditTypography.gmarketBold(8 * s).copy(color = AppColors.ink.copy(alpha = .7f)))
-                        }
+                issues.indices.forEach { index ->
+                    Pressable({ scope.launch { if (reduceMotion) pager.scrollToPage(index) else pager.animateScrollToPage(index) } }, Modifier.size(44.dp).semantics { selected = index == pager.currentPage; contentDescription = "매거진 ${index + 1}페이지" }) {
+                        Box(Modifier.width(((if (index == pager.currentPage) 16 else 5) * s).dp).height((5 * s).dp).background(AppColors.ink.copy(alpha = if (index == pager.currentPage) 1f else .22f), CircleShape))
                     }
                 }
             }
-        }
-        Row(Modifier.padding(horizontal = (15 * s).dp), horizontalArrangement = Arrangement.spacedBy((5 * s).dp)) {
-            issues.indices.forEach { index -> Box(Modifier.width(((if (index == pager.currentPage) 18 else 6) * s).dp)
-                .height((6 * s).dp).background(AppColors.ink.copy(alpha = if (index == pager.currentPage) 1f else .18f), CircleShape)) }
         }
     }
 }
 
 @Composable
-private fun FitHistoryCard(s: Float, onFitLab: () -> Unit, history: List<FitLabHistorySnapshot>, onHistory: (FitLabHistorySnapshot) -> Unit) {
-    Column(Modifier.width((361 * s).dp).heightIn(min = (170 * s).dp)
-        .coorditShadow(Color.Black.copy(alpha = .04f), (12 * s).dp, ContinuousRoundedShape((10 * s).dp), (4 * s).dp).background(AppColors.panel, ContinuousRoundedShape((10 * s).dp))
-        .padding(horizontal = (16 * s).dp).padding(top = (14 * s).dp).testTag("coordit-main04-fitlab-card")) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy((7 * s).dp)) {
-            Label("FIT LAB", CoorditTypography.climate2019(18.6f * s).copy(color = Color.Black, letterSpacing = (-.93f * s).sp))
-            Label("당신에게 꼭 맞는 사이즈 설계", CoorditTypography.gmarketMedium(8.8f * s).copy(color = Color.Black))
+private fun FitHistoryCard(s: Float, history: List<com.inseong.coordit.data.fitlab.FitLabHistorySnapshot>, open: (com.inseong.coordit.data.fitlab.FitLabHistorySnapshot) -> Unit) {
+    val recent = history.sortedWith(compareByDescending<com.inseong.coordit.data.fitlab.FitLabHistorySnapshot> { it.savedAt }.thenByDescending { it.analysisId }).take(2)
+    Column(Modifier.width((366 * s).dp).background(AppColors.panel, ContinuousRoundedShape((12 * s).dp))
+        .padding(horizontal = (16 * s).dp, vertical = (14 * s).dp).testTag("coordit-main04-fitlab-card"), verticalArrangement = Arrangement.spacedBy((6 * s).dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            CoorditText("최근 핏 분석", CoorditTypography.gmarketBold(17 * s))
+            Spacer(Modifier.weight(1f))
+            CoorditText("최근 저장 ${recent.size}개", CoorditTypography.gmarketMedium(9 * s).copy(color = AppColors.muted))
         }
-        Spacer(Modifier.height((5 * s).dp))
-        Pressable(onFitLab, Modifier.fillMaxWidth().height((36 * s).dp).background(AppColors.ink, CircleShape).testTag("coordit-main04-new-fit-button")) {
-            Label("새로운 옷 찾기", CoorditTypography.gmarketBold(11.5f * s).copy(color = Color.White))
-        }
-        Row(Modifier.padding(top = (7 * s).dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Label("HISTORY", CoorditTypography.climate2019(8.8f * s).copy(color = Color.Black, letterSpacing = (-.35f * s).sp))
-            Label("최근 저장 2개", CoorditTypography.gmarketMedium(8.2f * s).copy(color = Color.Black.copy(alpha = .48f)))
-        }
-        if (history.isEmpty()) Box(Modifier.padding(top = (6 * s).dp).fillMaxWidth().height((54 * s).dp)
-            .background(Color.Black.copy(alpha = .035f), ContinuousRoundedShape((6 * s).dp)).testTag("coordit-main04-history-empty"), contentAlignment = Alignment.Center) {
-            Label("저장한 핏 리포트가 아직 없어요", CoorditTypography.gmarketMedium(10 * s).copy(color = Color.Black.copy(alpha = .55f)))
-        }
-        else Column(Modifier.padding(top = (6 * s).dp, bottom = (12 * s).dp), verticalArrangement = Arrangement.spacedBy((6 * s).dp)) {
-            history.sortedByDescending { it.savedAt }.take(2).forEach { snapshot ->
-                Pressable({ onHistory(snapshot) }, Modifier.fillMaxWidth().testTag("home-history-${snapshot.analysisId}"), cornerRadius = 6 * s) {
-                    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).background(AppColors.closetField).padding((10 * s).dp),
-                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy((8 * s).dp)) {
+        if (recent.isEmpty()) Box(Modifier.fillMaxWidth().heightIn(min = (54 * s).dp).background(Color.Black.copy(alpha = .035f), ContinuousRoundedShape((6 * s).dp)).testTag("coordit-main04-history-empty"), contentAlignment = Alignment.Center) {
+            CoorditText("저장한 핏 리포트가 아직 없어요", CoorditTypography.gmarketMedium(10 * s).copy(color = Color.Black.copy(alpha = .55f)))
+        } else {
+            @Composable fun Item(snapshot: com.inseong.coordit.data.fitlab.FitLabHistorySnapshot, modifier: Modifier) {
+                val result = snapshot.recommendation
+                val tint = if (snapshot.upper) AppColors.blue else AppColors.green
+                Pressable({ open(snapshot) }, modifier.testTag("coordit-main04-history-card-${snapshot.analysisId}"), cornerRadius = 6 * s) {
+                    Row(Modifier.fillMaxWidth().heightIn(min = (54 * s).dp).background(Brush.horizontalGradient(listOf(Color.White.copy(alpha = .98f), tint.copy(alpha = .08f))), ContinuousRoundedShape((6 * s).dp)).padding((10 * s).dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy((7 * s).dp)) {
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy((4 * s).dp)) {
-                            Label(snapshot.productName, CoorditTypography.gmarketBold(11 * s))
-                            Label("${snapshot.recommendation.recommendedSize} · ${String.format(java.util.Locale.KOREA, "%.1f", snapshot.recommendation.fitScore)}점", CoorditTypography.gmarketMedium(10 * s))
+                            Label(snapshot.productName, CoorditTypography.gmarketBold(10 * s))
+                            Label("${if (snapshot.upper) "TOP" else "BOTTOM"} · ${result.recommendedSize} 추천", CoorditTypography.gmarketMedium(8.2f * s).copy(color = AppColors.muted))
                         }
-                        Label("보기 ›", CoorditTypography.gmarketMedium(10 * s))
+                        Column(horizontalAlignment = Alignment.End) {
+                            Label("SCORE", CoorditTypography.mona12(7.4f * s).copy(color = AppColors.muted))
+                            Label(String.format(java.util.Locale.US, "%.1f", result.fitScore), CoorditTypography.mona12(19 * s))
+                        }
                     }
                 }
             }
+            if (LocalDensity.current.fontScale >= 1.5f) recent.forEach { Item(it, Modifier.fillMaxWidth()) }
+            else Row(horizontalArrangement = Arrangement.spacedBy((8 * s).dp)) { recent.forEach { Item(it, Modifier.weight(1f)) } }
         }
     }
 }
@@ -280,7 +276,8 @@ private fun ReferencePicker(state: HomeUiState, onDismiss: () -> Unit, onAdd: ()
 
 @Composable
 private fun GarmentThumbnail(item: HomeGarment, modifier: Modifier) {
-    Box(modifier.background(Brush.verticalGradient(listOf(Color(226, 230, 238), Color(239, 242, 247)))), contentAlignment = Alignment.Center) {
+    Box(modifier.clip(RoundedCornerShape(7.dp)).background(Brush.verticalGradient(listOf(Color(226, 230, 238), Color(239, 242, 247))))
+        .border(1.dp, AppColors.line, RoundedCornerShape(7.dp)), contentAlignment = Alignment.Center) {
         Canvas(Modifier.size(if (item.category.upper) 22.dp else 24.dp, if (item.category.upper) 22.dp else 28.dp)) {
             val shape = Path().apply {
                 if (item.category.upper) {
@@ -298,7 +295,8 @@ private fun GarmentThumbnail(item: HomeGarment, modifier: Modifier) {
                 }
                 close()
             }
-            drawPath(shape, AppColors.ink.copy(alpha = .18f))
+            if (item.category.upper) drawPath(shape, AppColors.ink.copy(alpha = .18f), style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
+            else drawPath(shape, AppColors.ink.copy(alpha = .18f))
         }
     }
 }
@@ -306,23 +304,4 @@ private fun GarmentThumbnail(item: HomeGarment, modifier: Modifier) {
 @Composable
 private fun Label(text: String, style: TextStyle, modifier: Modifier = Modifier) {
     BasicText(text, modifier, style = style, maxLines = 1, overflow = TextOverflow.Ellipsis)
-}
-
-@Composable
-private fun FittedMagazineText(text: String, style: TextStyle, minimumScale: Float) {
-    val measurer = rememberTextMeasurer()
-    val density = LocalDensity.current
-    BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val maximumWidth = with(density) { maxWidth.roundToPx() }
-        val fittedStyle = remember(text, style, minimumScale, maximumWidth, density.fontScale) {
-            var candidate = style.copy(lineBreak = CoorditTypography.koreanParagraph, localeList = CoorditTypography.koreanLocale)
-            val minimumSize = style.fontSize.value * minimumScale
-            while (candidate.fontSize.value > minimumSize && measurer.measure(text, candidate,
-                    maxLines = 2, constraints = Constraints(maxWidth = maximumWidth)).hasVisualOverflow) {
-                candidate = candidate.copy(fontSize = (candidate.fontSize.value - .25f).coerceAtLeast(minimumSize).sp)
-            }
-            candidate
-        }
-        BasicText(text, style = fittedStyle, maxLines = 2, overflow = TextOverflow.Ellipsis)
-    }
 }

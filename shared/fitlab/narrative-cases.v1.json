@@ -1,0 +1,766 @@
+[
+  {
+    "id": "cotton-poly",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 70%, 폴리에스터 30%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [
+        "cotton",
+        "polyester"
+      ],
+      "traits": [
+        "cotton",
+        "polyester"
+      ],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "linen-boxy",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 56,
+        "total_length": 70
+      },
+      {
+        "chest_width": 58,
+        "total_length": 72
+      }
+    ],
+    "facts": {
+      "material": "리넨 55%, 면 45%",
+      "fit": "루즈핏"
+    },
+    "edited": false,
+    "expected": {
+      "components": [
+        "linen",
+        "cotton"
+      ],
+      "traits": [
+        "linen",
+        "cotton"
+      ],
+      "shape": "boxy",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "stretch-blend",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 97%, 스판 3%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [
+        "cotton",
+        "elastane"
+      ],
+      "traits": [
+        "cotton"
+      ],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "stretch-conflict",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 97%, 스판 3%",
+      "stretch": "없음"
+    },
+    "edited": false,
+    "expected": {
+      "components": [
+        "cotton",
+        "elastane"
+      ],
+      "traits": [
+        "cotton"
+      ],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": true
+    }
+  },
+  {
+    "id": "pu-coating-not-elastane",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "폴리우레탄 100%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [
+        "polyurethane"
+      ],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "duplicate-alias",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 60%, 코튼 40%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "lining-not-blended",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "겉감 면 100% / 안감 폴리에스터 100%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "unknown-fiber",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 60%, 대나무 40%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "no-ratio",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 리넨 혼방"
+    },
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "percent-first",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "70% cotton, 30% polyester"
+    },
+    "edited": false,
+    "expected": {
+      "components": [
+        "cotton",
+        "polyester"
+      ],
+      "traits": [
+        "cotton",
+        "polyester"
+      ],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "decimal-percentage",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 98.5%, 엘라스테인 1.5%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [
+        "cotton",
+        "elastane"
+      ],
+      "traits": [
+        "cotton"
+      ],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "excess-total",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 80%, 폴리 80%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "negative-ratio",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 -10%, 폴리 110%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "zero-spandex",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 100%, 스판 0%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [
+        "cotton"
+      ],
+      "traits": [
+        "cotton"
+      ],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "recycled-poly",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "recycled polyester 65%, cotton 35%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [
+        "polyester",
+        "cotton"
+      ],
+      "traits": [
+        "polyester",
+        "cotton"
+      ],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "mixed-shapes",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 56,
+        "total_length": 70
+      },
+      {
+        "chest_width": 58,
+        "total_length": 80
+      }
+    ],
+    "facts": {},
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "mixed",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "incomplete-table",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 56,
+        "total_length": 70
+      },
+      {
+        "total_length": 72
+      }
+    ],
+    "facts": {},
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "one-size",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 56,
+        "total_length": 70
+      }
+    ],
+    "facts": {},
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "knit-unsupported",
+    "category": "knit",
+    "rows": [
+      {
+        "chest_width": 56,
+        "total_length": 70
+      },
+      {
+        "chest_width": 58,
+        "total_length": 72
+      }
+    ],
+    "facts": {},
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "millimeters-not-cm",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 560,
+        "total_length": 700
+      },
+      {
+        "chest_width": 580,
+        "total_length": 720
+      }
+    ],
+    "facts": {},
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "seller-slim-conflict",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 56,
+        "total_length": 70
+      },
+      {
+        "chest_width": 58,
+        "total_length": 72
+      }
+    ],
+    "facts": {
+      "fit": "슬림핏"
+    },
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "boxy",
+      "fitConflict": true,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "seller-negated-slim",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 56,
+        "total_length": 70
+      },
+      {
+        "chest_width": 58,
+        "total_length": 72
+      }
+    ],
+    "facts": {
+      "fit": "슬림핏 아님"
+    },
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "boxy",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "stale-source-material",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 70%, 폴리 30%"
+    },
+    "edited": true,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "tshirt-category-threshold",
+    "category": "tshirt",
+    "rows": [
+      {
+        "chest_width": 56,
+        "total_length": 70
+      },
+      {
+        "chest_width": 58,
+        "total_length": 72
+      }
+    ],
+    "facts": {},
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "missing-material",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {},
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "wool-dominant",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "울 80%, 나일론 20%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [
+        "wool",
+        "nylon"
+      ],
+      "traits": [
+        "wool",
+        "nylon"
+      ],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "invalid-total",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 80%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "approximate",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 약 70%, 폴리 30%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [],
+      "traits": [],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  },
+  {
+    "id": "ambiguous-pu-not-spandex",
+    "category": "shirt",
+    "rows": [
+      {
+        "chest_width": 50,
+        "total_length": 74
+      },
+      {
+        "chest_width": 52,
+        "total_length": 76
+      }
+    ],
+    "facts": {
+      "material": "면 97%, 폴리우레탄 3%"
+    },
+    "edited": false,
+    "expected": {
+      "components": [
+        "cotton",
+        "polyurethane"
+      ],
+      "traits": [
+        "cotton"
+      ],
+      "shape": "unknown",
+      "fitConflict": false,
+      "stretchConflict": false
+    }
+  }
+]

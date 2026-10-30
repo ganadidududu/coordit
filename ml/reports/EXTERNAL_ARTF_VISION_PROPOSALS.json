@@ -1,0 +1,259 @@
+{
+  "execution": "interactive_assistant_vision",
+  "model_identity": "Current Codex chat visual assistant; separate provider API not invoked",
+  "exact_model_revision": null,
+  "receipt_sha256": "67e41b8192e00bfbf6dc08c1d26e65b285026117d7499d3e8bd01169a62d8e08",
+  "protocol_sha256": "5a727805c74123cf561796a051cd110c42c35decbe1a07335155b88ae98e721a",
+  "coordinate_system": "upright_rgb_normalized_top_left",
+  "ground_truth_supplied_before_predictions": false,
+  "predictions": [
+    {
+      "case_id": "P01",
+      "image_sha256": "9e87d5b085a142710f7379d28dca8b2570a00aef9ff735682e6579b33d59d524",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.4140625,
+          "y": 0.30078125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.603515625,
+          "y": 0.2421875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.412109375,
+          "y": 0.46484375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.626953125,
+          "y": 0.37109375,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Low-contrast seam lines and wrinkles; all four are uncertain structural candidates."
+    },
+    {
+      "case_id": "P02",
+      "image_sha256": "3a3f0a699259fdcc92f7a0157be3108e303c27d689de9f4784d68cd70fa9d819",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        }
+      ],
+      "note": "Patterned folded garment: cannot reliably identify shoulder/underarm junctions or whole-garment side; abstain."
+    },
+    {
+      "case_id": "P03",
+      "image_sha256": "f240f69fe2b4a2abc202e5c56a373a9f14187609dfe7c6c6514fa60d8deb4a55",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.337890625,
+          "y": 0.390625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.416015625,
+          "y": 0.2578125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.373046875,
+          "y": 0.51953125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.474609375,
+          "y": 0.34375,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Rotated patterned garment: infer attachment junction candidates from structure, seam lines uncertain."
+    },
+    {
+      "case_id": "P04",
+      "image_sha256": "febf4d53a322cb07aef05c7df0442da27f808e7baa4daa54cb785174b889318a",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.4140625,
+          "y": 0.78515625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.703125,
+          "y": 0.7890625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.35546875,
+          "y": 0.609375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.701171875,
+          "y": 0.6015625,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Upside-down shirt. Upper hem determines global side; shoulder attachment positions uncertain."
+    },
+    {
+      "case_id": "P05",
+      "image_sha256": "145f2eae8fcb4c1214f08378d19891966ff7bf2dcae71d3a29664cf3d4ece6b4",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.365234375,
+          "y": 0.41796875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.55078125,
+          "y": 0.3125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.51953125,
+          "y": 0.59765625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.39453125,
+          "y": 0.78515625,
+          "status": "visible_proposal"
+        }
+      ],
+      "note": "Waist and left outer hem visible; crotch junction is uncertain."
+    },
+    {
+      "case_id": "P06",
+      "image_sha256": "3064df25d96af05797577084ffba7e864dbbca6d8ca645cbedebbb483a8c41eb",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.52734375,
+          "y": 0.2265625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.591796875,
+          "y": 0.4765625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.451171875,
+          "y": 0.4296875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.376953125,
+          "y": 0.26171875,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Sideways partly folded shorts, waistband interpreted on right; side and crotch uncertain."
+    },
+    {
+      "case_id": "P07",
+      "image_sha256": "8c1d35f3ebd429a8a795f32d0bf7c71979ee8d26278a6d4e6dff22fc7e836c79",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.400390625,
+          "y": 0.1875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.712890625,
+          "y": 0.25390625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.52734375,
+          "y": 0.5625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.318359375,
+          "y": 0.7265625,
+          "status": "visible_proposal"
+        }
+      ],
+      "note": "Open flat shorts, waist and outer hem clear; crotch seam junction uncertain."
+    },
+    {
+      "case_id": "P08",
+      "image_sha256": "6d4a48a8f413699ef718fda5ea669c8794acb35ce12eed55aa763c190996ae1b",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.421875,
+          "y": 0.61328125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.548828125,
+          "y": 0.42578125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.37890625,
+          "y": 0.3203125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.296875,
+          "y": 0.47265625,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Rotated rear denim shorts; waistband interpreted along lower-right edge and crotch near upper-left notch; uncertain."
+    }
+  ]
+}

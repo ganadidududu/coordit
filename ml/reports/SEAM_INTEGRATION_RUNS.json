@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-28",
+  "original_aihub_sha256_preserved": true,
+  "runs": [
+    {
+      "name": "seam-integrated-pilot-v1",
+      "checkpoint": "artifacts/seam-integrated-pilot-v1/checkpoint.pt",
+      "sha256": "eeb659c1fcb28aa4c7711976432f6590b2316d37877a3914114889f4da29ec00",
+      "artifact_sha256": "ff51bf49ad80bebc3ffaca54eea0a53f657a6fd06b1c300e2c1757cd7452bc08",
+      "parent_sha256": "0baeadd24aeb788b1a575c3f4762643b1b6a1b8b486d84ec1ceb0fb9cae96ddf",
+      "registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "epochs": 10,
+      "steps": 640,
+      "exposures": 10240,
+      "synthetic_exposures": 1020,
+      "unique_images": 2808,
+      "source_unique_images": {
+        "aihub-71501": 2236,
+        "artf-1.0.1": 524,
+        "garmentcodedata-v2": 48
+      },
+      "per_epoch_source_exposures": {
+        "aihub-71501": 512,
+        "artf-1.0.1": 410,
+        "garmentcodedata-v2": 102
+      },
+      "architecture": "coordit-spatial-multitask-v2",
+      "device": "mps",
+      "final_loss": 6.92749747633934
+    },
+    {
+      "name": "seam-integrated-finetune-v1",
+      "checkpoint": "artifacts/seam-integrated-finetune-v1/checkpoint.pt",
+      "sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "artifact_sha256": "397acad1b759ef6f866c2eec59f4f30c0854d9c1f722f44dca4ce2accf1ef6fb",
+      "parent_sha256": "eeb659c1fcb28aa4c7711976432f6590b2316d37877a3914114889f4da29ec00",
+      "registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "epochs": 40,
+      "steps": 2560,
+      "exposures": 40960,
+      "synthetic_exposures": 2040,
+      "unique_images": 3029,
+      "source_unique_images": {
+        "aihub-71501": 2457,
+        "artf-1.0.1": 524,
+        "garmentcodedata-v2": 48
+      },
+      "per_epoch_source_exposures": {
+        "aihub-71501": 256,
+        "artf-1.0.1": 717,
+        "garmentcodedata-v2": 51
+      },
+      "architecture": "coordit-spatial-multitask-v2",
+      "device": "mps",
+      "final_loss": 4.051397729665041
+    }
+  ],
+  "integrated_pool": {
+    "aihub_real": 2482,
+    "artf_real": 524,
+    "artf_partial_anatomical_label_images": 314,
+    "artf_visible_semantic_targets": 1310,
+    "gcd_source_designs_inspected": 15,
+    "gcd_selected_designs": 6,
+    "gcd_synthetic_images": 48,
+    "gcd_landmark_images": 24,
+    "gcd_visible_landmark_images": 17,
+    "gcd_visible_points": 24,
+    "gcd_occluded_points": 64,
+    "gcd_category_images": {
+      "pants": 8,
+      "skirt": 16,
+      "shirt": 24
+    },
+    "gcd_full_dataset_downloaded": false,
+    "gcd_downloaded_prefix_bytes": 33554432
+  },
+  "comparison": "reports/seam-finetune-real-development-comparison.json",
+  "independent_real_validation_images": 0,
+  "independent_real_test_images": 0,
+  "aihub_verified_seam_annotations": 0,
+  "real_cm_accuracy": null,
+  "phase3_changed": false,
+  "deployment_approved": false
+}

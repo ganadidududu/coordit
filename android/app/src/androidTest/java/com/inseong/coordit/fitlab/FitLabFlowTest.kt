@@ -113,8 +113,7 @@ class FitLabFlowTest {
             click("fitlab-source-url"); capture("02-url")
             click("fitlab-back")
             click("fitlab-source-ocr"); capture("03-ocr")
-            click("fitlab-back")
-            click("fitlab-source-manual"); capture("04-manual")
+            click("fitlab-ocr-manual"); capture("04-manual")
             fill("fitlab-product-name", "QA 티셔츠")
             fill("fitlab-size-label-0", "M")
             fill("fitlab-size-0-shoulder_width", "45")
@@ -133,7 +132,9 @@ class FitLabFlowTest {
             assertEquals(FitLabRoute.References, model.state.value.screen)
             capture("06-references")
 
-            click("fitlab-reference-ref-1")
+            click("fitlab-choose-closet")
+            compose.onNodeWithTag("fitlab-reference-ref-1").performClick()
+            compose.onNodeWithTag("fitlab-reference-picker-done").performClick()
             click("fitlab-submit")
             ready(model)
             assertEquals(FitLabRoute.Loading, model.state.value.screen)
@@ -268,12 +269,18 @@ class FitLabFlowTest {
             click("fitlab-url-import")
             ready(model)
             assertEquals(2, model.state.value.draft.sizes.size)
+            click("fitlab-edit-product")
             click("fitlab-lower")
             compose.onNodeWithTag("fitlab-category-cancel").performTouchInput { click(center) }
             compose.waitUntil(5_000) { compose.onAllNodesWithTag("fitlab-category-cancel").fetchSemanticsNodes().isEmpty() }
             assertEquals(true, model.state.value.draft.upper)
             assertEquals(2, model.state.value.draft.sizes.size)
             assertEquals(45.0, model.state.value.draft.sizes.first().measurements["shoulder_width"])
+            click("fitlab-lower")
+            compose.onNodeWithTag("fitlab-category-confirm").performClick()
+            assertEquals(com.inseong.coordit.data.home.HomeCategory.Pants, model.state.value.draft.category)
+            assertEquals(true, model.state.value.draft.sizes.all { it.measurements.isEmpty() })
+            assertEquals("링크 티셔츠", model.state.value.draft.productName)
         } finally {
             compose.runOnUiThread { models.clear() }
         }
@@ -285,9 +292,11 @@ class FitLabFlowTest {
     }
 
     private fun click(tag: String) {
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("input keyevent 111").close()
+        compose.waitForIdle()
         val node = compose.onNodeWithTag(tag)
         if (tag != "fitlab-back") node.performScrollTo()
-        node.performClick()
+        node.performTouchInput { click(center) }
         compose.waitForIdle()
     }
 

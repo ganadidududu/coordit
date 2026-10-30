@@ -68,6 +68,8 @@ struct CoorditOnboardingView: View {
 
     @EnvironmentObject private var backendSession: CoorditBackendSessionStore
     @FocusState private var focusedField: Field?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var navigationDirection: CoorditNavigationDirection = .forward
     @State private var step: Step = .profile
     @State private var displayName = ""
     @State private var gender = ""
@@ -113,6 +115,7 @@ struct CoorditOnboardingView: View {
                                 }
                             }
                             .padding(.top, metrics.value(22))
+                            .coorditScreenTransition(value: step, direction: navigationDirection)
                         }
                         .padding(.horizontal, metrics.value(16))
                         .padding(.bottom, metrics.value(32))
@@ -543,7 +546,8 @@ struct CoorditOnboardingView: View {
     private func move(to nextStep: Step) {
         focusedField = nil
         validationMessage = ""
-        withAnimation(.easeOut(duration: 0.2)) {
+        navigationDirection = nextStep.rawValue >= step.rawValue ? .forward : .backward
+        withAnimation(CoorditMotion.navigation(reduceMotion: reduceMotion)) {
             step = nextStep
         }
     }

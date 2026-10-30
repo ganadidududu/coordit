@@ -1,0 +1,30 @@
+{
+  "dataset_id": "aihub-71501",
+  "license_id": "AI-Hub-71501-2026-10-28",
+  "review_date": "2026-10-28",
+  "reviewer": "Coordit source/terms audit with user's explicit agreement acceptance",
+  "source_url": "https://www.aihub.or.kr/aihubdata/data/view.do?dataSetSn=71501",
+  "agreement_url": "https://www.aihub.or.kr/aihubdata/data/dwld.do?dataSetSn=71501",
+  "policy_url": "https://aihub.or.kr/intrcn/guid/usagepolicy.do?currMenu=151&topMenu=105",
+  "faq_url": "https://aihub.or.kr/aihubnews/faq/list.do",
+  "source_authority": "NIA and listed dataset builders; original crowdsourced photography, participant agreements and deidentification described by original construction guide",
+  "guide_sha256": "68f3aaa3a7fe00d645f9967e5941dde2f0e7b320d03daa9b043d77e4fbabfe5e",
+  "manual_sha256": "947f2a0b8164f7496ea3a03ee793874033d7038e6de31d9b151493e98184d453",
+  "user_accepted_current_agreement": true,
+  "platform_download_application_submitted": true,
+  "platform_access_verified": "Individual file links appeared after submission; authenticated coat and jacket label TAR downloads verified locally",
+  "commercial_training_allowed": true,
+  "source_redistribution_allowed": false,
+  "cross_border_source_transfer_allowed": false,
+  "app_or_server_model_release_approved": false,
+  "approved_scope": ["local training in the approved user's Korean environment", "local preprocessing and annotation"],
+  "obligations": [
+    "Attribute the formal dataset name, AI Hub and NIA in trained products and derivative notices",
+    "No third-party access, source sharing or redistribution without provider/NIA approval",
+    "No overseas source transfer or use by foreign entities without separate agreement",
+    "Use source only for AI training; do not reidentify participants",
+    "Follow platform reporting/deletion instructions and separately review any deployment jurisdiction"
+  ],
+  "measurement_protocol": "Guide explicitly states cm; top front length HPS parallel to center front; chest flat width 1 inch below armpit multiplied by two; shoulder width from back; sleeve shoulder to lower cuff; pants lengths/rise start below waistband. Native values are preserved without claiming Coordit seam coordinates.",
+  "not_approved": ["fabricated seam keypoints", "unreviewed flat-width/AR endpoint substitution", "production accuracy", "app/server checkpoint deployment", "source photo transmission to third-party AI"]
+}

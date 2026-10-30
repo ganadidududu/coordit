@@ -1,6 +1,9 @@
 import { load } from "cheerio";
+import { factsFromRecord } from "./product-facts";
+import type { ProductFact } from "../product-import.types";
 
 export type ExtractedProductData = {
+  readonly facts: readonly ProductFact[];
   readonly name: string | null;
   readonly brand: string | null;
   readonly category: string | null;
@@ -50,7 +53,7 @@ const isProductRecord = (value: Record<string, unknown>): boolean => {
   const productType = type === "Product" || (Array.isArray(type) && type.includes("Product"));
   if (productType) return true;
   const keys = Object.keys(value).map((key) => key.toLowerCase());
-  return keys.includes("productname") || (keys.includes("name") && keys.some((key) => /sku|productid|goodsno/.test(key)));
+  return keys.includes("productname") || ((keys.includes("goodsname") || keys.includes("itemname")) && keys.some((key) => /sku|productid|goodsno|itemid/.test(key))) || (keys.includes("name") && keys.some((key) => /sku|productid|goodsno/.test(key)));
 };
 
 const findProductRecord = (root: unknown): Record<string, unknown> | null => {
@@ -61,7 +64,7 @@ const findProductRecord = (root: unknown): Record<string, unknown> | null => {
     const value = queue.shift();
     if (isRecord(value)) {
       if (isProductRecord(value)) return value;
-      queue.push(...Object.values(value));
+      queue.push(...Object.entries(value).filter(([key]) => !/review|recommend|related|author/i.test(key)).map(([, item]) => item));
     } else if (Array.isArray(value)) {
       queue.push(...value);
     }
@@ -92,6 +95,7 @@ export const extractProductFromUnknown = (root: unknown): ExtractedProductData |
   const priceValue = firstString(record.price, record.salePrice, offers.price);
   const price = priceValue === null ? null : Number(priceValue.replace(/[^\d.]/g, ""));
   return {
+    facts: factsFromRecord(record),
     name: firstString(record.name, record.productName, record.goodsName, record.itemName),
     brand: brandName(record.brand) ?? firstString(record.brandName, record.maker),
     category: firstString(record.category, record.categoryName),

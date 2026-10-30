@@ -41,7 +41,12 @@ class ClosetFlowTest {
             click("closet-item-upper"); ready(model); capture("03b-reference-detail")
             click("closet-back")
             click("closet-add"); capture("04-method")
-            click("closet-method-manual"); capture("05-manual")
+            click("closet-method-camera")
+            compose.onNodeWithText("카메라 측정 기능은 준비 중입니다!").assertIsDisplayed()
+            capture("04a-camera-notice")
+            compose.onNodeWithTag("camera-coming-soon-close").performClick()
+            click("closet-method-photo")
+            click("closet-switch-manual"); capture("05-manual")
             compose.onNodeWithTag("closet-submit").assertIsNotEnabled()
             assertTrue(api.requests.isEmpty())
             fill("closet-name", "QA 수동 티셔츠")
@@ -88,6 +93,42 @@ class ClosetFlowTest {
             assertEquals(Route.Manual, model.state.value.screen)
         } finally { compose.runOnUiThread { models.clear() } }
     }
+    @Test fun helpExampleKeepsOriginalPhotoDraftBitmap() {
+        val api = ClosetFixture()
+        val sessions = SessionRepository(ClosetAuthApi(), ClosetMemoryStore())
+        runBlocking { sessions.loginGoogle("fixture-token", "fixture-nonce") }
+        val models = ViewModelStore()
+        val photos = ClosetPhotos()
+        val originalPhoto = android.graphics.Bitmap.createBitmap(32, 32, android.graphics.Bitmap.Config.ARGB_8888)
+        lateinit var model: ClosetViewModel
+        compose.runOnUiThread {
+            model = ViewModelProvider(models, object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST") override fun <T : ViewModel> create(modelClass: Class<T>): T = ClosetViewModel(ClosetRepository(api), sessions) as T
+            })[ClosetViewModel::class.java]
+            model.startAdd()
+            model.chooseMethod(com.inseong.coordit.data.closet.ClosetMethod.Photo)
+            model.editDraft { it.copy(name = "원래 사진 의류", hasGarmentImage = true) }
+            photos.images["draft"] = originalPhoto
+        }
+        try {
+            compose.setContent { ClosetScreen(model, photos, {}, {}, {}) }
+            compose.onNodeWithTag("closet-tutorial-restart").performClick()
+            compose.onNodeWithTag("usage-guide-example").performClick()
+            compose.runOnUiThread { model.prefill() }
+            ready(model)
+            compose.runOnUiThread { model.selectSize("example-M"); model.save() }
+            ready(model)
+            assertEquals(Route.Detail, model.state.value.screen)
+            assertSame(originalPhoto, photos.images["draft"])
+            assertFalse(photos.images.containsKey("tutorial-clothing"))
+            click("closet-example-finish")
+            assertEquals(Route.Photo, model.state.value.screen)
+            assertTrue(model.state.value.draft.hasGarmentImage)
+            assertSame(originalPhoto, photos.images["draft"])
+            assertTrue(api.requests.isEmpty())
+        } finally { compose.runOnUiThread { models.clear() } }
+    }
+
     private fun ready(model: ClosetViewModel) { compose.waitUntil(5000) { !model.state.value.busy && !model.state.value.loading }; compose.waitForIdle() }
     private fun click(tag: String) {
         val node = compose.onNodeWithTag(tag)
@@ -106,7 +147,7 @@ class ClosetFlowTest {
     private fun fill(tag: String, value: String) { val node = compose.onNodeWithTag(tag); if (tag != "closet-rename-input") node.performScrollTo(); node.performTextReplacement(value) }
     private fun capture(name: String) {
         compose.waitForIdle()
-        if (name !in setOf("10-detail-scroll", "11-rename", "12-delete", "14-link-error", "15-size-choice", "17-photo-scroll")) {
+        if (name !in setOf("04a-camera-notice", "10-detail-scroll", "11-rename", "12-delete", "14-link-error", "15-size-choice", "17-photo-scroll")) {
             compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollBy)).onFirst()
                 .performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, -100000f) }
             compose.waitForIdle()

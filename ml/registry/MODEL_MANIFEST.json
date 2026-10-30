@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "models": [
+    {
+      "id": "mmpose-rtmpose",
+      "source_url": "https://github.com/open-mmlab/mmpose",
+      "code_license": "Apache-2.0",
+      "weights_license": "checkpoint-dependent",
+      "training_data_rights": "checkpoint-dependent",
+      "status": "pending_review",
+      "reason": "No selected checkpoint or training-data bill of materials; code license alone is insufficient.",
+      "checked_at": "2026-10-27",
+      "app_artifacts": [],
+      "server_artifacts": []
+    },
+    {
+      "id": "sam2",
+      "source_url": "https://github.com/facebookresearch/sam2",
+      "code_license": "Apache-2.0",
+      "weights_license": "Apache-2.0 publisher statement",
+      "training_data_rights": "SA-V requires separate audit",
+      "status": "pending_review",
+      "reason": "Segmentation only, not garment seam detection; training rights not fully reviewed.",
+      "checked_at": "2026-10-27",
+      "app_artifacts": [],
+      "server_artifacts": []
+    },
+    {
+      "id": "rf-detr-seg",
+      "source_url": "https://github.com/roboflow/rf-detr",
+      "code_license": "Apache-2.0 (core); PML for Plus",
+      "weights_license": "model-specific",
+      "training_data_rights": "checkpoint-dependent",
+      "status": "pending_review",
+      "reason": "Must pin selected Apache-designated weights and dataset lineage; Plus terms separate.",
+      "checked_at": "2026-10-27",
+      "app_artifacts": [],
+      "server_artifacts": []
+    },
+    {
+      "id": "depth-anything-v2-metric-hypersim-small",
+      "source_url": "https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Hypersim-Small",
+      "code_license": "Apache-2.0",
+      "weights_license": "Apache-2.0 model card",
+      "training_data_rights": "Hypersim CC-BY-SA-3.0; teacher/pretraining lineage unresolved",
+      "status": "pending_review",
+      "reason": "Share-alike/asset and teacher-distillation obligations unresolved. Do not download/deploy weights.",
+      "checked_at": "2026-10-27",
+      "app_artifacts": [],
+      "server_artifacts": []
+    },
+    {
+      "id": "depth-anything-v2-base-large-giant",
+      "source_url": "https://github.com/DepthAnything/Depth-Anything-V2",
+      "code_license": "Apache-2.0",
+      "weights_license": "CC-BY-NC-4.0",
+      "training_data_rights": "unreviewed",
+      "status": "blocked",
+      "reason": "Noncommercial checkpoint terms.",
+      "checked_at": "2026-10-27",
+      "app_artifacts": [],
+      "server_artifacts": []
+    },
+    {
+      "id": "yolov8-yolo11",
+      "source_url": "https://www.ultralytics.com/license",
+      "code_license": "AGPL-3.0 or commercial contract",
+      "weights_license": "AGPL-3.0 or commercial contract",
+      "training_data_rights": "checkpoint-dependent",
+      "status": "blocked",
+      "reason": "No compatible commercial contract held; no integration.",
+      "checked_at": "2026-10-27",
+      "app_artifacts": [],
+      "server_artifacts": []
+    }
+  ]
+}

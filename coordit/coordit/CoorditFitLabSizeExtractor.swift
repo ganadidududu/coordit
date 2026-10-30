@@ -57,6 +57,7 @@ enum CoorditFitLabSizeExtractor {
     }
 
     static func referenceClothingSizeRequest(from draft: CoorditClosetDraft) async -> ClothingSizeRequest {
+        if let measurement = draft.cameraMeasurement { return measurement.clothingSizeRequest }
         if let selectedRow = draft.selectedSizeRow {
             return selectedRow.clothingSizeRequest
         }

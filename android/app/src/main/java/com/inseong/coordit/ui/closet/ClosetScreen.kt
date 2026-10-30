@@ -36,6 +36,8 @@ import com.inseong.coordit.ui.components.*
 import com.inseong.coordit.ui.theme.*
 import java.util.Locale
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class ClosetPhotos(context: android.content.Context? = null, userId: String? = null) {
     val images = mutableStateMapOf<String, Bitmap>()
@@ -52,48 +54,61 @@ class ClosetPhotos(context: android.content.Context? = null, userId: String? = n
 }
 
 @Composable
-fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Unit, onProfile: () -> Unit, onFitLab: () -> Unit) {
+fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Unit, onProfile: () -> Unit, onFitLab: () -> Unit, returningToFitLab: Boolean = false, onExampleFinished: (Boolean) -> Unit = {}, referencePractice: Boolean = false, onStartExample: () -> Unit = { model.beginExample() }, onReferenceRegistered: (com.inseong.coordit.data.fitlab.FitLabReference) -> Unit = { onFitLab() }) {
     val state by model.state.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(state.items.map { it.id }) { photos.load(state.items.map { it.id }) }
     val focus = LocalFocusManager.current
     var upper by rememberSaveable { mutableStateOf(true) }
     var categoryName by rememberSaveable { mutableStateOf<String?>(null) }
     var search by rememberSaveable { mutableStateOf("") }
     var rename by remember { mutableStateOf<String?>(null) }
     var confirmDelete by remember { mutableStateOf(false) }
-    val scroll = key(state.screen) { rememberScrollState() }
-    val scope = rememberCoroutineScope()
-    val tutorialTarget = when (state.screen) {
-        ClosetScreenRoute.Overview -> "add"
-        ClosetScreenRoute.Method -> "method"
-        ClosetScreenRoute.Link -> when {
-            state.draft.selectedSizeRowId != null -> "register"
-            state.draft.sizeRows.isNotEmpty() -> "size"
-            com.inseong.coordit.sharing.ProductLinks.isProductUrl(state.draft.productLink) -> "analyze"
-            else -> "link"
-        }
-        ClosetScreenRoute.Manual, ClosetScreenRoute.Photo -> "link"
-        ClosetScreenRoute.Detail -> if (state.detail?.comparison?.fitScore != null) "score" else null
-        else -> null
-    }
-    fun back() { focus.clearFocus(); if (!state.busy) { if (state.screen == ClosetScreenRoute.Overview) onHome() else model.back() } }
+    var showsCardlessCapture by remember { mutableStateOf(false) }
+    var cameraNotice by remember { mutableStateOf(false) }
+    var guide by remember { mutableStateOf(false) }
+    if (guide) com.inseong.coordit.ui.guidance.UsageGuideSheet(com.inseong.coordit.ui.guidance.UsageGuide.Closet,
+        { guide = false }, { guide = false; onStartExample() })
+    if (cameraNotice) CameraComingSoon { cameraNotice = false }
+    var pendingLeave by remember { mutableStateOf<(() -> Unit)?>(null) }
+    fun leave(action: () -> Unit) { if (state.draft.isExample) pendingLeave = action else action() }
+    fun back() { focus.clearFocus(); if (!state.busy) { if (state.draft.isExample) leave(onHome) else if (state.screen == ClosetScreenRoute.Overview) onHome() else model.back() } }
+    pendingLeave?.let { action -> CoorditConfirmationDialog("처음이라면 끝까지 따라 해보는 걸 추천해요", "예시로 등록과 비교 흐름을 익힐 수 있어요. 나중에 사용법에서 다시 시작할 수도 있어요.", "계속 따라하기", "이번에는 건너뛰기", { pendingLeave = null }, { pendingLeave = null; model.finishExample(); onExampleFinished(false); if (!referencePractice) action() }, "closet-example-skip") }
     BackHandler { back() }
-    LaunchedEffect(state.items.map { it.id }) { photos.load(state.items.map { it.id }) }
-    LaunchedEffect(state.screen, state.detail?.item?.id) {
+    if (showsCardlessCapture) com.inseong.coordit.ui.fitlab.camera.CardlessGarmentCapture(
+        category = state.draft.category.wireName, inferLandmarks = model::inferGarment, onCancel = { showsCardlessCapture = false }, onMeasured = { capture ->
+            val keys = com.inseong.coordit.data.fitlab.camera.GarmentMeasurementPolicy.dimensions(capture.category)
+            val values = keys.map { capture.centimeters[it]?.let { value -> String.format(java.util.Locale.US, "%.1f", value) }.orEmpty() }
+            photos.images["draft"] = capture.bitmap
+            model.editDraft { it.copy(measurement1 = values.getOrElse(0) { "" }, measurement2 = values.getOrElse(1) { "" },
+                measurement3 = values.getOrElse(2) { "" }, measurement4 = values.getOrElse(3) { "" },
+                hasGarmentImage = true, cameraMetadata = capture.metadata) }
+            showsCardlessCapture = false
+        })
+    LaunchedEffect(state.screen, state.detail?.item?.id, state.draft.isExample, state.busy, state.registeredFitLabReference, referencePractice) {
+        if (state.draft.isExample) {
+            if (referencePractice && state.screen == ClosetScreenRoute.Detail) {
+                model.finishExample()
+                onExampleFinished(true)
+            }
+            return@LaunchedEffect
+        }
         if (state.screen == ClosetScreenRoute.Overview) photos.images.remove("draft")
         if (state.screen == ClosetScreenRoute.Detail) {
             state.detail?.item?.let { item ->
                 photos.images.remove("draft")?.let { if (!photos.save(item.id, it)) model.error("의류 사진을 기기에 저장하지 못했어요. 사진을 다시 선택해 주세요.") }
                 photos.load(listOf(item.id))
             }
+            if (returningToFitLab && !state.busy) state.registeredFitLabReference?.let { reference ->
+                withContext(Dispatchers.Main.immediate) { onReferenceRegistered(reference) }
+            }
         }
     }
-    GuidedScreen("closet",tutorialTarget) {
-    val dismissTutorial = tutorialDismissAction()
     BoxWithConstraints(Modifier.fillMaxSize().testTag("closet-${state.screen.name.lowercase()}")) {
         val s = maxWidth.value / ClosetDesign.canvasWidth
         SharedAppBackground(s)
         Column(Modifier.fillMaxSize().imePadding().padding(top = (ClosetDesign.contentTop * s).dp)) {
-            ClosetTitleBar(when (state.screen) {
+            FeatureTitleBar(when (state.screen) {
                 ClosetScreenRoute.Overview -> "CLOSET"
                 ClosetScreenRoute.Method -> "ADD CLOTHES"
                 ClosetScreenRoute.Manual -> "MANUAL INPUT"
@@ -101,10 +116,19 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                 ClosetScreenRoute.Photo -> "PHOTO INPUT"
                 ClosetScreenRoute.Saving -> "FIT CHECK"
                 ClosetScreenRoute.Detail -> "FIT DETAIL"
-            }, s, ::back, Modifier.align(Alignment.CenterHorizontally).testTag("closet-back"))
-            Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(scroll)
+            }, s, ::back, { guide = true }, "closet-back", "closet-tutorial-restart")
+            Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())
                 .padding(horizontal = ((when (state.screen) { ClosetScreenRoute.Overview -> ClosetDesign.overviewInset; ClosetScreenRoute.Detail -> ClosetDesign.detailInset; else -> ClosetDesign.contentInset }) * s).dp)
                 .padding(top = ((when (state.screen) { ClosetScreenRoute.Overview -> 28; ClosetScreenRoute.Method -> 24; ClosetScreenRoute.Detail -> 26; else -> 22 }) * s).dp, bottom = (120 * s).dp), verticalArrangement = Arrangement.spacedBy(((when (state.screen) { ClosetScreenRoute.Overview -> 22; ClosetScreenRoute.Detail -> 20; ClosetScreenRoute.Method -> 18; else -> 16 }) * s).dp)) {
+                if (state.draft.isExample) {
+                    val hint = when {
+                        state.screen == ClosetScreenRoute.Detail -> "등록한 옷 확인하기" to "등록한 옷의 사이즈와 치수를 확인해요. 핏랩에서 옷장에서 골라 비교를 누르면 이 옷을 기준으로 선택할 수 있어요."
+                        state.draft.selectedSizeRowId != null -> "선택한 사이즈 등록하기" to "선택한 사이즈로 등록하면 내 옷장에 저장돼요. 예시에서는 저장 없이 결과를 볼 수 있어요."
+                        state.draft.sizeRows.isNotEmpty() -> "내 사이즈 선택하기" to "사이즈표에서 실제로 보유한 옷의 사이즈를 누릅니다. 선택한 사이즈의 실측 정보가 저장됩니다."
+                        else -> "링크 분석하기" to "링크 분석하기를 누르면 상품명과 사이즈별 실측 정보를 불러옵니다. 분석이 완료되면 사이즈를 선택합니다."
+                    }
+                    com.inseong.coordit.ui.guidance.PracticeHint("CLOSET 체험 · 저장·차감 없음", hint.first, hint.second, { leave {} }, s)
+                }
                 when (state.screen) {
                     ClosetScreenRoute.Overview -> {
                         Column(Modifier.fillMaxWidth().background(AppColors.panel,ContinuousRoundedShape((7*s).dp)).padding((ClosetDesign.cardPadding*s).dp),verticalArrangement=Arrangement.spacedBy((12*s).dp)) {
@@ -120,7 +144,7 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                             }
                             MeasurementGrid(profile?.measurements.orEmpty(), upper, s)
                         }
-                        GuideTarget("add",s) { ClosetAction("보유 의류 추가하기", s, "closet-add", enabled = !state.loading, font=11.5f, capsule=true) { photos.images.remove("draft"); model.startAdd() } }
+                        ClosetAction("보유 의류 추가하기", s, "closet-add", enabled = !state.loading, font=11.5f, capsule=true) { photos.images.remove("draft"); model.startAdd() }
                         ClosetSearch(search, { search = it }, s)
                         if (state.loading) ClosetText("옷장을 불러오고 있어요.", 12f, s)
                         state.error?.let { ClosetError(it, s); ClosetAction("다시 시도", s, "closet-retry", secondary = true) { model.load() } }
@@ -133,18 +157,16 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                                 if (pair.size == 1) Spacer(Modifier.weight(1f))
                             }
                         } }
-                        GuideReplay(s) { scope.launch { scroll.scrollTo(0) } }
                     }
                     ClosetScreenRoute.Method -> {
                         Column(Modifier.padding(horizontal=(5*s).dp),verticalArrangement=Arrangement.spacedBy((5*s).dp)) {
                             ClosetText("어떻게 추가할까요?", 20f, s, bold = true)
-                            CoorditText("가지고 있는 정보에 맞는 방식을 선택해주세요.",CoorditTypography.gmarketMedium(11*s).copy(color=AppColors.ink.copy(alpha=.46f)))
+                            CoorditText("상품 링크나 사이즈표 캡처로 내 옷을 등록해요.",CoorditTypography.gmarketMedium(11*s).copy(color=AppColors.ink.copy(alpha=.46f)))
                         }
-                        GuideTarget("method",s) {
                         Column(verticalArrangement=Arrangement.spacedBy((11*s).dp)) {
-                            listOf(Triple(ClosetMethod.Link,"링크로 불러오기","상품 링크에서 사이즈 정보를 불러와요."), Triple(ClosetMethod.Photo,"사진으로 첨부하기","사이즈표 사진을 분석해요."), Triple(ClosetMethod.Manual,"직접 입력하기","실측 사이즈를 직접 입력해요.")).forEach { (method,title,description) ->
+                            listOf(Triple(ClosetMethod.Link,"링크로 불러오기","상품 링크에서 사이즈 정보를 불러와요."), Triple(null,"내 옷 촬영하기","사진·AR로 치수를 재요."), Triple(ClosetMethod.Photo,"사이즈표 사진 넣기","캡처에서 치수를 읽어요")).forEach { (method,title,description) ->
                                 val shape=ContinuousRoundedShape((ClosetDesign.panelRadius*s).dp)
-                                Pressable({ model.chooseMethod(method) }, Modifier.fillMaxWidth().shadow((ClosetDesign.smallGap*s).dp,shape,clip=false,ambientColor=Color.Black.copy(alpha=.06f),spotColor=Color.Black.copy(alpha=.06f)).testTag("closet-method-${method.name.lowercase()}"),cornerRadius=9*s) {
+                                Pressable({ if (method == null) cameraNotice = true else model.chooseMethod(method) }, Modifier.fillMaxWidth().shadow((ClosetDesign.smallGap*s).dp,shape,clip=false,ambientColor=Color.Black.copy(alpha=.06f),spotColor=Color.Black.copy(alpha=.06f)).testTag("closet-method-${method?.name?.lowercase() ?: "camera"}"),cornerRadius=9*s) {
                                     Row(Modifier.fillMaxWidth().heightIn(min=(84*s).dp).background(AppColors.panel,shape).border((.8f*s).dp,AppColors.ink.copy(alpha=.08f),RoundedCornerShape((ClosetDesign.panelRadius*s).dp)).padding((13*s).dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy((ClosetDesign.cardPadding*s).dp)) {
                                         Box(Modifier.size((50*s).dp).background(AppColors.ink,ContinuousRoundedShape((ClosetDesign.panelRadius*s).dp)),contentAlignment=Alignment.Center) { MethodIcon(method,s) }
                                         Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy((5*s).dp)) {
@@ -159,12 +181,10 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                                 }
                             }
                         }
-                        }
-                        ClosetAction("준비된 정보가 없나요? 예시 링크로 체험하기",s,"closet-method-example",secondary=true) { model.startExample() }
                     }
                     ClosetScreenRoute.Manual, ClosetScreenRoute.Link, ClosetScreenRoute.Photo -> {
                         val draft = state.draft
-                        if (draft.isTutorialExample) ExampleNotice(s)
+                        if (draft.isExample) com.inseong.coordit.ui.fitlab.ExampleNotice(s)
                         ClosetPanel(s, if (state.screen == ClosetScreenRoute.Link) "옷 종류" else "기본 정보",
                             if (state.screen == ClosetScreenRoute.Link) "링크를 분석하기 전에 옷 종류를 선택해 주세요." else "옷장에 표시할 이름과 종류를 입력해주세요.") {
                             if (state.screen != ClosetScreenRoute.Link) ClosetEntry(draft.name, { value -> model.editDraft { it.copy(name = value) } }, "의류 이름", "closet-name", s, enabled = !state.busy)
@@ -179,9 +199,13 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                                 } }
                             }
                         }
+                        if (state.screen == ClosetScreenRoute.Manual && com.inseong.coordit.BuildConfig.CARDLESS_AR_ENABLED) {
+                            CoorditButton("카드 없이 촬영 · 실험 기능", { showsCardlessCapture = true },
+                                Modifier.testTag("closet-cardless-capture"), enabled = !state.busy, secondary = true)
+                        }
                         if (state.screen == ClosetScreenRoute.Manual) ClosetPanel(s, "실측 사이즈", "단위는 cm로 입력해주세요.") {
                             val values = listOf(draft.measurement1,draft.measurement2,draft.measurement3,draft.measurement4)
-                            Column(verticalArrangement = Arrangement.spacedBy((8 * s).dp)) { fields(draft.category.upper).chunked(2).forEachIndexed { row, pair ->
+                            Column(verticalArrangement = Arrangement.spacedBy((8 * s).dp)) { categoryFields(draft.category).chunked(2).forEachIndexed { row, pair ->
                                 Row(horizontalArrangement = Arrangement.spacedBy((8 * s).dp)) { pair.forEachIndexed { col, field ->
                                     val i = row * 2 + col
                                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy((5 * s).dp)) {
@@ -193,12 +217,11 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                         }
                         }
                         if (state.screen == ClosetScreenRoute.Link) {
-                            GuideTarget("link",s) {
                             ClosetPanel(s,"상품 링크","사이즈 정보가 있는 상품 페이지 주소를 붙여넣어 주세요.") {
-                                ClosetEntry(draft.productLink, { value -> model.editDraft { it.copy(productLink = value) } }, "https://", "closet-url", s, enabled = !state.busy, linkIcon=true)
-                                val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
-                                ClosetAction("붙여넣기",s,"closet-url-paste",secondary=true,enabled=!state.busy) { clipboard.getText()?.text?.let { text -> model.editDraft { it.copy(productLink=text.trim()) } } }
-                            }
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy((8*s).dp)) {
+                                    Box(Modifier.weight(1f)) { ClosetEntry(draft.productLink, { value -> model.editDraft { it.copy(productLink = value) } }, "상품 링크 입력", "closet-url", s, enabled = !state.busy, linkIcon=true) }
+                                    Box(Modifier.width((82*s).dp)) { LinkPasteButton(s, "closet-link-paste", !state.busy) { value -> model.editDraft { it.copy(productLink = value) } } }
+                                }
                             }
                             state.error?.let { error -> ClosetPanel(s,"링크에서 표를 찾지 못했어요",error) {
                                 Row(horizontalArrangement=Arrangement.spacedBy((ClosetDesign.smallGap*s).dp)) {
@@ -218,34 +241,30 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                                 model.setSizeRows(rows.mapIndexed { i,row -> ClosetSizeRow(i.toString(), row.label, row.measurements) })
                             }, onGarment = { bitmap -> photos.images["draft"] = bitmap; model.editDraft { it.copy(hasGarmentImage = true) } }, enabled = !state.busy, scale = s)
                         }
-                        if (draft.sizeRows.isNotEmpty() && state.screen != ClosetScreenRoute.Manual) GuideTarget("size",s) { ClosetPanel(s,"내 사이즈 선택","구매해서 보유 중인 사이즈 한 개를 선택해 주세요.") {
+                        if (draft.sizeRows.isNotEmpty() && state.screen != ClosetScreenRoute.Manual) ClosetPanel(s,"내 사이즈 선택","구매해서 보유 중인 사이즈 한 개를 선택해 주세요.") {
                             draft.sizeRows.forEach { row ->
                                 Pressable({ model.selectSize(row.id) }, Modifier.fillMaxWidth().testTag("closet-size-${row.id}"), enabled = !state.busy) {
                                     Column(Modifier.fillMaxWidth().background(if (draft.selectedSizeRowId == row.id) AppColors.ink else AppColors.closetField).padding(12.dp)) {
                                         val color = if (draft.selectedSizeRowId == row.id) Color.White else AppColors.ink
                                         CoorditText(row.label,CoorditTypography.gmarketBold(ClosetDesign.measurementFont*s).copy(color=color))
-                                        CoorditText(fields(draft.category.upper).mapNotNull { (key,label) -> row.measurements[key]?.let { "$label ${number(it)}" } }.joinToString("  "),CoorditTypography.gmarketMedium(10*s).copy(color=color))
+                                        CoorditText(categoryFields(draft.category).mapNotNull { (key,label) -> row.measurements[key]?.let { "$label ${number(it)}" } }.joinToString("  "),CoorditTypography.gmarketMedium(10*s).copy(color=color))
                                     }
                                 }
                             }
                         }
-                        }
                         if(state.screen != ClosetScreenRoute.Link) state.error?.let { ClosetError(it,s) }
-                        val manualReady = draft.name.isNotBlank() && listOf(draft.measurement1,draft.measurement2,draft.measurement3,draft.measurement4).all { it.toDoubleOrNull()?.let { v -> v.isFinite() && v > 0 } == true }
+                        val manualReady = draft.name.isNotBlank() && listOf(draft.measurement1,draft.measurement2,draft.measurement3,draft.measurement4).take(draft.measurementKeys.size).all { it.toDoubleOrNull()?.let { v -> v.isFinite() && v > 0 } == true }
                         val ready = if (state.screen == ClosetScreenRoute.Manual) manualReady else if (state.screen == ClosetScreenRoute.Link && draft.sizeRows.isEmpty()) draft.productLink.isNotBlank() else draft.name.isNotBlank() && draft.selectedSizeRowId != null && (state.screen != ClosetScreenRoute.Photo || draft.hasSizeChartImage)
                         if(state.screen == ClosetScreenRoute.Link) Spacer(Modifier.height((1*s).dp))
-                        GuideTarget(if (draft.sizeRows.isEmpty()) "analyze" else "register",s) {
                         ClosetAction(if (state.screen == ClosetScreenRoute.Link) { if(state.busy) "링크 분석 중…" else if(draft.sizeRows.isEmpty()) "링크 분석하기" else "선택한 사이즈로 등록" } else if(state.busy) "불러오고 있어요" else "보유 의류 등록하기",s,"closet-submit",enabled=ready && !state.busy,font=17f) {
                             focus.clearFocus()
                             if (state.screen == ClosetScreenRoute.Link && draft.sizeRows.isEmpty()) model.prefill() else model.save()
-                        }
                         }
                         if (state.screen == ClosetScreenRoute.Photo) ClosetAction("직접 입력으로 계속하기",s,"closet-switch-manual",secondary=true,enabled=!state.busy) { model.chooseMethod(ClosetMethod.Manual) }
                     }
                     ClosetScreenRoute.Saving -> {
                         Spacer(Modifier.height((120*s).dp))
                         ClosetPanel(s) {
-                            OrbitLoadingIndicator(s,state.busy,Modifier.align(Alignment.CenterHorizontally))
                             ClosetText(if (state.busy) "보유 의류를 등록하고 있어요" else "저장하지 못했어요",15f,s,bold=true)
                             ClosetText(if(state.busy) "선택한 사이즈와 실측 정보를 옷장에 저장하고 있어요." else "입력한 정보는 그대로예요. 다시 시도해 주세요.",9f,s,muted=true)
                             state.error?.let { ClosetError(it,s) }
@@ -253,22 +272,26 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                         }
                     }
                     ClosetScreenRoute.Detail -> {
+                        if (state.draft.isExample) {
+                            com.inseong.coordit.ui.fitlab.ExampleNotice(s)
+                            ClosetAction(if (referencePractice) "핏랩으로 돌아가 비교하기" else "체험 마치고 내 옷 등록하기", s, "closet-example-finish") { model.finishExample(); onExampleFinished(true) }
+                        } else if (returningToFitLab) {
+                            ClosetAction("핏랩으로 돌아가 비교하기", s, "closet-return-fitlab", onClick = onFitLab)
+                        }
                         if (state.loading) ClosetText("상세 정보를 불러오고 있어요.",12f,s)
                         state.detail?.let { detail ->
-                            if (detail.item.id == "tutorial-example") ExampleNotice(s)
                             Row(Modifier.padding(top=(18*s).dp),horizontalArrangement=Arrangement.spacedBy((13*s).dp)) {
                                 GarmentArtwork(detail.item.category.upper,photos.images[detail.item.id],Modifier.size((126*s).dp,(168*s).dp),s)
                                 Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy((ClosetDesign.smallGap*s).dp)) {
                                     Box(Modifier.heightIn(min=(ClosetDesign.fieldHeight*s).dp)) { CoorditText(detail.item.name,CoorditTypography.gmarketBold(19*s).copy(color=Color.Black)) }
-                                    ClosetAction("옷 이름 수정하기",s,"closet-rename",secondary=true,font=10f,enabled=!state.busy && detail.item.id != "tutorial-example") { rename=detail.item.name }
-                                    ClosetGarmentPhotoPicker(onPhoto={ bitmap -> scope.launch { if (!photos.save(detail.item.id,bitmap)) model.error("의류 사진을 기기에 저장하지 못했어요. 다시 시도해 주세요.") } },enabled=!state.busy,compact=true,scale=s)
-                                    ClosetAction("내 옷장에서 삭제하기",s,"closet-delete",secondary=true,font=10f,enabled=!state.busy && detail.item.id != "tutorial-example") { confirmDelete=true }
+                                    ClosetAction("옷 이름 수정하기",s,"closet-rename",secondary=true,font=10f,enabled=!state.busy && !state.draft.isExample) { rename=detail.item.name }
+                                    ClosetGarmentPhotoPicker(onPhoto={ bitmap -> scope.launch { if (!photos.save(detail.item.id, bitmap)) model.error("의류 사진을 기기에 저장하지 못했어요. 사진을 다시 선택해 주세요.") } },enabled=!state.busy && !state.draft.isExample,compact=true,scale=s)
+                                    ClosetAction("내 옷장에서 삭제하기",s,"closet-delete",secondary=true,font=10f,enabled=!state.busy && !state.draft.isExample) { confirmDelete=true }
                                 }
                             }
-                            detail.sizes.firstOrNull()?.let { row -> DetailSizeChart(row.label, row.measurements, detail.item.category.upper, s) }
+                            detail.sizes.firstOrNull()?.let { row -> DetailSizeChart(row.label, row.measurements, detail.item.category, s) }
                             ClosetMannequin(detail.item.category.upper, detail.comparison?.diff.orEmpty(), s)
-                            GuideTarget("score",s,finish=true) { ClosetFitScore(detail.comparison,detail.item.category.upper,s) }
-                            if (detail.item.id == "tutorial-example") ClosetAction("예시 체험 마치기",s,"closet-example-finish") { dismissTutorial(); model.finishExample() }
+                            ClosetFitScore(detail.comparison,detail.item.category.upper,s)
                             detail.analysisError?.let { ClosetError(it,s) }
                         }
                         state.error?.let { ClosetError(it,s); ClosetAction("다시 시도",s,"closet-detail-retry",secondary=true) { state.detail?.item?.let(model::openItem) } }
@@ -276,22 +299,21 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                 }
             }
         }
-        CoorditHeader(s,onProfile,Modifier.align(Alignment.TopCenter).padding(top=(59*s).dp))
+        CoorditHeader(s,{ leave(onProfile) },Modifier.align(Alignment.TopCenter).padding(top=(55*s).dp))
         CoorditBottomNavigation(CoorditTab.Closet,s,{ tab -> if (!state.busy) when(tab) {
-            CoorditTab.Home -> onHome()
-            CoorditTab.FitLab -> onFitLab()
-            CoorditTab.Closet -> if(state.screen != ClosetScreenRoute.Overview) model.back()
+            CoorditTab.Home -> leave(onHome)
+            CoorditTab.FitLab -> leave(onFitLab)
+            CoorditTab.Closet -> if (state.draft.isExample) leave({}) else if(state.screen != ClosetScreenRoute.Overview) model.back()
         } },Modifier.align(Alignment.BottomCenter))
         rename?.let { value -> Dialog(onDismissRequest={ if(!state.busy) rename=null }) { ClosetPanel(s,"옷 이름 수정하기","옷장에 표시할 이름을 입력해 주세요.") {
             ClosetEntry(value,{rename=it},"옷 이름","closet-rename-input",s,enabled=!state.busy)
             ClosetAction("저장",s,"closet-rename-save",enabled=value.isNotBlank()&&!state.busy) { model.rename(value); rename=null }
             ClosetAction("취소",s,"closet-rename-cancel",secondary=true) {rename=null}
         } } }
-        if(confirmDelete) Dialog(onDismissRequest={if(!state.busy)confirmDelete=false}) { ClosetPanel(s,"옷장에서 삭제할까요?","의류와 저장된 사이즈 정보를 함께 삭제합니다.") {
-            ClosetAction("삭제",s,"closet-delete-confirm",enabled=!state.busy) {model.delete();confirmDelete=false}
+        if(confirmDelete) Dialog(onDismissRequest={if(!state.busy)confirmDelete=false}) { ClosetPanel(s,"옷장에서 삭제할까요?","\"${state.detail?.item?.name.orEmpty()}\"과 저장된 사이즈 정보를 함께 삭제합니다.") {
+            CoorditButton("삭제", {model.delete();confirmDelete=false}, Modifier.testTag("closet-delete-confirm"), enabled=!state.busy, danger=true)
             ClosetAction("취소",s,"closet-delete-cancel",secondary=true) {confirmDelete=false}
         } }
-    }
     }
 }
 
@@ -347,7 +369,7 @@ private fun MeasurementGrid(values:Map<String,Double?>,upper:Boolean,s:Float,dif
     }}} } }
 }
 @Composable
-private fun DetailSizeChart(label:String,values:Map<String,Double?>,upper:Boolean,s:Float) {
+private fun DetailSizeChart(label:String,values:Map<String,Double?>,category:HomeCategory,s:Float) {
     Column(Modifier.fillMaxWidth().background(AppColors.panel,ContinuousRoundedShape((ClosetDesign.panelRadius*s).dp)).padding((ClosetDesign.cardPadding*s).dp),verticalArrangement=Arrangement.spacedBy((12*s).dp)) {
         Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
             ClosetText("등록 사이즈표",14f,s,bold=true)
@@ -355,7 +377,7 @@ private fun DetailSizeChart(label:String,values:Map<String,Double?>,upper:Boolea
             CoorditText(label.ifBlank { "단일 사이즈" },CoorditTypography.gmarketMedium(11*s).copy(color=AppColors.ink.copy(alpha=.62f)))
         }
         Column(verticalArrangement=Arrangement.spacedBy((ClosetDesign.smallGap*s).dp)) {
-            fields(upper).chunked(2).forEach { pair ->
+            categoryFields(category).chunked(2).forEach { pair ->
                 Row(horizontalArrangement=Arrangement.spacedBy((ClosetDesign.smallGap*s).dp)) {
                     pair.forEach { (key,title) ->
                         Column(Modifier.weight(1f).background(Color.White.copy(alpha=.72f),ContinuousRoundedShape((7*s).dp)).padding((10*s).dp),verticalArrangement=Arrangement.spacedBy((3*s).dp)) {
@@ -399,26 +421,8 @@ private fun GarmentArtwork(upper:Boolean,bitmap:Bitmap?,modifier:Modifier,s:Floa
     }
 }
 @Composable
-private fun MethodIcon(method:ClosetMethod,s:Float) {
-    Canvas(Modifier.size((25*s).dp)) {
-        val stroke=androidx.compose.ui.graphics.drawscope.Stroke(width=2.dp.toPx())
-        if(method==ClosetMethod.Link){drawOval(Color.White,topLeft=androidx.compose.ui.geometry.Offset(0f,size.height*.2f),size=androidx.compose.ui.geometry.Size(size.width*.65f,size.height*.55f),style=stroke);drawOval(Color.White,topLeft=androidx.compose.ui.geometry.Offset(size.width*.35f,size.height*.2f),size=androidx.compose.ui.geometry.Size(size.width*.65f,size.height*.55f),style=stroke)}
-        else{drawRect(Color.White,style=stroke);if(method==ClosetMethod.Manual){for(i in 1..4)drawLine(Color.White,androidx.compose.ui.geometry.Offset(size.width*i/5,0f),androidx.compose.ui.geometry.Offset(size.width*i/5,size.height*.4f),stroke.width)}else{drawCircle(Color.White,size.width*.12f,androidx.compose.ui.geometry.Offset(size.width*.7f,size.height*.3f));drawLine(Color.White,androidx.compose.ui.geometry.Offset(0f,size.height),androidx.compose.ui.geometry.Offset(size.width*.5f,size.height*.45f),stroke.width)}}
-    }
-}
-
-@Composable
-private fun ClosetTitleBar(title:String,s:Float,onBack:()->Unit,modifier:Modifier=Modifier) {
-    Pressable(onBack,modifier,cornerRadius=7*s) {
-        Row(Modifier.width((370*s).dp).height((60*s).dp).background(AppColors.panel)
-            .padding(horizontal=(29*s).dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy((18*s).dp)) {
-            Canvas(Modifier.size((19*s).dp,(25*s).dp)) {
-                val p=Path().apply { moveTo(size.width*.66f,size.height*.13f);lineTo(size.width*.16f,size.height/2);lineTo(size.width*.66f,size.height*.87f) }
-                drawPath(p,Color.Black,style=androidx.compose.ui.graphics.drawscope.Stroke(3.5.dp.toPx(),cap=StrokeCap.Round,join=StrokeJoin.Round))
-            }
-            CoorditText(title,CoorditTypography.gmarketBold(22*s).copy(color=Color.Black,letterSpacing=(1.5*s).sp))
-        }
-    }
+private fun MethodIcon(method: ClosetMethod?, s: Float) {
+    InputMethodGlyph(when (method) { ClosetMethod.Link -> InputGlyph.Link; ClosetMethod.Photo -> InputGlyph.SizeChart; ClosetMethod.Manual -> InputGlyph.Ruler; null -> InputGlyph.Camera }, s, Color.White)
 }
 
 @Composable
@@ -458,3 +462,7 @@ private fun LinkGlyph(s:Float,color:Color) {
         drawPath(path,color,style=stroke)
     }
 }
+
+internal fun categoryFields(category: HomeCategory): List<Pair<String, String>> =
+    if (category == HomeCategory.Skirt) listOf("waist_width" to "허리단면", "hip_width" to "엉덩이단면", "total_length" to "총장")
+    else fields(category.upper)

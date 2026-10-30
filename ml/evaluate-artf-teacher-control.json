@@ -1,0 +1,27 @@
+{
+  "manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+  "manifest_sha256": "ae9806f8ad98e2ede7add42f7591ccb60b294de984ad632dcee75aea1d79fa00",
+  "pilot_packet": "reports/EXTERNAL_ARTF_VISION_PACKET.json",
+  "pilot_packet_sha256": "67e41b8192e00bfbf6dc08c1d26e65b285026117d7499d3e8bd01169a62d8e08",
+  "models": [
+    {
+      "name": "parent_latest_pairs",
+      "model": {
+        "directory": "artifacts/seam-resolution-256-pairs-v1",
+        "checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+        "artifact_sha256": "e45d6b82c5735c1c9b5db1c2142b9e8f2dad248270f6069f10b25b19d8b7e8a9",
+        "allow_resolution_transfer": false
+      }
+    },
+    {
+      "name": "equal_budget_control",
+      "model": {
+        "directory": "artifacts/seam-teacher-control-v1",
+        "checkpoint_sha256": "61576f4c77c4af3c57e842c4e0d6529cc58d3eb2fe0da87940d8b8ce6786c006",
+        "artifact_sha256": "9c7704795f2a2fff763e3b81f027d98c29f6570bd9f4a4bf0687c6747b3313a6",
+        "allow_resolution_transfer": false
+      }
+    }
+  ],
+  "output": "reports/ARTF_TEACHER_CONTROL_EVALUATION.json"
+}

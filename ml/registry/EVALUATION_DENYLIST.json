@@ -1,0 +1,72 @@
+{
+  "reason": "Development evaluation set; exclude entire aRTF publisher test partition and associated garments/scenes from training AND validation.",
+  "blocked_source_prefixes": [
+    "test/"
+  ],
+  "files": [
+    {
+      "path": "test/location_2/tshirts/2023-04-24_11-57-31_rgb_zed.png",
+      "sha256": "b03ad4439d9954742c24cb9ad80f560ed8cca9a305bbf685ee911e05a0d3c934"
+    },
+    {
+      "path": "test/location_3/tshirts/2023-04-24_17-01-21_rgb_zed.png",
+      "sha256": "24168aaa0e4801ba60cdd121cdf67b4cc6beb38c38bd2712a97ad3ba8a1d031f"
+    },
+    {
+      "path": "test/location_4/tshirts/2023-04-24_14-47-18_rgb_zed.png",
+      "sha256": "53c59bd5cc70d89579a2e15527cff9e560add40cbd1ae9f23eda2606fad95eaf"
+    },
+    {
+      "path": "test/location_5/tshirts/2023-04-24_15-46-55_rgb_zed.png",
+      "sha256": "04022a82ee698686622d17024b1832e32e8575e1b099006a53bd4b58bb13f4d0"
+    },
+    {
+      "path": "test/location_6/tshirts/2023-04-24_12-44-33_rgb_zed.png",
+      "sha256": "a70daba4791adcfc02dc6e48f0090ee9aaa326166ed4af8eca53b8f09a3cef4a"
+    },
+    {
+      "path": "test/location_7/tshirts/2023-04-25_14-14-13_rgb_smartphone.png",
+      "sha256": "7ba87f3249813fef5ce4cc57cb59a2bb4a5c28dcf139bfdcecd04777cd292d93"
+    },
+    {
+      "path": "test/location_8/tshirts/2023-04-25_15-19-27_rgb_smartphone.png",
+      "sha256": "ac88b242094baba537b6e6612fffd9dad32a6f545bdc5c4c99d480f9cd2234d2"
+    },
+    {
+      "path": "test/location_9/tshirts/2023-04-26_09-48-05_rgb_zed.png",
+      "sha256": "13a5fa67d7634abe94dc55e39007a42b4a14a782303fa6ca368fb858064790ca"
+    },
+    {
+      "path": "test/location_2/shorts/2023-04-24_12-14-26_rgb_zed.png",
+      "sha256": "9fc9d82d598d5987572bc4ad5e067948313ae7424d2a0ae962bdb40890e4a6e2"
+    },
+    {
+      "path": "test/location_3/shorts/2023-04-24_17-17-25_rgb_zed.png",
+      "sha256": "48de3f888d23e1e41d4482996959e480e6b815cc9aec607b994485c2e63e1b5e"
+    },
+    {
+      "path": "test/location_4/shorts/2023-04-24_15-04-42_rgb_zed.png",
+      "sha256": "3fdf219d853c7cd378f0e346b053cced49efeaab0af11cd2965a44d65d6a3b80"
+    },
+    {
+      "path": "test/location_5/shorts/2023-04-24_16-07-58_rgb_zed.png",
+      "sha256": "3150a611ab24c7c750566bafc4ba4a517c66e5755e80f789fb5eedde83bd27a3"
+    },
+    {
+      "path": "test/location_6/shorts/2023-04-24_13-04-57_rgb_zed.png",
+      "sha256": "abd45cdb0e18dba622c7b0705398aa9ca073e43f99b7d161bb8cddc93feb655f"
+    },
+    {
+      "path": "test/location_7/shorts/2023-04-25_14-31-29_rgb_smartphone.png",
+      "sha256": "ccb091a820802bd284331bfb72def191d0f298decd9b4fc72c5a1aa1762e736d"
+    },
+    {
+      "path": "test/location_8/shorts/2023-04-25_15-41-12_rgb_smartphone.png",
+      "sha256": "bc05def316216564ef8bd9ad63a21219ea23d1442eae67f1b98b7aff5cea20ef"
+    },
+    {
+      "path": "test/location_9/shorts/2023-04-26_10-03-08_rgb_zed.png",
+      "sha256": "a7218d06e8d03ba9eff8f946532712cdbd4da76a435e9db4153e56a151063a99"
+    }
+  ]
+}

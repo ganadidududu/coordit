@@ -1,0 +1,6 @@
+{
+  "source": "artifacts/secondhand-v3-source",
+  "output": "artifacts/secondhand-v3-training",
+  "reviews": "registry/reviews/secondhand-fine-categories.json",
+  "maximum_per_category": 100000
+}

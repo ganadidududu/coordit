@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-28",
+  "baseline": "d836185",
+  "ios": {
+    "full_suite": {
+      "result": "Passed",
+      "passed": 79,
+      "failed": 0
+    },
+    "additional_partial_point_ui": {
+      "light": "Passed",
+      "dark_system_setting": "Passed"
+    },
+    "last_card_status_change": {
+      "result": "Passed",
+      "passed": 3,
+      "failed": 0
+    },
+    "distinct_tests_passed": 80,
+    "sensor_cm_accuracy": "unverified",
+    "device_build": "passed; separate debug app; not reinstalled on goofy"
+  },
+  "ml": {
+    "tests_passed": 40,
+    "ruff": "passed",
+    "new_modules_basedpyright": "0 errors / 0 warnings, exit 0",
+    "full_basedpyright": "0 errors / 27 existing warnings, exit 1",
+    "old_public_inventory_checked": 16275,
+    "new_aihub_private_records_checked": 2482,
+    "training": "5 Metal GPU epochs; mask/classification only",
+    "native_cm_kept": true,
+    "seam_cm_regression_supervision": 0
+  },
+  "constraints": {
+    "phase3_touched": false,
+    "production_flags_enabled": false,
+    "backend_android_changed": false,
+    "photos_sent_to_third_party_ai": false
+  },
+  "evidence_root": "/tmp/coordit-ar-feedback-evidence",
+  "limitations": [
+    "AR coaching, actual plane coverage and sensor cm need device testing",
+    "No independently annotated real seam or tape/AR evaluation",
+    "Training-set IoU is not generalization",
+    "New weights not connected to phone or server"
+  ]
+}

@@ -32,10 +32,11 @@ export const getRewardAttempt = async (userId: string, attemptId: string) => {
   return { attemptId: data.id, expiresAt: data.expires_at, status: data.status };
 };
 
-export const grantRewardForVerifiedCallback = async (attemptId: string, transactionId: string) => {
+export const grantRewardForVerifiedCallback = async (attemptId: string, transactionId: string, signedUserId: string | null) => {
   const { data, error } = await supabase
-    .rpc("grant_admob_reward", { p_attempt_id: attemptId, p_transaction_id: transactionId })
+    .rpc("grant_admob_reward", { p_attempt_id: attemptId, p_transaction_id: transactionId, p_signed_user_id: signedUserId })
     .single<GrantRow>();
+  if (error?.code === "42501") throw createHttpError(403, "Reward callback account does not match its attempt");
   if (error || !data) throw createHttpError(500, "Failed to grant verified AdMob reward");
   if (data.status === "unknown_attempt") throw createHttpError(404, "Unknown reward attempt");
   if (data.status === "expired") throw createHttpError(409, "Expired reward attempt");

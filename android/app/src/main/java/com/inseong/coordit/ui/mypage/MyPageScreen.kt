@@ -137,7 +137,7 @@ fun MyPageScreen(
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     LaunchedEffect(initiallyShowThreadCharge) {
-        if (initiallyShowThreadCharge && !threadChargeOpened) { page = Page.ThreadCharge; threadChargeOpened = true; onOpenThreadCharge(activity) }
+        if (initiallyShowThreadCharge && !threadChargeOpened) { page = Page.ThreadCharge; threadChargeOpened = true; onRefresh(); onOpenThreadCharge(activity) }
     }
     LaunchedEffect(page) {
         focusManager.clearFocus(force = true)
@@ -147,7 +147,7 @@ fun MyPageScreen(
     LaunchedEffect(threadCharge.status) {
         if (page == Page.ThreadCharge) contentScroll.scrollTo(0)
     }
-    val leave = { if (page == Page.Root) onBack() else { page = parent(page); onClearMessage() } }
+    val leave = { if (page == Page.Root || (initiallyShowThreadCharge && page == Page.ThreadCharge)) onBack() else { page = parent(page); onClearMessage() } }
     BackHandler(enabled = !busy, onBack = leave)
     BoxWithConstraints(Modifier.fillMaxSize().testTag("mypage-screen")) {
         val scale = (maxWidth.value / MyPageDesign.designWidth).coerceIn(.82f, 1.25f)

@@ -1,0 +1,15 @@
+{
+  "baseline": {
+    "directory": "artifacts/aihub-coat-jacket-mask-pretrain-v2",
+    "checkpoint_sha256": "0baeadd24aeb788b1a575c3f4762643b1b6a1b8b486d84ec1ceb0fb9cae96ddf",
+    "artifact_sha256": "80ad9948bf00c3aa448ff00168b9ce690fc4cb72ed28c36efe86e744696e2adf"
+  },
+  "candidate": {
+    "directory": "artifacts/seam-integrated-pilot-v1",
+    "checkpoint_sha256": "eeb659c1fcb28aa4c7711976432f6590b2316d37877a3914114889f4da29ec00",
+    "artifact_sha256": "ff51bf49ad80bebc3ffaca54eea0a53f657a6fd06b1c300e2c1757cd7452bc08"
+  },
+  "manifest": "artifacts/artf-landmarks-v1/records.jsonl",
+  "split": "train",
+  "output": "reports/seam-pilot-real-development-comparison.json"
+}

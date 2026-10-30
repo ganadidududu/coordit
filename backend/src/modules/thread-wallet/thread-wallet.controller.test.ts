@@ -56,7 +56,7 @@ const startTestServer = async (submitAppleIapPurchase: (input: {
   app.get("/thread-wallet/balance", getThreadBalanceController);
   app.use((request, _response, next) => {
     Object.assign(request, {
-      user: { id: "845628bf-1362-4f64-937d-e947aa1d017f" }
+      user: { id: "845628bf-1362-4f64-937d-e947aa1d017f", isAnonymous: false }
     });
     next();
   });

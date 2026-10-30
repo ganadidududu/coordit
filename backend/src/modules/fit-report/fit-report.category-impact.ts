@@ -38,8 +38,8 @@ const impacts: Readonly<Record<Category, Partial<Record<MeasurementKey, Impact>>
     rise: { smaller: "데님 팬츠 밑위가 짧아져 앉을 때 허리선 위치가 달라질 수 있어요.", larger: "데님 팬츠 밑위가 길어져 허리선 위치가 달라질 수 있어요.", same: "데님 팬츠 밑위가 기준과 비슷해요." }
   },
   shorts: {
-    hip_width: { smaller: "쇼츠 힙 여유가 줄어 앉거나 걸을 때 움직임을 확인해야 해요.", larger: "쇼츠 힙 여유가 늘어나 앉거나 걸을 때 공간이 더 남아요.", same: "쇼츠 힙 여유가 기준과 비슷해요." },
-    total_length: { smaller: "쇼츠 밑단이 높아져 다리가 더 드러나는 방향이에요.", larger: "쇼츠 밑단이 낮아져 다리 노출이 줄어드는 방향이에요.", same: "쇼츠 밑단 길이가 기준과 비슷해요." }
+    hip_width: { smaller: "반바지 힙 여유가 줄어 앉거나 걸을 때 움직임을 확인해야 해요.", larger: "반바지 힙 여유가 늘어나 앉거나 걸을 때 공간이 더 남아요.", same: "반바지 힙 여유가 기준과 비슷해요." },
+    total_length: { smaller: "반바지 밑단이 높아져 다리가 더 드러나는 방향이에요.", larger: "반바지 밑단이 낮아져 다리 노출이 줄어드는 방향이에요.", same: "반바지 밑단 길이가 기준과 비슷해요." }
   },
   skirt: {
     hip_width: { smaller: "스커트 힙 실루엣이 몸에 더 가까워지는 방향이에요.", larger: "스커트 힙 실루엣에 여유가 더 생기는 방향이에요.", same: "스커트 힙 실루엣이 기준과 비슷해요." },

@@ -1,0 +1,145 @@
+{
+  "app": [],
+  "server": [],
+  "development": [
+    {
+      "path": "artifacts/tiny-shared-cpu-final/checkpoint.pt",
+      "sha256": "911cc7d4f1607f7ab3aeb786857f74ba883914ae0327837ab961278cd821e4aa",
+      "training_registry_sha256": "69c156dcfcf8ac28f306dc1549403a18b29e20303cfd6b7c743b9cf326d70717",
+      "deployment_approved": false
+    },
+    {
+      "path": "artifacts/tiny-shared-mps-final-data/checkpoint.pt",
+      "sha256": "7f9ad2e629da66c36567a1af7a9e85a6bb831a9b8b50cc7025d32bb0fe3f42fd",
+      "training_registry_sha256": "69c156dcfcf8ac28f306dc1549403a18b29e20303cfd6b7c743b9cf326d70717",
+      "deployment_approved": false
+    },
+    {
+      "path": "artifacts/tiny-category-mps-final-data/checkpoint.pt",
+      "sha256": "977fb9938cb8c6ff65a86592b3dc968b189b0f104cd0d3f93af4aebd1e4fde2b",
+      "training_registry_sha256": "69c156dcfcf8ac28f306dc1549403a18b29e20303cfd6b7c743b9cf326d70717",
+      "deployment_approved": false
+    },
+    {
+      "path": "artifacts/spatial-v2-shared/checkpoint.pt",
+      "sha256": "bc5992b7572b5f451a3e2389fef3f9de915c4f540ec6cb66d2b84a141ed17798",
+      "training_registry_sha256": "e96bdb578f19128fa72eb1cb3a918dcceef7667067416abf8db630597fcff2f9",
+      "deployment_approved": false,
+      "weights_license": "Internal development; source attribution obligations apply"
+    },
+    {
+      "path": "artifacts/spatial-v2-category/checkpoint.pt",
+      "sha256": "78892d145d3e5db36666f2b27cb4586c03ac193c05c8de8634aa556b14cd504b",
+      "training_registry_sha256": "e96bdb578f19128fa72eb1cb3a918dcceef7667067416abf8db630597fcff2f9",
+      "deployment_approved": false,
+      "weights_license": "Internal development; source attribution obligations apply"
+    },
+    {
+      "path": "artifacts/secondhand-supervision-smoke/checkpoint.pt",
+      "sha256": "bc00f78f3b88d83e1a24aae05d37e5b74c792062cebe08774e9f06c4a3d9cc72",
+      "training_registry_sha256": "5464f66f667788709a8a1b26370cbead9026f00fa8854d158990127ade7d6513",
+      "deployment_approved": false,
+      "purpose": "classification_only_ingestion_cpu_smoke_not_landmark_training",
+      "weights_license": "Internal development; source attribution obligations apply"
+    },
+    {
+      "path": "artifacts/aihub-coat-jacket-mask-pretrain-v2/checkpoint.pt",
+      "sha256": "0baeadd24aeb788b1a575c3f4762643b1b6a1b8b486d84ec1ceb0fb9cae96ddf",
+      "training_registry_sha256": "6d293479ef3eba8c2f5e0bb1ca1b5f9ef31e18b97135e2530826466d9973a9de",
+      "deployment_approved": false,
+      "purpose": "real_coat_jacket_mask_pretraining_only_no_seam_or_cm_regression",
+      "weights_license": "Internal local development under AI-Hub-71501-2026-10-28; attribution and territory restrictions; separate deployment review required"
+    },
+    {
+      "path": "artifacts/seam-integrated-pilot-v1/checkpoint.pt",
+      "sha256": "eeb659c1fcb28aa4c7711976432f6590b2316d37877a3914114889f4da29ec00",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "0baeadd24aeb788b1a575c3f4762643b1b6a1b8b486d84ec1ceb0fb9cae96ddf",
+      "deployment_approved": false,
+      "purpose": "partial_real_anatomical_and_topology_seam_development_not_independent_accuracy",
+      "weights_license": "Internal local training; AI Hub territory and attribution restrictions plus aRTF/GarmentCodeData CC BY 4.0 notices; no release grant"
+    },
+    {
+      "path": "artifacts/seam-integrated-finetune-v1/checkpoint.pt",
+      "sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "eeb659c1fcb28aa4c7711976432f6590b2316d37877a3914114889f4da29ec00",
+      "deployment_approved": false,
+      "purpose": "partial_real_anatomical_and_topology_seam_development_not_independent_accuracy",
+      "weights_license": "Internal local training; AI Hub territory and attribution restrictions plus aRTF/GarmentCodeData CC BY 4.0 notices; no release grant"
+    },
+    {
+      "path": "artifacts/seam-real-augmentation-v1/checkpoint.pt",
+      "sha256": "2ba32df955ad6f5329f2c5636b7425f5d1408c39356087aebf79095adeaf4d54",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "deployment_approved": false,
+      "purpose": "augmented_partial_real_seam_development_not_centimeter_or_release_accuracy",
+      "weights_license": "Internal local training; AI Hub territory restrictions and attribution; aRTF/GarmentCodeData/Second-Hand CC BY 4.0 notices as applicable; no release grant"
+    },
+    {
+      "path": "artifacts/seam-diverse-real-augmentation-v1/checkpoint.pt",
+      "sha256": "894f41af2aaa05a76b93431be81030c4fe1d14c7bd5fdb979a26ca7584f1d018",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "0baeadd24aeb788b1a575c3f4762643b1b6a1b8b486d84ec1ceb0fb9cae96ddf",
+      "deployment_approved": false,
+      "purpose": "augmented_partial_real_seam_development_not_centimeter_or_release_accuracy",
+      "weights_license": "Internal local training; AI Hub territory restrictions and attribution; aRTF/GarmentCodeData/Second-Hand CC BY 4.0 notices as applicable; no release grant"
+    },
+    {
+      "path": "artifacts/seam-resolution-128-v1/checkpoint.pt",
+      "sha256": "16b431031c4d3704ec6c2bcc21993937494c3049a88accae784ea7b258ca2f07",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "deployment_approved": false,
+      "purpose": "controlled_spatial_resolution_development_not_release_or_centimeter_accuracy",
+      "weights_license": "Internal local training; AI Hub territory/attribution restrictions and aRTF/GarmentCodeData CC BY 4.0 notices; no app/server deployment grant"
+    },
+    {
+      "path": "artifacts/seam-resolution-256-v1/checkpoint.pt",
+      "sha256": "1648b17b8324db22b3639de2458f57a623c441482b3dd109a36618749f82ebb9",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "deployment_approved": false,
+      "purpose": "controlled_spatial_resolution_development_not_release_or_centimeter_accuracy",
+      "weights_license": "Internal local training; AI Hub territory/attribution restrictions and aRTF/GarmentCodeData CC BY 4.0 notices; no app/server deployment grant"
+    },
+    {
+      "path": "artifacts/seam-resolution-256-context-v1/checkpoint.pt",
+      "sha256": "097ca00c3aef5e1639a7ab3232176b724bde34dc246b65507f84258a4fb0a32f",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "deployment_approved": false,
+      "purpose": "controlled_spatial_resolution_development_not_release_or_centimeter_accuracy",
+      "weights_license": "Internal local training; AI Hub territory/attribution restrictions and aRTF/GarmentCodeData CC BY 4.0 notices; no app/server deployment grant"
+    },
+    {
+      "path": "artifacts/seam-resolution-256-pairs-v1/checkpoint.pt",
+      "sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "b60a2c9a7014bc3320b818321be24d83d86b2f66cf784f360245658f985ece49",
+      "deployment_approved": false,
+      "purpose": "projected_pair_supervision_development_not_centimeter_or_release_accuracy",
+      "weights_license": "Internal local training; AI Hub territory/attribution restrictions and aRTF/GarmentCodeData CC BY 4.0 notices; no app/server deployment grant"
+    },
+    {
+      "path": "artifacts/seam-teacher-control-v1/checkpoint.pt",
+      "sha256": "61576f4c77c4af3c57e842c4e0d6529cc58d3eb2fe0da87940d8b8ce6786c006",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+      "deployment_approved": false,
+      "purpose": "equal_budget_teacher_control_not_promoted",
+      "weights_license": "Internal local training; AI Hub local/territory restrictions and source attribution; no app/server deployment grant"
+    },
+    {
+      "path": "artifacts/seam-artf-visual-teacher-v1/checkpoint.pt",
+      "sha256": "5038e2660a02334e49344eaae401404c2b4750e223d90d28a7c9d9872f6bd087",
+      "training_registry_sha256": "4fcceaf57714c0b7daf56079fa5dbc3469b514dffec46518484bd76cd1f1b0d9",
+      "parent_checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+      "deployment_approved": false,
+      "purpose": "weak_public_artf_teacher_experiment_did_not_improve_parent_not_promoted",
+      "teacher_predictions_sha256": "ca6d2e0cd7dd1036c9a859564c6aee6d2701ce4e0ef3dd76c4cf3fe8f808eb84",
+      "weights_license": "Internal local training; unverified assistant proposals, AI Hub local/territory restrictions and source attribution; no app/server deployment grant"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "dataset_id": "aihub-71501",
+  "reviewed_at": "2026-10-28",
+  "status": "protocol_prepared_no_human_verified_coordinates",
+  "local_annotation_already_authorized": true,
+  "source_agreement": "reviews/aihub-71501-agreement.json",
+  "protocol": "coordit-upper-seam-v2",
+  "coordinate_system": "upright_rgb_normalized_top_left",
+  "side_convention": "one whole-garment side: lower-hem endpoint nearest bbox bottom-left in original pixel distance is left; not wearer anatomy or independently x-sorted seam pairs",
+  "required_human_reference_points": ["hem_reference_left", "hem_reference_right"],
+  "reference_points_are_measurement_ground_truth": false,
+  "required_source_view": ["front", "back"],
+  "seam_targets": ["shoulder_left", "shoulder_right", "armpit_left", "armpit_right"],
+  "ambiguous_or_occluded_points": "exclude rather than guess; incomplete photos stay unverified",
+  "native_cm_protocol": {
+    "chest": "width 1 inch below armpits multiplied by two",
+    "shoulder": "back-view horizontal distance between shoulder points",
+    "front_armpit_pair_is_native_chest_target": false
+  },
+  "publisher_side_reference": "https://github.com/tlpss/aRTF-Clothes-dataset/blob/e3eda811bca47584f1bb9432e3f11366ccef1e4a/artf_clothes/scripts/keypoint_ordering.py",
+  "v1_reviews_may_be_silently_promoted": false,
+  "aihub_human_verified_seam_images": 0,
+  "photos_transmitted_to_external_ai": false,
+  "dataset_training_scope_changed": false,
+  "deployment_approved": false
+}

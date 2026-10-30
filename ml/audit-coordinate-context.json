@@ -1,0 +1,9 @@
+{
+  "model": {
+    "directory": "artifacts/seam-resolution-256-context-v1",
+    "checkpoint_sha256": "097ca00c3aef5e1639a7ab3232176b724bde34dc246b65507f84258a4fb0a32f",
+    "artifact_sha256": "34f5efd8bd04b70c1ce51e00f0eff967f8f406b20df3e050bb95f044fae5b4ee"
+  },
+  "manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+  "output": "reports/coordinate-context-audit.json"
+}

@@ -18,7 +18,7 @@ interface ClosetApi {
     @GET("fit/closet-items/{id}/comparison") suspend fun comparison(@Header("Authorization") auth: String, @Path("id") id: String): ClosetComparison
 }
 data class ClosetRenameRequest(val name: String)
-data class ClosetPrefillRequest(val url: String, val category: String)
+data class ClosetPrefillRequest(val url: String, val category: String?)
 data class ClosetItemResponse(val id: String, val name: String, val category: String, @SerializedName("size_label") val sizeLabel: String?) {
     fun item(): ClosetItem? = HomeCategory.entries.firstOrNull { it.wireName == category }?.let { ClosetItem(id, name, it, sizeLabel) }
 }
@@ -34,7 +34,7 @@ data class ClosetSizeResponse(
     fun row(index: Int) = ClosetSizeRow(id ?: "size-$index", sizeLabel ?: "등록 사이즈", mapOf("total_length" to totalLength, "shoulder_width" to shoulderWidth, "chest_width" to chestWidth, "sleeve_length" to sleeveLength, "waist_width" to waistWidth, "hip_width" to hipWidth, "rise" to rise, "outseam" to outseam).mapNotNull { (key, value) -> value?.takeIf { it.isFinite() && it > 0 }?.let { key to it } }.toMap())
 }
 data class ClosetCreateResponse(val clothingItem: ClosetItemResponse, val clothingSize: ClosetSizeResponse)
-data class ClosetPrefillResponse(val productName: String?, val sizes: List<ClosetSizeResponse>, val category: String? = null)
+data class ClosetPrefillResponse(val productName: String?, val sizes: List<ClosetSizeResponse>, val category: String? = null, val brand: String? = null, val mallName: String? = null, val productUrl: String? = null, val productFacts: com.inseong.coordit.data.fitlab.ProductFacts? = null)
 data class ClosetPrefill(val name: String?, val rows: List<ClosetSizeRow>, val category: HomeCategory?)
 class ClosetRepository(private val api: ClosetApi) {
     private fun auth(token: String): String { require(token.isNotBlank()) { "로그인이 필요해요." }; return "Bearer $token" }

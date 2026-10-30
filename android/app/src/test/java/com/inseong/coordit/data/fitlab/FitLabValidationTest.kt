@@ -6,6 +6,16 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class FitLabValidationTest {
+    @Test fun lowerImportsNormalizeLengthAliasesAndDropIncompatibleFields() {
+        val raw = mapOf("waist_width" to 39.0, "hip_width" to 51.0, "rise" to 30.0, "total_length" to 101.0, "outseam" to 102.0, "chest_width" to 56.0)
+        val pants = normalizedFitLabMeasurements(HomeCategory.Pants, raw)
+        assertEquals(mapOf("waist_width" to 39.0, "hip_width" to 51.0, "rise" to 30.0, "outseam" to 102.0), pants)
+        val skirt = normalizedFitLabMeasurements(HomeCategory.Skirt, raw)
+        assertEquals(mapOf("waist_width" to 39.0, "hip_width" to 51.0, "total_length" to 101.0), skirt)
+        assertEquals(101.0, normalizedFitLabMeasurements(HomeCategory.Pants, raw - "outseam")["outseam"])
+        assertEquals(102.0, normalizedFitLabMeasurements(HomeCategory.Skirt, raw - "total_length")["total_length"])
+        assertNull(FitLabDraft(productName = "팬츠", category = HomeCategory.Pants, sizes = listOf(FitLabSizeDraft("m", "M", pants))).validationError())
+    }
     @Test fun validatesCompatibleMeasurementsAndNormalizedLabels() {
         val valid = FitLabDraft(
             productName = "셔츠",

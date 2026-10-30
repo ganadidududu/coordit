@@ -31,6 +31,7 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
     case closetAddMethod = "closet-add-method"
     case closetAddLink = "closet-add-link"
     case closetAddPhoto = "closet-add-photo"
+    case closetAddSizeChart = "closet-add-size-chart"
     case closetAddManual = "closet-add-manual"
     case closetAddLoading = "closet-add-loading"
     case closetAddResult = "closet-add-result"
@@ -85,6 +86,7 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
              .closetAddMethod,
              .closetAddLink,
              .closetAddPhoto,
+             .closetAddSizeChart,
              .closetAddManual,
              .closetAddLoading,
              .closetAddResult:
@@ -109,6 +111,7 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
              .closetAddMethod,
              .closetAddLink,
              .closetAddPhoto,
+             .closetAddSizeChart,
              .closetAddManual,
              .closetAddLoading,
              .closetAddResult:
@@ -159,6 +162,7 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
              .closetAddMethod,
              .closetAddLink,
              .closetAddPhoto,
+             .closetAddSizeChart,
              .closetAddManual,
              .closetAddLoading,
              .closetAddResult:
@@ -202,6 +206,7 @@ enum CoorditFrameRoute: String, CaseIterable, Identifiable {
              .fitLabResultBottom,
              .closetAddLink,
              .closetAddPhoto,
+             .closetAddSizeChart,
              .closetAddManual,
              .myPageProfileEdit,
              .myPagePasswordChange,

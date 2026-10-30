@@ -1,0 +1,162 @@
+{
+  "kind": "comparison_of_existing_scored_reports_no_new_inference",
+  "manifest_sha256": "ae9806f8ad98e2ede7add42f7591ccb60b294de984ad632dcee75aea1d79fa00",
+  "source_reports": [
+    {
+      "path": "reports/artf-unseen-diverse-augmentation.json",
+      "sha256": "7b48002dbf9dbec8ee7fbc293eb132824a24f4b8c2de58e7b86b69e23dd4bd9d"
+    },
+    {
+      "path": "reports/seam-resolution-context-vs-pairs.json",
+      "sha256": "c8d632e009be44e7ba1fad2bf0668de69261bf97189d2e51a2c22816b5e6aefc"
+    }
+  ],
+  "baseline_name": "previous_seam_diverse_real_augmentation_60epochs",
+  "baseline": {
+    "checkpoint_sha256": "894f41af2aaa05a76b93431be81030c4fe1d14c7bd5fdb979a26ca7584f1d018",
+    "images": 561,
+    "images_seen_in_training": 0,
+    "real_images": 561,
+    "synthetic_images": 0,
+    "per_category": {
+      "shorts": {
+        "points": 832,
+        "pck_005": 0.2091346153846154,
+        "nme": 0.1420154075125398
+      },
+      "tshirt": {
+        "points": 1536,
+        "pck_005": 0.236328125,
+        "nme": 0.13525197835542713
+      }
+    },
+    "per_landmark": {
+      "waist_left": {
+        "points": 168,
+        "pck_005": 0.17261904761904762,
+        "nme": 0.15309547672985077
+      },
+      "waist_right": {
+        "points": 165,
+        "pck_005": 0.15151515151515152,
+        "nme": 0.16837619128495906
+      },
+      "crotch": {
+        "points": 163,
+        "pck_005": 0.3987730061349693,
+        "nme": 0.09371443929299256
+      },
+      "side_waist": {
+        "points": 168,
+        "pck_005": 0.17261904761904762,
+        "nme": 0.15252092515306903
+      },
+      "side_hem": {
+        "points": 168,
+        "pck_005": 0.15476190476190477,
+        "nme": 0.14140320456741998
+      },
+      "shoulder_left": {
+        "points": 383,
+        "pck_005": 0.2010443864229765,
+        "nme": 0.15322084896638502
+      },
+      "shoulder_right": {
+        "points": 388,
+        "pck_005": 0.15206185567010308,
+        "nme": 0.16363043205082878
+      },
+      "armpit_left": {
+        "points": 380,
+        "pck_005": 0.32105263157894737,
+        "nme": 0.11365445125235343
+      },
+      "armpit_right": {
+        "points": 385,
+        "pck_005": 0.2727272727272727,
+        "nme": 0.11009390776154476
+      }
+    },
+    "mask_iou_per_category": {
+      "shorts": 0.5572016916649286,
+      "tshirt": 0.6692639157992422
+    },
+    "macro_miou_present_categories": 0.6132328037320853
+  },
+  "candidate_name": "new_context_with_projected_pair_supervision_20epochs",
+  "candidate": {
+    "checkpoint_sha256": "f998fa346139cfc9876816fea1ed72ad234e9b8656e76868e7d330c6faa420fd",
+    "images": 561,
+    "images_seen_in_training": 0,
+    "real_images": 561,
+    "synthetic_images": 0,
+    "per_category": {
+      "shorts": {
+        "points": 832,
+        "pck_005": 0.24519230769230768,
+        "nme": 0.13474904359575773
+      },
+      "tshirt": {
+        "points": 1536,
+        "pck_005": 0.22200520833333334,
+        "nme": 0.14051047763966076
+      }
+    },
+    "per_landmark": {
+      "waist_left": {
+        "points": 168,
+        "pck_005": 0.23214285714285715,
+        "nme": 0.1378359711074847
+      },
+      "waist_right": {
+        "points": 165,
+        "pck_005": 0.19393939393939394,
+        "nme": 0.14848317147768808
+      },
+      "crotch": {
+        "points": 163,
+        "pck_005": 0.43558282208588955,
+        "nme": 0.08557538682183513
+      },
+      "side_waist": {
+        "points": 168,
+        "pck_005": 0.21428571428571427,
+        "nme": 0.13818873237219773
+      },
+      "side_hem": {
+        "points": 168,
+        "pck_005": 0.15476190476190477,
+        "nme": 0.16244370679348885
+      },
+      "shoulder_left": {
+        "points": 383,
+        "pck_005": 0.17754569190600522,
+        "nme": 0.16601245447886287
+      },
+      "shoulder_right": {
+        "points": 388,
+        "pck_005": 0.0979381443298969,
+        "nme": 0.1667243813322953
+      },
+      "armpit_left": {
+        "points": 380,
+        "pck_005": 0.3236842105263158,
+        "nme": 0.1154306274103491
+      },
+      "armpit_right": {
+        "points": 385,
+        "pck_005": 0.2909090909090909,
+        "nme": 0.11347694861363958
+      }
+    },
+    "mask_iou_per_category": {
+      "shorts": 0.6349500679378167,
+      "tshirt": 0.6921237917058791
+    },
+    "macro_miou_present_categories": 0.6635369298218479
+  },
+  "coordinate_error_normalization": "normalized square-input diagonal; PCK@0.05",
+  "cm_accuracy": null,
+  "deployment_approved": false,
+  "conclusion": "Tshirt PCK/NME worsened versus the most recent 60-epoch model; shorts improved. No across-category measurement promotion."
+}

@@ -207,6 +207,8 @@ export interface FitReportJson {
 }
 
 export interface GenerateFitReportOptions {
+  readonly comparisonBundleAnalysisId?: string;
+    readonly cameraComparison?: boolean;
   idempotencyKey?: string;
   selectedSizeLabel?: string;
   style?: ReportStyle;

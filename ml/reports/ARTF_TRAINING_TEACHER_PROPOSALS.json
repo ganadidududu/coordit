@@ -1,0 +1,1115 @@
+{
+  "execution": "interactive_assistant_vision",
+  "model_identity": "Current Codex chat visual assistant; separate provider API not invoked",
+  "exact_model_revision": null,
+  "receipt_sha256": "2a46e007324f534db100bab1ce386c3346931a6ea8422ae3de2c6436de6dbd22",
+  "protocol_sha256": "aa2cd3455012a89d3fb63be6e483f3b616b9a9d4f58bca1465d793d43d2d4269",
+  "coordinate_system": "upright_rgb_normalized_top_left",
+  "ground_truth_supplied_before_predictions": false,
+  "predictions": [
+    {
+      "case_id": "T01",
+      "image_sha256": "7c1adc44a4d91576e33c5016911926ddf6f701c9e4b1ce34a34cff7bcca6ad41",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.33984375,
+          "y": 0.60546875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.23828125,
+          "y": 0.4609375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.5078125,
+          "y": 0.8125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.4140625,
+          "y": 0.2109375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": 0.298828125,
+          "y": 0.7421875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": 0.861328125,
+          "y": 0.4296875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": 0.23828125,
+          "y": 0.4609375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": 0.298828125,
+          "y": 0.02734375,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Rotated shirt; shoulder attachment and neck candidates uncertain; no source labels seen."
+    },
+    {
+      "case_id": "T02",
+      "image_sha256": "3bb1057b9424b96eb89d346012bdb06ed86b9ef8566d38c016b4862c7cce717b",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.6640625,
+          "y": 0.765625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.73828125,
+          "y": 0.203125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.515625,
+          "y": 0.74609375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.60546875,
+          "y": 0.11328125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": 0.720703125,
+          "y": 0.64453125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": 0.248046875,
+          "y": 0.3359375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": 0.73828125,
+          "y": 0.203125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": 0.67578125,
+          "y": 0.0390625,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Hem left and neck right; lower-image side follows bottom-left hem reference."
+    },
+    {
+      "case_id": "T03",
+      "image_sha256": "2ba21290fe79c2fdecadd5713f97a5efc6a4e4930df2e43c73e77ed6cc04c1d2",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.478515625,
+          "y": 0.65625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.615234375,
+          "y": 0.5078125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.404296875,
+          "y": 0.62109375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.55859375,
+          "y": 0.40234375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": 0.529296875,
+          "y": 0.62109375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": 0.3671875,
+          "y": 0.31640625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": 0.615234375,
+          "y": 0.5078125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": 0.623046875,
+          "y": 0.41015625,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Small rotated dark shirt; all returned attachment points uncertain."
+    },
+    {
+      "case_id": "T04",
+      "image_sha256": "d1813335274b458d38560f254552baf5c3a75d6559fb69284e33a628a268a2c0",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.439453125,
+          "y": 0.66796875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.455078125,
+          "y": 0.31640625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": 0.216796875,
+          "y": 0.51953125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        }
+      ],
+      "note": "Dark shirt; shoulder/neck/sleeve seam evidence insufficient, abstain on those targets."
+    },
+    {
+      "case_id": "T05",
+      "image_sha256": "4824695c9a5930ca4b4475b2992ec753be991d28b23cdbdb5804b5b4a8f4c9e0",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.365234375,
+          "y": 0.16796875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.630859375,
+          "y": 0.23046875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.37109375,
+          "y": 0.3203125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.642578125,
+          "y": 0.33984375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": 0.4375,
+          "y": 0.1640625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": 0.5078125,
+          "y": 0.7578125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": 0.630859375,
+          "y": 0.23046875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": 0.712890625,
+          "y": 0.30078125,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Upright spread shirt; neck high point and cuff midpoint remain provisional."
+    },
+    {
+      "case_id": "T06",
+      "image_sha256": "9a9b26c8f3dedaec97b62f0c29265fe36d4fb91b09ad81fd3a14ce21d9b68e13",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": 0.64453125,
+          "y": 0.3125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        }
+      ],
+      "note": "Rotated hem endpoints nearly tied relative to bbox bottom-left; abstain on side-dependent targets."
+    },
+    {
+      "case_id": "T07",
+      "image_sha256": "1b46867f6333466137904f27d7a2962bdf716597c48a2b55483f92224052478f",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.50390625,
+          "y": 0.3046875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.658203125,
+          "y": 0.3359375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.48046875,
+          "y": 0.42578125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.66796875,
+          "y": 0.47265625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": 0.55078125,
+          "y": 0.296875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": 0.546875,
+          "y": 0.8203125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": 0.658203125,
+          "y": 0.3359375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": 0.71484375,
+          "y": 0.43359375,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Upright spread shirt; original small RGB, no GT overlay."
+    },
+    {
+      "case_id": "T08",
+      "image_sha256": "6ba449003e7e8948af2a393c2e065b2fa207ea2a91666589a2c7d92d4b1b6100",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.3984375,
+          "y": 0.3125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.552734375,
+          "y": 0.3359375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.384765625,
+          "y": 0.43359375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.564453125,
+          "y": 0.44140625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": 0.4453125,
+          "y": 0.29296875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": 0.44921875,
+          "y": 0.82421875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": 0.552734375,
+          "y": 0.3359375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": 0.6015625,
+          "y": 0.40625,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Upright gray shirt; neckline high point and cuff midpoint uncertain."
+    },
+    {
+      "case_id": "T09",
+      "image_sha256": "94ffc6a52cc3c69b75a9a0d7f66c05976d7c6e5315c44631eb6a98cab05c593c",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.466796875,
+          "y": 0.34375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.6640625,
+          "y": 0.41015625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.439453125,
+          "y": 0.48828125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.677734375,
+          "y": 0.54296875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": 0.517578125,
+          "y": 0.33203125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": 0.533203125,
+          "y": 0.703125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": 0.6640625,
+          "y": 0.41015625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": 0.71875,
+          "y": 0.5,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "White wrinkled shirt; uncertain seams, visible lower hem."
+    },
+    {
+      "case_id": "T10",
+      "image_sha256": "75fa657238318ac64d318082a2d2dc46809792a290ff66e5dfe3535128cdff44",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.564453125,
+          "y": 0.84765625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.7734375,
+          "y": 0.58984375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.4296875,
+          "y": 0.78125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.701171875,
+          "y": 0.3984375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": 0.611328125,
+          "y": 0.86328125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": 0.3671875,
+          "y": 0.22265625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": 0.7734375,
+          "y": 0.58984375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": 0.779296875,
+          "y": 0.359375,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Strongly rotated red shirt, lower-left original hem determines whole-garment left side."
+    },
+    {
+      "case_id": "T11",
+      "image_sha256": "5d16a7c0345386ca130218f714dd6d7cfe7a17459849a3444f8c5c0556679b34",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": 0.294921875,
+          "y": 0.66015625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": 0.30078125,
+          "y": 0.24609375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": 0.4609375,
+          "y": 0.76171875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": 0.453125,
+          "y": 0.21875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": 0.27734375,
+          "y": 0.52734375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": 0.78125,
+          "y": 0.48828125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": 0.30078125,
+          "y": 0.24609375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": 0.4296875,
+          "y": 0.05078125,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Sideways blue shirt; cuff partly folded, shoulder and neckline junctions uncertain."
+    },
+    {
+      "case_id": "T12",
+      "image_sha256": "7697b1a967763181e105ea77c176ef1bdd6757f3cb7dbf9e5d1525e18c591e4e",
+      "points": [
+        {
+          "landmark_type": "shoulder_left",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "shoulder_right",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "armpit_left",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "armpit_right",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "length_start",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "hem_center",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "sleeve_start",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "sleeve_end",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        }
+      ],
+      "note": "Crumpled white garment on same-color bed; no reliable seam or endpoint identity, abstain."
+    },
+    {
+      "case_id": "T13",
+      "image_sha256": "ca7ac1a4a6f40e472c782886c789254ecc88877f1579edb7d9001af4cb5a154c",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.498046875,
+          "y": 0.23046875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.685546875,
+          "y": 0.3515625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.533203125,
+          "y": 0.5078125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.421875,
+          "y": 0.515625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": 0.58984375,
+          "y": 0.30859375,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Rotated dark shorts; seam/waist center candidates uncertain."
+    },
+    {
+      "case_id": "T14",
+      "image_sha256": "0203ce6cab58837b1141df69a7d4196f1413a416b9a7d97c3a21fdafe2e05c94",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.58984375,
+          "y": 0.328125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.65234375,
+          "y": 0.61328125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.45703125,
+          "y": 0.54296875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.361328125,
+          "y": 0.3671875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": 0.59765625,
+          "y": 0.4765625,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Gray sideways shorts; crotch and center waist uncertain."
+    },
+    {
+      "case_id": "T15",
+      "image_sha256": "16cd5eeb52e3e3db275bddc3c4ee44c00dabda1490df39b8a81c3a3ad640038d",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.361328125,
+          "y": 0.55859375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.51171875,
+          "y": 0.828125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.55078125,
+          "y": 0.42578125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.4765625,
+          "y": 0.26953125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": 0.4296875,
+          "y": 0.6875,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Upside-down crumpled shorts; all candidates uncertain."
+    },
+    {
+      "case_id": "T16",
+      "image_sha256": "7a6aa17f2039963e0bb6409c788cecbf641d4d256a774140515b868e31d54026",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.421875,
+          "y": 0.21875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.546875,
+          "y": 0.3515625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.416015625,
+          "y": 0.46484375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.322265625,
+          "y": 0.34765625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": 0.484375,
+          "y": 0.28515625,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Small dark rotated shorts; visible outline does not certify seam positions."
+    },
+    {
+      "case_id": "T17",
+      "image_sha256": "4d3d3d9a9df81242fba7337af4d71792df2cee05d9657089641e4fffd8631e67",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.39453125,
+          "y": 0.44921875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.58203125,
+          "y": 0.38671875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.5078125,
+          "y": 0.70703125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.3515625,
+          "y": 0.82421875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": 0.486328125,
+          "y": 0.44140625,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Yellow shorts, spread on table; crotch and top waistband center provisional."
+    },
+    {
+      "case_id": "T18",
+      "image_sha256": "c8ee60b2827cc7f486a6882b519dac1c76cf1b99f98c2b94b46299688aa8b10e",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.38671875,
+          "y": 0.79296875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.693359375,
+          "y": 0.68359375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.47265625,
+          "y": 0.40625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.263671875,
+          "y": 0.37109375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": 0.525390625,
+          "y": 0.69921875,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Upside-down gray shorts; waistband fold makes center and crotch uncertain."
+    },
+    {
+      "case_id": "T19",
+      "image_sha256": "db52c365623b9cf37d4631e0268ade78602362428dc5f757d5e2d36c3ad9d277",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": null,
+          "y": null,
+          "status": "abstain"
+        }
+      ],
+      "note": "Crumpled dark garment on bed; no reliable seam identities, abstain entirely."
+    },
+    {
+      "case_id": "T20",
+      "image_sha256": "4a53b8c300349be12f0d4fb77d01bd123f19837fbfd67fe18807b8188c51ffb9",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.359375,
+          "y": 0.234375,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.359375,
+          "y": 0.65625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.5234375,
+          "y": 0.44140625,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.611328125,
+          "y": 0.203125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": 0.365234375,
+          "y": 0.44921875,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Sideways navy shorts; right-side notch crotch candidate uncertain."
+    },
+    {
+      "case_id": "T21",
+      "image_sha256": "5961c285cfb4d7ed78d8138ce6e896095518044d90cb088f3c34e0d5243a0284",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.265625,
+          "y": 0.4140625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.4140625,
+          "y": 0.3671875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.34375,
+          "y": 0.6953125,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.208984375,
+          "y": 0.7890625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": 0.34375,
+          "y": 0.41015625,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Upright black shorts; visible waistband endpoints, uncertain inseam junction."
+    },
+    {
+      "case_id": "T22",
+      "image_sha256": "72665339dbdb9b2e1b589f1c105b6772c7139e3c620a9ca7e6ee3e0cf13e0557",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.43359375,
+          "y": 0.75390625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.65234375,
+          "y": 0.8515625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.578125,
+          "y": 0.484375,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.455078125,
+          "y": 0.42578125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": 0.54296875,
+          "y": 0.796875,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Upside-down navy shorts; left follows nearest top-left waistband endpoint, not wearer anatomy."
+    },
+    {
+      "case_id": "T23",
+      "image_sha256": "5a002dcf780befa43b371577a7e64a7a5da58ec606ba8b51d781fa4eff8fe686",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.3671875,
+          "y": 0.2578125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.537109375,
+          "y": 0.2890625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.42578125,
+          "y": 0.5078125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.28515625,
+          "y": 0.546875,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": 0.44921875,
+          "y": 0.296875,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Front denim shorts; waist/crotch visible, center waist remains uncertain."
+    },
+    {
+      "case_id": "T24",
+      "image_sha256": "8cb3e2d83a51a9d2274d2e5fdab4ecf5bb2d32f5af10f5fd785365e537d27b0e",
+      "points": [
+        {
+          "landmark_type": "waist_left",
+          "x": 0.453125,
+          "y": 0.28515625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_right",
+          "x": 0.6484375,
+          "y": 0.3203125,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "crotch",
+          "x": 0.515625,
+          "y": 0.5546875,
+          "status": "uncertain_proposal"
+        },
+        {
+          "landmark_type": "side_hem",
+          "x": 0.353515625,
+          "y": 0.62890625,
+          "status": "visible_proposal"
+        },
+        {
+          "landmark_type": "waist_center",
+          "x": 0.546875,
+          "y": 0.34375,
+          "status": "uncertain_proposal"
+        }
+      ],
+      "note": "Wrinkled yellow shorts on bed; center waist and crotch provisional."
+    }
+  ]
+}

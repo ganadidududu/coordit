@@ -1,0 +1,46 @@
+{
+  "accepted": {
+    "tshirt": 3018,
+    "shirt": 1895,
+    "jacket": 1468,
+    "knit": 948,
+    "pants": 2853,
+    "jeans": 1383,
+    "shorts": 899,
+    "skirt": 1111,
+    "hoodie": 513,
+    "coat": 9,
+    "sweatshirt": 4
+  },
+  "excluded": {
+    "publisher_test_rows": 3390,
+    "unmapped_or_rejected/Top": 3812,
+    "unmapped_or_rejected/Dress": 2548,
+    "unmapped_or_rejected/Sweater": 2379,
+    "unmapped_or_rejected/Blouse": 1939,
+    "unmapped_or_rejected/Tank Top": 1057,
+    "unmapped_or_rejected/Tunic": 174,
+    "unmapped_or_rejected/Nightgown": 11,
+    "unmapped_or_rejected/Jacker": 57,
+    "unmapped_or_rejected/Training Top": 213,
+    "unmapped_or_rejected/Robe": 39,
+    "unmapped_or_rejected/Outerwear": 248,
+    "unmapped_or_rejected/Tights": 490,
+    "unmapped_or_rejected/Winter Trousers": 35,
+    "unmapped_or_rejected/Winter Jacket": 157,
+    "unmapped_or_rejected/Rain Jacket": 45,
+    "unmapped_or_rejected/Vest": 355,
+    "exact_duplicate": 126,
+    "unmapped_or_rejected/Rain Trousers": 40,
+    "unmapped_or_rejected/Pajamas": 307,
+    "unmapped_or_rejected/Night Gown": 115,
+    "conflicting_duplicate_labels": 0
+  },
+  "label_scope": "classification_only",
+  "centimeter_ground_truth": 0,
+  "mask_ground_truth": 0,
+  "seam_ground_truth": 0,
+  "splits": {
+    "train": 14101
+  }
+}

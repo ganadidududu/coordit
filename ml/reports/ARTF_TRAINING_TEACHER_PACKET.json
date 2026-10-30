@@ -1,0 +1,232 @@
+{
+  "preparation": {
+    "manifest": "artifacts/artf-landmarks-v1/records.jsonl",
+    "evaluation_manifest": "artifacts/artf-unseen-training-evaluation-v1/records.jsonl",
+    "protocol": "protocols/artf-training-teacher-v1.md",
+    "output": "artifacts/artf-training-teacher-v1",
+    "per_category": 12,
+    "seed": 20261029
+  },
+  "manifest_sha256": "156fac9f1c88d9136fd17dcc8c86e8cc412e6256c3f6bb24797f6424f06a2498",
+  "evaluation_manifest_sha256": "ae9806f8ad98e2ede7add42f7591ccb60b294de984ad632dcee75aea1d79fa00",
+  "protocol_sha256": "aa2cd3455012a89d3fb63be6e483f3b616b9a9d4f58bca1465d793d43d2d4269",
+  "cases": [
+    {
+      "case_id": "T01",
+      "category": "tshirt",
+      "source_image_id": "7c1adc44a4d91576e33c5016911926ddf6f701c9e4b1ce34a34cff7bcca6ad41",
+      "image_file": "T01.png",
+      "image_sha256": "7c1adc44a4d91576e33c5016911926ddf6f701c9e4b1ce34a34cff7bcca6ad41",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T02",
+      "category": "tshirt",
+      "source_image_id": "3bb1057b9424b96eb89d346012bdb06ed86b9ef8566d38c016b4862c7cce717b",
+      "image_file": "T02.png",
+      "image_sha256": "3bb1057b9424b96eb89d346012bdb06ed86b9ef8566d38c016b4862c7cce717b",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T03",
+      "category": "tshirt",
+      "source_image_id": "2ba21290fe79c2fdecadd5713f97a5efc6a4e4930df2e43c73e77ed6cc04c1d2",
+      "image_file": "T03.png",
+      "image_sha256": "2ba21290fe79c2fdecadd5713f97a5efc6a4e4930df2e43c73e77ed6cc04c1d2",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T04",
+      "category": "tshirt",
+      "source_image_id": "d1813335274b458d38560f254552baf5c3a75d6559fb69284e33a628a268a2c0",
+      "image_file": "T04.png",
+      "image_sha256": "d1813335274b458d38560f254552baf5c3a75d6559fb69284e33a628a268a2c0",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T05",
+      "category": "tshirt",
+      "source_image_id": "4824695c9a5930ca4b4475b2992ec753be991d28b23cdbdb5804b5b4a8f4c9e0",
+      "image_file": "T05.png",
+      "image_sha256": "4824695c9a5930ca4b4475b2992ec753be991d28b23cdbdb5804b5b4a8f4c9e0",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T06",
+      "category": "tshirt",
+      "source_image_id": "9a9b26c8f3dedaec97b62f0c29265fe36d4fb91b09ad81fd3a14ce21d9b68e13",
+      "image_file": "T06.png",
+      "image_sha256": "9a9b26c8f3dedaec97b62f0c29265fe36d4fb91b09ad81fd3a14ce21d9b68e13",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T07",
+      "category": "tshirt",
+      "source_image_id": "1b46867f6333466137904f27d7a2962bdf716597c48a2b55483f92224052478f",
+      "image_file": "T07.png",
+      "image_sha256": "1b46867f6333466137904f27d7a2962bdf716597c48a2b55483f92224052478f",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T08",
+      "category": "tshirt",
+      "source_image_id": "6ba449003e7e8948af2a393c2e065b2fa207ea2a91666589a2c7d92d4b1b6100",
+      "image_file": "T08.png",
+      "image_sha256": "6ba449003e7e8948af2a393c2e065b2fa207ea2a91666589a2c7d92d4b1b6100",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T09",
+      "category": "tshirt",
+      "source_image_id": "94ffc6a52cc3c69b75a9a0d7f66c05976d7c6e5315c44631eb6a98cab05c593c",
+      "image_file": "T09.png",
+      "image_sha256": "94ffc6a52cc3c69b75a9a0d7f66c05976d7c6e5315c44631eb6a98cab05c593c",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T10",
+      "category": "tshirt",
+      "source_image_id": "75fa657238318ac64d318082a2d2dc46809792a290ff66e5dfe3535128cdff44",
+      "image_file": "T10.png",
+      "image_sha256": "75fa657238318ac64d318082a2d2dc46809792a290ff66e5dfe3535128cdff44",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T11",
+      "category": "tshirt",
+      "source_image_id": "5d16a7c0345386ca130218f714dd6d7cfe7a17459849a3444f8c5c0556679b34",
+      "image_file": "T11.png",
+      "image_sha256": "5d16a7c0345386ca130218f714dd6d7cfe7a17459849a3444f8c5c0556679b34",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T12",
+      "category": "tshirt",
+      "source_image_id": "7697b1a967763181e105ea77c176ef1bdd6757f3cb7dbf9e5d1525e18c591e4e",
+      "image_file": "T12.png",
+      "image_sha256": "7697b1a967763181e105ea77c176ef1bdd6757f3cb7dbf9e5d1525e18c591e4e",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T13",
+      "category": "shorts",
+      "source_image_id": "ca7ac1a4a6f40e472c782886c789254ecc88877f1579edb7d9001af4cb5a154c",
+      "image_file": "T13.png",
+      "image_sha256": "ca7ac1a4a6f40e472c782886c789254ecc88877f1579edb7d9001af4cb5a154c",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T14",
+      "category": "shorts",
+      "source_image_id": "0203ce6cab58837b1141df69a7d4196f1413a416b9a7d97c3a21fdafe2e05c94",
+      "image_file": "T14.png",
+      "image_sha256": "0203ce6cab58837b1141df69a7d4196f1413a416b9a7d97c3a21fdafe2e05c94",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T15",
+      "category": "shorts",
+      "source_image_id": "16cd5eeb52e3e3db275bddc3c4ee44c00dabda1490df39b8a81c3a3ad640038d",
+      "image_file": "T15.png",
+      "image_sha256": "16cd5eeb52e3e3db275bddc3c4ee44c00dabda1490df39b8a81c3a3ad640038d",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T16",
+      "category": "shorts",
+      "source_image_id": "7a6aa17f2039963e0bb6409c788cecbf641d4d256a774140515b868e31d54026",
+      "image_file": "T16.png",
+      "image_sha256": "7a6aa17f2039963e0bb6409c788cecbf641d4d256a774140515b868e31d54026",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T17",
+      "category": "shorts",
+      "source_image_id": "4d3d3d9a9df81242fba7337af4d71792df2cee05d9657089641e4fffd8631e67",
+      "image_file": "T17.png",
+      "image_sha256": "4d3d3d9a9df81242fba7337af4d71792df2cee05d9657089641e4fffd8631e67",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T18",
+      "category": "shorts",
+      "source_image_id": "c8ee60b2827cc7f486a6882b519dac1c76cf1b99f98c2b94b46299688aa8b10e",
+      "image_file": "T18.png",
+      "image_sha256": "c8ee60b2827cc7f486a6882b519dac1c76cf1b99f98c2b94b46299688aa8b10e",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T19",
+      "category": "shorts",
+      "source_image_id": "db52c365623b9cf37d4631e0268ade78602362428dc5f757d5e2d36c3ad9d277",
+      "image_file": "T19.png",
+      "image_sha256": "db52c365623b9cf37d4631e0268ade78602362428dc5f757d5e2d36c3ad9d277",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T20",
+      "category": "shorts",
+      "source_image_id": "4a53b8c300349be12f0d4fb77d01bd123f19837fbfd67fe18807b8188c51ffb9",
+      "image_file": "T20.png",
+      "image_sha256": "4a53b8c300349be12f0d4fb77d01bd123f19837fbfd67fe18807b8188c51ffb9",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T21",
+      "category": "shorts",
+      "source_image_id": "5961c285cfb4d7ed78d8138ce6e896095518044d90cb088f3c34e0d5243a0284",
+      "image_file": "T21.png",
+      "image_sha256": "5961c285cfb4d7ed78d8138ce6e896095518044d90cb088f3c34e0d5243a0284",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T22",
+      "category": "shorts",
+      "source_image_id": "72665339dbdb9b2e1b589f1c105b6772c7139e3c620a9ca7e6ee3e0cf13e0557",
+      "image_file": "T22.png",
+      "image_sha256": "72665339dbdb9b2e1b589f1c105b6772c7139e3c620a9ca7e6ee3e0cf13e0557",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T23",
+      "category": "shorts",
+      "source_image_id": "5a002dcf780befa43b371577a7e64a7a5da58ec606ba8b51d781fa4eff8fe686",
+      "image_file": "T23.png",
+      "image_sha256": "5a002dcf780befa43b371577a7e64a7a5da58ec606ba8b51d781fa4eff8fe686",
+      "width": 512,
+      "height": 256
+    },
+    {
+      "case_id": "T24",
+      "category": "shorts",
+      "source_image_id": "8cb3e2d83a51a9d2274d2e5fdab4ecf5bb2d32f5af10f5fd785365e537d27b0e",
+      "image_file": "T24.png",
+      "image_sha256": "8cb3e2d83a51a9d2274d2e5fdab4ecf5bb2d32f5af10f5fd785365e537d27b0e",
+      "width": 512,
+      "height": 256
+    }
+  ],
+  "attribution": "aRTF Clothes, Thomas Lips, Victor-Louis De Gusseme and Francis wyffels, CC BY 4.0, doi:10.5281/zenodo.14501499. Resized/converted; cite Learning Keypoints for Robotic Cloth Manipulation using Synthetic Data (2024)."
+}
