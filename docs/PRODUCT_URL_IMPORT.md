@@ -159,11 +159,11 @@ longer matches; measurement edits alone retain them. The detailed size table and
 explicit paid comparison action remain available. Viewing this report does not
 create a product, invoke recommendation/report generation, or debit threads.
 
-Public page navigation and the existing explicit size API request check
-`robots.txt` using the configured crawler user agent. Redirect destinations keep
-public-network validation. Robots responses are bounded (5-second timeout,
-512 KB, three redirects, five-minute bounded cache); 404/410 mean no published
-policy, while denials, HTML challenge documents, or unavailable policies stop collection. Declared crawl
-delays are respected in addition to the existing per-user/domain limits. There
-is no login, CAPTCHA, or access-block bypass. This narrows collection risk but
-is not a legal clearance or a substitute for seller permission/terms review.
+The user-initiated import uses the original direct product-navigation contract.
+The mandatory `robots.txt` preflight added with seller-fact extraction was removed
+after it blocked previously supported product URLs before any product request.
+Public-network validation still applies to navigation, redirects, and the
+explicit size API request. Existing per-user/domain limits, response timeouts,
+and redirect limits remain. Seller HTTP 401/403/429 responses remain errors;
+login and CAPTCHA challenges are not bypassed. This describes runtime behavior,
+not legal clearance or a substitute for seller permission/terms review.
