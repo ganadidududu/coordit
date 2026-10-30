@@ -81,7 +81,9 @@ final class CoorditARPlaneMeasurementTests: XCTestCase {
     }
 
     func testNewModesRemainDisabledAndGalleryKeepsCardFallback() {
+        XCTAssertFalse(CoorditGarmentCaptureController.featureEnabled)
         XCTAssertFalse(CoorditGarmentCaptureController.cardlessEnabled)
+        XCTAssertFalse(CoorditRemoteLandmarkProvider.developmentEnabled)
         let controller = CoorditGarmentCaptureController(method: .card)
         controller.loadTestFixture()
         XCTAssertEqual(controller.method, .card)
