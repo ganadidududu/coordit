@@ -30,7 +30,10 @@ fun UsageGuideSheet(guide: UsageGuide, onDismiss: () -> Unit, onExample: () -> U
             }
             Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 if (firstUse) CoorditText("처음이라면 예시로 한 번 따라 해보세요. 핏랩과 옷장 사용법을 차례로 안내해드릴게요.", CoorditTypography.gmarketMedium(14f))
-                CoorditText(guide.introduction, CoorditTypography.gmarketBold(15f), Modifier.fillMaxWidth().background(AppColors.closetField, RoundedCornerShape(12.dp)).padding(16.dp))
+                Column(Modifier.fillMaxWidth().background(GuidanceStyle.background, RoundedCornerShape(GuidanceStyle.radius.dp)).padding(GuidanceStyle.inset.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    CoorditText("사용법 · 도움말", CoorditTypography.gmarketBold(14f).copy(color = GuidanceStyle.accent))
+                    CoorditText(guide.introduction, CoorditTypography.gmarketMedium(15f).copy(color = androidx.compose.ui.graphics.Color.White))
+                }
                 guide.topics.forEach { topic ->
                     var expanded by rememberSaveable(guide, topic.id) { mutableStateOf(false) }
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {

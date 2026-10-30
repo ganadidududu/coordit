@@ -127,7 +127,7 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                         state.draft.sizeRows.isNotEmpty() -> "내 사이즈 선택하기" to "사이즈표에서 실제로 보유한 옷의 사이즈를 누릅니다. 선택한 사이즈의 실측 정보가 저장됩니다."
                         else -> "링크 분석하기" to "링크 분석하기를 누르면 상품명과 사이즈별 실측 정보를 불러옵니다. 분석이 완료되면 사이즈를 선택합니다."
                     }
-                    com.inseong.coordit.ui.guidance.PracticeHint("CLOSET 체험 · 저장·차감 없음", hint.first, hint.second, { leave {} }, s)
+                    com.inseong.coordit.ui.guidance.PracticeHint(if (state.screen == ClosetScreenRoute.Detail || state.draft.selectedSizeRowId != null) "3/3 · 등록 확인" else if (state.draft.sizeRows.isNotEmpty()) "2/3 · 보유 사이즈" else "1/3 · 내 옷 링크", hint.first, hint.second, { leave {} }, s)
                 }
                 when (state.screen) {
                     ClosetScreenRoute.Overview -> {

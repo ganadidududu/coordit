@@ -11,6 +11,7 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
         XCTAssertFalse(element("tutorial-example-notice", app).exists)
         capture("login-home-no-guide", app)
         app.buttons["CLOSET"].tap()
+        startIntroductionIfOffered(app)
         XCTAssertTrue(element("closet-product-link", app).waitForExistence(timeout: 8))
         XCTAssertEqual(element("closet-product-link", app).value as? String, "https://example.coordit.invalid/products/basic")
         XCTAssertFalse(element("usage-guide-sheet", app).exists)
@@ -23,6 +24,7 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
         app.buttons["HOME"].tap()
         XCTAssertFalse(element("usage-guide-sheet", app).exists)
         app.buttons["FIT LAB"].tap()
+        startIntroductionIfOffered(app)
         XCTAssertTrue(element("fitlab-url-import", app).waitForExistence(timeout: 8))
         XCTAssertTrue(element("fitlab-tutorial-dismiss", app).waitForExistence(timeout: 8))
         capture("first-fitlab-entry", app)
@@ -50,6 +52,7 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
     func testFirstFitLabPracticeIncludesMissingReferenceRegistrationWithoutChargeOrSave() {
         let app = launch(account: UUID().uuidString)
         app.buttons["FIT LAB"].tap()
+        startIntroductionIfOffered(app)
         tap("fitlab-url-import", app)
         XCTAssertTrue(element("fitlab-free-summary", app).waitForExistence(timeout: 8))
         let hint = element("fitlab-tutorial-step-4", app)
@@ -68,6 +71,7 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
         tap("fitlab-manage-references", app)
         XCTAssertTrue(element("closet-tutorial-step-3", app).waitForExistence(timeout: 8))
         app.buttons["FIT LAB"].tap()
+        startIntroductionIfOffered(app)
         let exit = app.alerts["처음이라면 끝까지 따라 해보는 걸 추천해요"]
         XCTAssertTrue(exit.waitForExistence(timeout: 3))
         exit.buttons["계속 따라하기"].tap()
@@ -87,6 +91,7 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
         XCTAssertTrue(element("fitlab-source-url", app).waitForExistence(timeout: 8))
         XCTAssertFalse(element("usage-guide-sheet", app).exists)
         app.buttons["CLOSET"].tap()
+        startIntroductionIfOffered(app)
         XCTAssertTrue(element("closet-add-garment", app).waitForExistence(timeout: 8))
         XCTAssertFalse(element("tutorial-example-notice", app).exists)
         XCTAssertFalse(app.staticTexts["[예시] 베이직 티셔츠"].exists)
@@ -95,6 +100,7 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
     func testSharedProductWaitsBehindPracticeAndReturnsWithoutStartingClosetHelp() {
         let originalURL = "https://shop.example/my-original-product"
         let app = launch(account: UUID().uuidString, extra: ["--coordit-shared-fitlab-url", originalURL])
+        startIntroductionIfOffered(app)
         tap("fitlab-url-import", app)
         XCTAssertTrue(element("fitlab-free-summary", app).waitForExistence(timeout: 8))
         tap("fitlab-tutorial-dismiss", app)
@@ -108,6 +114,7 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
     func testFreeReportCanScrollPastCompactCoachAtAccessibilitySize() {
         let app = launch(account: UUID().uuidString, extra: ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXL"])
         app.buttons["FIT LAB"].tap()
+        startIntroductionIfOffered(app)
         tap("fitlab-url-import", app)
         XCTAssertTrue(element("fitlab-free-summary", app).waitForExistence(timeout: 8))
         capture("practice-free-summary-large-start", app)
@@ -133,6 +140,7 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
     func testHelpReplayReturnsToOriginalFreeReportAfterNestedReferencePractice() {
         let app = launch(account: UUID().uuidString)
         app.buttons["FIT LAB"].tap()
+        startIntroductionIfOffered(app)
         tap("fitlab-tutorial-dismiss", app)
         app.alerts["처음이라면 끝까지 따라 해보는 걸 추천해요"].buttons["이번에는 건너뛰기"].tap()
         tap("fitlab-source-url", app)
@@ -160,7 +168,77 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
         XCTAssertFalse(element("tutorial-example-notice", app).exists)
         capture("help-replay-restored-report", app)
         app.buttons["CLOSET"].tap()
+        startIntroductionIfOffered(app)
         XCTAssertTrue(element("closet-add-garment", app).waitForExistence(timeout: 8))
+    }
+
+    func testDeferringIntroductionPreservesSharedProductAndKeepsClosetIndependent() {
+        let originalURL = "https://shop.example/preserved-product"
+        let app = launch(account: UUID().uuidString, extra: ["--coordit-shared-fitlab-url", originalURL])
+        XCTAssertTrue(element("practice-introduction", app).waitForExistence(timeout: 8))
+        XCTAssertFalse(element("tutorial-example-notice", app).exists)
+        capture("intro-fitlab-before-start", app)
+        tap("practice-intro-later", app)
+        XCTAssertTrue(element("fitlab-url-field", app).waitForExistence(timeout: 8))
+        XCTAssertEqual(element("fitlab-url-field", app).value as? String, originalURL)
+        XCTAssertFalse(element("tutorial-example-notice", app).exists)
+        capture("intro-deferred-shared-product", app)
+        app.buttons["HOME"].tap()
+        app.buttons["FIT LAB"].tap()
+        XCTAssertFalse(element("practice-introduction", app).waitForExistence(timeout: 2))
+        app.buttons["CLOSET"].tap()
+        XCTAssertTrue(element("practice-introduction", app).waitForExistence(timeout: 8))
+        capture("intro-closet-before-start", app)
+        tap("practice-intro-later", app)
+        XCTAssertTrue(element("closet-add-garment", app).waitForExistence(timeout: 8))
+        XCTAssertFalse(element("tutorial-example-notice", app).exists)
+    }
+
+    func testOnDemandHelpHeadersAreDistinctInAllThreeContexts() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--coordit-ui-testing", "--coordit-ui-testing-authenticated", "--coordit-start-route", "fitlab-input", "--coordit-thread-balance", "1", "--coordit-fitlab-fixture", "url-success"]
+        app.launch()
+        tap("fitlab-tutorial-restart", app)
+        capture("help-fitlab", app)
+        tap("usage-guide-close", app)
+        tap("fitlab-source-url", app)
+        let field = element("fitlab-url-field", app)
+        XCTAssertTrue(field.waitForExistence(timeout: 8))
+        field.tap()
+        field.typeText("https://shop.example/guidance-product")
+        tap("fitlab-url-import", app)
+        tap("fitlab-show-comparison", app)
+        tap("fitlab-tutorial-restart", app)
+        capture("help-references", app)
+        tap("usage-guide-close", app)
+        app.buttons["CLOSET"].tap()
+        tap("closet-tutorial-restart", app)
+        capture("help-closet", app)
+        tap("usage-guide-close", app)
+    }
+
+    private func startIntroductionIfOffered(_ app: XCUIApplication) {
+        guard element("practice-introduction", app).waitForExistence(timeout: 1.5) else { return }
+        XCTAssertFalse(element("tutorial-example-notice", app).exists)
+        let name = app.staticTexts["옷장 등록, 예시로 함께 해볼까요?"].exists ? "first-closet-introduction" : "first-fitlab-introduction"
+        capture(name + (app.launchArguments.contains("UICTContentSizeCategoryAccessibilityXL") ? "-large" : ""), app)
+        if app.launchArguments.contains("UICTContentSizeCategoryAccessibilityXL") {
+            let note = app.staticTexts["실제 저장·실타래 사용 없이 연습해요."]
+            let button = element("practice-intro-start", app)
+            for _ in 0..<6 {
+                let base = app.coordinate(withNormalizedOffset: .zero)
+                let start = base.withOffset(CGVector(dx: app.frame.midX, dy: button.frame.minY - 30))
+                let end = base.withOffset(CGVector(dx: app.frame.midX, dy: app.frame.height * 0.35))
+                start.press(forDuration: 0.05, thenDragTo: end)
+                if note.frame.height > 0 && note.frame.minY > 0 && note.frame.maxY < button.frame.minY { break }
+            }
+            XCTAssertTrue(note.isHittable)
+            XCTAssertGreaterThan(note.frame.height, 0)
+            XCTAssertLessThan(note.frame.maxY, button.frame.minY)
+            XCTAssertTrue(element("practice-intro-step-3", app).isHittable)
+            capture(name + "-large-end", app)
+        }
+        tap("practice-intro-start", app)
     }
 
     private func completeClosetExample(_ app: XCUIApplication, returnToFitLab: Bool = false) {
@@ -197,7 +275,7 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
         let target = element(id, app)
         XCTAssertTrue(target.waitForExistence(timeout: 8), id)
         for _ in 0..<16 {
-            let sheet = element("usage-guide-close", app).exists || element("fitlab-reference-picker", app).exists
+            let sheet = element("practice-introduction", app).exists || element("usage-guide-close", app).exists || element("fitlab-reference-picker", app).exists
             let covered = !sheet && target.frame.maxY > app.frame.maxY - 110
             if target.isHittable && !covered { break }
             if target.frame.midY < app.frame.midY { app.swipeDown() } else { app.swipeUp() }

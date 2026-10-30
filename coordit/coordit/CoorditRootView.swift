@@ -7,6 +7,8 @@ struct CoorditRootView: View {
     @StateObject private var closetTutorial = CoorditClosetTutorial()
     @StateObject private var fitLabTutorial = CoorditFitLabTutorial()
     @StateObject private var firstUseGuidance = CoorditFirstUseGuidance()
+    @State private var pendingPracticeIntroduction: CoorditUsageGuide?
+    @State private var introductionAccountID: String?
     @State private var showsTutorialExitConfirmation = false
     @State private var tutorialExitDestination: CoorditFrameRoute?
     @State private var tutorialReturnRoute: CoorditFrameRoute?
@@ -189,6 +191,10 @@ struct CoorditRootView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .buttonStyle(CoorditPressFeedbackButtonStyle())
         .task(id: firstUseVisitID) {
+            if introductionAccountID != firstUseGuidanceUserID {
+                pendingPracticeIntroduction = nil
+                introductionAccountID = firstUseGuidanceUserID
+            }
             let previousPractice = firstUseGuidance.activePractice
             firstUseGuidance.prepare(userID: firstUseGuidanceUserID)
             if previousPractice != nil, firstUseGuidance.activePractice == nil {
@@ -317,6 +323,19 @@ struct CoorditRootView: View {
             await backendSession.restorePersistedSession()
             openPendingSharedFitLabImport()
         }
+        .sheet(item: $pendingPracticeIntroduction) { guide in
+            CoorditGuidanceIntroduction(guide: guide, onStart: {
+                pendingPracticeIntroduction = nil
+                beginFirstUsePractice(guide)
+            }, onLater: {
+                firstUseGuidance.markCompleted(guide)
+                pendingPracticeIntroduction = nil
+                if let url = pendingPracticeSharedURL {
+                    pendingPracticeSharedURL = nil
+                    openSharedFitLabImport(url)
+                }
+            })
+        }
         .sheet(isPresented: $showsFitLabReferenceSelection) {
             CoorditHomeReferenceSelectionSheet(
                 items: closetItems,
@@ -382,15 +401,15 @@ struct CoorditRootView: View {
     }
 
     private func startFirstUsePracticeIfNeeded() {
-        guard firstUseGuidanceUserID != nil, firstUseGuidance.activePractice == nil,
+        guard firstUseGuidanceUserID != nil, firstUseGuidance.activePractice == nil, pendingPracticeIntroduction == nil,
               !isPracticingReferenceRegistration else { return }
         if route == .fitLabInput, !fitLabCoordinator.isAnalysisRunning,
            fitLabCoordinator.retryStep == nil, fitLabCoordinator.recommendation == nil,
            firstUseGuidance.needsPractice(.fitLab) {
-            beginFirstUsePractice(.fitLab)
+            pendingPracticeIntroduction = .fitLab
         } else if route.navigationSection == 2, !closetAddSaveState.isSaving,
                   firstUseGuidance.needsPractice(.closet) {
-            beginFirstUsePractice(.closet)
+            pendingPracticeIntroduction = .closet
         }
     }
 
@@ -805,7 +824,7 @@ struct CoorditRootView: View {
         // A direct URL notification may arrive before scene activation. Remove
         // its queued copy so activation cannot reset the in-progress Fit Lab flow.
         CoorditSharedFitLabImport.removePendingProductURL(matching: url)
-        if firstUseGuidance.activePractice != nil {
+        if firstUseGuidance.activePractice != nil || pendingPracticeIntroduction != nil {
             pendingPracticeSharedURL = url
             return
         }

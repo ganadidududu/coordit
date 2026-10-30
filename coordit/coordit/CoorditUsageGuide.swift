@@ -85,11 +85,18 @@ struct CoorditUsageGuideSheet: View {
                         .font(CoorditTypography.gmarketMedium(size: 14, relativeTo: .body))
                         .accessibilityIdentifier("first-use-guide-introduction")
                 }
-                Text(guide.introduction)
-                    .font(CoorditTypography.gmarketBold(size: 15, relativeTo: .body))
-                    .padding(16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(CoorditFitLabPalette.field, in: RoundedRectangle(cornerRadius: 12))
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("사용법 · 도움말", systemImage: "book.closed")
+                        .font(CoorditTypography.gmarketBold(size: 14, relativeTo: .headline))
+                        .foregroundStyle(CoorditGuidanceStyle.accent)
+                    Text(guide.introduction)
+                        .font(CoorditTypography.gmarketMedium(size: 15, relativeTo: .body))
+                        .foregroundStyle(.white)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(CoorditGuidanceStyle.inset)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(CoorditGuidanceStyle.background, in: RoundedRectangle(cornerRadius: CoorditGuidanceStyle.radius))
                 ForEach(guide.topics) { topic in
                     DisclosureGroup {
                         Text(topic.body)
