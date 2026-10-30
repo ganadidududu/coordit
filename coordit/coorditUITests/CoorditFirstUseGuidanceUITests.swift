@@ -194,16 +194,47 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
         XCTAssertFalse(element("tutorial-example-notice", app).exists)
     }
 
+    func testOnDemandHelpHeadersAreDistinctInAllThreeContexts() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--coordit-ui-testing", "--coordit-ui-testing-authenticated", "--coordit-start-route", "fitlab-input", "--coordit-thread-balance", "1", "--coordit-fitlab-fixture", "url-success"]
+        app.launch()
+        tap("fitlab-tutorial-restart", app)
+        capture("help-fitlab", app)
+        tap("usage-guide-close", app)
+        tap("fitlab-source-url", app)
+        let field = element("fitlab-url-field", app)
+        XCTAssertTrue(field.waitForExistence(timeout: 8))
+        field.tap()
+        field.typeText("https://shop.example/guidance-product")
+        tap("fitlab-url-import", app)
+        tap("fitlab-show-comparison", app)
+        tap("fitlab-tutorial-restart", app)
+        capture("help-references", app)
+        tap("usage-guide-close", app)
+        app.buttons["CLOSET"].tap()
+        tap("closet-tutorial-restart", app)
+        capture("help-closet", app)
+        tap("usage-guide-close", app)
+    }
+
     private func startIntroductionIfOffered(_ app: XCUIApplication) {
         guard element("practice-introduction", app).waitForExistence(timeout: 1.5) else { return }
         XCTAssertFalse(element("tutorial-example-notice", app).exists)
         let name = app.staticTexts["옷장 등록, 예시로 함께 해볼까요?"].exists ? "first-closet-introduction" : "first-fitlab-introduction"
         capture(name + (app.launchArguments.contains("UICTContentSizeCategoryAccessibilityXL") ? "-large" : ""), app)
         if app.launchArguments.contains("UICTContentSizeCategoryAccessibilityXL") {
+            let note = app.staticTexts["실제 저장·실타래 사용 없이 연습해요."]
+            let button = element("practice-intro-start", app)
             for _ in 0..<6 {
-                if element("practice-intro-step-3", app).isHittable { break }
-                app.swipeUp()
+                let base = app.coordinate(withNormalizedOffset: .zero)
+                let start = base.withOffset(CGVector(dx: app.frame.midX, dy: button.frame.minY - 30))
+                let end = base.withOffset(CGVector(dx: app.frame.midX, dy: app.frame.height * 0.35))
+                start.press(forDuration: 0.05, thenDragTo: end)
+                if note.frame.height > 0 && note.frame.minY > 0 && note.frame.maxY < button.frame.minY { break }
             }
+            XCTAssertTrue(note.isHittable)
+            XCTAssertGreaterThan(note.frame.height, 0)
+            XCTAssertLessThan(note.frame.maxY, button.frame.minY)
             XCTAssertTrue(element("practice-intro-step-3", app).isHittable)
             capture(name + "-large-end", app)
         }

@@ -273,6 +273,31 @@ class ReleaseGuidanceTest {
         } finally { compose.runOnUiThread { models.clear() } }
     }
 
+    @Test fun onDemandHelpHeadersAreDistinctInAllThreeContexts() {
+        try {
+            start(false)
+            tap("coordit-main04-new-fit-button")
+            tap("fitlab-tutorial-restart")
+            capture("help-fitlab")
+            tap("usage-guide-close")
+            compose.runOnUiThread {
+                fit.chooseSource(FitLabSource.Url)
+                fit.edit { it.copy(productUrl = "https://shop.example/guidance-product") }
+            }
+            tap("fitlab-url-import")
+            compose.waitUntil(10_000) { !fit.state.value.busy }
+            tap("fitlab-review-continue")
+            compose.waitUntil(10_000) { !fit.state.value.busy }
+            tap("fitlab-tutorial-restart")
+            capture("help-references")
+            tap("usage-guide-close")
+            compose.onNodeWithContentDescription("CLOSET").performClick()
+            tap("closet-tutorial-restart")
+            capture("help-closet")
+            tap("usage-guide-close")
+        } finally { compose.runOnUiThread { models.clear() } }
+    }
+
     private fun startIntroduction() {
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("practice-introduction").fetchSemanticsNodes().isNotEmpty() }
         assertFalse(fit.state.value.draft.isExample)
@@ -280,7 +305,8 @@ class ReleaseGuidanceTest {
         val name = if (compose.onAllNodesWithText("옷장 등록, 예시로 함께 해볼까요?").fetchSemanticsNodes().isNotEmpty()) "first-closet-introduction" else "first-fitlab-introduction"
         capture(name + if (currentFontScale > 1f) "-large" else "")
         if (currentFontScale > 1f) {
-            compose.onNodeWithTag("practice-intro-step-3").performScrollTo().assertIsDisplayed()
+            compose.onNodeWithText("실제 저장·실타래 사용 없이 연습해요.").performScrollTo().assertIsDisplayed()
+            compose.onNodeWithTag("practice-intro-step-3").assertIsDisplayed()
             capture(name + "-large-end")
         }
         tap("practice-intro-start")
@@ -425,7 +451,7 @@ class ReleaseGuidanceTest {
         @Suppress("UNCHECKED_CAST") override fun <V : ViewModel> create(modelClass: Class<V>): V = factory() as V
     })[type]
     private fun tap(tag: String) {
-        if (tag.startsWith("practice-intro-")) {
+        if (tag.startsWith("practice-intro-") || tag in setOf("fitlab-tutorial-restart", "closet-tutorial-restart", "usage-guide-close")) {
             compose.onNodeWithTag(tag).assertIsDisplayed().performTouchInput { click(center) }
             compose.waitForIdle()
             return
