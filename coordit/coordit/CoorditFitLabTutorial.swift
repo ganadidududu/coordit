@@ -27,7 +27,7 @@ final class CoorditFitLabTutorial: ObservableObject {
             case .link: "상품 페이지 주소를 입력하거나 붙여넣고 다음을 누릅니다. 옷 종류도 상품에 맞게 선택합니다."
             case .importLink: "다음을 누르면 링크의 상품과 사이즈 정보를 무료로 정리해요."
             case .review: "누락되거나 잘못 읽힌 값만 수정해주세요. 정상적으로 읽힌 사이즈표는 바로 넘어가요."
-            case .continueToReferences: "아래 리포트를 읽고 ‘내 옷과 비교하기’를 눌러주세요."
+            case .continueToReferences: "리포트를 확인하세요.\n‘내 옷과 비교하기’를 눌러보세요."
             case .references: "‘옷장에서 골라 비교’를 누르고, 방금 등록한 예시 옷을 선택해주세요."
             case .analyze: "선택한 내 옷과 상품의 사이즈를 비교해요. 예시 체험에서는 실타래를 사용하지 않아요."
             case .result: "추천 사이즈와 핏 점수를 확인합니다. 아래 사이즈를 누르면 해당 사이즈의 점수와 부위별 차이를 비교할 수 있습니다."
