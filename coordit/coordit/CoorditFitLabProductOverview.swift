@@ -9,6 +9,7 @@ struct CoorditFitLabProductOverview: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var selected: CoorditFitLabSizeDraft? { draft.sizes.first { $0.id == selectedSizeID } ?? draft.sizes.first }
     private var summary: CoorditFitLabProductSummary { .init(draft: draft) }
+    private var facts: CoorditProductFacts? { draft.productFacts.flatMap { $0.applies(to: draft) ? $0 : nil } }
     private var reading: CoorditFitLabProductReading { .init(draft: draft) }
 
     var body: some View {
@@ -21,20 +22,39 @@ struct CoorditFitLabProductOverview: View {
             Text([draft.brand, draft.category.koreanTitle, draft.mallName].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
                 .foregroundStyle(CoorditFitLabPalette.muted)
-            Text(draft.source == .url ? "상품 링크의 정보만으로 정리했어요. 실타래는 사용하지 않아요." : "입력한 상품과 치수로 정리했어요. 실타래는 사용하지 않아요.")
-                .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
-                .fixedSize(horizontal: false, vertical: true)
-
             Divider()
-            readingParagraph(title: "사이즈 요약", body: reading.overview, symbol: "ruler")
-            readingParagraph(title: reading.sizeDifferenceTitle, body: reading.sizeDifference, symbol: "arrow.left.arrow.right")
+            readingParagraph(title: "사이즈 요약 · 치수 기준", body: reading.conciseSizeSummary, symbol: "ruler")
                 .accessibilityIdentifier("fitlab-summary-size-reading")
-            readingParagraph(title: "입을 때 볼 점", body: reading.wearingContext, symbol: "tshirt")
-                .accessibilityIdentifier("fitlab-summary-wearing-context")
-            Text("실측표와 옷 종류를 바탕으로 정리했어요. 실제 착용감은 원단과 디자인에 따라 달라져요.")
+            if let facts {
+                if let material = facts.summary(for: ["material", "lining", "stretch", "thickness", "sheerness"]) {
+                    readingParagraph(title: "소재·구조", body: material, symbol: "tshirt")
+                        .accessibilityIdentifier("fitlab-summary-material")
+                }
+                if let fit = facts.summary(for: ["fit", "model"]) {
+                    readingParagraph(title: "핏·착용 정보", body: fit, symbol: "person")
+                        .accessibilityIdentifier("fitlab-summary-fit")
+                }
+                if let care = facts.summary(for: ["care"]) {
+                    readingParagraph(title: "관리", body: care, symbol: "drop")
+                }
+                VStack(alignment: .leading, spacing: metrics.value(4)) {
+                    Text("소재·핏·관리 정보는 판매처 제공 내용이에요.")
+                    if let checked = facts.checkedLabel {
+                        Text("확인 \(checked)")
+                    }
+                    Link("상품 원문 보기", destination: facts.sourceUrl)
+                        .frame(minHeight: 44)
+                        .foregroundStyle(CoorditFitLabPalette.ink)
+                        .accessibilityIdentifier("fitlab-summary-source")
+                }
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))
                 .foregroundStyle(CoorditFitLabPalette.muted)
-                .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text(draft.source == .url ? "소재·핏 정보는 확인되지 않았어요." : "소재·핏 정보는 상품 링크에서 확인할 수 있어요.")
+                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
+                    .foregroundStyle(CoorditFitLabPalette.muted)
+                    .accessibilityIdentifier("fitlab-summary-facts-unavailable")
+            }
             Button {
                 withAnimation(CoorditMotion.navigation(reduceMotion: reduceMotion)) {
                     showsMeasurements.toggle()

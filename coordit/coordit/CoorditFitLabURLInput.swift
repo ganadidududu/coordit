@@ -534,6 +534,7 @@ struct CoorditFitLabURLInputView: View {
         rows = response.sizes.map(EditableRow.init)
         if rows.isEmpty { rows = [EditableRow()] }
         draft.source = .url
+        draft.productFacts = response.productFacts
         draft.productURL = response.productUrl
         draft.mallName = response.mallName
         draft.selectedReferenceIDs.removeAll()

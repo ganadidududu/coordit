@@ -50,6 +50,7 @@ struct CoorditFitLabURLPrefillResponse: Codable, Equatable, Sendable {
     let fitType: String
     let parsingStatus: String
     let sizes: [Size]
+    var productFacts: CoorditProductFacts? = nil
 }
 
 struct CoorditFitLabProductRequest: Codable, Equatable, Sendable {

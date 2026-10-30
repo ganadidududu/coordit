@@ -26,6 +26,24 @@ struct CoorditFitLabProductReading {
         }.map { (first: $0.0, other: $0.1) }
     }
 
+    var conciseSizeSummary: String {
+        let summary = CoorditFitLabProductSummary(draft: draft)
+        let ranges = [(widthKey, "\(widthName) 단면"), (lengthKey, "총장")].compactMap { key, name -> String? in
+            guard let item = summary.measurements.first(where: { $0.key == key }) else { return nil }
+            let range = item.minimum == item.maximum ? number(item.minimum) : "\(number(item.minimum))–\(number(item.maximum))"
+            return "\(name) \(range)cm"
+        }
+        let labels = draft.sizes.count <= 4 ? draft.sizes.map(\.label).joined(separator: ", ") : "사이즈 \(draft.sizes.count)개"
+        let overview = ([labels] + ranges).filter { !$0.isEmpty }.joined(separator: " · ")
+        guard let pair = comparisonPair else { return overview }
+        let changes = [(widthKey, "\(widthName) 단면"), (lengthKey, "총장")].compactMap { key, name -> String? in
+            guard let change = difference(key, from: pair.first, to: pair.other) else { return nil }
+            return "\(name) \(change > 0 ? "+" : "")\(number(change))cm"
+        }
+        guard !changes.isEmpty else { return overview }
+        return overview + "\n\(pair.first.label) → \(pair.other.label): " + changes.joined(separator: " · ")
+    }
+
     var headline: String {
         if let pair = comparisonPair {
             if let width = difference(widthKey, from: pair.first, to: pair.other) {

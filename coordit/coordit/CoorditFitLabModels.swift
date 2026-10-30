@@ -123,6 +123,48 @@ struct CoorditFitLabSizeDraft: Identifiable, Codable, Equatable, Sendable {
     var measurements: [CoorditFitLabMeasurementKey: Double] = [:]
 }
 
+struct CoorditProductFacts: Codable, Equatable, Sendable {
+    struct Item: Codable, Equatable, Sendable {
+        let kind: String
+        let value: String
+    }
+    let productName: String
+    let sourceUrl: URL
+    let capturedAt: String
+    let items: [Item]
+
+    var checkedDate: Date? {
+        let fractional = ISO8601DateFormatter()
+        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return fractional.date(from: capturedAt) ?? ISO8601DateFormatter().date(from: capturedAt)
+    }
+
+    var checkedLabel: String? {
+        guard let date = checkedDate else { return nil }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy.MM.dd HH:mm"
+        return formatter.string(from: date)
+    }
+
+    func applies(to draft: CoorditFitLabDraft) -> Bool {
+        draft.source == .url && sourceUrl == draft.productURL &&
+        productName.trimmingCharacters(in: .whitespacesAndNewlines) == draft.productName.trimmingCharacters(in: .whitespacesAndNewlines) &&
+        checkedDate != nil && ["http", "https"].contains(sourceUrl.scheme?.lowercased() ?? "")
+    }
+
+    func summary(for kinds: [String]) -> String? {
+        let labels = ["material": "소재", "lining": "안감", "stretch": "신축성", "thickness": "두께", "sheerness": "비침", "fit": "핏", "model": "모델", "care": "관리"]
+        let lines = kinds.compactMap { kind -> String? in
+            let matches = items.filter { $0.kind == kind }
+            guard matches.count == 1, let item = matches.first, !item.value.isEmpty, item.value.count <= 80,
+                  let label = labels[kind] else { return nil }
+            return "\(label) · \(item.value)"
+        }
+        return lines.isEmpty ? nil : lines.joined(separator: "\n")
+    }
+}
+
 struct CoorditFitLabDraft: Codable, Equatable, Sendable {
     var source: CoorditFitLabSource = .manual
     var garmentKind: CoorditFitLabGarmentKind = .upper
@@ -131,6 +173,7 @@ struct CoorditFitLabDraft: Codable, Equatable, Sendable {
     var brand: String?
     var mallName: String?
     var productURL: URL?
+    var productFacts: CoorditProductFacts?
     var sizes: [CoorditFitLabSizeDraft] = [CoorditFitLabSizeDraft()]
     var selectedReferenceIDs: Set<String> = []
     var ocrMetadata: CoorditFitLabOCRMetadata?

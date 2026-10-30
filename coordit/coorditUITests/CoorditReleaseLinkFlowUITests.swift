@@ -20,8 +20,9 @@ final class CoorditReleaseLinkFlowUITests: XCTestCase {
         XCTAssertFalse(element("fitlab-submit-analysis", app).exists)
         assertNoAnalysis(app)
         XCTAssertFalse(element("fitlab-summary-highlight", app).exists)
-        XCTAssertTrue(element("fitlab-summary-size-reading", app).label.contains("약 4cm"))
-        XCTAssertTrue(element("fitlab-summary-wearing-context", app).exists)
+        XCTAssertTrue(element("fitlab-summary-size-reading", app).label.contains("+2cm"))
+        XCTAssertTrue(element("fitlab-summary-material", app).exists)
+        XCTAssertTrue(element("fitlab-summary-fit", app).exists)
         capture("release-free-summary", app)
         scrollToComparison(app)
         capture("release-free-summary-end", app)
@@ -68,6 +69,48 @@ final class CoorditReleaseLinkFlowUITests: XCTestCase {
         XCTAssertTrue(ledger.contains("recommend=1"), ledger)
         XCTAssertTrue(ledger.contains("report=1"), ledger)
         capture("release-paid-result", app)
+    }
+
+    func testManualReportDoesNotInventSellerFacts() {
+        let app = launch(balance: 0, fixture: "url-manual-report")
+        XCTAssertTrue(element("fitlab-free-summary", app).waitForExistence(timeout: 5))
+        XCTAssertTrue(element("fitlab-summary-facts-unavailable", app).exists)
+        XCTAssertFalse(element("fitlab-summary-source", app).exists)
+        capture("report-manual", app)
+        assertNoAnalysis(app)
+    }
+
+    func testEditingImportedProductNameHidesOriginalSellerFacts() {
+        let app = launch(balance: 0, extra: ["--coordit-shared-fitlab-url", "https://shop.example/products/linen-shirt"])
+        tap("fitlab-url-import", app)
+        XCTAssertTrue(element("fitlab-summary-material", app).waitForExistence(timeout: 5))
+        scrollToComparison(app)
+        tap("fitlab-edit-product", app)
+        let field = element("fitlab-product-name", app)
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        let current = field.value as? String ?? ""
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count) + "수정 상품")
+        if app.buttons["완료"].exists { app.buttons["완료"].tap() }
+        tap("fitlab-manual-continue", app)
+        tap("fitlab-manual-confirm", app)
+        XCTAssertTrue(element("fitlab-free-summary", app).waitForExistence(timeout: 5))
+        XCTAssertFalse(element("fitlab-summary-material", app).exists)
+        XCTAssertTrue(element("fitlab-summary-facts-unavailable", app).exists)
+        capture("report-edited-identity", app)
+        assertNoAnalysis(app)
+    }
+
+    func testMissingProductFactsStillShowsFreeSizeReport() {
+        let app = launch(balance: 0, extra: ["--coordit-shared-fitlab-url", "https://shop.example/products/facts-missing"])
+        tap("fitlab-url-import", app)
+        XCTAssertTrue(element("fitlab-free-summary", app).waitForExistence(timeout: 5))
+        XCTAssertTrue(element("fitlab-summary-facts-unavailable", app).exists)
+        XCTAssertFalse(element("fitlab-summary-material", app).exists)
+        capture("report-missing-facts", app)
+        scrollToComparison(app)
+        capture("report-missing-facts-end", app)
+        assertNoAnalysis(app)
     }
 
     func testZeroThreadsStillAllowsFreeSummaryAndReferenceRegistration() {
@@ -141,11 +184,11 @@ final class CoorditReleaseLinkFlowUITests: XCTestCase {
         XCTAssertTrue(element("coordit-shared-app-background", app).exists)
     }
 
-    private func launch(route: String = "fitlab-input", balance: Int, extra: [String] = []) -> XCUIApplication {
+    private func launch(route: String = "fitlab-input", balance: Int, fixture: String = "url-success", extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--coordit-ui-testing", "--coordit-ui-testing-authenticated",
             "--coordit-start-route", route, "--coordit-thread-balance", String(balance),
-            "--coordit-fitlab-fixture", "url-success"] + extra
+            "--coordit-fitlab-fixture", fixture] + extra
         app.launch()
         return app
     }

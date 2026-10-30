@@ -1237,6 +1237,7 @@ final class CoorditFitLabCoordinator: ObservableObject {
     #if DEBUG
     private func seed(route: CoorditFrameRoute, fixture: String?) {
         guard fixture != nil else { return }
+        if fixture == "url-manual-report" { draft.isSourceConfirmed = true; return }
         if fixture?.hasPrefix("camera-") == true {
             if fixture == "camera-demo" { return }
             if route == .fitLabInput, cameraMeasurement == nil {

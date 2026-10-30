@@ -3,6 +3,37 @@ import XCTest
 
 @MainActor
 final class CoorditProductSummaryTests: XCTestCase {
+    func testProductFactsRoundTripAndIdentityValidation() throws {
+        let url = try XCTUnwrap(URL(string: "https://shop.example/products/linen-shirt"))
+        let facts = CoorditProductFacts(productName: "리넨 셔츠", sourceUrl: url, capturedAt: "2026-10-30T03:00:00.000Z", items: [
+            .init(kind: "material", value: "리넨 55%, 면 45%"), .init(kind: "future-kind", value: "unknown")
+        ])
+        var draft = CoorditFitLabDraft(source: .url, productName: "리넨 셔츠", productURL: url, productFacts: facts)
+        let restored = try JSONDecoder().decode(CoorditFitLabDraft.self, from: JSONEncoder().encode(draft))
+        XCTAssertEqual(restored.productFacts, facts)
+        XCTAssertTrue(facts.applies(to: restored))
+        XCTAssertNil(facts.summary(for: ["fit", "future-kind"]))
+        draft.productName = "다른 상품"
+        XCTAssertFalse(facts.applies(to: draft))
+        draft.productName = facts.productName
+        draft.productURL = URL(string: "https://shop.example/other")
+        XCTAssertFalse(facts.applies(to: draft))
+        let legacy = try JSONDecoder().decode(CoorditFitLabURLPrefillResponse.self, from: Data(#"{"productName":"옛 상품","productUrl":"https://shop.example/old","category":"shirt","fitType":"regular","parsingStatus":"parsed","sizes":[]}"#.utf8))
+        XCTAssertNil(legacy.productFacts)
+    }
+
+    func testConciseReportOnlyComparesSharedValidMeasurements() {
+        let draft = CoorditFitLabDraft(sizes: [
+            .init(label: "M", measurements: [.chestWidth: 56, .totalLength: 70]),
+            .init(label: "L", measurements: [.totalLength: 72, .shoulderWidth: .nan])
+        ])
+        let reading = CoorditFitLabProductReading(draft: draft).conciseSizeSummary
+        XCTAssertTrue(reading.contains("가슴 단면 56cm"))
+        XCTAssertTrue(reading.contains("총장 +2cm"))
+        XCTAssertFalse(reading.contains("가슴 단면 +"))
+        XCTAssertFalse(reading.contains("nan"))
+    }
+
     func testSummaryCalculatesRangesFromProductSizesOnly() {
         let draft = CoorditFitLabDraft(sizes: [
             .init(label: "M", measurements: [.chestWidth: 54, .totalLength: 68]),
