@@ -55,7 +55,7 @@ import {
   markRecommendationClicked,
   markRecommendationPurchased
 } from "./modules/recommendation-logs/recommendation-logs.controller";
-import { deleteMe, getMe, updateMe } from "./modules/users/users.controller";
+import { deleteMe, getMe, getMyConsents, updateMe, updateMyConsents } from "./modules/users/users.controller";
 import {
   appleIapPurchaseController,
   getMonetizationReadinessController,
@@ -99,6 +99,8 @@ routes.post("/auth/guest/welcome", guestWelcomeController);
 routes.get("/users/me", getMe);
 routes.patch("/users/me", updateMe);
 routes.delete("/users/me", deleteMe);
+routes.get("/users/me/consents", getMyConsents);
+routes.patch("/users/me/consents", updateMyConsents);
 
 routes.use(onboardingMiddleware);
 
