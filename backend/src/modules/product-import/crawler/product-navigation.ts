@@ -1,6 +1,7 @@
 import { errors as playwrightErrors } from "playwright";
 import { env } from "../../../config/env";
 import type { ProductSite } from "../product-import.types";
+import { assertPublicUrl } from "../security/url-validator";
 export const productIdFromUrl = (url: URL): string | null => {
   const pathSegments = url.pathname.split("/");
   for (let index = pathSegments.length - 1; index >= 0; index -= 1) {
@@ -28,6 +29,7 @@ export const fetchMusinsaSizeCandidate = async (
   if (!productId) return null;
   try {
     const sizeUrl = new URL(`https://goods-detail.musinsa.com/api2/goods/${productId}/actual-size`);
+    await assertPublicUrl(sizeUrl);
     const response = await page.context().request.get(
       sizeUrl.href,
       { timeout: Math.min(env.crawlTimeoutMs, 10_000), maxRedirects: 0 }
