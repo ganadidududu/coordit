@@ -54,6 +54,11 @@ class SessionRepository(private val api: CoorditApi, private val store: SessionS
     suspend fun health(): BackendHealth = api.health()
     suspend fun loadProfile(): UserProfile = api.me(authorization())
     suspend fun updateProfile(displayName: String): UserProfile = api.updateMe(authorization(), UpdateProfileRequest(displayName.trim()))
+    suspend fun loadFeedbackConsent(): Boolean = feedbackConsent(api.consents(authorization()))
+    suspend fun updateFeedbackConsent(accepted: Boolean): Boolean = feedbackConsent(api.updateConsents(authorization(),
+        UpdateConsentsRequest(mapOf("fit_data_improvement" to UpdateConsentsRequest.Consent(accepted)))))
+    private fun feedbackConsent(response: UserConsents): Boolean =
+        response.consents["fit_data_improvement"]?.accepted ?: throw IOException("Missing fit_data_improvement consent")
     suspend fun loadOnboardingStatus(): OnboardingStatus = api.onboardingStatus(authorization())
     suspend fun completeOnboarding(request: OnboardingRequest): OnboardingCompletion = api.completeOnboarding(authorization(), request)
     suspend fun loadThreadBalance(): ThreadBalanceResponse = api.threadBalance(authorization())

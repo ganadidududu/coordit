@@ -62,6 +62,9 @@ final class CoorditBackendSessionStore: ObservableObject {
     @Published private(set) var statusText = "백엔드 연결 확인 전"
     @Published private(set) var isWorking = false
     @Published private(set) var isWarning = false
+    @Published private(set) var feedbackDataConsent: Bool?
+    @Published private(set) var isUpdatingConsent = false
+    @Published private(set) var consentStatusText = ""
     @Published private(set) var monetizationReadinessState: CoorditMonetizationReadinessState = .notLoaded
 
     private let client: CoorditBackendClient
@@ -98,6 +101,13 @@ final class CoorditBackendSessionStore: ObservableObject {
             )
             onboardingComplete = !ProcessInfo.processInfo.arguments.contains("--coordit-ui-testing-onboarding-incomplete")
             statusText = "테스트 계정으로 로그인됨"
+            let arguments = ProcessInfo.processInfo.arguments
+            if arguments.contains("--coordit-test-local-profile-reset") {
+                CoorditLocalProfileStore.clear(userID: Self.uiTestingUserID)
+            }
+            if Self.uiTestingConsentMode == "accepted" {
+                UserDefaults.standard.set(true, forKey: consentFixtureKey)
+            }
         } else {
             usesAuthenticatedUITestFixture = false
             session = tokenStore.load()
@@ -549,6 +559,8 @@ final class CoorditBackendSessionStore: ObservableObject {
         tokenStore.delete()
         session = nil
         profile = nil
+        feedbackDataConsent = nil
+        consentStatusText = ""
         latestBodyMeasurement = nil
         onboardingComplete = false
         referenceFitProfiles = [:]
@@ -572,10 +584,13 @@ final class CoorditBackendSessionStore: ObservableObject {
             }
             if let userID = session?.user.id {
                 Self.clearCachedOnboardingComplete(for: userID)
+                CoorditLocalProfileStore.clear(userID: userID)
             }
             tokenStore.delete()
             session = nil
             profile = nil
+            feedbackDataConsent = nil
+            consentStatusText = ""
             latestBodyMeasurement = nil
             onboardingComplete = false
             referenceFitProfiles = [:]
@@ -591,11 +606,84 @@ final class CoorditBackendSessionStore: ObservableObject {
         }
     }
 
-    func saveProfile(displayName: String) async {
-        await runAuthenticated { token in
-            profile = try await client.updateMe(token: token, displayName: displayName)
+    func saveProfile(displayName: String) async -> Bool {
+        guard let userID = session?.user.id else {
+            statusText = "프로필 저장은 로그인이 필요해요."
+            isWarning = true
+            return false
+        }
+        isWorking = true
+        defer { isWorking = false }
+        do {
+            let updatedProfile = try await authenticatedValue { token in
+                try await client.updateMe(token: token, displayName: displayName)
+            }
+            guard session?.user.id == userID else { return false }
+            profile = updatedProfile
             statusText = "프로필을 백엔드에 저장했어요."
             isWarning = false
+            return true
+        } catch {
+            statusText = "이름을 저장하지 못했어요. 연결을 확인하고 다시 시도해 주세요."
+            isWarning = true
+            return false
+        }
+    }
+
+    func loadFeedbackDataConsent() async {
+        feedbackDataConsent = nil
+        consentStatusText = ""
+        guard let userID = session?.user.id else {
+            consentStatusText = "지금은 동의 설정을 불러올 수 없어요."
+            return
+        }
+        do {
+#if DEBUG
+            if usesAuthenticatedUITestFixture, let mode = Self.uiTestingConsentMode {
+                guard mode != "unavailable" else { throw CoorditBackendClientError.invalidResponse }
+                feedbackDataConsent = UserDefaults.standard.bool(forKey: consentFixtureKey)
+                return
+            }
+#endif
+            let response = try await authenticatedValue { token in
+                try await client.consents(token: token)
+            }
+            guard session?.user.id == userID else { return }
+            guard let consent = response.consents["fit_data_improvement"] else {
+                throw CoorditBackendClientError.invalidResponse
+            }
+            feedbackDataConsent = consent.accepted
+        } catch {
+            guard session?.user.id == userID else { return }
+            consentStatusText = "지금은 동의 설정을 불러올 수 없어요."
+        }
+    }
+
+    func updateFeedbackDataConsent(_ accepted: Bool) async {
+        guard let userID = session?.user.id, feedbackDataConsent != nil, !isUpdatingConsent else { return }
+        isUpdatingConsent = true
+        consentStatusText = ""
+        defer { isUpdatingConsent = false }
+        do {
+#if DEBUG
+            if usesAuthenticatedUITestFixture, let mode = Self.uiTestingConsentMode {
+                guard mode != "save-failure" else { throw CoorditBackendClientError.invalidResponse }
+                UserDefaults.standard.set(accepted, forKey: consentFixtureKey)
+                feedbackDataConsent = accepted
+                return
+            }
+#endif
+            let response = try await authenticatedValue { token in
+                try await client.updateConsents(token: token, accepted: accepted)
+            }
+            guard session?.user.id == userID else { return }
+            guard let consent = response.consents["fit_data_improvement"] else {
+                throw CoorditBackendClientError.invalidResponse
+            }
+            feedbackDataConsent = consent.accepted
+        } catch {
+            guard session?.user.id == userID else { return }
+            consentStatusText = "동의 설정을 저장하지 못했어요. 다시 시도해 주세요."
         }
     }
 
@@ -1327,6 +1415,17 @@ final class CoorditBackendSessionStore: ObservableObject {
     }
 
 #if DEBUG
+    private var consentFixtureKey: String {
+        "coordit.ui-test-consent.\(Self.uiTestingUserID)"
+    }
+
+    private static var uiTestingConsentMode: String? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "--coordit-test-consents"),
+              arguments.indices.contains(index + 1) else { return nil }
+        return arguments[index + 1]
+    }
+
     private enum UITestingMonetizationReadiness {
         case enabled
         case disabled

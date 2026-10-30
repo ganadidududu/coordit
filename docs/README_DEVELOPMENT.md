@@ -66,6 +66,7 @@
 | 기능 | 변수 / 기본값 | 비고 |
 | --- | --- | --- |
 | API | `PORT=4000`, `NODE_ENV=development` | development에서 localhost:3000과 127.0.0.1:3000 허용 |
+| 프록시 | `TRUST_PROXY_HOPS=1` | API 앞의 리버스 프록시 수. Cloud Run은 1, 클라이언트가 직접 접속하는 배포만 0. 동의 기록의 IP가 이 값에 따라 정해짐 |
 | production CORS | `CORS_ORIGINS` | 쉼표로 구분한 정확한 HTTPS origin. 경로·마지막 `/` 제외 |
 | Supabase | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | 세 값은 서버 시작에 필수. service-role key는 서버에만 보관 |
 | iOS | `COORDIT_API_BASE_URL` | Xcode build setting. Simulator 로컬 API는 `http://127.0.0.1:4000` |

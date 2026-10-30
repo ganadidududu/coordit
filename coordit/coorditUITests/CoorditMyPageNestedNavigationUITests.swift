@@ -251,7 +251,10 @@ final class CoorditMyPageNestedNavigationUITests: XCTestCase {
 
     func testEditableAndConfirmationDestinationsExposeWorkingControls() throws {
         var app = launchApp(at: "mypage-profile-edit")
-        completeAction("프로필 저장", expecting: "mypage-profile-saved", in: app)
+        tap(app.buttons["프로필 저장"], in: app)
+        XCTAssertTrue(element("mypage-profile-save-error", in: app).waitForExistence(timeout: 5))
+        XCTAssertFalse(element("mypage-profile-saved", in: app).exists)
+        app.terminate()
 
         app = launchApp(at: "mypage-logout")
         completeAction("로그아웃 확인", expecting: "mypage-logout-complete", in: app)

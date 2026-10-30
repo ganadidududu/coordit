@@ -9,6 +9,8 @@ struct CoorditSettingsTextField: View {
     let metrics: CoorditResponsiveMetrics
     var isSecure = false
     var multiline = false
+    var onFocusChange: ((Bool) -> Void)?
+    @FocusState private var fieldIsFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: metrics.value(7)) {
@@ -39,6 +41,10 @@ struct CoorditSettingsTextField: View {
                     .allowsHitTesting(false)
             }
             .accessibilityIdentifier(identifier)
+            .focused($fieldIsFocused)
+            .onChange(of: fieldIsFocused) { _, focused in
+                onFocusChange?(focused)
+            }
         }
     }
 }

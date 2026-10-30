@@ -42,15 +42,41 @@ extension CoorditMyPageFamilyView {
                 }
                 CoorditSettingsDivider(metrics: metrics)
                 CoorditSettingsDetailRow(title: "피드백 데이터 개인화 사용 동의", subtitle: "추천 개선에 사용", metrics: metrics) {
-                    CoorditSettingsToggle(isOn: $feedDataConsent, metrics: metrics, label: "피드백 데이터 개인화 사용 동의")
+                    if let accepted = backendSession.feedbackDataConsent {
+                        CoorditSettingsToggle(
+                            isOn: Binding(
+                                get: { accepted },
+                                set: { value in
+                                    Task { await backendSession.updateFeedbackDataConsent(value) }
+                                }
+                            ),
+                            metrics: metrics,
+                            label: "피드백 데이터 개인화 사용 동의"
+                        )
+                        .disabled(backendSession.isUpdatingConsent)
+                    } else {
+                        Button {} label: {
+                            Capsule()
+                                .fill(CoorditSettingsStyle.line)
+                                .frame(width: metrics.value(42), height: metrics.value(24))
+                        }
+                        .disabled(true)
+                        .accessibilityLabel("피드백 데이터 개인화 사용 동의")
+                        .accessibilityValue("확인 불가")
+                    }
                 }
-                CoorditSettingsDivider(metrics: metrics)
-                CoorditSettingsDetailRow(title: "AI/ML 추천 개선 데이터 사용 동의", subtitle: "비식별 학습 반영", metrics: metrics) {
-                    CoorditSettingsToggle(isOn: $aiDataConsent, metrics: metrics, label: "AI/ML 추천 개선 데이터 사용 동의")
-                }
+            }
+            if !backendSession.consentStatusText.isEmpty {
+                CoorditSettingsStatusBanner(
+                    text: backendSession.consentStatusText,
+                    identifier: "mypage-consent-error",
+                    metrics: metrics,
+                    isWarning: true
+                )
             }
         }
         .task { await adPrivacyService.refreshConsent() }
+        .task(id: backendSession.session?.user.id) { await backendSession.loadFeedbackDataConsent() }
     }
 
     func appSettings(metrics: CoorditResponsiveMetrics) -> some View {

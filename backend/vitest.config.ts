@@ -16,6 +16,8 @@ export default defineConfig({
       "src/modules/auth/auth-google.http.test.ts",
       "src/modules/auth/auth-refresh.http.test.ts",
       "src/config/env.test.ts",
+      "src/app.test.ts",
+      "src/modules/users/user-consents.http.test.ts",
       "src/middleware/**/*.test.ts"
     ]
   }
