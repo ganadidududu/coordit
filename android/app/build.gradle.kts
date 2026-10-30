@@ -23,7 +23,7 @@ android {
         applicationId = "com.coordit.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = providers.gradleProperty("COORDIT_VERSION_CODE").orElse("12").get().toInt()
+        versionCode = providers.gradleProperty("COORDIT_VERSION_CODE").orElse("13").get().toInt()
         versionName = providers.gradleProperty("COORDIT_VERSION_NAME").orElse("1.0.3").get()
         buildConfigField("boolean", "CARDLESS_AR_ENABLED", "false")
         buildConfigField("boolean", "AI_LANDMARKS_ENABLED", "false")
