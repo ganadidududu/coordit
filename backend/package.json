@@ -44,7 +44,8 @@
     "test:guest-wallet": "tsx src/modules/auth/guest-wallet.db.test.ts && tsx src/modules/auth/guest-merge.db.test.ts && vitest run src/modules/auth/guest-auth.service.test.ts src/modules/auth/guest-auth.http.test.ts src/modules/auth/apple-device-check.test.ts && npm run test:member-welcome",
     "test:wallet-hardening": "npm run test:guest-wallet && tsx src/modules/thread-wallet/thread-wallet-hardening.db.test.ts",
     "test:garment-landmarks": "vitest run src/modules/garment-landmarks/garment-landmarks.gateway.test.ts",
-    "test:member-welcome": "tsx src/modules/auth/member-welcome-policy.db.test.ts && vitest run src/modules/auth/guest-auth.service.test.ts src/modules/auth/guest-auth.http.test.ts"
+    "test:member-welcome": "tsx src/modules/auth/member-welcome-policy.db.test.ts && vitest run src/modules/auth/guest-auth.service.test.ts src/modules/auth/guest-auth.http.test.ts",
+    "check:narrative-rules": "tsx scripts/generate-narrative-rules.ts --check"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",
