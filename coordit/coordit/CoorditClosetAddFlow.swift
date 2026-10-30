@@ -347,6 +347,9 @@ private struct CoorditClosetLinkInputScreen: View {
                 if draft.isTutorialExample {
                     CoorditExampleNotice()
                 }
+                if let step = tutorial.step {
+                    EmptyView().closetTutorialTarget(step)
+                }
                 CoorditClosetFormCard(title: "상품 링크", subtitle: "사이즈 정보가 있는 상품 페이지 주소를 붙여넣어 주세요.", metrics: metrics) {
                     CoorditLinkInputRow(text: $draft.productLink, metrics: metrics, pasteIdentifier: "closet-link-paste") {
                         TextField("상품 링크 입력", text: $draft.productLink)
@@ -359,10 +362,9 @@ private struct CoorditClosetLinkInputScreen: View {
                             .onTapGesture { isLinkFocused = true }
                             .accessibilityIdentifier("closet-product-link")
                     }
-                    .disabled(isExtracting)
+                    .disabled(isExtracting || tutorial.requiresSkipConfirmation)
                 }
 
-                .closetTutorialTarget(.link)
                 .id(CoorditClosetTutorial.Step.link)
 
                 CoorditClosetBasicsCard(draft: $draft, metrics: metrics, showsName: false)
@@ -412,7 +414,6 @@ private struct CoorditClosetLinkInputScreen: View {
                             }
                         }
                     }
-                    .closetTutorialTarget(.size)
                     .id(CoorditClosetTutorial.Step.size)
                 }
 
@@ -429,7 +430,6 @@ private struct CoorditClosetLinkInputScreen: View {
                     metrics: metrics,
                     action: draft.extractedSizeRows.isEmpty ? extractLink : onSubmit
                 )
-                .closetTutorialTarget(draft.extractedSizeRows.isEmpty ? .analyze : .register)
                 .id(draft.extractedSizeRows.isEmpty ? CoorditClosetTutorial.Step.analyze : .register)
                 }
                 .padding(.top, metrics.value(16))

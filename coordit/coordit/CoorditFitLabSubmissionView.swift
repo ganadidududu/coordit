@@ -20,13 +20,17 @@ struct CoorditFitLabSubmissionView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: metrics.value(14)) {
-                if coordinator.draft.isTutorialExample { CoorditExampleNotice() }
                 if coordinator.recommendation == nil, !coordinator.isComparisonRequested {
                     CoorditFitLabProductOverview(draft: coordinator.draft, metrics: metrics)
+                        .fitLabTutorialTarget(.continueToReferences)
                     if let editProduct {
                         Button("상품 정보 수정", action: editProduct)
                             .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
                             .accessibilityIdentifier("fitlab-edit-product")
+                    }
+                    CoorditFitLabComparisonCTA(metrics: metrics) {
+                        coordinator.isComparisonRequested = true
+                        tutorial.show(.references)
                     }
                 }
                 if coordinator.recommendation != nil {
@@ -37,25 +41,9 @@ struct CoorditFitLabSubmissionView: View {
                 ledgerProbe
             }
             .padding(.horizontal, metrics.value(22))
-            .padding(.bottom, metrics.value(isFreeOverview ? 24 : 120))
+            .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            if isFreeOverview {
-                CoorditFitLabComparisonCTA(metrics: metrics) {
-                    coordinator.isComparisonRequested = true
-                    tutorial.show(.references)
-                }
-                .fitLabTutorialTarget(.continueToReferences)
-                .padding(.horizontal, metrics.value(22))
-                .padding(.top, metrics.value(12))
-                .padding(.bottom, metrics.value(106))
-                .background {
-                    LinearGradient(colors: [CoorditFitLabPalette.surface.opacity(0), CoorditFitLabPalette.surface, CoorditFitLabPalette.surface], startPoint: .top, endPoint: .bottom)
-                        .ignoresSafeArea(edges: .bottom)
-                }
-            }
-        }
         .coorditScreenTransition(
             value: coordinator.isComparisonRequested,
             direction: coordinator.isComparisonRequested ? .forward : .backward
@@ -77,7 +65,9 @@ struct CoorditFitLabSubmissionView: View {
         .alert("새 상품을 등록할까요?", isPresented: $showsDiscardConfirmation) {
             Button("계속 입력", role: .cancel) { }
             Button("새 상품 등록", role: .destructive) {
+                let wasExample = coordinator.draft.isTutorialExample
                 coordinator.discardAndRestart()
+                if wasExample { tutorial.dismiss() }
             }
         } message: {
             Text("현재 입력한 상품 정보, 기준 의류 선택, 아직 저장하지 않은 분석 결과는 초기화돼요. 이미 저장된 분석 기록은 그대로 남아요.")
@@ -85,10 +75,6 @@ struct CoorditFitLabSubmissionView: View {
         .alert("카메라 측정 기능은 준비 중입니다!", isPresented: $showsCameraComingSoon) {
             Button("확인", role: .cancel) { }
         }
-    }
-
-    private var isFreeOverview: Bool {
-        coordinator.recommendation == nil && !coordinator.isComparisonRequested
     }
 
     private func updateTutorialSelection() {
@@ -109,23 +95,49 @@ struct CoorditFitLabSubmissionView: View {
                 .font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))
                 .accessibilityIdentifier("fitlab-reference-selection")
 
-            if !coordinator.draft.isTutorialExample {
+            Text("옷장에 저장한 옷을 고르거나, 아직 등록하지 않은 내 옷으로도 비교할 수 있어요.")
+                .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
+                .foregroundStyle(CoorditFitLabPalette.muted)
+                .fixedSize(horizontal: false, vertical: true)
+            Group {
                 CoorditInputMethodPanel(metrics: metrics) {
-                CoorditInputMethodCard(title: "내 옷 링크로 등록", subtitle: "잘 맞는 옷의 상품 링크 사용", symbol: "link", metrics: metrics, action: manageReferences)
+                CoorditInputMethodCard(title: "내 옷 링크로 등록", subtitle: "처음 비교하는 내 옷 · 등록하면 옷장에 자동 저장", symbol: "link", metrics: metrics, action: manageReferences)
                     .accessibilityIdentifier("fitlab-manage-references")
                 if CoorditGarmentCaptureController.featureEnabled, let measureWithCamera {
                     CoorditInputMethodCard(title: "촬영해서 비교", subtitle: "사진과 치수는 옷장에 자동 저장", symbol: "camera", metrics: metrics, action: measureWithCamera)
                         .accessibilityIdentifier("fitlab-camera-comparison")
                 } else {
-                    CoorditInputMethodCard(title: "카메라로 등록", subtitle: "내 옷을 촬영해 치수 측정", symbol: "camera", metrics: metrics) {
+                    CoorditInputMethodCard(title: "카메라로 등록", subtitle: "준비 중 · 지금은 링크나 사이즈표 이용", symbol: "camera", metrics: metrics) {
                         showsCameraComingSoon = true
                     }
                     .accessibilityIdentifier("fitlab-camera-comparison")
                 }
                 }
             }
+            Text(coordinator.draft.isTutorialExample
+                ? "실제 이용 시 등록한 내 옷과 보유 사이즈는 옷장에 자동 저장돼요. 다음에는 옷장에서 바로 골라 비교할 수 있어요. 이번 예시에서는 저장하지 않아요."
+                : "등록한 내 옷과 보유 사이즈는 옷장에 자동 저장돼요. 다음에는 옷장에서 바로 골라 비교할 수 있어요.")
+                .font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))
+                .foregroundStyle(CoorditFitLabPalette.muted)
+                .fixedSize(horizontal: false, vertical: true)
+            if coordinator.references.isEmpty, coordinator.loadState != .loading {
+                VStack(alignment: .leading, spacing: metrics.value(10)) {
+                    Text("기준 옷이 아직 없나요?")
+                        .font(CoorditTypography.gmarketBold(size: metrics.value(15), relativeTo: .headline))
+                    Text("기준 옷은 평소 잘 맞는 내 옷이에요. 구매할 새 상품이 아니라, 이미 가진 옷의 링크로 등록하고 실제 보유 사이즈를 골라주세요.")
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
+                    Text("링크가 없으면 옷장의 ‘사이즈표 사진 넣기’를 이용할 수 있어요. 카메라로 직접 재는 기능은 준비 중이에요.")
+                        .font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))
+                        .foregroundStyle(CoorditFitLabPalette.muted)
+                }
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(metrics.value(15))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(CoorditFitLabPalette.surface, in: RoundedRectangle(cornerRadius: metrics.value(8)))
+                .accessibilityIdentifier("fitlab-reference-onboarding")
+            }
             CoorditInputMethodPanel(metrics: metrics) {
-                CoorditInputMethodCard(title: "옷장에서 골라 비교", subtitle: "이미 등록한 내 옷 사용", symbol: "tshirt", metrics: metrics) {
+                CoorditInputMethodCard(title: "옷장에서 골라 비교", subtitle: "저장된 내 옷 사용 · 다시 등록할 필요 없어요", symbol: "tshirt", metrics: metrics) {
                     showsWardrobe.toggle()
                 }
                 .accessibilityIdentifier("fitlab-choose-closet")
@@ -152,7 +164,11 @@ struct CoorditFitLabSubmissionView: View {
             Button("다른 상품 넣기") { showsDiscardConfirmation = true }
                 .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
         }
-        .fitLabTutorialTarget(coordinator.canSubmit ? .analyze : .references)
+        .fitLabTutorialTarget(coordinator.canSubmit ? .analyze : .references,
+            title: coordinator.references.isEmpty ? "먼저 기준 옷을 등록해요" : nil,
+            message: coordinator.references.isEmpty
+            ? "‘내 옷 링크로 등록’에서 잘 맞는 보유 의류를 등록해볼게요. 실제 저장은 하지 않아요."
+            : nil)
     }
 
     private var resultPanel: some View {

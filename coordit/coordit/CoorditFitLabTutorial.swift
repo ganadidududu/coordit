@@ -27,8 +27,8 @@ final class CoorditFitLabTutorial: ObservableObject {
             case .link: "상품 페이지 주소를 입력하거나 붙여넣고 다음을 누릅니다. 옷 종류도 상품에 맞게 선택합니다."
             case .importLink: "다음을 누르면 링크의 상품과 사이즈 정보를 무료로 정리해요."
             case .review: "누락되거나 잘못 읽힌 값만 수정해주세요. 정상적으로 읽힌 사이즈표는 바로 넘어가요."
-            case .continueToReferences: "무료 리포트에서 상품과 실측을 확인하고, 아래의 내 옷과 비교하기를 눌러주세요."
-            case .references: "이미 등록한 옷은 옷장에서 골라 비교하고, 없다면 내 옷 링크로 등록할 수 있어요. 예시에서는 옷장에서 골라 비교를 누르고, 팝업의 예시 옷을 선택한 뒤 선택 완료를 눌러주세요."
+            case .continueToReferences: "아래 리포트를 읽고 ‘내 옷과 비교하기’를 눌러주세요."
+            case .references: "‘옷장에서 골라 비교’를 누르고, 방금 등록한 예시 옷을 선택해주세요."
             case .analyze: "선택한 내 옷과 상품의 사이즈를 비교해요. 예시 체험에서는 실타래를 사용하지 않아요."
             case .result: "추천 사이즈와 핏 점수를 확인합니다. 아래 사이즈를 누르면 해당 사이즈의 점수와 부위별 차이를 비교할 수 있습니다."
             case .save: "실제 분석은 히스토리에 추가해 다시 볼 수 있어요. 예시는 체험 마치기로 끝내요."
@@ -75,6 +75,7 @@ final class CoorditFitLabTutorial: ObservableObject {
 private struct CoorditFitLabTutorialTarget: ViewModifier {
     @EnvironmentObject private var tutorial: CoorditFitLabTutorial
     let step: CoorditFitLabTutorial.Step
+    let title: String?
     let message: String?
     let enabled: Bool
 
@@ -83,8 +84,8 @@ private struct CoorditFitLabTutorialTarget: ViewModifier {
         if enabled {
             content.modifier(CoorditTutorialTarget(
                 isActive: enabled && tutorial.step == step,
-                progress: "FIT LAB 가이드",
-                title: step.title,
+                progress: "FIT LAB 체험 · 저장·차감 없음",
+                title: title ?? step.title,
                 message: message ?? step.message,
                 identifier: "fitlab-tutorial",
                 stepIdentifier: "fitlab-tutorial-step-\(step.rawValue)",
@@ -101,10 +102,11 @@ private struct CoorditFitLabTutorialTarget: ViewModifier {
 extension View {
     func fitLabTutorialTarget(
         _ step: CoorditFitLabTutorial.Step,
+        title: String? = nil,
         message: String? = nil,
         enabled: Bool = true
     ) -> some View {
-        modifier(CoorditFitLabTutorialTarget(step: step, message: message, enabled: enabled))
+        modifier(CoorditFitLabTutorialTarget(step: step, title: title, message: message, enabled: enabled))
     }
 
 }

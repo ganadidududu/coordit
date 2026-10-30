@@ -114,8 +114,8 @@ extension CoorditClosetFamilyView {
                 .padding(.top, metrics.value(6))
 
                 if isExampleResult {
-                    Button("체험 마치고 내 옷 등록하기") {
-                        tutorial.dismiss()
+                    Button(referencePractice ? "핏랩으로 돌아가 비교하기" : "체험 마치고 내 옷 등록하기") {
+                        tutorial.finishRegistration()
                         draft = CoorditClosetDraft()
                         onRouteChange(.closetAddMethod)
                     }

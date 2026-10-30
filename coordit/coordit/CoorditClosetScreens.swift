@@ -149,6 +149,8 @@ struct CoorditClosetItem: Identifiable {
 
 struct CoorditClosetFamilyView: View {
     let route: CoorditFrameRoute
+    let referencePractice: Bool
+    let onStartPractice: (() -> Void)?
     let onRouteChange: (CoorditFrameRoute) -> Void
     let onSavedItem: (CoorditClosetItem) async -> CoorditFrameRoute?
 
@@ -187,9 +189,13 @@ struct CoorditClosetFamilyView: View {
         selectedReferenceIDs: Binding<Set<String>>,
         addSaveState: Binding<CoorditClosetAddSaveState>,
         onSavedItem: @escaping (CoorditClosetItem) async -> CoorditFrameRoute?,
+        referencePractice: Bool = false,
+        onStartPractice: (() -> Void)? = nil,
         onRouteChange: @escaping (CoorditFrameRoute) -> Void
     ) {
         self.route = route
+        self.referencePractice = referencePractice
+        self.onStartPractice = onStartPractice
         _items = items
         _selectedItemID = selectedItemID
         _draft = draft
@@ -264,9 +270,10 @@ struct CoorditClosetFamilyView: View {
             }
         }
         .sheet(item: $activeGuide) { guide in
-            CoorditUsageGuideSheet(guide: guide, onExample: startClosetExample)
+            CoorditUsageGuideSheet(guide: guide, onExample: onStartPractice ?? startClosetExample)
         }
         .onAppear { tutorial.visit(route, draft: draft) }
+        .onChange(of: route) { _, destination in tutorial.visit(destination, draft: draft) }
         .task(id: referenceProfileRefreshKey) {
             await backendSession.refreshReferenceFitProfiles()
             while !Task.isCancelled {

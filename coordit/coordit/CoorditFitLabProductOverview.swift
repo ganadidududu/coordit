@@ -26,23 +26,6 @@ struct CoorditFitLabProductOverview: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             Divider()
-            VStack(alignment: .leading, spacing: metrics.value(12)) {
-                Label("이 옷, 여기부터 보세요", systemImage: "viewfinder")
-                    .font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))
-                Text(reading.headline)
-                    .font(CoorditTypography.gmarketBold(size: metrics.value(23), relativeTo: .title2))
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(reading.headlineDetail)
-                    .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
-                    .lineSpacing(metrics.value(5))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .foregroundStyle(.white)
-            .padding(metrics.value(18))
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(CoorditFitLabPalette.ink.gradient, in: RoundedRectangle(cornerRadius: metrics.value(12)))
-            .accessibilityElement(children: .combine)
-            .accessibilityIdentifier("fitlab-summary-highlight")
             readingParagraph(title: "사이즈 요약", body: reading.overview, symbol: "ruler")
             readingParagraph(title: reading.sizeDifferenceTitle, body: reading.sizeDifference, symbol: "arrow.left.arrow.right")
                 .accessibilityIdentifier("fitlab-summary-size-reading")

@@ -34,6 +34,7 @@ final class CoorditClosetTutorial: ObservableObject {
 
     @Published private(set) var step: Step?
     @Published private(set) var completionRevision = 0
+    @Published private(set) var completedRegistration = false
     var requiresSkipConfirmation = false
     private let defaults: UserDefaults
     private let seenKey = "coordit.closetTutorial.v1.seen"
@@ -43,6 +44,7 @@ final class CoorditClosetTutorial: ObservableObject {
     }
 
     func visit(_ route: CoorditFrameRoute, draft: CoorditClosetDraft) {
+        if requiresSkipConfirmation, route == .closetOverview { return }
         if route == .closetOverview {
             if step != nil {
                 step = .add
@@ -67,7 +69,8 @@ final class CoorditClosetTutorial: ObservableObject {
         }
     }
 
-    func restart() { step = .add }
+    func restart() { completedRegistration = false; step = .add }
+    func pause() { step = nil }
 
     func advance(from expected: Step, to next: Step) {
         guard step == expected else { return }
@@ -81,7 +84,17 @@ final class CoorditClosetTutorial: ObservableObject {
         step = valid ? .analyze : .link
     }
 
+    func finishRegistration() {
+        completedRegistration = true
+        complete()
+    }
+
     func dismiss() {
+        completedRegistration = false
+        complete()
+    }
+
+    private func complete() {
         defaults.set(true, forKey: seenKey)
         step = nil
         completionRevision += 1
@@ -98,13 +111,14 @@ private struct CoorditClosetTutorialTarget: ViewModifier {
     func body(content: Content) -> some View {
         content.modifier(CoorditTutorialTarget(
             isActive: tutorial.step == step,
-            progress: "CLOSET 가이드",
+            progress: "CLOSET 체험 · 저장·차감 없음",
             title: title ?? step.title,
             message: message ?? step.message,
             identifier: "closet-tutorial",
             stepIdentifier: "closet-tutorial-step-\(step.rawValue)",
             finishTitle: step == .score && canFinish ? "확인 완료" : nil,
             requiresSkipConfirmation: tutorial.requiresSkipConfirmation,
+            finish: tutorial.finishRegistration,
             dismiss: tutorial.dismiss
         ))
     }
@@ -119,57 +133,47 @@ struct CoorditTutorialTarget: ViewModifier {
     let stepIdentifier: String
     var finishTitle: String? = nil
     var requiresSkipConfirmation = false
+    var finish: (() -> Void)? = nil
     let dismiss: () -> Void
     @State private var showsSkipConfirmation = false
 
     func body(content: Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             if isActive {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text(progress)
-                            .font(CoorditTypography.gmarketMedium(size: 11))
-                        Spacer()
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 8) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(progress)
+                                .font(CoorditTypography.gmarketMedium(size: 10, relativeTo: .caption))
+                                .foregroundStyle(CoorditDesignTokens.ColorToken.muted)
+                            Text(title)
+                                .font(CoorditTypography.gmarketBold(size: 14, relativeTo: .headline))
+                        }
+                        Spacer(minLength: 0)
                         Button(requiresSkipConfirmation ? "건너뛰기" : "도움말 닫기") {
                             if requiresSkipConfirmation { showsSkipConfirmation = true } else { dismiss() }
                         }
-                            .font(CoorditTypography.gmarketMedium(size: 12))
-                            .frame(minWidth: 44, minHeight: 44)
-                            .accessibilityIdentifier("\(identifier)-dismiss")
+                        .font(CoorditTypography.gmarketMedium(size: 11, relativeTo: .caption))
+                        .frame(minWidth: 48, minHeight: 48)
+                        .accessibilityIdentifier("\(identifier)-dismiss")
                     }
-                    Text(title)
-                        .font(CoorditTypography.gmarketBold(size: 14))
                     Text(message)
-                        .font(CoorditTypography.gmarketMedium(size: 12))
+                        .font(CoorditTypography.gmarketMedium(size: 12, relativeTo: .body))
                         .fixedSize(horizontal: false, vertical: true)
                     if let finishTitle {
-                        Button(finishTitle, action: dismiss)
+                        Button(finishTitle, action: finish ?? dismiss)
                             .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary))
                             .accessibilityIdentifier("\(identifier)-finish")
                     }
-                    Image(systemName: "arrow.down")
-                        .accessibilityHidden(true)
                 }
                 .foregroundStyle(CoorditDesignTokens.ColorToken.ink)
-                .padding(16)
-                .background(CoorditDesignTokens.ColorToken.panel)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(CoorditDesignTokens.ColorToken.line, lineWidth: 1)
-                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(CoorditFitLabPalette.field, in: RoundedRectangle(cornerRadius: 10))
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier(stepIdentifier)
             }
             content
-                .overlay {
-                    if isActive {
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(CoorditDesignTokens.ColorToken.ink, lineWidth: 2)
-                            .padding(-3)
-                            .allowsHitTesting(false)
-                    }
-                }
         }
         .alert("처음이라면 끝까지 따라 해보는 걸 추천해요", isPresented: $showsSkipConfirmation) {
             Button("계속 따라하기", role: .cancel) { }

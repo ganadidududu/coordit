@@ -19,16 +19,18 @@ final class CoorditReleaseLinkFlowUITests: XCTestCase {
         XCTAssertEqual(element("coordit-thread-balance-probe", app).label, "1")
         XCTAssertFalse(element("fitlab-submit-analysis", app).exists)
         assertNoAnalysis(app)
-        XCTAssertTrue(element("fitlab-summary-highlight", app).label.contains("2cm 넓어요"))
-        XCTAssertTrue(element("fitlab-show-comparison", app).isHittable)
+        XCTAssertFalse(element("fitlab-summary-highlight", app).exists)
         XCTAssertTrue(element("fitlab-summary-size-reading", app).label.contains("약 4cm"))
         XCTAssertTrue(element("fitlab-summary-wearing-context", app).exists)
         capture("release-free-summary", app)
+        scrollToComparison(app)
+        capture("release-free-summary-end", app)
+        app.swipeDown()
         tap("fitlab-toggle-measurements", app)
         tap("fitlab-product-size-L", app)
         XCTAssertTrue(element("fitlab-summary-size-difference", app).label.contains("L → M"))
-        XCTAssertTrue(element("fitlab-show-comparison", app).isHittable)
-        capture("release-persistent-comparison-cta", app)
+        scrollToComparison(app)
+        capture("release-expanded-summary-end", app)
         tap("fitlab-show-comparison", app)
         XCTAssertTrue(element("fitlab-manage-references", app).waitForExistence(timeout: 5))
         XCTAssertTrue(element("fitlab-camera-comparison", app).isEnabled)
@@ -146,6 +148,18 @@ final class CoorditReleaseLinkFlowUITests: XCTestCase {
             "--coordit-fitlab-fixture", "url-success"] + extra
         app.launch()
         return app
+    }
+
+    private func scrollToComparison(_ app: XCUIApplication) {
+        let compare = element("fitlab-show-comparison", app)
+        for _ in 0..<12 {
+            if compare.isHittable && compare.frame.maxY < app.frame.maxY - 110 { break }
+            app.swipeUp()
+        }
+        XCTAssertTrue(compare.isHittable)
+        let edit = element("fitlab-edit-product", app)
+        XCTAssertTrue(edit.isHittable)
+        XCTAssertLessThan(edit.frame.maxY, compare.frame.minY)
     }
 
     private func assertNoAnalysis(_ app: XCUIApplication) {

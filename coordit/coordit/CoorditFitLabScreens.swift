@@ -15,6 +15,7 @@ struct CoorditFitLabFamilyView: View {
     @Binding var sharedImportURL: URL?
     let onInsufficientThread: () -> Void
     let onOpenThreadRecharge: () -> Void
+    var onStartPractice: (() -> Void)? = nil
     @State private var inputDestination: CoorditFitLabInputDestination = .sources
     @State private var inputNavigationDirection: CoorditNavigationDirection = .forward
     @State private var showsCameraComparison = false
@@ -90,6 +91,7 @@ struct CoorditFitLabFamilyView: View {
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .sheet(item: $activeGuide) { guide in
             CoorditUsageGuideSheet(guide: guide) {
+                if let onStartPractice { onStartPractice(); return }
                 sharedImportURL = nil
                 coordinator.draft = CoorditFitLabDraft()
                 coordinator.draft.source = .url
@@ -136,8 +138,15 @@ struct CoorditFitLabFamilyView: View {
             openSharedImport(url)
         }
         .onChange(of: coordinator.draft.productURL) { _, _ in
-            if tutorial.requiresSkipConfirmation, coordinator.draft.isTutorialExample, !coordinator.draft.isSourceConfirmed {
+            if coordinator.draft.isTutorialExample, !coordinator.draft.isSourceConfirmed {
                 navigateInput(to: .url)
+            }
+        }
+        .onChange(of: coordinator.tutorialRestorationRevision) { _, _ in
+            if let url = sharedImportURL {
+                openSharedImport(url)
+            } else {
+                navigateInput(to: coordinator.draft.source == .url && coordinator.draft.productURL != nil ? .url : .sources)
             }
         }
         .onAppear {

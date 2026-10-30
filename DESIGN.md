@@ -191,3 +191,21 @@ None accepted for this change. Existing feature-specific token duplication outsi
 - Result guidance explains scores and size comparison; history guidance states saving keeps the report while confirmation leaves without saving. No automatic analysis or save is triggered by the guide.
 
 - Fit Lab 상품 링크는 영문 키보드와 시스템 붙여넣기 버튼을 제공한다. 튜토리얼 입력 완료는 화면의 다음 버튼 또는 키보드 완료로 진행하며, 단순 포커스 해제나 스크롤만으로 단계를 바꾸지 않는다.
+
+### Android release link flow (2026-10-29)
+
+The Android port follows the current iOS release source at `32221c7` and `52f80b4`, including free product reading before the paid comparison. The current release's explicit example practice does not persist garments, submit analysis, save history, or consume threads; this supersedes the earlier tutorial lifecycle described above for this port.
+
+- Layout: Home is one vertical content scroller beneath fixed shared chrome; editorial, reference garments, recent two real reports, and Closet entry follow the iOS order. Editorial paging owns only horizontal movement. At accessibility text sizes artwork becomes inline and report previews stack vertically.
+- Layout: FitLab is a fixed feature title, one vertical content scroller, and fixed bottom navigation. The free product summary ends with product-information edit, then an inline comparison action in the same content scroller; no comparison footer remains fixed above navigation. Measurement-size chips alone own horizontal scrolling. Input, loading, result, and history reuse the same scaffold.
+- Layout: Reference selection and usage guides use a header, one vertical scroller, and a fixed footer inside a large modal sheet. Temporary garment selection commits only with the explicit done action; close, outside dismissal, and system Back discard temporary changes.
+- Layout: Closet retains its vertical content scroller and fixed feature chrome. Link registration can return to the existing FitLab comparison without replacing its product. Form content includes bottom clearance for the floating navigation.
+- Primary action: link/photo import → free summary → choose owned garments → explicit comparison for one thread. Manual entry remains reachable through import recovery. Camera measurement stays behind the release availability notice.
+- Shared tokens: `AppColors`, `CoorditTypography`, `CoorditButton`, feature title/help, input glyphs, paste, confirmation, guidance, and release overview primitives. The editorial PNG is artwork from the original assets, not a screenshot of interface content.
+
+### Feature-entry practice (2026-10-30)
+
+- Login and Home do not present usage guides. FitLab and Closet start independently on their first feature visit per account. The first visit runs an actionable local example; long FAQ sheets require an explicit Help action.
+- A single compact step hint belongs to the content scroller. The free-report comparison CTA follows product-information edit in the same scroller and never contains tutorial text. The oversized navy headline card and comparison teaser heading are omitted. Comparison uses the same solid shared content-action button family, dimensions and typography as product edit, with primary/secondary prominence; no gradient, decorative icon or shadow. Closet link registration keeps the hint at the same scroll-body location as its step changes, keeping size rows in a stable hierarchy.
+- Comparison explains two paths: select saved owned clothing or register unregistered owned clothing. Registering the actual owned size also saves that garment in Closet for later reuse. Camera measurement is marked unavailable and link/size-chart alternatives stay explicit.
+- Example reference registration is a local nested practice. Finishing returns to the same product before selection/comparison; it never writes clothing/history or consumes threads. Cancellation and replay restore the previous work, including retry context and photo drafts.

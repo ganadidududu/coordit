@@ -51,7 +51,7 @@ struct CoorditFitLabReferencePicker: View {
                             Button("다시 불러오기") { Task { await reload() } }
                                 .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
                         }
-                        if !coordinator.draft.isTutorialExample {
+                        Group {
                             Button("내 옷 링크로 등록") { dismiss(); register() }
                                 .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary))
                                 .accessibilityIdentifier("fitlab-reference-picker-register")

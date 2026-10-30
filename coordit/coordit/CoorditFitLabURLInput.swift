@@ -104,7 +104,7 @@ struct CoorditFitLabURLInputView: View {
                         .accessibilityLabel("상품 링크")
                         .accessibilityIdentifier("fitlab-url-field")
                 }
-                .disabled(isLoading)
+                .disabled(isLoading || tutorial.requiresSkipConfirmation)
 
                 if tutorial.step == .link {
                     Button("다음", action: completeLinkEntry)

@@ -74,6 +74,31 @@ final class CoorditFitLabCoordinator: ObservableObject {
     #if DEBUG
     private(set) var fixtureAPI: CoorditFitLabFixtureAPI?
     #endif
+    private struct TutorialSnapshot {
+        let draft: CoorditFitLabDraft
+        let isComparisonRequested: Bool
+        let references: [CoorditFitLabReferenceRow]
+        let createdProductID: String?
+        let createdSizeIDs: [String]
+        let checkpoint: CoorditFitLabSubmissionCheckpoint
+        let recommendation: CoorditFitLabRecommendationResponse?
+        let report: CoorditFitLabReportResponse?
+        let reportFailureMessage: String?
+        let selectedHistory: CoorditFitLabHistorySnapshot?
+        let error: CoorditFitLabError?
+        let retryStep: CoorditFitLabSubmissionStep?
+        let submissionStep: CoorditFitLabSubmissionStep
+        let loadState: CoorditFitLabLoadState
+        let screen: CoorditFitLabScreen
+        let analysisState: CoorditFitLabAnalysisState
+        let isAnalysisNoticeVisible: Bool
+        let cameraMeasurement: CoorditGarmentMeasurement?
+        let cameraReference: CoorditCameraReference?
+        let cameraBundleAnalysisID: String?
+    }
+    private var tutorialSnapshot: TutorialSnapshot?
+    @Published private(set) var tutorialRestorationRevision = 0
+
     private var operationGeneration = 0
     private var submissionTask: Task<Void, Never>?
     private var historyGeneration = 0
@@ -314,13 +339,17 @@ final class CoorditFitLabCoordinator: ObservableObject {
         return try await selectedAPI.compatibleReferences(category: category)
     }
 
+    func registerTutorialReference() {
+        guard draft.isTutorialExample else { return }
+        references = CoorditTutorialExample.references(category: draft.category)
+    }
+
     func loadCompatibleReferences(
         using overrideAPI: (any CoorditFitLabAPI)? = nil,
         authenticatedUserID: String? = nil
     ) async {
         guard loadState != .loading else { return }
         if draft.isTutorialExample {
-            references = CoorditTutorialExample.references(category: draft.category)
             draft.selectedReferenceIDs.formIntersection(Set(references.map(\.id)))
             loadState = .loaded
             error = nil
@@ -554,7 +583,96 @@ final class CoorditFitLabCoordinator: ObservableObject {
         }
     }
 
+    @discardableResult
+    func beginTutorialPractice() -> Bool {
+        guard !isAnalysisRunning, loadState != .loading else { return false }
+        if tutorialSnapshot == nil {
+            tutorialSnapshot = TutorialSnapshot(
+                draft: draft,
+                isComparisonRequested: isComparisonRequested,
+                references: references,
+                createdProductID: createdProductID,
+                createdSizeIDs: createdSizeIDs,
+                checkpoint: checkpoint,
+                recommendation: recommendation,
+                report: report,
+                reportFailureMessage: reportFailureMessage,
+                selectedHistory: selectedHistory,
+                error: error,
+                retryStep: retryStep,
+                submissionStep: submissionStep,
+                loadState: loadState,
+                screen: screen,
+                analysisState: analysisState,
+                isAnalysisNoticeVisible: isAnalysisNoticeVisible,
+                cameraMeasurement: cameraMeasurement,
+                cameraReference: cameraReference,
+                cameraBundleAnalysisID: cameraBundleAnalysisID
+            )
+        }
+        resetTutorialDisplay()
+        draft.source = .url
+        draft.productURL = URL(string: CoorditTutorialExample.link)
+        return true
+    }
+
+    func finishTutorialPractice() {
+        guard let saved = tutorialSnapshot else { return }
+        tutorialSnapshot = nil
+        draft = saved.draft
+        isComparisonRequested = saved.isComparisonRequested
+        references = saved.references
+        createdProductID = saved.createdProductID
+        createdSizeIDs = saved.createdSizeIDs
+        checkpoint = saved.checkpoint
+        recommendation = saved.recommendation
+        report = saved.report
+        reportFailureMessage = saved.reportFailureMessage
+        selectedHistory = saved.selectedHistory
+        error = saved.error
+        retryStep = saved.retryStep
+        submissionStep = saved.submissionStep
+        loadState = saved.loadState
+        screen = saved.screen
+        analysisState = saved.analysisState
+        isAnalysisNoticeVisible = saved.isAnalysisNoticeVisible
+        cameraMeasurement = saved.cameraMeasurement
+        cameraReference = saved.cameraReference
+        cameraBundleAnalysisID = saved.cameraBundleAnalysisID
+        tutorialRestorationRevision += 1
+    }
+
+    func abandonTutorialPractice() {
+        guard tutorialSnapshot != nil else { return }
+        tutorialSnapshot = nil
+        resetTutorialDisplay()
+    }
+
+    private func resetTutorialDisplay() {
+        draft = CoorditFitLabDraft()
+        isComparisonRequested = false
+        references = []
+        createdProductID = nil
+        createdSizeIDs = []
+        checkpoint = CoorditFitLabSubmissionCheckpoint()
+        recommendation = nil
+        report = nil
+        reportFailureMessage = nil
+        selectedHistory = nil
+        error = nil
+        retryStep = nil
+        submissionStep = .idle
+        loadState = .idle
+        screen = .input
+        analysisState = .idle
+        isAnalysisNoticeVisible = false
+        cameraMeasurement = nil
+        cameraReference = nil
+        cameraBundleAnalysisID = nil
+    }
+
     func discardAndRestart(clearCameraPersistence: Bool = true) {
+        if tutorialSnapshot != nil { finishTutorialPractice(); return }
         isComparisonRequested = false
         if clearCameraPersistence, fixtureName == nil, let owner = cameraSessionUserID { UserDefaults.standard.removeObject(forKey: cameraSessionKey(owner)) }
         cameraMeasurement = nil; cameraReference = nil; cameraBundleAnalysisID = nil
