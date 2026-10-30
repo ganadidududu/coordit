@@ -20,3 +20,18 @@ it("crawls a rendered product document through schema and mobile mapper with siz
     expect(response.productFacts?.sourceUrl).toBe(response.productUrl);
   } finally { create.mockRestore(); await browserManager.close(); }
 }, 20_000);
+
+
+it("keeps the authoritative page item when misleading structured and secondary DOM Products come first", async () => {
+  const session = await browserManager.createSession();
+  const html = `<meta property="og:title" content="면 셔츠"><script type="application/ld+json">{"@type":"Product","name":"가죽 재킷","material":"양가죽 100%","brand":"다른 브랜드"}</script><h1>면 셔츠</h1><aside itemscope itemtype="https://schema.org/Product"><h2 itemprop="name">가죽 재킷</h2><dl><dt>소재</dt><dd>양가죽 100%</dd></dl></aside>`;
+  await session.page.route("https://shop.example/**", (route) => route.fulfill({ body: html, contentType: "text/html; charset=utf-8" }));
+  const create = vi.spyOn(browserManager, "createSession").mockResolvedValue(session);
+  try {
+    const preview = await crawlProductPage({ url: new URL("https://shop.example/products/cotton-shirt"), includeImages: false, includeDetailImages: false, crawledAt: "2026-10-30T03:00:00.000Z" }, "musinsa");
+    expect(preview.product.name).toBe("면 셔츠");
+    expect(preview.product.brand).toBeNull();
+    expect(preview.product.facts).toEqual([]);
+    expect(toFitLabUrlPrefill(preview)).not.toHaveProperty("productFacts");
+  } finally { create.mockRestore(); await browserManager.close(); }
+}, 20_000);

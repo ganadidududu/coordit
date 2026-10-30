@@ -31,14 +31,18 @@ export const factFromLabel = (label: string, raw: unknown): ProductFact | null =
 };
 
 type ProductFactRecord = { readonly name: string | null; readonly productId: string | null; readonly facts: readonly ProductFact[] };
-type ProductFactIdentity = { readonly name: string; readonly pageName: string | null; readonly productId: string | null };
+type ProductPageIdentity = { readonly pageName: string | null; readonly productId: string | null };
+type ProductFactIdentity = ProductPageIdentity & { readonly name: string };
 
-export const factsForIdentity = (product: ProductFactRecord | null, identity: ProductFactIdentity): readonly ProductFact[] => {
-  if (!product || product.name !== identity.name) return [];
+export const matchesProductPage = (product: ProductFactRecord | null, identity: ProductPageIdentity): boolean => {
+  if (!product?.name) return false;
   const samePageName = identity.pageName !== null && clean(product.name) === clean(identity.pageName);
   const sameId = identity.productId !== null && product.productId === identity.productId;
-  return samePageName || sameId ? product.facts : [];
+  return samePageName || sameId;
 };
+
+export const factsForIdentity = (product: ProductFactRecord | null, identity: ProductFactIdentity): readonly ProductFact[] =>
+  product?.name === identity.name && matchesProductPage(product, identity) ? product.facts : [];
 
 export const mergeProductFacts = (...sources: readonly (readonly ProductFact[])[]): readonly ProductFact[] => {
   const all = sources.flat();

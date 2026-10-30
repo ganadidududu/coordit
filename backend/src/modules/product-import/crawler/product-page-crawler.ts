@@ -5,7 +5,7 @@ import { ProductImportError } from "../product-import.error";
 import { assertPublicUrl, parseProductUrl } from "../security/url-validator";
 import type { ProductCrawlContext, ProductImportPreview, ProductSite } from "../product-import.types";
 import { decodeHydrationMarkup } from "./size-chart-parser";
-import { factsFromHtml, factsForIdentity, mergeProductFacts } from "./product-facts";
+import { factsFromHtml, factsForIdentity, matchesProductPage, mergeProductFacts } from "./product-facts";
 import { productIdFromUrl, fetchMusinsaSizeCandidate, navigationWaitUntil, shouldRevealSizeContent, effectiveCrawlerSite, revealSizeContent } from "./product-navigation";
 export { productIdFromUrl, navigationWaitUntil, shouldRevealSizeContent, effectiveCrawlerSite } from "./product-navigation";
 import { browserManager } from "./browser-manager";
@@ -122,8 +122,8 @@ export const crawlProductPage = async (
       ...(musinsaSizeCandidate ? [musinsaSizeCandidate] : []),
       ...observer.getCandidates()
     ];
-    const structured = extractStructuredProduct(html);
-    const network = firstNetworkProduct(networkCandidates);
+    const structuredCandidate = extractStructuredProduct(html);
+    const networkCandidate = firstNetworkProduct(networkCandidates);
     const networkSizeTable = firstNetworkSizeTable(networkCandidates);
     const dom = extractDomProduct({
       html,
@@ -131,16 +131,19 @@ export const crawlProductPage = async (
       includeImages: effectiveContext.includeImages,
       includeDetailImages: effectiveContext.includeDetailImages
     });
-    const name = structured?.name ?? network?.name ?? dom.name;
+    const pageIdentity = { pageName: dom.name, productId: productIdFromUrl(effectiveContext.url) };
+    const structured = matchesProductPage(structuredCandidate, pageIdentity) ? structuredCandidate : null;
+    const network = matchesProductPage(networkCandidate, pageIdentity) ? networkCandidate : null;
+    const name = structured?.name ?? network?.name ?? dom.name ?? structuredCandidate?.name ?? networkCandidate?.name;
     if (!name) {
       throw new ProductImportError("PRODUCT_NAME_NOT_FOUND", "상품명을 찾을 수 없습니다.", false, 422);
     }
-    const identity = { name, pageName: dom.name, productId: productIdFromUrl(effectiveContext.url) };
+    const identity = { ...pageIdentity, name };
     const facts = mergeProductFacts(
       factsForIdentity(structured, identity),
       factsForIdentity(network, identity),
-      factsFromHtml(html, name),
-      factsFromHtml(decodeHydrationMarkup(html) ?? "", name)
+      dom.name ? factsFromHtml(html, dom.name) : [],
+      dom.name ? factsFromHtml(decodeHydrationMarkup(html) ?? "", dom.name) : []
     );
     const brand = structured?.brand ?? network?.brand ?? dom.brand;
     const rawCategory = structured?.category ?? network?.category ?? dom.category;
