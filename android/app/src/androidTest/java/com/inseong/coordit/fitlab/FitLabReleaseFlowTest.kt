@@ -55,8 +55,8 @@ class FitLabReleaseFlowTest {
             openLink()
             tap("fitlab-url-import")
             ready()
-            compose.onNodeWithTag("fitlab-summary-material").assertExists()
-            compose.onNodeWithTag("fitlab-summary-fit").assertExists()
+            compose.onNodeWithTag("fitlab-summary-analysis").assertExists()
+            compose.onNodeWithTag("fitlab-summary-evidence").assertExists()
             capture("report-rich-facts")
             compose.onNodeWithTag("fitlab-summary-source").performScrollTo()
             capture("report-rich-facts-source", top = false)
@@ -71,7 +71,7 @@ class FitLabReleaseFlowTest {
             capture("report-expanded-end", top = false)
             compose.runOnUiThread { model.edit { it.copy(productName = "다른 상품") } }
             ready()
-            compose.onNodeWithTag("fitlab-summary-material").assertDoesNotExist()
+            compose.onNodeWithTag("fitlab-summary-evidence").assertDoesNotExist()
             compose.onNodeWithTag("fitlab-summary-facts-unavailable").assertExists()
             capture("report-edited-identity")
             compose.runOnUiThread { model.edit { it.copy(source = FitLabSource.Manual) } }
@@ -90,7 +90,7 @@ class FitLabReleaseFlowTest {
             tap("fitlab-url-import")
             ready()
             compose.onNodeWithTag("fitlab-summary-facts-unavailable").assertExists()
-            compose.onNodeWithTag("fitlab-summary-material").assertDoesNotExist()
+            compose.onNodeWithTag("fitlab-summary-evidence").assertDoesNotExist()
             capture("report-missing-facts")
             compose.onNodeWithTag("fitlab-review-continue").performScrollTo()
             capture("report-missing-facts-end", top = false)

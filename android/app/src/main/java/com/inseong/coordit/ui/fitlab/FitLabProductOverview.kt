@@ -31,6 +31,7 @@ internal fun ExampleNotice(s: Float) {
 @Composable
 internal fun ProductOverview(draft: FitLabDraft, s: Float, edit: () -> Unit) {
     val facts = draft.productFacts?.takeIf { it.appliesTo(draft) }
+    val narrative = remember(draft) { FitLabNarrative(draft).paragraph }
     val uriHandler = LocalUriHandler.current
     val reading = remember(draft) { FitLabProductReading(draft) }
     var measurementsVisible by rememberSaveable { mutableStateOf(false) }
@@ -46,18 +47,16 @@ internal fun ProductOverview(draft: FitLabDraft, s: Float, edit: () -> Unit) {
         FitText(listOf(draft.brand, draft.category.title, draft.mallName).filter { it.isNotBlank() }.joinToString(" · "), 12f, s, color = AppColors.muted)
         Box(Modifier.fillMaxWidth().height(1.dp).background(AppColors.line))
         ReadingParagraph("사이즈 요약 · 치수 기준", reading.conciseSizeSummary, InputGlyph.Ruler, s, "fitlab-summary-size-reading")
+        if (narrative.isNotEmpty()) {
+            ReadingParagraph(NarrativeRules.text["heading"].orEmpty(), narrative, InputGlyph.Garment, s, "fitlab-summary-analysis")
+            FitText(NarrativeRules.text["qualifier"].orEmpty(), 11f, s, color = AppColors.muted)
+        }
         if (facts != null) {
-            facts.summary(listOf("material", "lining", "stretch", "thickness", "sheerness"))?.let {
-                ReadingParagraph("소재·구조", it, InputGlyph.Garment, s, "fitlab-summary-material")
-            }
-            facts.summary(listOf("fit", "model"))?.let {
-                ReadingParagraph("핏·착용 정보", it, InputGlyph.Person, s, "fitlab-summary-fit")
-            }
-            facts.summary(listOf("care"))?.let {
-                ReadingParagraph("관리", it, InputGlyph.Care, s, "fitlab-summary-care")
+            facts.summary(listOf("material", "lining", "stretch", "thickness", "sheerness", "fit", "model", "care"))?.let {
+                ReadingParagraph("판매처 정보", it, InputGlyph.SizeChart, s, "fitlab-summary-evidence")
             }
             Column(verticalArrangement = Arrangement.spacedBy((4 * s).dp)) {
-                FitText("소재·핏·관리 정보는 판매처 제공 내용이에요.", 11f, s, color = AppColors.muted)
+                FitText("분석 근거는 판매처 정보와 실측표예요.", 11f, s, color = AppColors.muted)
                 facts.checkedDate?.let { checked ->
                     FitText("확인 " + DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm").withZone(ZoneId.systemDefault()).format(checked), 11f, s, color = AppColors.muted)
                 }

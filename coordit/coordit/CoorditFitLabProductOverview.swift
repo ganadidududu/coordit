@@ -25,20 +25,21 @@ struct CoorditFitLabProductOverview: View {
             Divider()
             readingParagraph(title: "사이즈 요약 · 치수 기준", body: reading.conciseSizeSummary, symbol: "ruler")
                 .accessibilityIdentifier("fitlab-summary-size-reading")
+            if !CoorditFitLabNarrative(draft: draft).paragraph.isEmpty {
+                readingParagraph(title: CoorditNarrativeRules.text["heading"] ?? "코딧 간단 분석", body: CoorditFitLabNarrative(draft: draft).paragraph, symbol: "tshirt")
+                    .accessibilityIdentifier("fitlab-summary-analysis")
+                Text(CoorditNarrativeRules.text["qualifier"] ?? "")
+                    .font(CoorditTypography.gmarketMedium(size: metrics.value(11), relativeTo: .caption))
+                    .foregroundStyle(CoorditFitLabPalette.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             if let facts {
-                if let material = facts.summary(for: ["material", "lining", "stretch", "thickness", "sheerness"]) {
-                    readingParagraph(title: "소재·구조", body: material, symbol: "tshirt")
-                        .accessibilityIdentifier("fitlab-summary-material")
-                }
-                if let fit = facts.summary(for: ["fit", "model"]) {
-                    readingParagraph(title: "핏·착용 정보", body: fit, symbol: "person")
-                        .accessibilityIdentifier("fitlab-summary-fit")
-                }
-                if let care = facts.summary(for: ["care"]) {
-                    readingParagraph(title: "관리", body: care, symbol: "drop")
+                if let evidence = facts.summary(for: ["material", "lining", "stretch", "thickness", "sheerness", "fit", "model", "care"]) {
+                    readingParagraph(title: "판매처 정보", body: evidence, symbol: "doc.text")
+                        .accessibilityIdentifier("fitlab-summary-evidence")
                 }
                 VStack(alignment: .leading, spacing: metrics.value(4)) {
-                    Text("소재·핏·관리 정보는 판매처 제공 내용이에요.")
+                    Text("분석 근거는 판매처 정보와 실측표예요.")
                     if let checked = facts.checkedLabel {
                         Text("확인 \(checked)")
                     }
