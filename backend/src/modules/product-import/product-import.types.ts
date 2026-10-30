@@ -1,3 +1,8 @@
+export const PRODUCT_FACT_KINDS = ["material", "fit", "lining", "stretch", "thickness", "sheerness", "care", "model"] as const;
+export type ProductFactKind = typeof PRODUCT_FACT_KINDS[number];
+export type ProductFact = { readonly kind: ProductFactKind; readonly value: string };
+
+
 export const PRODUCT_SITES = [
   "musinsa",
   "29cm",
@@ -59,6 +64,7 @@ export type ProductImportPreview = {
     } | null;
     readonly gender: string | null;
     readonly materials: readonly string[];
+    readonly facts?: readonly ProductFact[];
     readonly description: string | null;
     readonly soldOut: boolean | null;
   };

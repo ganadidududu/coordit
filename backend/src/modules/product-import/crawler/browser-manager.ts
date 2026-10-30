@@ -1,4 +1,5 @@
 import { chromium, type Browser, type BrowserContext, type Page, type Route } from "playwright";
+import { assertCrawlAllowed } from "../security/robots-policy";
 import { env } from "../../../config/env";
 import { ProductImportError } from "../product-import.error";
 import { assertPublicUrl, parseProductUrl } from "../security/url-validator";
@@ -115,6 +116,9 @@ export class BrowserManager {
             publicHostChecks.set(hostKey, publicHostCheck);
           }
           await publicHostCheck;
+          if (request.isNavigationRequest() && request.frame() === page.mainFrame()) {
+            await assertCrawlAllowed(target, request.redirectedFrom() === null);
+          }
           let redirects = 0;
           for (let previous = request.redirectedFrom(); previous; previous = previous.redirectedFrom()) redirects += 1;
           if (redirects > env.maxRedirects) {

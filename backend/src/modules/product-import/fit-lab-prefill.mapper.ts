@@ -1,3 +1,4 @@
+import type { ProductFact } from "./product-import.types";
 import type {
   NormalizedCategory,
   NormalizedMeasurementValue,
@@ -10,8 +11,10 @@ type FitLabPrefillInput = {
   readonly source: {
     readonly site: ProductSite;
     readonly url: string;
+    readonly crawledAt?: string;
   };
   readonly product: {
+    readonly facts?: readonly ProductFact[];
     readonly name: string;
     readonly brand: string | null;
     readonly normalizedCategory: NormalizedCategory;
@@ -86,6 +89,9 @@ export const toFitLabUrlPrefill = (
     mallName: preview.source.site,
     productUrl: preview.source.url,
     category,
+    ...(preview.product.facts?.length && preview.source.crawledAt ? { productFacts: {
+      productName: preview.product.name, sourceUrl: preview.source.url, capturedAt: preview.source.crawledAt, items: preview.product.facts
+    } } : {}),
     fitType: "regular",
     parsingStatus: preview.partial ? "partial" : "parsed",
     sizes: preview.sizeChart.normalizedRows.map((row) => ({

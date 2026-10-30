@@ -133,3 +133,37 @@ npm run test:product-import
 - `CRAWL_TIMEOUT`: 로컬에서 Chromium 설치 여부와 쇼핑몰 응답 시간을 확인한 후 제한을 조정한다.
 
 쿠키와 사용자 인증 정보는 쇼핑몰 요청에 전달하지 않으며, 브라우저 Context와 Page는 요청마다 분리되어 종료된다.
+
+## Free first report: confirmed product facts
+
+The existing `POST /external-products/from-url` response can now include optional
+`productFacts: { productName, sourceUrl, capturedAt, items: [{ kind, value }] }`.
+Kinds are `material`, `fit`, `lining`, `stretch`, `thickness`, `sheerness`, `care`,
+and `model`. The source URL is the final adapter URL and the timestamp is the
+crawl time. Old responses without this field still produce a size-only report.
+No database migration or LLM call is needed for this preview.
+
+Extraction reads the selected product's structured fields/additional properties,
+explicit specification attributes, labeled product descriptions, and HTML table
+or definition-list fields inside the matching Product scope or a product-detail container with matching page identity. Unscoped tables are omitted. It does not summarize reviews or related products.
+Values are plain text capped at 80 characters, one per kind; conflicting values
+are omitted. Model information retains height and worn size only. Material
+composition never implies thickness, stretch, season, or an individual fit
+recommendation. The existing `fitType: regular` analysis default is not a seller
+fact and is never rendered as one.
+
+Both mobile apps show the same measured size range/difference, confirmed seller
+facts, source link, and checked time. Missing information has one short empty
+state. Facts are hidden when the product name, source URL, or input source no
+longer matches; measurement edits alone retain them. The detailed size table and
+explicit paid comparison action remain available. Viewing this report does not
+create a product, invoke recommendation/report generation, or debit threads.
+
+Public page navigation and the existing explicit size API request check
+`robots.txt` using the configured crawler user agent. Redirect destinations keep
+public-network validation. Robots responses are bounded (5-second timeout,
+512 KB, three redirects, five-minute bounded cache); 404/410 mean no published
+policy, while denials, HTML challenge documents, or unavailable policies stop collection. Declared crawl
+delays are respected in addition to the existing per-user/domain limits. There
+is no login, CAPTCHA, or access-block bypass. This narrows collection risk but
+is not a legal clearance or a substitute for seller permission/terms review.
