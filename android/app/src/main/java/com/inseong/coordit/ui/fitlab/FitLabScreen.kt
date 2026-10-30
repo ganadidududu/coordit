@@ -87,7 +87,7 @@ fun FitLabScreen(model: FitLabViewModel, onHome: () -> Unit, onCloset: () -> Uni
                 if (state.draft.isExample) {
                     val hint = when (state.screen) {
                         FitLabRoute.Url -> "상품 정보 불러오기" to "다음을 누르면 링크의 상품과 사이즈 정보를 무료로 정리해요."
-                        FitLabRoute.Review -> "무료 분석 확인하고 비교하기" to "리포트를 확인하세요.\n‘내 옷과 비교하기’를 눌러보세요."
+                        FitLabRoute.Review -> "무료 분석 확인하고 비교하기" to "리포트를 확인하세요.\n‘내 옷과 비교하기’ 버튼을 눌러보세요."
                         FitLabRoute.References -> if (state.references.isEmpty()) "먼저 기준 옷을 등록해요" to "‘내 옷 링크로 등록’에서 잘 맞는 보유 의류를 등록해볼게요. 실제 저장은 하지 않아요." else if (state.draft.selectedReferenceIds.isEmpty()) "등록한 기준 옷 선택하기" to "‘옷장에서 골라 비교’를 누르고, 방금 등록한 예시 옷을 선택해주세요." else "핏 분석 시작하기" to "선택한 내 옷과 상품의 사이즈를 비교해요. 예시 체험에서는 실타래를 사용하지 않아요."
                         FitLabRoute.Result -> "사이즈별 핏 비교하기" to "추천 사이즈와 핏 점수를 확인합니다. 아래 사이즈를 누르면 해당 사이즈의 점수와 부위별 차이를 비교할 수 있습니다. 예시는 체험 마치기로 끝내요."
                         else -> "읽지 못한 값 보완하기" to "누락되거나 잘못 읽힌 값만 수정해주세요. 정상적으로 읽힌 사이즈표는 바로 넘어가요."
