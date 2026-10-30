@@ -38,7 +38,7 @@ class FitLabViewModel(
                         val pending = runCatching { submissionStore.load(next) }.getOrNull()
                         if (userId == next) {
                             mutableState.value = if (pending == null) {
-                                mutableState.value.copy(history = loaded)
+                                mutableState.value.copy(history = loaded, accountReady = true)
                             } else {
                                 mutableState.value.copy(
                                     screen = if (pending.recommendation == null) FitLabScreen.Loading else FitLabScreen.Result,
@@ -46,6 +46,7 @@ class FitLabViewModel(
                                     checkpoint = pending.checkpoint,
                                     recommendation = pending.recommendation,
                                     history = loaded,
+                                    accountReady = true,
                                     step = if (pending.recommendation == null) FitLabStep.Recommendation else FitLabStep.Complete,
                                     error = if (pending.recommendation == null) "중단된 분석을 완료된 단계부터 이어갈 수 있어요." else null,
                                     reportError = if (pending.recommendation != null) "중단된 상세 리포트를 이어서 만들 수 있어요." else null,
@@ -59,13 +60,34 @@ class FitLabViewModel(
     }
 
     fun updateBalance(balance: Int) { mutableState.value = state.value.copy(threadBalance = balance, threadBalanceKnown = true) }
-    fun importSharedProduct(url: String): Boolean {
-        if (state.value.busy || state.value.draft.isExample) return false
-        restart()
-        mutableState.value = state.value.copy(screen = FitLabScreen.Url, draft = FitLabDraft(source = FitLabSource.Url, productUrl = url))
-        loadBalance()
+    suspend fun importSharedProduct(url: String): Boolean {
+        val accepted = openSharedProduct(url)
+        if (accepted) loadBalance()
+        return accepted
+    }
+    suspend fun openSharedProduct(url: String): Boolean {
+        if (state.value.busy || state.value.draft.isExample || !state.value.accountReady || !com.inseong.coordit.sharing.ProductLinks.isProductUrl(url)) return false
+        val owner = userId ?: return false
+        val previous = state.value
+        val ticket = ++generation
+        mutableState.value = previous.copy(busy = true, error = null)
+        try { submissionStore.clear(owner) }
+        catch (error: Exception) {
+            if (error is CancellationException) throw error
+            if (current(ticket)) mutableState.value = previous.copy(error = "이전 분석을 정리하지 못했어요. 다시 시도해 주세요.")
+            return false
+        }
+        if (!current(ticket)) return false
+        mutableState.value = FitLabState(
+            accountReady = true,
+            screen = FitLabScreen.Url,
+            draft = FitLabDraft(source = FitLabSource.Url, productUrl = url),
+            history = state.value.history,
+            threadBalance = state.value.threadBalance,
+        )
         return true
     }
+    fun dismissNotice() { mutableState.value = state.value.copy(notice = null) }
     fun dismissThreadNotice() { mutableState.value = state.value.copy(requiresThreads = false) }
     fun open() {
         if (mutableState.value.screen == FitLabScreen.References) loadReferences()
@@ -74,7 +96,7 @@ class FitLabViewModel(
     fun beginExample(): Boolean {
         if (state.value.busy) return false
         if (!state.value.draft.isExample) beforeExample = state.value
-        mutableState.value = FitLabState(screen = FitLabScreen.Url, threadBalance = state.value.threadBalance, history = state.value.history,
+        mutableState.value = FitLabState(accountReady = state.value.accountReady, screen = FitLabScreen.Url, threadBalance = state.value.threadBalance, history = state.value.history,
             draft = FitLabDraft(source = FitLabSource.Url, productUrl = FitLabExample.link, isExample = true))
         return true
     }
@@ -85,7 +107,7 @@ class FitLabViewModel(
     }
     fun finishExample() {
         if (!state.value.draft.isExample) return
-        mutableState.value = beforeExample ?: FitLabState(threadBalance = state.value.threadBalance, history = state.value.history)
+        mutableState.value = beforeExample ?: FitLabState(accountReady = state.value.accountReady, threadBalance = state.value.threadBalance, history = state.value.history)
         beforeExample = null
     }
     fun chooseSource(source: FitLabSource) {
@@ -211,7 +233,7 @@ class FitLabViewModel(
         val result = state.value.recommendation ?: return
         val session = sessions.session.value ?: return
         val ticket = generation
-        mutableState.value = state.value.copy(busy = true, step = FitLabStep.Report, reportError = null, error = null)
+        mutableState.value = state.value.copy(busy = true, notice = FitLabNotice.Running, step = FitLabStep.Report, reportError = null, error = null)
         work = viewModelScope.launch {
             try {
                 var checkpoint = state.value.checkpoint
@@ -220,10 +242,10 @@ class FitLabViewModel(
                 submissionStore.save(FitLabPendingSubmission(session.user.id, draft = state.value.draft, checkpoint = checkpoint, recommendation = result))
                 val report = repository.report(session.accessToken, result, key)
                 submissionStore.clear(session.user.id)
-                if (current(ticket)) mutableState.value = state.value.copy(report = report, reportError = null, checkpoint = checkpoint, busy = false, step = FitLabStep.Complete, threadBalance = report.availableThreads ?: state.value.threadBalance)
+                if (current(ticket)) mutableState.value = state.value.copy(report = report, reportError = null, checkpoint = checkpoint, notice = FitLabNotice.Completed, busy = false, step = FitLabStep.Complete, threadBalance = report.availableThreads ?: state.value.threadBalance)
             } catch (error: Exception) {
                 if (error is CancellationException) throw error
-                if (current(ticket)) mutableState.value = state.value.copy(busy = false, reportError = message(error), step = FitLabStep.Complete, requiresThreads = error is HttpException && error.code() == 402)
+                if (current(ticket)) mutableState.value = state.value.copy(busy = false, notice = FitLabNotice.Failed, reportError = message(error), step = FitLabStep.Complete, requiresThreads = error is HttpException && error.code() == 402)
             }
         }
     }
@@ -239,7 +261,7 @@ class FitLabViewModel(
         }
         val session = sessions.session.value ?: run { mutableState.value = state.value.copy(error = "로그인이 필요해요."); return }
         val ticket = ++generation
-        mutableState.value = state.value.copy(screen = FitLabScreen.Loading, busy = true, error = null, reportError = null)
+        mutableState.value = state.value.copy(screen = FitLabScreen.Loading, busy = true, notice = FitLabNotice.Running, error = null, reportError = null)
         work = viewModelScope.launch {
             try {
                 var checkpoint = state.value.checkpoint
@@ -284,10 +306,10 @@ class FitLabViewModel(
                     }
                 }
                 if (report != null) submissionStore.clear(session.user.id)
-                if (current(ticket)) mutableState.value = state.value.copy(screen = FitLabScreen.Result, checkpoint = checkpoint, recommendation = recommendation, report = report, reportError = reportError, step = FitLabStep.Complete, busy = false, error = null, threadBalance = report?.availableThreads ?: state.value.threadBalance)
+                if (current(ticket)) mutableState.value = state.value.copy(screen = FitLabScreen.Result, checkpoint = checkpoint, recommendation = recommendation, report = report, reportError = reportError, notice = if (reportError == null) FitLabNotice.Completed else FitLabNotice.Failed, step = FitLabStep.Complete, busy = false, error = null, threadBalance = report?.availableThreads ?: state.value.threadBalance)
             } catch (error: Exception) {
                 if (error is CancellationException) throw error
-                if (current(ticket)) mutableState.value = state.value.copy(screen = FitLabScreen.Loading, busy = false, error = message(error), requiresThreads = error is HttpException && error.code() == 402)
+                if (current(ticket)) mutableState.value = state.value.copy(screen = FitLabScreen.Loading, busy = false, notice = FitLabNotice.Failed, error = message(error), requiresThreads = error is HttpException && error.code() == 402)
             }
         }
     }
@@ -295,7 +317,7 @@ class FitLabViewModel(
         if (state.value.busy) return
         if (state.value.draft.isExample) { finishExample(); return }
         userId?.let { owner -> viewModelScope.launch { submissionStore.clear(owner) } }
-        mutableState.value = FitLabState(threadBalance = state.value.threadBalance, threadBalanceKnown = state.value.threadBalanceKnown, history = state.value.history)
+        mutableState.value = FitLabState(accountReady = state.value.accountReady, threadBalance = state.value.threadBalance, threadBalanceKnown = state.value.threadBalanceKnown, history = state.value.history)
     }
     fun back(): Boolean {
         if (state.value.busy) return false
@@ -305,7 +327,7 @@ class FitLabViewModel(
             FitLabScreen.Review -> state.value.copy(screen = FitLabScreen.Sources, error = null)
             FitLabScreen.References -> state.value.copy(screen = FitLabScreen.Review, error = null)
             FitLabScreen.Loading -> state.value.copy(screen = FitLabScreen.References, error = null)
-            FitLabScreen.Result -> FitLabState(threadBalance = state.value.threadBalance, history = state.value.history)
+            FitLabScreen.Result -> FitLabState(accountReady = state.value.accountReady, threadBalance = state.value.threadBalance, history = state.value.history)
             FitLabScreen.HistoryDetail -> state.value.copy(screen = state.value.historyReturnScreen, selectedHistory = null, error = null)
         }
         return true

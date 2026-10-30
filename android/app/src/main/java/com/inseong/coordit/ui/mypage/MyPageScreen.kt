@@ -37,6 +37,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -52,6 +54,7 @@ import com.inseong.coordit.data.model.BodyMeasurement
 import com.inseong.coordit.data.model.UserProfile
 import com.inseong.coordit.ui.app.ThreadChargeState
 import com.inseong.coordit.ui.app.ThreadChargeStatus
+import com.inseong.coordit.ui.app.FeedbackConsentState
 import com.inseong.coordit.ui.components.*
 import com.inseong.coordit.ui.theme.*
 import java.text.DecimalFormat
@@ -122,16 +125,20 @@ fun MyPageScreen(
     onRefreshAdPrivacy: (Activity?) -> Unit, onShowAdPrivacyOptions: (Activity?) -> Unit,
     onSaveProfile: (String) -> Unit, onSaveBody: (Double, Double) -> Unit,
     onLogout: () -> Unit, onDeleteAccount: () -> Unit, onClearMessage: () -> Unit,
-    startAtThreadCharge: Boolean = false,
+    initiallyShowThreadCharge: Boolean = false,
+    feedbackConsent: FeedbackConsentState = FeedbackConsentState(),
+    onRefreshFeedbackConsent: () -> Unit = {},
+    onSaveFeedbackConsent: (Boolean) -> Unit = {},
 ) {
-    var page by rememberSaveable { mutableStateOf(if (startAtThreadCharge) Page.ThreadCharge else Page.Root) }
+    var page by rememberSaveable { mutableStateOf(Page.Root) }
+    var threadChargeOpened by rememberSaveable { mutableStateOf(false) }
     val activity = LocalContext.current.findActivity()
-    LaunchedEffect(Unit) {
-        if (startAtThreadCharge) { onRefresh(); onOpenThreadCharge(activity) }
-    }
     val contentScroll = rememberScrollState()
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
+    LaunchedEffect(initiallyShowThreadCharge) {
+        if (initiallyShowThreadCharge && !threadChargeOpened) { page = Page.ThreadCharge; threadChargeOpened = true; onRefresh(); onOpenThreadCharge(activity) }
+    }
     LaunchedEffect(page) {
         focusManager.clearFocus(force = true)
         keyboard?.hide()
@@ -140,7 +147,7 @@ fun MyPageScreen(
     LaunchedEffect(threadCharge.status) {
         if (page == Page.ThreadCharge) contentScroll.scrollTo(0)
     }
-    val leave = { if (page == Page.Root || (startAtThreadCharge && page == Page.ThreadCharge)) onBack() else { page = parent(page); onClearMessage() } }
+    val leave = { if (page == Page.Root || (initiallyShowThreadCharge && page == Page.ThreadCharge)) onBack() else { page = parent(page); onClearMessage() } }
     BackHandler(enabled = !busy, onBack = leave)
     BoxWithConstraints(Modifier.fillMaxSize().testTag("mypage-screen")) {
         val scale = (maxWidth.value / MyPageDesign.designWidth).coerceIn(.82f, 1.25f)
@@ -171,7 +178,7 @@ fun MyPageScreen(
                         Page.Body -> BodyPage(scale, profile, body) { page = Page.BodyEdit }
                         Page.BodyEdit -> BodyEditPage(scale, body, busy, onSaveBody)
                         Page.Notifications -> NotificationsPage(scale)
-                        Page.Privacy -> PrivacyPage(scale, threadCharge, { onRefreshAdPrivacy(activity) }, { onShowAdPrivacyOptions(activity) }) { page = it }
+                        Page.Privacy -> PrivacyPage(scale, threadCharge, { onRefreshAdPrivacy(activity) }, { onShowAdPrivacyOptions(activity) }, feedbackConsent, onRefreshFeedbackConsent, onSaveFeedbackConsent) { page = it }
                         Page.Policy -> DocumentPage(scale, policySections, "개인정보를 투명하게 다룹니다", "시행일 2026.07.07 · COORDIT 서비스 기준")
                         Page.Terms -> DocumentPage(scale, termsSections, "COORDIT 서비스 이용약관", "시행일 2026.07.07 · 앱 사용 전 주요 내용을 확인해 주세요.")
                         Page.Settings -> AppSettingsPage(scale)
@@ -441,7 +448,7 @@ private fun AccountPage(scale: Float, profile: UserProfile?, open: (Page) -> Uni
         SettingsCard(scale) {
             SettingsActionRow("프로필 수정", "이름, 사진, 기본 소개", "open-profile", scale) { open(Page.Profile) }
             SettingsDivider(scale)
-            SettingsDetailRow("연결 계정", scale) { SettingsValuePill(profile?.email ?: "계정 없음", scale) }
+            SettingsDetailRow("연결 계정", scale, value = profile?.email ?: "계정 없음")
             SettingsDivider(scale)
             SettingsActionRow("회원 탈퇴", "계정 및 데이터 삭제", "open-delete", scale, danger = true) { open(Page.Delete) }
         }
@@ -573,11 +580,12 @@ private fun PrivacyPage(
     charge: ThreadChargeState,
     refreshAdPrivacy: () -> Unit,
     showAdPrivacyOptions: () -> Unit,
+    feedback: FeedbackConsentState,
+    refreshFeedback: () -> Unit,
+    saveFeedback: (Boolean) -> Unit,
     open: (Page) -> Unit,
 ) {
-    var feedback by rememberPreference("feedback_personalization", true)
-    var ai by rememberPreference("ai_data_use", false)
-    LaunchedEffect(Unit) { refreshAdPrivacy() }
+    LaunchedEffect(Unit) { refreshAdPrivacy(); refreshFeedback() }
     SettingsCard(scale) {
         SettingsActionRow("개인정보 처리방침", "서비스 데이터 처리 기준", "open-policy", scale) { open(Page.Policy) }
         SettingsDivider(scale)
@@ -585,11 +593,13 @@ private fun PrivacyPage(
         SettingsDivider(scale)
         SettingsActionRow("광고 개인정보 설정", charge.privacyStatusText, "ad-privacy-options", scale, statusTag = "ad-privacy-status", onClick = showAdPrivacyOptions)
         SettingsDivider(scale)
-        SettingsDetailRow("데이터 수집 동의", scale) { SettingsValuePill("필수 동의 완료", scale) }
+        SettingsDetailRow("데이터 수집 동의", scale, value = "필수 동의 완료")
         SettingsDivider(scale)
-        SettingsDetailRow("피드백 데이터 개인화 사용 동의", scale, subtitle = "추천 개선에 사용") { SettingsToggle(feedback, { feedback = it }, "피드백 데이터 개인화 사용 동의", scale) }
-        SettingsDivider(scale)
-        SettingsDetailRow("AI/ML 추천 개선 데이터 사용 동의", scale, subtitle = "비식별 학습 반영") { SettingsToggle(ai, { ai = it }, "AI/ML 추천 개선 데이터 사용 동의", scale) }
+        SettingsDetailRow("피드백 데이터 개인화 사용 동의", scale, subtitle = if (feedback.busy) "동의 설정을 확인하고 있어요" else "추천 개선에 사용") {
+            SettingsToggle(feedback.accepted, saveFeedback, "피드백 데이터 개인화 사용 동의", scale, Modifier.testTag("feedback-consent-toggle"), enabled = feedback.canChange)
+        }
+        feedback.message?.let { CoorditText(it, CoorditTypography.gmarketMedium(9 * scale).copy(color = AppColors.muted),
+            Modifier.padding(horizontal = (13 * scale).dp).testTag("feedback-consent-message").semantics { liveRegion = LiveRegionMode.Polite }) }
     }
 }
 
@@ -597,7 +607,7 @@ private fun PrivacyPage(
 private fun AppSettingsPage(scale: Float) {
     val context = LocalContext.current
     SettingsCard(scale) {
-        SettingsDetailRow("앱 버전", scale) { SettingsValuePill("v${BuildConfig.VERSION_NAME}", scale) }
+        SettingsDetailRow("앱 버전", scale, value = "v${BuildConfig.VERSION_NAME}")
         SettingsDivider(scale)
         SettingsActionRow("문의하기", "hyu.coordit@gmail.com", "support-email", scale) { context.sendSupportEmail() }
     }
@@ -748,7 +758,7 @@ private fun DocumentPage(scale: Float, sections: List<DocumentSection>, title: S
     }
 }
 
-@Composable private fun ValueRow(title: String, value: String, scale: Float) { SettingsDetailRow(title, scale) { SettingsValuePill(value, scale) } }
+@Composable private fun ValueRow(title: String, value: String, scale: Float) { SettingsDetailRow(title, scale, value = value) }
 @Composable private fun StatusPanel(text: String, error: Boolean, scale: Float) { Box(Modifier.fillMaxWidth().background(if (error) AppColors.danger.copy(alpha = .12f) else AppColors.settingsValue, RoundedCornerShape((7 * scale).dp)).padding((12 * scale).dp)) { CoorditText(text, CoorditTypography.gmarketMedium(10 * scale).copy(color = if (error) AppColors.danger else AppColors.ink)) } }
 
 @Composable private fun rememberPreference(key: String, default: Boolean): MutableState<Boolean> {

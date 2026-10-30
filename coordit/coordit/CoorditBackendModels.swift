@@ -59,6 +59,24 @@ struct CoorditUserProfile: Codable, Equatable {
     }
 }
 
+struct CoorditUserConsents: Decodable {
+    let consents: [String: Consent]
+
+    struct Consent: Decodable {
+        let accepted: Bool
+        let version: String?
+        let updatedAt: String?
+    }
+}
+
+struct CoorditUpdateConsentsRequest: Encodable {
+    let consents: [String: Consent]
+
+    struct Consent: Encodable {
+        let accepted: Bool
+    }
+}
+
 struct CoorditBodyMeasurement: Codable, Equatable {
     let id: String?
     let heightCm: Double?

@@ -22,6 +22,16 @@ const integer = (key: string, fallback: number): number => {
   return Number.isInteger(value) && value > 0 ? value : fallback;
 };
 
+const nonNegativeInteger = (key: string, fallback: number): number => {
+  const raw = process.env[key]?.trim();
+  if (!raw) return fallback;
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value < 0) {
+    throw new Error(`${key} must be a non-negative integer`);
+  }
+  return value;
+};
+
 const optional = (key: string): string | null => {
   const value = process.env[key]?.trim();
   return value ? value : null;
@@ -123,6 +133,7 @@ const appleIapEnabled = featureEnabled("APPLE_IAP_ENABLED")
 export const env = {
   nodeEnv,
   port: Number(process.env.PORT ?? 4000),
+  trustProxyHops: nonNegativeInteger("TRUST_PROXY_HOPS", 1),
   corsOrigins: corsOrigins(nodeEnv),
   supabaseUrl: required("SUPABASE_URL"),
   supabaseAnonKey: required("SUPABASE_ANON_KEY"),

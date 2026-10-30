@@ -56,6 +56,11 @@ data class ThreadRewardAttempt(
     val status: String,
 )
 data class UpdateProfileRequest(val displayName: String)
+data class UserConsent(val accepted: Boolean?, val version: String?, val updatedAt: String?)
+data class UserConsents(val consents: Map<String, UserConsent>)
+data class UpdateConsentsRequest(val consents: Map<String, Consent>) {
+    data class Consent(val accepted: Boolean)
+}
 data class BodyMeasurementRequest(
     val heightCm: Double,
     val weightKg: Double,

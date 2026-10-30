@@ -7,6 +7,8 @@ import { routes, imageRoutes } from "./routes";
 
 export const app = express();
 
+app.set("trust proxy", env.trustProxyHops);
+
 app.use(
   cors({
     origin: (origin, callback) => {

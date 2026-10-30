@@ -7,6 +7,7 @@ struct CoorditFeatureTitleBar: View {
     let accessibilityLabel: String
     var onHelp: (() -> Void)? = nil
     var helpIdentifier: String = ""
+    var height: CGFloat = 60
     let onBack: () -> Void
 
     var body: some View {
@@ -23,7 +24,7 @@ struct CoorditFeatureTitleBar: View {
                     Spacer(minLength: 0)
                 }
                 .foregroundStyle(.black)
-                .frame(height: metrics.value(60))
+                .frame(height: metrics.value(height))
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)

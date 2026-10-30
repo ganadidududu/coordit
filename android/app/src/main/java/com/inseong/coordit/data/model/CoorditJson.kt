@@ -28,10 +28,20 @@ private class AuthSessionAdapter : TypeAdapter<AuthSession>() {
         val userElement = body.get("user")
         if (userElement == null || !userElement.isJsonObject) throw IOException("Authentication user must be an object")
         val user = userElement.asJsonObject
+        val anonymous = user.get("isAnonymous")?.let {
+            if (!it.isJsonPrimitive || !it.asJsonPrimitive.isBoolean) throw IOException("Authentication isAnonymous must be a boolean")
+            it.asBoolean
+        } ?: false
         return AuthSession(
             body.requiredString("accessToken", allowEmpty = false),
             body.requiredString("refreshToken", allowEmpty = false),
-            AuthUser(user.requiredString("id", allowEmpty = false), user.requiredString("email", allowEmpty = true)),
+            AuthUser(
+                user.requiredString("id", allowEmpty = false),
+                if (anonymous && (user.get("email") == null || user.get("email").isJsonNull)) "" else {
+                    user.requiredString("email", allowEmpty = true)
+                },
+                anonymous,
+            ),
         )
     }
 
@@ -43,6 +53,7 @@ private class AuthSessionAdapter : TypeAdapter<AuthSession>() {
         writer.name("user").beginObject()
         writer.name("id").value(session.user.id)
         writer.name("email").value(session.user.email)
+        writer.name("isAnonymous").value(session.user.isAnonymous)
         writer.endObject()
         writer.endObject()
     }

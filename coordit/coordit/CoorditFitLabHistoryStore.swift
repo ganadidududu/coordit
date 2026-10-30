@@ -434,11 +434,14 @@ actor CoorditFitLabFileHistoryStore: CoorditFitLabHistoryStoring {
             let fileURL = directory.appendingPathComponent("history.json")
             try legacyFixture.write(to: fileURL, options: [.atomic])
             let migrated = try load(userID: migrationUser)
+            let reloaded = try load(userID: migrationUser)
             let rewrittenHeader = try Self.decoder.decode(
                 EnvelopeHeader.self,
                 from: Data(contentsOf: fileURL)
             )
             results["migration"] = migrated.count == 1
+                && reloaded.count == 1
+                && reloaded.first?.sizeDrafts == nil
                 && migrated.first?.schemaVersion == CoorditFitLabHistorySnapshot.currentSchemaVersion
                 && migrated.first?.analysisID == "legacy-analysis"
                 && migrated.first?.userID == migrationUser
@@ -498,7 +501,8 @@ actor CoorditFitLabFileHistoryStore: CoorditFitLabHistoryStoring {
             originalSource: snapshot.originalSource,
             recommendation: snapshot.recommendation,
             report: snapshot.report,
-            chartData: snapshot.chartData
+            chartData: snapshot.chartData,
+            sizeDrafts: snapshot.sizeDrafts
         )
     }
     #endif

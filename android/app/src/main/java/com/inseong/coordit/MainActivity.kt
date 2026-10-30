@@ -8,6 +8,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.inseong.coordit.auth.GoogleIdentity
@@ -19,23 +20,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-    private val sharedProductUrl = androidx.compose.runtime.mutableStateOf<String?>(null)
-
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        acceptSharedProduct(intent)
-    }
-
-    private fun acceptSharedProduct(intent: android.content.Intent) {
-        if (intent.action == android.content.Intent.ACTION_SEND && intent.type == "text/plain") {
-            sharedProductUrl.value = com.inseong.coordit.data.fitlab.sharedProductLink(intent.getStringExtra(android.content.Intent.EXTRA_TEXT))
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString("shared-product-url", sharedProductUrl.value)
-        super.onSaveInstanceState(outState)
+        (application as CoorditApplication).container.sharedImports.accept(intent)
     }
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
@@ -44,14 +32,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) acceptSharedProduct(intent)
-        else sharedProductUrl.value = savedInstanceState.getString("shared-product-url")
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).apply {
             hide(WindowInsetsCompat.Type.systemBars())
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
         val container = (application as CoorditApplication).container
+        if (savedInstanceState == null) container.sharedImports.accept(intent)
         val model = ViewModelProvider(this, object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T =
@@ -76,6 +63,7 @@ class MainActivity : ComponentActivity() {
         val identity = GoogleIdentity(applicationContext)
         val reduceMotion = Settings.Global.getFloat(contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
         setContent {
+            val imports = container.sharedImports.pending.collectAsStateWithLifecycle().value
             CoorditApp(model, reduceMotion,
                 onGoogle = {
                     val attempt = model.beginGoogle()
@@ -93,8 +81,8 @@ class MainActivity : ComponentActivity() {
                 onDeleteAccount = { model.deleteAccount { identity.clear() } },
                 closetModel = closet,
                 fitLabModel = fitLab,
-                sharedProductUrl = sharedProductUrl.value,
-                onSharedProductConsumed = { sharedProductUrl.value = null },
+                sharedProductUrl = imports.firstOrNull(),
+                onSharedProductConsumed = { imports.firstOrNull()?.let(container.sharedImports::consume) },
             )
         }
     }

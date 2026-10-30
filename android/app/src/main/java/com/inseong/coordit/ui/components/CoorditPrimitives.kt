@@ -68,18 +68,17 @@ fun CoorditButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
 
 @Composable
 fun BackTitleCard(title: String, scale: Float, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    val titleSize = if (title.length >= 6) 18f else 22f
-    Pressable(onBack, modifier.semantics { contentDescription = "$title 뒤로가기" }, cornerRadius = 6 * scale) {
-        Row(Modifier.width((372 * scale).dp).height((60 * scale).dp).background(AppColors.panel)
-            .padding(horizontal = (26 * scale).dp), verticalAlignment = Alignment.CenterVertically) {
-            Canvas(Modifier.size((23 * scale).dp)) {
+    Pressable(onBack, modifier.semantics { contentDescription = "$title 뒤로가기" }, cornerRadius = 7 * scale) {
+        Row(Modifier.width((370 * scale).dp).heightIn(min = (60 * scale).dp).background(AppColors.panel)
+            .padding(horizontal = (29 * scale).dp, vertical = (12 * scale).dp), verticalAlignment = Alignment.CenterVertically) {
+            Canvas(Modifier.size((25 * scale).dp)) {
                 drawLine(Color.Black.copy(alpha = .82f), Offset(size.width * .65f, size.height * .12f),
                     Offset(size.width * .25f, size.height * .5f), 3 * scale * density, StrokeCap.Round)
                 drawLine(Color.Black.copy(alpha = .82f), Offset(size.width * .25f, size.height * .5f),
                     Offset(size.width * .65f, size.height * .88f), 3 * scale * density, StrokeCap.Round)
             }
-            Spacer(Modifier.width((15 * scale).dp))
-            BasicText(title, style = CoorditTypography.climate2019(titleSize * scale).copy(color = Color.Black, letterSpacing = (1.2f * scale).sp), maxLines = 1)
+            Spacer(Modifier.width((18 * scale).dp))
+            BasicText(title, style = CoorditTypography.gmarketBold(22 * scale).copy(color = Color.Black, letterSpacing = (1.5f * scale).sp))
         }
     }
 }

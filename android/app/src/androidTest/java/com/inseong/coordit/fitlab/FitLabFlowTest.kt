@@ -6,6 +6,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.cancel
 import com.inseong.coordit.closet.ClosetAuthApi
 import com.inseong.coordit.closet.ClosetMemoryStore
 import com.inseong.coordit.data.closet.ClosetPrefillRequest
@@ -20,12 +22,75 @@ import com.inseong.coordit.ui.fitlab.FitLabViewModel
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
 
 class FitLabFlowTest {
     @get:Rule val compose = createAndroidComposeRule<AccountPreviewActivity>()
+
+    @Test fun acceptingSharedLinkCannotRestoreAbandonedPaidCheckpoint() {
+        val api = FitLabFixture()
+        val sessions = SessionRepository(ClosetAuthApi(), ClosetMemoryStore())
+        val history = FitLabMemoryHistory()
+        val submissions = FitLabMemorySubmissions()
+        runBlocking {
+            sessions.loginGoogle("fixture-token", "fixture-nonce")
+            submissions.save(FitLabPendingSubmission("closet-test-user", FitLabDraft(productName="abandoned-product"), FitLabCheckpoint(productId="abandoned-product-id",recommendationKey="abandoned-key")))
+        }
+        val model = FitLabViewModel(FitLabRepository(api),sessions,history,submissions)
+        try {
+            compose.waitUntil(5_000) { model.state.value.accountReady }
+            assertEquals("abandoned-product-id",model.state.value.checkpoint.productId)
+            runBlocking { assertTrue(model.openSharedProduct("https://shop.example/replacement")) }
+            assertEquals("https://shop.example/replacement",model.state.value.draft.productUrl)
+            assertEquals(FitLabRoute.Url,model.state.value.screen)
+            assertEquals(null,runBlocking { submissions.load("closet-test-user") })
+            val recreated = FitLabViewModel(FitLabRepository(api),sessions,history,submissions)
+            try {
+                compose.waitUntil(5_000) { recreated.state.value.accountReady }
+                assertEquals(null,recreated.state.value.checkpoint.productId)
+                assertEquals(FitLabRoute.Sources,recreated.state.value.screen)
+                assertEquals(0,api.productCalls)
+            } finally { recreated.viewModelScope.cancel() }
+        } finally { model.viewModelScope.cancel() }
+    }
+
+    @Test fun exampleTutorialNeverWritesToServerOrHistory() {
+        compose.activity.getSharedPreferences("guided-tutorials", android.content.Context.MODE_PRIVATE).edit().clear().commit()
+        val api = FitLabFixture()
+        val sessions = SessionRepository(ClosetAuthApi(), ClosetMemoryStore())
+        runBlocking { sessions.loginGoogle("fixture-token", "fixture-nonce") }
+        val model = FitLabViewModel(FitLabRepository(api), sessions, FitLabMemoryHistory(), FitLabMemorySubmissions())
+        try {
+            compose.setContent { FitLabScreen(model, {}, {}, {}) }
+            capture("tutorial-source")
+            click("fitlab-source-example")
+            compose.onNodeWithTag("tutorial-example-notice").assertExists()
+            click("fitlab-url-next")
+            capture("tutorial-import")
+            click("fitlab-url-import")
+            ready(model)
+            assertEquals(3, model.state.value.draft.sizes.size)
+            click("fitlab-confirm-draft")
+            click("fitlab-review-continue")
+            ready(model)
+            click("fitlab-reference-tutorial-reference")
+            click("fitlab-submit")
+            compose.onNodeWithTag("fitlab-result").assertExists()
+            tap("fitlab-score-L")
+            compose.onNodeWithTag("fitlab-selected-score").assertTextEquals("82.0점")
+            captureAt("fitlab-example-finish", "tutorial-finish")
+            tap("fitlab-example-finish")
+            assertEquals(FitLabRoute.Sources, model.state.value.screen)
+            assertEquals(0, api.productCalls)
+            assertEquals(0, api.sizeCalls)
+            assertEquals(0, api.recommendationKeys.size)
+            assertEquals(0, api.reportKeys.size)
+            assertEquals(emptyList<FitLabHistorySnapshot>(), model.state.value.history)
+        } finally { model.viewModelScope.cancel() }
+    }
 
     @Test fun fitLabFlowRetriesWithoutDuplicatingCompletedWrites() {
         val api = FitLabFixture()
@@ -120,8 +185,7 @@ class FitLabFlowTest {
             compose.waitUntil(5_000) { model.state.value.history.size == 1 || model.state.value.error != null }
             ready(model)
             assertEquals(1, model.state.value.history.size)
-            tap("fitlab-restart")
-            compose.waitForIdle()
+            assertEquals(FitLabRoute.Sources, model.state.value.screen)
             click("fitlab-history-analysis-1")
             assertEquals(FitLabRoute.HistoryDetail, model.state.value.screen)
             capture("09-history-detail")
@@ -266,6 +330,8 @@ class FitLabFlowTest {
     }
 
     private fun captureAt(tag: String, name: String) {
+        android.os.SystemClock.sleep(350)
+        compose.waitForIdle()
         compose.onNodeWithTag(tag).performScrollTo()
         compose.onNodeWithTag(tag).assertIsDisplayed()
         compose.waitForIdle()
@@ -347,6 +413,9 @@ internal class FitLabFixture : FitLabApi {
     var sizeCalls = 0
     val recommendationKeys = mutableListOf<String>()
     val reportKeys = mutableListOf<String>()
+    var failRecommendation = true
+    var failReport = true
+    var recommendationGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
 
     override suspend fun balance(auth: String) = ThreadBalanceResponse(7)
     override suspend fun references(auth: String, category: String) = listOf(
@@ -371,7 +440,8 @@ internal class FitLabFixture : FitLabApi {
     }
     override suspend fun recommend(auth: String, request: FitLabRecommendRequest): FitLabRecommendation {
         recommendationKeys += request.idempotencyKey
-        if (recommendationKeys.size == 1) throw IOException("ambiguous result")
+        recommendationGate?.await()
+        if (failRecommendation && recommendationKeys.size == 1) throw IOException("ambiguous result")
         return FitLabRecommendation(
             "analysis-1", "M", 93.5, "잘 맞아요", "기준 옷과 가장 비슷한 핏이에요.", "high",
             mapOf("shoulder_width" to 0.5, "chest_width" to 1.0),
@@ -386,7 +456,7 @@ internal class FitLabFixture : FitLabApi {
     }
     override suspend fun report(auth: String, id: String, request: FitLabReportRequest): FitLabReportResponse {
         reportKeys += request.idempotencyKey
-        if (reportKeys.size == 1) throw IOException("ambiguous report result")
+        if (failReport && reportKeys.size == 1) throw IOException("ambiguous report result")
         return FitLabReportResponse(
             id, "fixture", FitLabReportBody("M 사이즈 핏 리포트", "기준 옷과 비슷한 여유가 예상돼요.", recommendationReason = "M은 어깨와 가슴의 균형이 가장 가까워요.", garmentFitContext = "티셔츠에서는 어깨와 가슴의 균형을 확인해요.", sizeTradeoff = "M은 어깨, L은 가슴 여유가 유리해요.", measurementAnalysis = listOf(FitLabMeasurementAnalysis("어깨", "0.5cm 여유"))),
             FitLabChartData(

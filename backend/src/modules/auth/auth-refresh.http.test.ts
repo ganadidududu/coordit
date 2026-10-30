@@ -73,9 +73,10 @@ describe("POST /auth/refresh", () => {
     expect(refreshSession).not.toHaveBeenCalled();
   });
 
-  it("preserves an anonymous guest across refresh-token rotation", async () => {
+  it.each([undefined, ""])("preserves an anonymous guest with email %j across refresh-token rotation", async (email) => {
     const guestUser = {
       id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      email,
       is_anonymous: true
     };
     vi.spyOn(supabaseAuth.auth, "refreshSession").mockResolvedValue({

@@ -269,6 +269,7 @@ struct CoorditFitLabHistorySnapshot: Identifiable, Codable, Equatable, Sendable 
     let recommendation: CoorditFitLabRecommendationResponse
     let report: CoorditFitLabReportResponse?
     let chartData: CoorditFitLabReportResponse.ChartData
+    let sizeDrafts: [CoorditFitLabSizeDraft]?
 
     nonisolated init(
         schemaVersion: Int = currentSchemaVersion,
@@ -283,7 +284,8 @@ struct CoorditFitLabHistorySnapshot: Identifiable, Codable, Equatable, Sendable 
         originalSource: CoorditFitLabSource,
         recommendation: CoorditFitLabRecommendationResponse,
         report: CoorditFitLabReportResponse?,
-        chartData: CoorditFitLabReportResponse.ChartData
+        chartData: CoorditFitLabReportResponse.ChartData,
+        sizeDrafts: [CoorditFitLabSizeDraft]? = nil
     ) {
         self.schemaVersion = schemaVersion
         self.id = id
@@ -298,6 +300,7 @@ struct CoorditFitLabHistorySnapshot: Identifiable, Codable, Equatable, Sendable 
         self.recommendation = recommendation
         self.report = report
         self.chartData = chartData
+        self.sizeDrafts = sizeDrafts
     }
 }
 

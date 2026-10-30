@@ -54,6 +54,20 @@ class SessionRepositoryTest {
         assertNull(store.value)
         assertNull(repository.session.value)
     }
+    @Test fun validGuestSessionRestoresWithoutCallingRefreshEndpoint() = runTest {
+        val payload = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString("{\"exp\":${System.currentTimeMillis()/1000+3600}}".toByteArray())
+        val guest = AuthSession("header.$payload.signature", "guest-refresh", AuthUser("guest-user", "", true))
+        store.value = guest
+        assertEquals(guest, repository.restore())
+        assertEquals(0, server.requestCount)
+        assertTrue(requireNotNull(repository.session.value).user.isAnonymous)
+    }
+    @Test fun serverContractFailureDoesNotDeleteSavedGuestIdentity() = runTest {
+        store.value = saved.copy(user = AuthUser("guest-user", "", true))
+        server.enqueue(MockResponse().setResponseCode(400).setBody("{\"message\":\"Auth user email is missing\"}"))
+        try { repository.restore(); fail("Expected server contract failure") } catch (error: HttpException) { assertEquals(400,error.code()) }
+        assertNotNull(store.value)
+    }
     @Test fun transientFailureKeepsStoredSessionForRetry() = runTest {
         store.value = saved
         server.enqueue(MockResponse().setResponseCode(503))
@@ -118,6 +132,15 @@ class SessionRepositoryTest {
         server.enqueue(MockResponse().setBody("""{"accessToken":"a","refreshToken":"r","user":{"id":"u","email":""}}"""))
         assertEquals("", repository.loginGoogle("token", "nonce").user.email)
     }
+    @Test fun anonymousMarkerSurvivesParsingAndEncryptedStoreSerialization() = runTest {
+        val json = """{"accessToken":"a","refreshToken":"r","user":{"id":"guest-user","email":null,"isAnonymous":true}}"""
+        server.enqueue(MockResponse().setBody(json))
+        val guest = repository.loginGuest()
+        assertTrue(guest.user.isAnonymous)
+        assertEquals("", guest.user.email)
+        val gson = CoorditJson.create()
+        assertEquals(guest, gson.fromJson(gson.toJson(guest), AuthSession::class.java))
+    }
     @Test fun myPageMutationsMatchBackendContractAndDeleteClearsSessionAfterSuccess() = runTest {
         server.enqueue(MockResponse().setBody(authJson))
         repository.loginGoogle("token", "nonce"); server.takeRequest()
@@ -140,6 +163,37 @@ class SessionRepositoryTest {
         repository.deleteAccount()
         assertEquals("DELETE", server.takeRequest().method)
         assertNull(store.value); assertNull(repository.session.value)
+    }
+    @Test fun feedbackConsentUsesAuthenticatedGetAndPatchWithoutChangingMarketing() = runTest {
+        server.enqueue(MockResponse().setBody(authJson))
+        repository.loginGoogle("token", "nonce"); server.takeRequest()
+        val json = """{"consents":{"fit_data_improvement":{"accepted":true,"version":"2026-07-07","updatedAt":"2026-10-29T00:00:00Z"},"marketing":{"accepted":false,"version":"2026-07-07","updatedAt":null}}}"""
+        server.enqueue(MockResponse().setBody(json))
+        assertTrue(repository.loadFeedbackConsent())
+        server.takeRequest().also {
+            assertEquals("GET", it.method); assertEquals("/users/me/consents", it.path)
+            assertEquals("Bearer new-access", it.getHeader("Authorization"))
+        }
+        val decoded = CoorditJson.create().fromJson(json, UserConsents::class.java)
+        assertEquals("2026-07-07", decoded.consents.getValue("fit_data_improvement").version)
+        assertEquals("2026-10-29T00:00:00Z", decoded.consents.getValue("fit_data_improvement").updatedAt)
+        assertNull(decoded.consents.getValue("marketing").updatedAt)
+        server.enqueue(MockResponse().setBody(json.replace("\"accepted\":true", "\"accepted\":false")))
+        assertFalse(repository.updateFeedbackConsent(false))
+        server.takeRequest().also {
+            assertEquals("PATCH", it.method); assertEquals("/users/me/consents", it.path)
+            assertEquals("Bearer new-access", it.getHeader("Authorization"))
+            val body = JsonParser.parseString(it.body.readUtf8()).asJsonObject
+            assertEquals(JsonParser.parseString("""{"consents":{"fit_data_improvement":{"accepted":false}}}"""), body)
+        }
+    }
+    @Test fun missingFeedbackConsentIsNotInvented() = runTest {
+        server.enqueue(MockResponse().setBody(authJson))
+        repository.loginGoogle("token", "nonce"); server.takeRequest()
+        listOf("""{"consents":{}}""", """{"consents":{"fit_data_improvement":{"accepted":null}}}""").forEach {
+            server.enqueue(MockResponse().setBody(it))
+            try { repository.loadFeedbackConsent(); fail("Expected missing consent rejection") } catch (_: java.io.IOException) { }
+        }
     }
     private class MemoryStore : SessionStore {
         var value: AuthSession? = null

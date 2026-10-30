@@ -36,3 +36,5 @@ ml/.venv/
 ml/.pytest_cache/
 ml/.ruff_cache/
 **/__pycache__/
+android/signing/
+*.aab

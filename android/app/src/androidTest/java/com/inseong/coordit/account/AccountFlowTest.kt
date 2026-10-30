@@ -90,6 +90,8 @@ class AccountFlowTest {
         override suspend fun markCompleted() { completed = true }
     }
     private class TestApi : CoorditApi {
+        override suspend fun consents(authorization: String): UserConsents = error("not used")
+        override suspend fun updateConsents(authorization: String, request: UpdateConsentsRequest): UserConsents = error("not used")
         var submitted: OnboardingRequest? = null
         var statusFailures = 1
         val profile = UserProfile("test-user", "test@example.invalid", "테스트사용자")

@@ -206,7 +206,7 @@ Content-Type: application/json
 | 주요 반환값 | `{ "onboardingComplete": boolean }` |
 | 사용 화면 | App bootstrap, route guard |
 
-`POST /auth/onboarding`, `GET /auth/onboarding/status`, `GET/PATCH/DELETE /users/me`를 제외한 보호 API는 온보딩 완료 상태가 아니면 HTTP 403을 반환한다.
+`POST /auth/onboarding`, `GET /auth/onboarding/status`, `GET/PATCH/DELETE /users/me`, `GET/PATCH /users/me/consents`를 제외한 보호 API는 온보딩 완료 상태가 아니면 HTTP 403을 반환한다.
 
 ## 4. Profile
 
@@ -231,6 +231,17 @@ Content-Type: application/json
 | 필수 입력 | 수정할 프로필 값 |
 | 주요 반환값 | 수정된 사용자 프로필 |
 | 사용 화면 | Profile |
+
+### 선택 동의 조회·변경
+
+| 항목 | 내용 |
+| --- | --- |
+| 기능명 | 선택 동의 관리 |
+| 목적 | 온보딩에서 받은 선택 동의(`fit_data_improvement`, `marketing`)를 확인하고 철회·재동의한다. |
+| Endpoint | `GET /users/me/consents`, `PATCH /users/me/consents` |
+| 필수 입력 | Authorization header. PATCH는 `{ "consents": { "fit_data_improvement": { "accepted": false } } }`처럼 바꿀 항목만 보낸다. 필수 동의 키는 400 |
+| 주요 반환값 | `{ "consents": { "<key>": { "accepted", "version", "updatedAt" } } }`. 현재 시행 중인 동의 버전 기준이며, PATCH도 변경 후 전체 상태를 반환 |
+| 사용 화면 | My Page > 개인정보/보안 |
 
 ### 신체 치수 등록
 

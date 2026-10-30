@@ -35,15 +35,27 @@ import com.inseong.coordit.data.home.HomeCategory
 import com.inseong.coordit.ui.components.*
 import com.inseong.coordit.ui.theme.*
 import java.util.Locale
+import kotlinx.coroutines.launch
 
-class ClosetPhotos {
+class ClosetPhotos(context: android.content.Context? = null, userId: String? = null) {
     val images = mutableStateMapOf<String, Bitmap>()
+    private val storage = if (context != null && userId != null) GarmentPhotoStore(context, userId) else null
     fun clear() = images.clear()
+    suspend fun load(ids: List<String>) {
+        val store = storage ?: return
+        ids.filterNot(images::containsKey).forEach { id -> store.load(id)?.let { images[id] = it } }
+    }
+    suspend fun save(id: String, image: Bitmap): Boolean {
+        images[id] = image
+        return try { storage?.save(id, image); true } catch (_: java.io.IOException) { false }
+    }
 }
 
 @Composable
 fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Unit, onProfile: () -> Unit, onFitLab: () -> Unit, returningToFitLab: Boolean = false, onExampleFinished: (Boolean) -> Unit = {}, referencePractice: Boolean = false, onStartExample: () -> Unit = { model.beginExample() }, onReferenceRegistered: (com.inseong.coordit.data.fitlab.FitLabReference) -> Unit = { onFitLab() }) {
     val state by model.state.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(state.items.map { it.id }) { photos.load(state.items.map { it.id }) }
     val focus = LocalFocusManager.current
     var upper by rememberSaveable { mutableStateOf(true) }
     var categoryName by rememberSaveable { mutableStateOf<String?>(null) }
@@ -82,7 +94,8 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
         if (state.screen == ClosetScreenRoute.Overview) photos.images.remove("draft")
         if (state.screen == ClosetScreenRoute.Detail) {
             state.detail?.item?.let { item ->
-                photos.images.remove("draft")?.let { photos.images[item.id] = it }
+                photos.images.remove("draft")?.let { if (!photos.save(item.id, it)) model.error("의류 사진을 기기에 저장하지 못했어요. 사진을 다시 선택해 주세요.") }
+                photos.load(listOf(item.id))
             }
             if (returningToFitLab && !state.busy) state.registeredFitLabReference?.let(onReferenceRegistered)
         }
@@ -268,7 +281,7 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                                 Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy((ClosetDesign.smallGap*s).dp)) {
                                     Box(Modifier.heightIn(min=(ClosetDesign.fieldHeight*s).dp)) { CoorditText(detail.item.name,CoorditTypography.gmarketBold(19*s).copy(color=Color.Black)) }
                                     ClosetAction("옷 이름 수정하기",s,"closet-rename",secondary=true,font=10f,enabled=!state.busy && !state.draft.isExample) { rename=detail.item.name }
-                                    ClosetGarmentPhotoPicker(onPhoto={ photos.images[detail.item.id]=it },enabled=!state.busy && !state.draft.isExample,compact=true,scale=s)
+                                    ClosetGarmentPhotoPicker(onPhoto={ bitmap -> scope.launch { if (!photos.save(detail.item.id, bitmap)) model.error("의류 사진을 기기에 저장하지 못했어요. 사진을 다시 선택해 주세요.") } },enabled=!state.busy && !state.draft.isExample,compact=true,scale=s)
                                     ClosetAction("내 옷장에서 삭제하기",s,"closet-delete",secondary=true,font=10f,enabled=!state.busy && !state.draft.isExample) { confirmDelete=true }
                                 }
                             }

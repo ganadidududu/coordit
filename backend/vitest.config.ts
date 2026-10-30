@@ -23,6 +23,8 @@ export default defineConfig({
       "src/modules/auth/social-auth-upgrade.service.test.ts",
       "src/modules/thread-wallet/thread-purchase-membership.test.ts",
       "src/config/env.test.ts",
+      "src/app.test.ts",
+      "src/modules/users/user-consents.http.test.ts",
       "src/middleware/**/*.test.ts"
     ]
   }

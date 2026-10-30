@@ -24,6 +24,7 @@ data class ClosetDraft(
     val cameraMetadata: Map<String, String> = emptyMap(),
     val isExample: Boolean = false,
 ) {
+    val isTutorialExample get() = productLink.trim() == com.inseong.coordit.data.fitlab.TutorialExample.link
     val selectedSizeRow get() = sizeRows.firstOrNull { it.id == selectedSizeRowId }
     val measurementKeys get() = GarmentMeasurementPolicy.dimensions(category.wireName)
     fun measurements(): Map<String, Double> {

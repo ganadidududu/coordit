@@ -138,6 +138,14 @@ final class CoorditFitLabCoordinator: ObservableObject {
                 self.draft = CoorditFitLabFixtures.upperDraft
             }
             seed(route: route, fixture: configuration.name)
+            let arguments = ProcessInfo.processInfo.arguments
+            if arguments.contains("--coordit-ui-testing"),
+               let index = arguments.firstIndex(of: "--coordit-test-garment-category"),
+               arguments.indices.contains(index + 1),
+               let category = CoorditFitLabCategory(rawValue: arguments[index + 1]) {
+                draft.category = category
+                draft.garmentKind = category.garmentKind
+            }
         }
         let launchArguments = ProcessInfo.processInfo.arguments
         if launchArguments.contains("--coordit-test-analysis-running-then-completed") {
@@ -1012,7 +1020,8 @@ final class CoorditFitLabCoordinator: ObservableObject {
             originalSource: draft.source,
             recommendation: recommendation,
             report: report,
-            chartData: report?.chartData ?? .init()
+            chartData: report?.chartData ?? .init(),
+            sizeDrafts: draft.sizes
         )
     }
 
@@ -1254,6 +1263,11 @@ final class CoorditFitLabCoordinator: ObservableObject {
             loadState = .loading
         case .fitLabResultTop:
             draft = CoorditFitLabFixtures.upperResultDraft
+            if fixture == "long-report" {
+                for index in draft.sizes.indices {
+                    draft.sizes[index].measurements.removeValue(forKey: .sleeveLength)
+                }
+            }
             recommendation = CoorditFitLabFixtures.upperRecommendation
             report = fixture == "long-report" ? CoorditFitLabFixtures.longReport : CoorditFitLabFixtures.report
         case .fitLabResultBottom:

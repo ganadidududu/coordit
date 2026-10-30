@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -32,11 +33,14 @@ import com.inseong.coordit.ui.theme.*
 @Composable
 fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit, onLogout: () -> Unit, onDeleteAccount: () -> Unit = {}, closetModel: com.inseong.coordit.ui.closet.ClosetViewModel? = null, fitLabModel: com.inseong.coordit.ui.fitlab.FitLabViewModel? = null, sharedProductUrl: String? = null, onSharedProductConsumed: () -> Unit = {}) {
     val state by model.state.collectAsStateWithLifecycle()
-    val photos = remember { com.inseong.coordit.ui.closet.ClosetPhotos() }
+    val photoContext = LocalContext.current
+    val photos = remember(state.userId) { com.inseong.coordit.ui.closet.ClosetPhotos(photoContext.applicationContext, state.userId) }
     val nav = rememberNavController()
+    val scope = rememberCoroutineScope()
     val route by nav.currentBackStackEntryAsState()
-    var accountVisible by remember { mutableStateOf(false) }
-    var rechargeFromFitLab by remember { mutableStateOf(false) }
+    var navigatedStage by rememberSaveable { mutableStateOf<AppStage?>(null) }
+    var accountVisible by rememberSaveable { mutableStateOf(false) }
+    var rechargeFromFitLab by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(accountVisible) { if (!accountVisible) rechargeFromFitLab = false }
     var unavailableFeature by remember { mutableStateOf<String?>(null) }
     var registeringReference by rememberSaveable { mutableStateOf(false) }
@@ -65,11 +69,11 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
         } else finishPractice()
     }
     val closetState = closetModel?.state?.collectAsStateWithLifecycle()?.value
-    LaunchedEffect(state.stage, state.profile?.id, route?.destination?.route, accountVisible, fitLabState?.busy, closetState?.busy, practice) {
+    LaunchedEffect(state.stage, state.profile?.id, fitLabState?.accountReady, route?.destination?.route, accountVisible, fitLabState?.busy, closetState?.busy, practice) {
         if (state.stage != AppStage.Home) { practice = null; referencePractice = false; registeringReference = false; return@LaunchedEffect }
         if (accountVisible || practice != null || referencePractice) return@LaunchedEffect
         when (route?.destination?.route) {
-            "FitLab" -> if (fitLabModel != null && fitLabState?.busy == false && fitLabState.screen !in setOf(com.inseong.coordit.data.fitlab.FitLabScreen.Loading, com.inseong.coordit.data.fitlab.FitLabScreen.Result, com.inseong.coordit.data.fitlab.FitLabScreen.HistoryDetail) && needsPractice(com.inseong.coordit.ui.guidance.UsageGuide.FitLab)) {
+            "FitLab" -> if (fitLabModel != null && fitLabState?.accountReady == true && fitLabState.busy == false && fitLabState.screen !in setOf(com.inseong.coordit.data.fitlab.FitLabScreen.Loading, com.inseong.coordit.data.fitlab.FitLabScreen.Result, com.inseong.coordit.data.fitlab.FitLabScreen.HistoryDetail) && needsPractice(com.inseong.coordit.ui.guidance.UsageGuide.FitLab)) {
                 if (fitLabModel.beginExample()) practice = com.inseong.coordit.ui.guidance.UsageGuide.FitLab
             }
             "Closet" -> if (closetModel != null && closetState?.busy == false && needsPractice(com.inseong.coordit.ui.guidance.UsageGuide.Closet)) {
@@ -77,17 +81,23 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
             }
         }
     }
-    LaunchedEffect(state.stage, route?.destination?.route, accountVisible, sharedProductUrl, fitLabState?.busy, fitLabState?.draft?.isExample, practice) {
-        if (state.stage == AppStage.Home && !accountVisible && sharedProductUrl != null && fitLabModel != null && fitLabState?.busy == false && practice == null) {
+    LaunchedEffect(state.stage, fitLabState?.accountReady, route?.destination?.route, accountVisible, sharedProductUrl, fitLabState?.busy, fitLabState?.draft?.isExample, practice) {
+        if (state.stage == AppStage.Home && !accountVisible && sharedProductUrl != null && fitLabModel != null && fitLabState?.accountReady == true && fitLabState.busy == false && practice == null) {
             if (needsPractice(com.inseong.coordit.ui.guidance.UsageGuide.FitLab)) {
                 nav.navigate("FitLab") { popUpTo(AppStage.Home.name); launchSingleTop = true }
-            } else if (fitLabModel.importSharedProduct(sharedProductUrl)) {
-                nav.navigate("FitLab") { popUpTo(AppStage.Home.name); launchSingleTop = true }
-                onSharedProductConsumed()
+            } else {
+                scope.launch {
+                    if (fitLabModel.importSharedProduct(sharedProductUrl)) {
+                        nav.navigate("FitLab") { popUpTo(AppStage.Home.name); launchSingleTop = true }
+                        onSharedProductConsumed()
+                    }
+                }
             }
         }
     }
     LaunchedEffect(state.stage) {
+        if (navigatedStage == state.stage) return@LaunchedEffect
+        navigatedStage = state.stage
         if (state.stage == AppStage.Authentication || state.stage == AppStage.Welcome) photos.clear()
         accountVisible = false
         unavailableFeature = null
@@ -183,15 +193,11 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
             ) }
         }
     }
-    if (!accountVisible && practice == null && state.stage == AppStage.Home && route?.destination?.route != "FitLab" && fitLabState?.draft?.isExample == false &&
-        fitLabState.screen in setOf(com.inseong.coordit.data.fitlab.FitLabScreen.Loading, com.inseong.coordit.data.fitlab.FitLabScreen.Result)) {
-        Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
-            Pressable({ nav.navigate("FitLab") { launchSingleTop = true } }, Modifier.fillMaxWidth().heightIn(min = 44.dp)
-                .background(AppColors.ink, ContinuousRoundedShape(12.dp)).testTag("fitlab-global-notice")
-                .semantics { liveRegion = LiveRegionMode.Polite }) {
-                CoorditText(if (fitLabState.busy) "핏 분석을 만들고 있어요 · 진행 상황 보기" else if (fitLabState.recommendation != null) "핏 분석이 준비됐어요 · 결과 보기" else "핏 분석을 이어서 완료할 수 있어요",
-                    CoorditTypography.gmarketMedium(12f).copy(color = androidx.compose.ui.graphics.Color.White), Modifier.padding(12.dp))
-            }
+    if (!accountVisible && practice == null && state.stage == AppStage.Home && route?.destination?.route != "FitLab" && fitLabState?.draft?.isExample == false) {
+        fitLabState.notice?.let { notice ->
+            com.inseong.coordit.ui.fitlab.FitAnalysisNotice(notice, reduceMotion,
+                onDismiss = { fitLabModel?.dismissNotice() },
+                onOpen = { fitLabModel?.dismissNotice(); nav.navigate("FitLab") { launchSingleTop = true } })
         }
     }
     if (accountVisible) {
@@ -204,7 +210,8 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
             onRefreshAdPrivacy = model::refreshAdPrivacy, onShowAdPrivacyOptions = model::showAdPrivacyOptions,
             onSaveProfile = model::saveProfile, onSaveBody = model::saveBody,
             onLogout = onLogout, onDeleteAccount = onDeleteAccount, onClearMessage = model::clearSettingsMessage,
-            startAtThreadCharge = rechargeFromFitLab)
+            initiallyShowThreadCharge = rechargeFromFitLab, feedbackConsent = state.feedbackConsent,
+            onRefreshFeedbackConsent = model::refreshFeedbackConsent, onSaveFeedbackConsent = model::saveFeedbackConsent)
     }
     unavailableFeature?.let { feature ->
         Dialog(onDismissRequest = { unavailableFeature = null }) {

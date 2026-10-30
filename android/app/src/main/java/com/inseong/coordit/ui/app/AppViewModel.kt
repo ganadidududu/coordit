@@ -27,6 +27,9 @@ import retrofit2.HttpException
 
 enum class AppStage { Restoring, Welcome, Authentication, LoadingAccount, AccountRecovery, Onboarding, ReturningWelcome, Home }
 enum class ThreadChargeStatus { Idle, CheckingReadiness, CheckingConsent, LoadingAd, Ready, Presenting, AwaitingSettlement, Failed, Disabled }
+data class FeedbackConsentState(val accepted: Boolean? = null, val busy: Boolean = false, val available: Boolean = false, val message: String? = null) {
+    val canChange: Boolean get() = available && accepted != null && !busy
+}
 data class ThreadChargeState(
     val status: ThreadChargeStatus = ThreadChargeStatus.Idle,
     val message: String? = null,
@@ -56,6 +59,7 @@ private fun ThreadChargeState.withPrivacy(state: AdPrivacyState) = copy(
     privacyStatusText = state.statusText,
 )
 data class AppState(
+    val userId: String? = null,
     val stage: AppStage = AppStage.Restoring,
     val busy: Boolean = false,
     val error: String? = null,
@@ -64,6 +68,7 @@ data class AppState(
     val threadBalance: Int = 0,
     val threadCharge: ThreadChargeState = ThreadChargeState(),
     val settingsMessage: String? = null,
+    val feedbackConsent: FeedbackConsentState = FeedbackConsentState(),
     val home: HomeUiState = HomeUiState(),
 )
 
@@ -78,6 +83,7 @@ class AppViewModel(
     val state = mutableState.asStateFlow()
     private var accountWork: Job? = null
     private var homeWork: Job? = null
+    private var consentWork: Job? = null
     private var generation = 0L
     private var providerAttempt = 0L
     private var rewardWork: Job? = null
@@ -90,6 +96,7 @@ class AppViewModel(
 
     fun restore() {
         accountWork?.cancel()
+        consentWork?.cancel()
         mutableState.value = AppState()
         accountWork = viewModelScope.launch {
             try {
@@ -97,7 +104,7 @@ class AppViewModel(
                 if (restored == null) signedOut() else loadAccount(returning = true)
             } catch (error: Exception) {
                 if (error is CancellationException) throw error
-                if (error is HttpException && error.code() in setOf(400, 401, 403)) signedOut()
+                if (error is HttpException && error.code() in setOf(401, 403)) signedOut()
                 else mutableState.value = AppState(stage = AppStage.AccountRecovery, error = "로그인 상태를 복원하지 못했어요.\n연결을 확인하고 다시 시도해 주세요.")
             }
         }
@@ -174,6 +181,13 @@ class AppViewModel(
         }
     }
     private suspend fun loadAccount(returning: Boolean) {
+        mutableState.update { it.copy(userId = session.session.value?.user?.id) }
+        if (session.session.value?.user?.isAnonymous == true) {
+            welcome.markCompleted()
+            mutableState.update { it.copy(stage = if (returning) AppStage.ReturningWelcome else AppStage.Home, busy = false, error = null) }
+            refreshHome()
+            return
+        }
         val status = session.loadOnboardingStatus()
         val profile = optional { session.loadProfile() }
         val body = optional { session.loadBodyMeasurements().firstOrNull() }
@@ -248,6 +262,37 @@ class AppViewModel(
         }
     }
     fun clearSettingsMessage() { mutableState.update { it.copy(error = null, settingsMessage = null) } }
+    fun refreshFeedbackConsent() {
+        if (state.value.feedbackConsent.busy || session.session.value == null) return
+        val current = generation
+        mutableState.update { it.copy(feedbackConsent = FeedbackConsentState(busy = true)) }
+        consentWork = viewModelScope.launch {
+            try {
+                val accepted = session.loadFeedbackConsent()
+                if (generation == current) mutableState.update { it.copy(feedbackConsent = FeedbackConsentState(accepted = accepted, available = true)) }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                if (generation == current) mutableState.update { it.copy(feedbackConsent = FeedbackConsentState(message = "지금은 동의 설정을 불러올 수 없어요")) }
+            }
+        }
+    }
+    fun saveFeedbackConsent(accepted: Boolean) {
+        val previous = state.value.feedbackConsent
+        if (!previous.canChange) return
+        val current = generation
+        mutableState.update { it.copy(feedbackConsent = previous.copy(accepted = accepted, busy = true, message = null)) }
+        consentWork = viewModelScope.launch {
+            try {
+                val saved = session.updateFeedbackConsent(accepted)
+                if (generation == current) mutableState.update { it.copy(feedbackConsent = FeedbackConsentState(accepted = saved, available = true)) }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                val unavailable = error is java.io.IOException || error is HttpException && error.code() == 404
+                if (generation == current) mutableState.update { it.copy(feedbackConsent = previous.copy(busy = false, available = !unavailable,
+                    message = if (unavailable) "지금은 동의 설정을 불러올 수 없어요" else "동의 설정을 저장하지 못했어요. 다시 시도해 주세요.")) }
+            }
+        }
+    }
     fun openThreadCharge(activity: Activity? = null) {
         when (state.value.threadCharge.status) {
             ThreadChargeStatus.CheckingReadiness, ThreadChargeStatus.CheckingConsent, ThreadChargeStatus.LoadingAd,
@@ -397,7 +442,7 @@ class AppViewModel(
         }
     }
     fun logout(clearProvider: suspend () -> Unit = {}) {
-        accountWork?.cancel(); homeWork?.cancel(); rewardWork?.cancel(); rewardAccessWork?.cancel(); rewardedAds.clear(); generation++; providerAttempt++; rewardAttemptToken++
+        accountWork?.cancel(); homeWork?.cancel(); consentWork?.cancel(); rewardWork?.cancel(); rewardAccessWork?.cancel(); rewardedAds.clear(); generation++; providerAttempt++; rewardAttemptToken++
         mutableState.update { it.copy(busy = true, error = null) }
         accountWork = viewModelScope.launch {
             try {
@@ -412,7 +457,7 @@ class AppViewModel(
     }
     fun deleteAccount(clearProvider: suspend () -> Unit = {}) {
         if (state.value.busy) return
-        accountWork?.cancel(); homeWork?.cancel(); rewardWork?.cancel(); rewardAccessWork?.cancel(); rewardedAds.clear(); generation++; providerAttempt++; rewardAttemptToken++
+        accountWork?.cancel(); homeWork?.cancel(); consentWork?.cancel(); rewardWork?.cancel(); rewardAccessWork?.cancel(); rewardedAds.clear(); generation++; providerAttempt++; rewardAttemptToken++
         mutableState.update { it.copy(busy = true, error = null, settingsMessage = null) }
         accountWork = viewModelScope.launch {
             try {

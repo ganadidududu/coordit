@@ -15,6 +15,7 @@ final class CoorditCameraAnalysisTests: XCTestCase {
     }
 
     func testCameraRegistersAndSelectsReferenceBeforeReport() async throws {
+        try XCTSkipIf(!CoorditGarmentCaptureController.featureEnabled, "Camera comparison is disabled for this release")
         let api = CoorditFitLabFixtureAPI(fixtureName: "camera-success")
         let coordinator = makeCoordinator(api: api)
         let measurement = try makeMeasurement()
@@ -27,6 +28,7 @@ final class CoorditCameraAnalysisTests: XCTestCase {
     }
 
     func testReportFailureRetainsMeasurementsAndRetriesWithoutRegisteringAgain() async throws {
+        try XCTSkipIf(!CoorditGarmentCaptureController.featureEnabled, "Camera comparison is disabled for this release")
         let api = CoorditFitLabFixtureAPI(fixtureName: "submission-report-failure")
         let coordinator = makeCoordinator(api: api)
         let measurement = try makeMeasurement()
@@ -40,6 +42,7 @@ final class CoorditCameraAnalysisTests: XCTestCase {
     }
 
     func testRemeasurementKeepsProductAndPaidBundleButRecomputesReport() async throws {
+        try XCTSkipIf(!CoorditGarmentCaptureController.featureEnabled, "Camera comparison is disabled for this release")
         let api = CoorditFitLabFixtureAPI(fixtureName: "camera-success")
         let coordinator = makeCoordinator(api: api)
         try await coordinator.analyzeCameraMeasurement(makeMeasurement())
@@ -55,6 +58,7 @@ final class CoorditCameraAnalysisTests: XCTestCase {
     }
 
     func testRemeasurementAfterReportFailureReusesThePaidAnalysis() async throws {
+        try XCTSkipIf(!CoorditGarmentCaptureController.featureEnabled, "Camera comparison is disabled for this release")
         let api = CoorditFitLabFixtureAPI(fixtureName: "submission-report-failure")
         let coordinator = makeCoordinator(api: api)
         do { try await coordinator.analyzeCameraMeasurement(makeMeasurement()); XCTFail("First report must fail") }
@@ -63,6 +67,21 @@ final class CoorditCameraAnalysisTests: XCTestCase {
         try await coordinator.analyzeCameraMeasurement(makeMeasurement(chest: 55))
         XCTAssertEqual(api.recommendationRequests.last?.comparisonBundleAnalysisID, paidAnalysisID)
         XCTAssertNotNil(coordinator.report)
+    }
+
+    func testDisabledCameraComparisonDoesNotWriteOrCharge() async throws {
+        try XCTSkipIf(CoorditGarmentCaptureController.featureEnabled, "Release availability gate is enabled")
+        let api = CoorditFitLabFixtureAPI(fixtureName: "camera-success")
+        let coordinator = makeCoordinator(api: api)
+        do {
+            try await coordinator.analyzeCameraMeasurement(makeMeasurement())
+            XCTFail("Disabled camera comparison must be rejected")
+        } catch {
+            XCTAssertEqual(error as? CoorditFitLabError, .invalidDraft("카메라 비교 기능을 준비하고 있어요."))
+        }
+        XCTAssertTrue(api.requestLedger.isEmpty)
+        XCTAssertNil(coordinator.recommendation)
+        XCTAssertNil(coordinator.report)
     }
 
     private func makeCoordinator(api: CoorditFitLabFixtureAPI) -> CoorditFitLabCoordinator {

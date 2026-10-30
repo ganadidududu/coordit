@@ -130,7 +130,11 @@ data class FitLabCheckpoint(
     val reportKey: String? = null,
 )
 
+enum class FitLabNotice { Running, Completed, Failed }
+
 data class FitLabState(
+    val accountReady: Boolean = false,
+    val notice: FitLabNotice? = null,
     val screen: FitLabScreen = FitLabScreen.Sources,
     val draft: FitLabDraft = FitLabDraft(),
     val references: List<FitLabReference> = emptyList(),

@@ -21,6 +21,7 @@ struct CoorditFitLabFamilyView: View {
     @State private var showsCameraComparison = false
     @State private var activeGuide: CoorditUsageGuide?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var inheritedTypeSize
 
     var body: some View {
         CoorditScreenScaffold(
@@ -88,6 +89,7 @@ struct CoorditFitLabFamilyView: View {
             }
             #endif
         }
+        .environment(\.dynamicTypeSize, resolvedTypeSize)
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .sheet(item: $activeGuide) { guide in
             CoorditUsageGuideSheet(guide: guide) {
@@ -182,6 +184,16 @@ struct CoorditFitLabFamilyView: View {
         #endif
     }
 
+    private var resolvedTypeSize: DynamicTypeSize {
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--coordit-ui-testing"), arguments.contains("--coordit-fitlab-accessibility-xxxl") {
+            return .accessibility5
+        }
+        #endif
+        return inheritedTypeSize
+    }
+
     @ViewBuilder
     private func completedReportContent(
         variant: CoorditFitLabResultVariant,
@@ -196,6 +208,7 @@ struct CoorditFitLabFamilyView: View {
             }
             CoorditFitLabResultScreen(
                 variant: variant,
+                category: coordinator.draft.category,
                 recommendation: coordinator.recommendation,
                 report: coordinator.report,
                 sizeDrafts: coordinator.draft.sizes,
@@ -853,6 +866,7 @@ private struct CoorditFitLabLoadingScreen: View {
 private struct CoorditFitLabResultScreen: View {
     @EnvironmentObject private var tutorial: CoorditFitLabTutorial
     let variant: CoorditFitLabResultVariant
+    let category: CoorditFitLabCategory
     let recommendation: CoorditFitLabRecommendationResponse?
     let report: CoorditFitLabReportResponse?
     let sizeDrafts: [CoorditFitLabSizeDraft]
@@ -875,7 +889,8 @@ private struct CoorditFitLabResultScreen: View {
                 variant: variant,
                 recommendation: $0,
                 report: report,
-                sizeDrafts: sizeDrafts
+                sizeDrafts: sizeDrafts,
+                category: category
             )
         } ?? []
         let selectedSize = sizeOptions.first { $0.sizeLabel == selectedSizeLabel }
@@ -888,16 +903,14 @@ private struct CoorditFitLabResultScreen: View {
         )
         let selection = CoorditFitLabScoreSelection(selected: selectedSize, recommendation: recommendation, report: report)
         ScrollView {
-            VStack(spacing: metrics.value(14)) {
+            VStack(spacing: metrics.value(11)) {
                 scoreCard
 
-                CoorditFitLabMannequinPanel(
-                    assetName: variant.assetName,
-                    metrics: metrics,
-                    measurements: scoreCard.measurements
+                CoorditFitLabGarmentPanel(
+                    category: category,
+                    measurements: scoreCard.measurements,
+                    metrics: metrics
                 )
-                .frame(height: metrics.value(270))
-                CoorditFitLabOverlayLegend(metrics: metrics)
 
                 CoorditFitLabSizeScoreChart(
                     options: sizeOptions,
@@ -907,6 +920,11 @@ private struct CoorditFitLabResultScreen: View {
 
                 .fitLabTutorialTarget(.result)
 
+                CoorditFitLabSizeReason(
+                    size: selectedSize,
+                    recommendationReason: report?.report.recommendationReason,
+                    metrics: metrics
+                )
                 CoorditFitLabComparisonNote(
                     selected: selection.sizeLabel,
                     recommended: recommendation?.recommendedSize ?? "-",
@@ -1034,7 +1052,7 @@ private struct CoorditFitLabResultScreen: View {
                 }
                 #endif
             }
-            .padding(.horizontal, metrics.value(24))
+            .padding(.horizontal, metrics.value(16))
             .padding(.bottom, metrics.value(120))
         }
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))

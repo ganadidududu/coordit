@@ -255,7 +255,7 @@ class FitLabReleaseFlowTest {
         start(fixture, loadBalance = false)
         try {
             assertFalse(model.state.value.threadBalanceKnown)
-            compose.runOnUiThread { assertTrue(model.importSharedProduct("https://shop.example/shared")) }
+            kotlinx.coroutines.runBlocking { assertTrue(model.importSharedProduct("https://shop.example/shared")) }
             ready()
             assertTrue(model.state.value.threadBalanceKnown)
             assertEquals(7, model.state.value.threadBalance)

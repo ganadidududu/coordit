@@ -51,6 +51,8 @@ struct CoorditLiquidGlassBottomNavigation: View {
                     .frame(height: 20 * scale, alignment: .bottom)
 
                 tabLabel(tab)
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                    .minimumScaleFactor(0.65)
             }
             .foregroundStyle(Main01DesignTokens.Colors.foreground)
             .frame(maxWidth: .infinity, minHeight: 50 * scale)
