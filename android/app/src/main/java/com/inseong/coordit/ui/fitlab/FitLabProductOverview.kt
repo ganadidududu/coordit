@@ -8,6 +8,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalUriHandler
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +30,8 @@ internal fun ExampleNotice(s: Float) {
 
 @Composable
 internal fun ProductOverview(draft: FitLabDraft, s: Float, edit: () -> Unit) {
+    val facts = draft.productFacts?.takeIf { it.appliesTo(draft) }
+    val uriHandler = LocalUriHandler.current
     val reading = remember(draft) { FitLabProductReading(draft) }
     var measurementsVisible by rememberSaveable { mutableStateOf(false) }
     var sizeId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -39,12 +44,32 @@ internal fun ProductOverview(draft: FitLabDraft, s: Float, edit: () -> Unit) {
         }
         FitText(draft.productName, 19f, s, true)
         FitText(listOf(draft.brand, draft.category.title, draft.mallName).filter { it.isNotBlank() }.joinToString(" · "), 12f, s, color = AppColors.muted)
-        FitText(if (draft.source == FitLabSource.Url) "상품 링크의 정보만으로 정리했어요. 실타래는 사용하지 않아요." else "입력한 상품과 치수로 정리했어요. 실타래는 사용하지 않아요.", 12f, s)
         Box(Modifier.fillMaxWidth().height(1.dp).background(AppColors.line))
-        ReadingParagraph("사이즈 요약", reading.overview, InputGlyph.Ruler, s, "fitlab-summary-overview")
-        ReadingParagraph(reading.sizeDifferenceTitle, reading.sizeDifference, InputGlyph.SizeDifference, s, "fitlab-summary-size-reading")
-        ReadingParagraph("입을 때 볼 점", reading.wearingContext, InputGlyph.Garment, s, "fitlab-summary-wearing-context")
-        FitText("실측표와 옷 종류를 바탕으로 정리했어요. 실제 착용감은 원단과 디자인에 따라 달라져요.", 11f, s, color = AppColors.muted)
+        ReadingParagraph("사이즈 요약 · 치수 기준", reading.conciseSizeSummary, InputGlyph.Ruler, s, "fitlab-summary-size-reading")
+        if (facts != null) {
+            facts.summary(listOf("material", "lining", "stretch", "thickness", "sheerness"))?.let {
+                ReadingParagraph("소재·구조", it, InputGlyph.Garment, s, "fitlab-summary-material")
+            }
+            facts.summary(listOf("fit", "model"))?.let {
+                ReadingParagraph("핏·착용 정보", it, InputGlyph.Person, s, "fitlab-summary-fit")
+            }
+            facts.summary(listOf("care"))?.let {
+                ReadingParagraph("관리", it, InputGlyph.Care, s, "fitlab-summary-care")
+            }
+            Column(verticalArrangement = Arrangement.spacedBy((4 * s).dp)) {
+                FitText("소재·핏·관리 정보는 판매처 제공 내용이에요.", 11f, s, color = AppColors.muted)
+                facts.checkedDate?.let { checked ->
+                    FitText("확인 " + DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm").withZone(ZoneId.systemDefault()).format(checked), 11f, s, color = AppColors.muted)
+                }
+                Pressable(onClick = { uriHandler.openUri(facts.sourceUrl) }, modifier = Modifier.heightIn(min = 44.dp).testTag("fitlab-summary-source")) {
+                    FitText("상품 원문 보기", 12f, s)
+                }
+            }
+        } else {
+            Box(Modifier.testTag("fitlab-summary-facts-unavailable")) {
+                FitText(if (draft.source == FitLabSource.Url) "소재·핏 정보는 확인되지 않았어요." else "소재·핏 정보는 상품 링크에서 확인할 수 있어요.", 12f, s, color = AppColors.muted)
+            }
+        }
         Box(Modifier.semantics { stateDescription = if (measurementsVisible) "펼쳐짐" else "접힘" }) {
             Secondary(if (measurementsVisible) "상세 실측표 접기  ⌃" else "상세 실측표 펼치기  ⌄", s, "fitlab-toggle-measurements") { measurementsVisible = !measurementsVisible }
         }

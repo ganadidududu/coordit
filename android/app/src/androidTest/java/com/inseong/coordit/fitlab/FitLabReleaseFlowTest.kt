@@ -45,6 +45,60 @@ class FitLabReleaseFlowTest {
         ready()
     }
 
+    @Test fun productFactsSurviveImportAndDisappearWhenProductChanges() {
+        val fixture = FitLabFixture()
+        val response = com.google.gson.Gson().fromJson("""{"productName":"리넨 셔츠","brand":"Coordit","mallName":"shop.example","productUrl":"https://shop.example/products/linen-shirt","category":"shirt","fitType":"regular","parsingStatus":"mocked","productFacts":{"productName":"리넨 셔츠","sourceUrl":"https://shop.example/products/linen-shirt","capturedAt":"2026-10-30T03:00:00.000Z","items":[{"kind":"material","value":"리넨 55%, 면 45%"},{"kind":"lining","value":"없음"},{"kind":"fit","value":"루즈핏"},{"kind":"model","value":"178cm · M 착용"},{"kind":"care","value":"단독 손세탁"}]},"sizes":[{"sizeLabel":"M","shoulderWidth":45,"chestWidth":56,"totalLength":70,"sleeveLength":61,"waistWidth":null,"hipWidth":null,"rise":null,"outseam":null},{"sizeLabel":"L","shoulderWidth":47,"chestWidth":58,"totalLength":72,"sleeveLength":63,"waistWidth":null,"hipWidth":null,"rise":null,"outseam":null}]}""", com.inseong.coordit.data.closet.ClosetPrefillResponse::class.java)
+        start(object : FitLabApi by fixture {
+            override suspend fun prefill(auth: String, request: ClosetPrefillRequest) = response
+        })
+        try {
+            openLink()
+            tap("fitlab-url-import")
+            ready()
+            compose.onNodeWithTag("fitlab-summary-material").assertExists()
+            compose.onNodeWithTag("fitlab-summary-fit").assertExists()
+            capture("report-rich-facts")
+            compose.onNodeWithTag("fitlab-summary-source").performScrollTo()
+            capture("report-rich-facts-source", top = false)
+            compose.onNodeWithTag("fitlab-review-continue").performScrollTo()
+            compose.onNodeWithTag("fitlab-scroll").performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, 100_000f) }
+            capture("report-rich-facts-end", top = false)
+            tap("fitlab-toggle-measurements")
+            tap("fitlab-product-size-L")
+            compose.onNodeWithTag("fitlab-summary-size-difference").assertTextContains("L → M", substring = true)
+            capture("report-expanded", top = false)
+            compose.onNodeWithTag("fitlab-scroll").performSemanticsAction(SemanticsActions.ScrollBy) { it(0f, 100_000f) }
+            capture("report-expanded-end", top = false)
+            compose.runOnUiThread { model.edit { it.copy(productName = "다른 상품") } }
+            ready()
+            compose.onNodeWithTag("fitlab-summary-material").assertDoesNotExist()
+            compose.onNodeWithTag("fitlab-summary-facts-unavailable").assertExists()
+            capture("report-edited-identity")
+            compose.runOnUiThread { model.edit { it.copy(source = FitLabSource.Manual) } }
+            ready()
+            capture("report-manual")
+            assertEquals(0, fixture.productCalls)
+            assertTrue(fixture.recommendationKeys.isEmpty())
+        } finally { models.clear() }
+    }
+
+    @Test fun missingMetadataKeepsSizeReportAndFreeComparisonEntry() {
+        val fixture = FitLabFixture()
+        start(fixture)
+        try {
+            openLink()
+            tap("fitlab-url-import")
+            ready()
+            compose.onNodeWithTag("fitlab-summary-facts-unavailable").assertExists()
+            compose.onNodeWithTag("fitlab-summary-material").assertDoesNotExist()
+            capture("report-missing-facts")
+            compose.onNodeWithTag("fitlab-review-continue").performScrollTo()
+            capture("report-missing-facts-end", top = false)
+            assertEquals(0, fixture.productCalls)
+            assertTrue(fixture.recommendationKeys.isEmpty())
+        } finally { models.clear() }
+    }
+
     @Test fun freeSummaryPickerCancellationCameraAndZeroBalancePopupsMatchRelease() {
         val fixture = FitLabFixture()
         start(object : FitLabApi by fixture { override suspend fun balance(auth: String) = ThreadBalanceResponse(0) })
@@ -294,7 +348,7 @@ class FitLabReleaseFlowTest {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
         android.os.SystemClock.sleep(700)
         val bitmap = checkNotNull(InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot())
-        val folder = File(compose.activity.getExternalFilesDir(null), "summary-inline").apply { mkdirs() }
+        val folder = File(compose.activity.getExternalFilesDir(null), "product-first-report").apply { mkdirs() }
         File(folder, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
     }

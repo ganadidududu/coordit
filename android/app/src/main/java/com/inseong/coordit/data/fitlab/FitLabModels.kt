@@ -21,6 +21,7 @@ data class FitLabDraft(
     val productName: String = "",
     val brand: String = "",
     val productUrl: String = "",
+    val productFacts: ProductFacts? = null,
     val sizes: List<FitLabSizeDraft> = listOf(FitLabSizeDraft("size-1")),
     val selectedReferenceIds: Set<String> = emptySet(),
     val mallName: String = "",

@@ -25,6 +25,23 @@ class FitLabProductReading(private val draft: FitLabDraft) {
             .thenBy { abs(difference(lengthKey, it) ?: 0.0) },
     )
 
+    val conciseSizeSummary: String get() {
+        val dimensions = listOf(widthKey to "$widthName 단면", lengthKey to "총장")
+        val ranges = dimensions.mapNotNull { (key, name) ->
+            val item = measurements.firstOrNull { it.key == key } ?: return@mapNotNull null
+            val range = if (item.minimum == item.maximum) format(item.minimum) else "${format(item.minimum)}–${format(item.maximum)}"
+            "$name ${range}cm"
+        }
+        val labels = if (draft.sizes.size <= 4) draft.sizes.joinToString(", ") { it.label } else "사이즈 ${draft.sizes.size}개"
+        val overview = (listOf(labels) + ranges).filter { it.isNotBlank() }.joinToString(" · ")
+        val p = pair ?: return overview
+        val changes = dimensions.mapNotNull { (key, name) ->
+            val change = difference(key, p) ?: return@mapNotNull null
+            "$name ${if (change > 0) "+" else ""}${format(change)}cm"
+        }
+        return if (changes.isEmpty()) overview else overview + "\n${p.first.label} → ${p.second.label}: " + changes.joinToString(" · ")
+    }
+
     val headline: String get() {
         pair?.let { p ->
             difference(widthKey, p)?.let { width ->

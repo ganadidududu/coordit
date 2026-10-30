@@ -122,7 +122,7 @@ class FitLabViewModel(
         }.filter { it.measurements.isNotEmpty() }
         require(rows.isNotEmpty()) { "사이즈표를 찾지 못했어요. 사진이나 직접 입력을 이용해 주세요." }
         val category = if (draft.automaticCategory) HomeCategory.entries.firstOrNull { it.wireName == response.category } ?: draft.category else draft.category
-        val updated = draft.copy(productName = response.productName.orEmpty(), brand = response.brand.orEmpty(), mallName = response.mallName.orEmpty(), category = category, sizes = rows.map { it.copy(measurements = normalizedFitLabMeasurements(category, it.measurements)) }, selectedReferenceIds = emptySet())
+        val updated = draft.copy(productFacts = response.productFacts, productUrl = response.productUrl ?: draft.productUrl, productName = response.productName.orEmpty(), brand = response.brand.orEmpty(), mallName = response.mallName.orEmpty(), category = category, sizes = rows.map { it.copy(measurements = normalizedFitLabMeasurements(category, it.measurements)) }, selectedReferenceIds = emptySet())
         val complete = updated.validationError() == null && updated.sizes.all { row ->
             com.inseong.coordit.data.fitlab.camera.GarmentMeasurementPolicy.dimensions(category.wireName).all { key ->
                 row.measurements[key]?.let { com.inseong.coordit.data.fitlab.camera.GarmentMeasurementPolicy.plausible(key, it) } == true

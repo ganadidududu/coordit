@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.inseong.coordit.ui.theme.*
 
-enum class InputGlyph { Link, SizeChart, Camera, Ruler, Garment, SizeDifference, Circle, CheckCircle, CheckCircleFilled, CloseCircleFilled }
+enum class InputGlyph { Link, SizeChart, Camera, Ruler, Garment, Person, Care, SizeDifference, Circle, CheckCircle, CheckCircleFilled, CloseCircleFilled }
 
 @Composable
 fun InputMethodGlyph(glyph: InputGlyph, scale: Float, color: Color = AppColors.ink) {
@@ -62,6 +62,20 @@ fun InputMethodGlyph(glyph: InputGlyph, scale: Float, color: Color = AppColors.i
                     close()
                 }
                 drawPath(garment, color, style = stroke)
+            }
+            InputGlyph.Person -> {
+                drawCircle(color, size.width * .17f, Offset(size.width * .5f, size.height * .22f), style = stroke)
+                drawRoundRect(color, Offset(size.width * .15f, size.height * .55f), Size(size.width * .7f, size.height * .35f), CornerRadius(size.width * .2f), style = stroke)
+            }
+            InputGlyph.Care -> {
+                val drop = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(size.width * .5f, size.height * .05f)
+                    cubicTo(size.width * .2f, size.height * .45f, size.width * .05f, size.height * .7f, size.width * .25f, size.height * .88f)
+                    cubicTo(size.width * .4f, size.height * 1.03f, size.width * .75f, size.height * .98f, size.width * .8f, size.height * .7f)
+                    cubicTo(size.width * .82f, size.height * .5f, size.width * .62f, size.height * .22f, size.width * .5f, size.height * .05f)
+                    close()
+                }
+                drawPath(drop, color, style = stroke)
             }
             InputGlyph.SizeDifference -> {
                 listOf(.32f to false, .68f to true).forEach { (y, reversed) ->
