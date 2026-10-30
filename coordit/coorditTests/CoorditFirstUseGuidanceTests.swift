@@ -76,7 +76,9 @@ final class CoorditFirstUseGuidanceTests: XCTestCase {
         coordinator.draft.productName = "예시 상품"
         coordinator.draft.isSourceConfirmed = true
         coordinator.registerTutorialReference()
-        XCTAssertTrue(coordinator.selectReference(id: "tutorial-reference"))
+        XCTAssertEqual(coordinator.draft.selectedReferenceIDs, ["tutorial-reference"])
+        XCTAssertTrue(coordinator.isComparisonRequested)
+        XCTAssertTrue(coordinator.canSubmit)
         await coordinator.submit()
         XCTAssertEqual(coordinator.recommendation?.fitAnalysisResultID, "tutorial-example")
         XCTAssertEqual(api.requestLedger, ledger)

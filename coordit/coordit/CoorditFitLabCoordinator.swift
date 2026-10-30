@@ -342,6 +342,8 @@ final class CoorditFitLabCoordinator: ObservableObject {
     func registerTutorialReference() {
         guard draft.isTutorialExample else { return }
         references = CoorditTutorialExample.references(category: draft.category)
+        if let reference = references.first { _ = selectReference(id: reference.id) }
+        isComparisonRequested = true
     }
 
     func loadCompatibleReferences(

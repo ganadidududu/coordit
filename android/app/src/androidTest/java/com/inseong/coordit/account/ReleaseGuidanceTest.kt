@@ -141,16 +141,15 @@ class ReleaseGuidanceTest {
             compose.onNodeWithTag("fitlab-reference-picker-close").performClick()
             tap("fitlab-manage-references")
             compose.waitUntil(10_000) { closet.state.value.draft.isExample }
-            completeClosetExample()
-            tap("closet-example-finish")
+            completeClosetExample(returnToFitLab = true)
             compose.onNodeWithTag("fitlab-choose-closet").assertExists()
             assertTrue(fit.state.value.draft.isExample)
             assertEquals(1, fit.state.value.references.size)
             capture("practice-reference-return")
-            tap("fitlab-choose-closet")
-            compose.onNodeWithTag("fitlab-reference-tutorial-reference").performClick()
-            capture("practice-reference-selection")
-            compose.onNodeWithTag("fitlab-reference-picker-done").performClick()
+            assertEquals(setOf("tutorial-reference"), fit.state.value.draft.selectedReferenceIds)
+            compose.onNodeWithTag("fitlab-submit").assertIsEnabled()
+            compose.onNodeWithTag("fitlab-reference-picker").assertDoesNotExist()
+            capture("practice-reference-auto-selected")
             tap("fitlab-submit")
             compose.waitUntil(10_000) { fit.state.value.screen == com.inseong.coordit.data.fitlab.FitLabScreen.Result }
             capture("practice-result")
@@ -187,8 +186,7 @@ class ReleaseGuidanceTest {
             compose.waitUntil(10_000) { !fit.state.value.busy }
             assertTrue(fit.state.value.references.isEmpty())
             tap("fitlab-manage-references")
-            completeClosetExample()
-            tap("closet-example-finish")
+            completeClosetExample(returnToFitLab = true)
             compose.onNodeWithTag("fitlab-choose-closet").assertExists()
             tap("practice-skip")
             compose.onNodeWithText("이번에는 건너뛰기").performClick()
@@ -240,7 +238,7 @@ class ReleaseGuidanceTest {
         } finally { compose.runOnUiThread { models.clear() } }
     }
 
-    private fun completeClosetExample() {
+    private fun completeClosetExample(returnToFitLab: Boolean = false) {
         capture("closet-practice-link")
         tap("closet-submit")
         compose.waitUntil(10_000) { !closet.state.value.busy }
@@ -251,6 +249,12 @@ class ReleaseGuidanceTest {
         capture("closet-practice-size-end")
         tap("closet-submit")
         compose.waitForIdle()
+        if (returnToFitLab) {
+            compose.waitUntil(10_000) { fit.state.value.draft.selectedReferenceIds == setOf("tutorial-reference") }
+            compose.onNodeWithTag("closet-example-finish").assertDoesNotExist()
+            assertTrue(closetApi.requests.isEmpty())
+            return
+        }
         capture("closet-practice-result")
         compose.onAllNodes(SemanticsMatcher.keyIsDefined(androidx.compose.ui.semantics.SemanticsActions.ScrollBy)).onFirst()
             .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.ScrollBy) { it(0f, 100_000f) }
@@ -258,37 +262,65 @@ class ReleaseGuidanceTest {
         assertTrue(closetApi.requests.isEmpty())
     }
 
+    private fun prepareRealReferenceRegistration() {
+        start(false)
+        tap("coordit-main04-new-fit-button")
+        compose.waitUntil(10_000) { !fit.state.value.busy }
+        tap("fitlab-source-url")
+        compose.onNodeWithTag("fitlab-product-url").performTextReplacement("https://shop.example/product")
+        tap("fitlab-url-import")
+        compose.waitUntil(10_000) { !fit.state.value.busy }
+        tap("fitlab-review-continue")
+        compose.waitUntil(10_000) { !fit.state.value.busy }
+        tap("fitlab-manage-references")
+        compose.onNodeWithTag("closet-url").performTextReplacement("https://shop.example/my-shirt")
+        tap("closet-submit")
+        compose.waitUntil(10_000) { !closet.state.value.busy }
+        tap("closet-size-M")
+        capture("reference-size-before-save")
+    }
+
     @Test fun registeringReferenceReturnsToSameComparisonWithNewGarmentAvailable() {
         try {
-            start(false)
-            compose.onNodeWithTag("coordit-main04-new-fit-button").performClick()
-            compose.waitUntil(10_000) { !fit.state.value.busy }
-            tap("fitlab-source-url")
-            compose.onNodeWithTag("fitlab-product-url").performTextReplacement("https://shop.example/product")
-            InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("input keyevent 111").close()
-            tap("fitlab-url-import")
-            compose.waitUntil(10_000) { fit.state.value.screen == com.inseong.coordit.data.fitlab.FitLabScreen.Review }
-            tap("fitlab-review-continue")
-            compose.waitUntil(10_000) { !fit.state.value.busy }
-            tap("fitlab-manage-references")
-            compose.onNodeWithTag("closet-url").performTextReplacement("https://shop.example/my-shirt")
-            InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("input keyevent 111").close()
+            prepareRealReferenceRegistration()
+            val original = fit.state.value.draft
             tap("closet-submit")
-            compose.waitUntil(10_000) { !closet.state.value.busy }
-            tap("closet-size-M")
-            tap("closet-submit")
-            compose.waitUntil(10_000) { !closet.state.value.busy }
-            compose.onAllNodes(SemanticsMatcher.keyIsDefined(androidx.compose.ui.semantics.SemanticsActions.ScrollBy)).onFirst()
-                .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.ScrollBy) { it(0f, -100_000f) }
-            capture("reference-registered")
-            tap("closet-return-fitlab")
-            compose.waitUntil(10_000) { !fit.state.value.busy }
-            assertEquals("링크 티셔츠", fit.state.value.draft.productName)
-            tap("fitlab-choose-closet")
-            compose.onNodeWithTag("fitlab-reference-saved-ref").assertIsDisplayed()
-            capture("registered-reference-picker")
+            compose.waitUntil(10_000) { fit.state.value.draft.selectedReferenceIds == setOf("saved-ref") }
+            assertEquals(original.copy(selectedReferenceIds = setOf("saved-ref")), fit.state.value.draft)
+            compose.onNodeWithTag("fitlab-references").assertExists()
+            compose.onNodeWithTag("fitlab-submit").assertIsEnabled()
+            compose.onNodeWithTag("fitlab-reference-picker").assertDoesNotExist()
+            compose.onNodeWithTag("closet-return-fitlab").assertDoesNotExist()
+            capture("reference-auto-selected")
             assertEquals(1, closetApi.requests.size)
             assertEquals(0, fitApi.productCalls)
+            assertTrue(fitApi.recommendationKeys.isEmpty())
+            val selected = fit.state.value.draft.selectedReferenceIds
+            compose.runOnUiThread {
+                assertFalse(fit.acceptRegisteredReference(FitLabReference("wrong-kind", "pants", "팬츠", "pants", true)))
+                assertFalse(fit.acceptRegisteredReference(FitLabReference("inactive", "shirt", "셔츠", "shirt", false)))
+            }
+            assertEquals(selected, fit.state.value.draft.selectedReferenceIds)
+        } finally { compose.runOnUiThread { models.clear() } }
+    }
+
+    @Test fun failedReferenceRegistrationStaysInClosetAndRetryAutoSelectsWithoutCharging() {
+        try {
+            prepareRealReferenceRegistration()
+            homeApi.failRegistration = true
+            tap("closet-submit")
+            compose.waitUntil(10_000) { !closet.state.value.busy }
+            compose.onNodeWithTag("closet-save-retry").assertExists()
+            assertTrue(fit.state.value.draft.selectedReferenceIds.isEmpty())
+            assertTrue(homeApi.saved.isEmpty())
+            capture("reference-registration-retry")
+            homeApi.failRegistration = false
+            tap("closet-save-retry")
+            compose.waitUntil(10_000) { fit.state.value.draft.selectedReferenceIds == setOf("saved-ref") }
+            assertEquals(closetApi.requests.first().idempotencyKey, closetApi.requests.last().idempotencyKey)
+            assertEquals(0, fitApi.productCalls)
+            assertTrue(fitApi.recommendationKeys.isEmpty())
+            capture("reference-retry-auto-selected")
         } finally { compose.runOnUiThread { models.clear() } }
     }
 
@@ -361,7 +393,7 @@ class ReleaseGuidanceTest {
         compose.waitForIdle(); InstrumentationRegistry.getInstrumentation().waitForIdleSync()
         android.os.SystemClock.sleep(700)
         val bitmap = checkNotNull(InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot())
-        val folder = File(compose.activity.getExternalFilesDir(null), "summary-inline").apply { mkdirs() }
+        val folder = File(compose.activity.getExternalFilesDir(null), "reference-auto-select").apply { mkdirs() }
         File(folder, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
     }
@@ -369,8 +401,12 @@ class ReleaseGuidanceTest {
 
 private class ReleaseHomeApi : HomeApi {
     val saved = mutableListOf<HomeReferenceResponse>()
+    var failRegistration = false
     override suspend fun clothing(authorization: String) = listOf(HomeClothingResponse("home-shirt", "내 셔츠", "shirt"))
     override suspend fun references(authorization: String) = saved.toList()
-    override suspend fun select(authorization: String, request: HomeReferenceRequest) = HomeReferenceResponse("saved-ref", request.clothingItemId, true).also { saved += it }
+    override suspend fun select(authorization: String, request: HomeReferenceRequest): HomeReferenceResponse {
+        if (failRegistration) throw java.io.IOException("offline")
+        return HomeReferenceResponse("saved-ref", request.clothingItemId, true).also { saved += it }
+    }
     override suspend fun deactivate(authorization: String, id: String) = saved.first { it.id == id }
 }

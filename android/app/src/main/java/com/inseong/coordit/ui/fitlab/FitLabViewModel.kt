@@ -80,7 +80,8 @@ class FitLabViewModel(
     }
     fun registerExampleReference() {
         if (!state.value.draft.isExample) return
-        mutableState.value = state.value.copy(references = FitLabExample.references(state.value.draft.category), referencePickerVisible = false)
+        val reference = FitLabExample.references(state.value.draft.category).single()
+        acceptRegisteredReference(reference)
     }
     fun finishExample() {
         if (!state.value.draft.isExample) return
@@ -137,6 +138,14 @@ class FitLabViewModel(
             val refs = if (state.value.draft.isExample) state.value.references else repository.references(token, state.value.draft.category.wireName)
             if (current(ticket)) mutableState.value = state.value.copy(references = refs, draft = state.value.draft.copy(selectedReferenceIds = state.value.draft.selectedReferenceIds.intersect(refs.map { it.id }.toSet())), threadBalance = balance ?: state.value.threadBalance, threadBalanceKnown = balance != null || state.value.threadBalanceKnown, busy = false, step = FitLabStep.Idle)
         }
+    }
+    fun acceptRegisteredReference(reference: FitLabReference): Boolean {
+        if (state.value.busy || !reference.isActive || !referenceIsCompatible(reference.category, state.value.draft.category)) return false
+        edit { it.copy(selectedReferenceIds = it.selectedReferenceIds + reference.id) }
+        mutableState.value = state.value.copy(screen = FitLabScreen.References,
+            references = state.value.references.filterNot { it.id == reference.id } + reference,
+            referencePickerVisible = false)
+        return true
     }
     fun showReferencePicker() { mutableState.value = state.value.copy(referencePickerVisible = true) }
     fun dismissReferencePicker() { mutableState.value = state.value.copy(referencePickerVisible = false) }

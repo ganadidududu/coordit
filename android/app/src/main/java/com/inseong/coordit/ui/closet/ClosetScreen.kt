@@ -42,7 +42,7 @@ class ClosetPhotos {
 }
 
 @Composable
-fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Unit, onProfile: () -> Unit, onFitLab: () -> Unit, returningToFitLab: Boolean = false, onExampleFinished: (Boolean) -> Unit = {}, referencePractice: Boolean = false, onStartExample: () -> Unit = { model.beginExample() }) {
+fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Unit, onProfile: () -> Unit, onFitLab: () -> Unit, returningToFitLab: Boolean = false, onExampleFinished: (Boolean) -> Unit = {}, referencePractice: Boolean = false, onStartExample: () -> Unit = { model.beginExample() }, onReferenceRegistered: (com.inseong.coordit.data.fitlab.FitLabReference) -> Unit = { onFitLab() }) {
     val state by model.state.collectAsStateWithLifecycle()
     val focus = LocalFocusManager.current
     var upper by rememberSaveable { mutableStateOf(true) }
@@ -71,13 +71,20 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                 hasGarmentImage = true, cameraMetadata = capture.metadata) }
             showsCardlessCapture = false
         })
-    LaunchedEffect(state.screen, state.detail?.item?.id, state.draft.isExample) {
-        if (state.draft.isExample) return@LaunchedEffect
+    LaunchedEffect(state.screen, state.detail?.item?.id, state.draft.isExample, state.busy, state.registeredFitLabReference, referencePractice) {
+        if (state.draft.isExample) {
+            if (referencePractice && state.screen == ClosetScreenRoute.Detail) {
+                model.finishExample()
+                onExampleFinished(true)
+            }
+            return@LaunchedEffect
+        }
         if (state.screen == ClosetScreenRoute.Overview) photos.images.remove("draft")
         if (state.screen == ClosetScreenRoute.Detail) {
             state.detail?.item?.let { item ->
                 photos.images.remove("draft")?.let { photos.images[item.id] = it }
             }
+            if (returningToFitLab && !state.busy) state.registeredFitLabReference?.let(onReferenceRegistered)
         }
     }
     BoxWithConstraints(Modifier.fillMaxSize().testTag("closet-${state.screen.name.lowercase()}")) {

@@ -91,9 +91,10 @@ struct CoorditFitLabSubmissionView: View {
             Text(coordinator.draft.productName)
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(13), relativeTo: .body))
                 .foregroundStyle(CoorditFitLabPalette.muted)
-            Text(coordinator.references.isEmpty ? "잘 맞는 내 옷과 비교해요" : "어떤 옷과 비교할까요?")
+            Text(!coordinator.draft.selectedReferenceIDs.isEmpty ? "비교할 준비가 됐어요" : coordinator.references.isEmpty ? "잘 맞는 내 옷과 비교해요" : "어떤 옷과 비교할까요?")
                 .font(CoorditTypography.gmarketBold(size: metrics.value(19), relativeTo: .title3))
                 .accessibilityIdentifier("fitlab-reference-selection")
+            if !coordinator.draft.selectedReferenceIDs.isEmpty { comparisonActions }
 
             Text("옷장에 저장한 옷을 고르거나, 아직 등록하지 않은 내 옷으로도 비교할 수 있어요.")
                 .font(CoorditTypography.gmarketMedium(size: metrics.value(12), relativeTo: .body))
@@ -101,7 +102,7 @@ struct CoorditFitLabSubmissionView: View {
                 .fixedSize(horizontal: false, vertical: true)
             Group {
                 CoorditInputMethodPanel(metrics: metrics) {
-                CoorditInputMethodCard(title: "내 옷 링크로 등록", subtitle: "처음 비교하는 내 옷 · 등록하면 옷장에 자동 저장", symbol: "link", metrics: metrics, action: manageReferences)
+                CoorditInputMethodCard(title: "내 옷 링크로 등록", subtitle: "등록 후 자동 선택 · 옷장에 저장", symbol: "link", metrics: metrics, action: manageReferences)
                     .accessibilityIdentifier("fitlab-manage-references")
                 if CoorditGarmentCaptureController.featureEnabled, let measureWithCamera {
                     CoorditInputMethodCard(title: "촬영해서 비교", subtitle: "사진과 치수는 옷장에 자동 저장", symbol: "camera", metrics: metrics, action: measureWithCamera)
@@ -143,6 +144,20 @@ struct CoorditFitLabSubmissionView: View {
                 .accessibilityIdentifier("fitlab-choose-closet")
                 .accessibilityHint("팝업에서 비교할 옷을 선택해요")
             }
+            if coordinator.draft.selectedReferenceIDs.isEmpty { comparisonActions }
+            if let error = coordinator.error { errorPanel(error) }
+            Button("다른 상품 넣기") { showsDiscardConfirmation = true }
+                .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
+        }
+        .fitLabTutorialTarget(coordinator.canSubmit ? .analyze : .references,
+            title: coordinator.references.isEmpty ? "먼저 기준 옷을 등록해요" : nil,
+            message: coordinator.references.isEmpty
+            ? "‘내 옷 링크로 등록’에서 잘 맞는 보유 의류를 등록해볼게요. 실제 저장은 하지 않아요."
+            : nil)
+    }
+
+    private var comparisonActions: some View {
+        VStack(alignment: .leading, spacing: metrics.value(14)) {
             if !coordinator.draft.selectedReferenceIDs.isEmpty {
                 Text("선택한 기준 옷 \(coordinator.draft.selectedReferenceIDs.count)벌 · " + coordinator.references.filter {
                     coordinator.draft.selectedReferenceIDs.contains($0.id)
@@ -160,15 +175,7 @@ struct CoorditFitLabSubmissionView: View {
                 .buttonStyle(CoorditContentActionButtonStyle(prominence: .primary))
                 .disabled(!coordinator.canSubmit || coordinator.loadState == .loading)
                 .accessibilityIdentifier(coordinator.retryStep == nil ? "fitlab-submit-analysis" : "fitlab-retry-submission")
-            if let error = coordinator.error { errorPanel(error) }
-            Button("다른 상품 넣기") { showsDiscardConfirmation = true }
-                .buttonStyle(CoorditContentActionButtonStyle(prominence: .secondary))
         }
-        .fitLabTutorialTarget(coordinator.canSubmit ? .analyze : .references,
-            title: coordinator.references.isEmpty ? "먼저 기준 옷을 등록해요" : nil,
-            message: coordinator.references.isEmpty
-            ? "‘내 옷 링크로 등록’에서 잘 맞는 보유 의류를 등록해볼게요. 실제 저장은 하지 않아요."
-            : nil)
     }
 
     private var resultPanel: some View {

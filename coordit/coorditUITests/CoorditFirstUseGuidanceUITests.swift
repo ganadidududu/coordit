@@ -71,14 +71,13 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
         let exit = app.alerts["처음이라면 끝까지 따라 해보는 걸 추천해요"]
         XCTAssertTrue(exit.waitForExistence(timeout: 3))
         exit.buttons["계속 따라하기"].tap()
-        completeClosetExample(app)
-        tap("closet-example-finish", app)
+        completeClosetExample(app, returnToFitLab: true)
         XCTAssertTrue(element("fitlab-choose-closet", app).waitForExistence(timeout: 8))
         capture("practice-reference-return", app)
-        tap("fitlab-choose-closet", app)
-        tap("fitlab-reference-tutorial-reference", app)
-        capture("practice-reference-selection", app)
-        tap("fitlab-reference-picker-done", app)
+        XCTAssertTrue(element("fitlab-selected-reference-summary", app).exists)
+        XCTAssertTrue(element("fitlab-submit-analysis", app).isEnabled)
+        XCTAssertFalse(element("fitlab-reference-picker", app).exists)
+        capture("practice-reference-auto-selected", app)
         tap("fitlab-submit-analysis", app)
         XCTAssertTrue(element("fitlab-size-score-M", app).waitForExistence(timeout: 10))
         XCTAssertFalse(element("fitlab-add-history", app).exists)
@@ -152,8 +151,7 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
         XCTAssertTrue(element("fitlab-reference-picker-empty", app).waitForExistence(timeout: 5))
         tap("fitlab-reference-picker-close", app)
         tap("fitlab-manage-references", app)
-        completeClosetExample(app)
-        tap("closet-example-finish", app)
+        completeClosetExample(app, returnToFitLab: true)
         XCTAssertTrue(element("fitlab-choose-closet", app).waitForExistence(timeout: 8))
         tap("fitlab-tutorial-dismiss", app)
         app.alerts["처음이라면 끝까지 따라 해보는 걸 추천해요"].buttons["이번에는 건너뛰기"].tap()
@@ -165,7 +163,7 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
         XCTAssertTrue(element("closet-add-garment", app).waitForExistence(timeout: 8))
     }
 
-    private func completeClosetExample(_ app: XCUIApplication) {
+    private func completeClosetExample(_ app: XCUIApplication, returnToFitLab: Bool = false) {
         XCTAssertTrue(element("closet-tutorial-step-3", app).waitForExistence(timeout: 8))
         tap("closet-add-submit", app)
         XCTAssertTrue(element("closet-tutorial-step-4", app).waitForExistence(timeout: 8))
@@ -175,6 +173,11 @@ final class CoorditFirstUseGuidanceUITests: XCTestCase {
         XCTAssertLessThanOrEqual(element("closet-link-size-row-M", app).frame.maxY, element("closet-link-size-row-L", app).frame.minY)
         capture("closet-practice-size", app)
         tap("closet-add-submit", app)
+        if returnToFitLab {
+            XCTAssertTrue(element("fitlab-selected-reference-summary", app).waitForExistence(timeout: 8))
+            XCTAssertFalse(element("closet-example-finish", app).exists)
+            return
+        }
         XCTAssertTrue(element("closet-detail-total-score", app).waitForExistence(timeout: 8))
         XCTAssertTrue(element("closet-tutorial-step-6", app).exists)
         XCTAssertFalse(element("closet-detail-delete", app).exists)

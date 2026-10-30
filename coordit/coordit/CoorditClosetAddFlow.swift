@@ -202,8 +202,12 @@ extension CoorditClosetFamilyView {
 
         if submittedDraft.isTutorialExample {
             selectedItemID = nil
-            tutorial.advance(from: .register, to: .score)
-            onRouteChange(.closetAddResult)
+            if referencePractice {
+                tutorial.finishRegistration()
+            } else {
+                tutorial.advance(from: .register, to: .score)
+                onRouteChange(.closetAddResult)
+            }
             return
         }
 

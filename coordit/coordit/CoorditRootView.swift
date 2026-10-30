@@ -725,6 +725,7 @@ struct CoorditRootView: View {
               fitLabCoordinator.selectReference(id: referenceID)
         else { return nil }
 
+        fitLabCoordinator.isComparisonRequested = true
         return .fitLabInput
     }
 

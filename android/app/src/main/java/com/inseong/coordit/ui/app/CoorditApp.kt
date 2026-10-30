@@ -143,6 +143,13 @@ fun CoorditApp(model: AppViewModel, reduceMotion: Boolean, onGoogle: () -> Unit,
                 onProfile = { accountVisible = true },
                 onFitLab = { if (fitLabModel != null) { if (registeringReference) fitLabModel.loadReferences() else fitLabModel.open(); registeringReference = false; nav.navigate("FitLab") { popUpTo(AppStage.Home.name); launchSingleTop = true } } else unavailableFeature = "FIT LAB" },
                 returningToFitLab = registeringReference, onExampleFinished = ::finishClosetPractice, referencePractice = referencePractice,
+                onReferenceRegistered = { reference ->
+                    if (fitLabModel?.acceptRegisteredReference(reference) == true) {
+                        closet.consumeRegisteredFitLabReference()
+                        registeringReference = false
+                        nav.navigate("FitLab") { popUpTo(AppStage.Home.name); launchSingleTop = true }
+                    } else closet.error("상품과 같은 종류의 기준 옷을 선택해주세요. 등록한 옷은 옷장에 저장되어 있어요.")
+                },
                 onStartExample = { if (closet.beginExample()) practice = com.inseong.coordit.ui.guidance.UsageGuide.Closet }) }
         }
         composable("FitLab") {

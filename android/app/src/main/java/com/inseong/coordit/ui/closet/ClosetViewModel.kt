@@ -84,7 +84,7 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
         if (state.value.busy) return
         registeringForFitLab = false
         pendingKey = null
-        mutableState.value = state.value.copy(screen = ClosetScreen.Method, draft = ClosetDraft(), error = null)
+        mutableState.value = state.value.copy(screen = ClosetScreen.Method, draft = ClosetDraft(), registeredFitLabReference = null, error = null)
     }
     fun startReferenceRegistration() {
         if (state.value.busy) return
@@ -165,17 +165,25 @@ class ClosetViewModel(private val repository: ClosetRepository, private val sess
         mutableState.value = state.value.copy(screen = ClosetScreen.Saving)
         runOperation { token, ticket ->
             val detail = repository.create(token, draft, key)
-            if (current(ticket) && registeringForFitLab) {
+            val reference = if (current(ticket) && registeringForFitLab) {
                 val item = detail.item
-                requireNotNull(homeRepository).registerReference(token, com.inseong.coordit.data.home.HomeGarment(item.id, item.name, item.category))
-            }
+                val saved = requireNotNull(homeRepository).registerReference(token, com.inseong.coordit.data.home.HomeGarment(item.id, item.name, item.category))
+                require(saved.isActive && saved.clothingItemId == item.id) { "등록한 기준 옷을 확인하지 못했어요. 다시 시도해 주세요." }
+                com.inseong.coordit.data.fitlab.FitLabReference(requireNotNull(saved.id) { "기준 옷 등록 응답을 확인하지 못했어요. 다시 시도해 주세요." }, item.id, item.name, item.category.wireName, true)
+            } else null
             if (current(ticket)) {
                 pendingKey = null
-                mutableState.value = state.value.copy(screen = ClosetScreen.Detail, detail = detail, items = listOf(detail.item) + state.value.items.filter { it.id != detail.item.id })
-                val full = repository.detail(token, detail.item.id)
-                if (current(ticket)) mutableState.value = state.value.copy(detail = full)
+                mutableState.value = state.value.copy(screen = ClosetScreen.Detail, detail = detail, registeredFitLabReference = reference, items = listOf(detail.item) + state.value.items.filter { it.id != detail.item.id })
+                if (reference == null) {
+                    val full = repository.detail(token, detail.item.id)
+                    if (current(ticket)) mutableState.value = state.value.copy(detail = full)
+                }
             }
         }
+    }
+    fun consumeRegisteredFitLabReference() {
+        registeringForFitLab = false
+        mutableState.value = state.value.copy(registeredFitLabReference = null)
     }
     fun rename(name: String) {
         val detail = state.value.detail ?: return

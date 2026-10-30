@@ -26,11 +26,14 @@ internal fun ComparisonSelection(state: FitLabState, s: Float, model: FitLabView
     var discard by remember { mutableStateOf(false) }
     var insufficient by remember { mutableStateOf(false) }
     FitText(state.draft.productName, 13f, s, color = AppColors.muted)
-    FitText(if (state.references.isEmpty()) "잘 맞는 내 옷과 비교해요" else "어떤 옷과 비교할까요?", 19f, s, true)
+    FitText(if (state.draft.selectedReferenceIds.isNotEmpty()) "비교할 준비가 됐어요" else if (state.references.isEmpty()) "잘 맞는 내 옷과 비교해요" else "어떤 옷과 비교할까요?", 19f, s, true)
+    if (state.draft.selectedReferenceIds.isNotEmpty()) ComparisonSubmitPanel(state, s) {
+        if (!state.draft.isExample && state.threadBalanceKnown && state.threadBalance <= 0) insufficient = true else model.submit()
+    }
     FitText("옷장에 저장한 옷을 고르거나, 아직 등록하지 않은 내 옷으로도 비교할 수 있어요.", 12f, s, color = AppColors.muted)
     run {
         Panel(s, dark = true) {
-            SelectionAction("내 옷 링크로 등록", "처음 비교하는 내 옷 · 등록하면 옷장에 자동 저장", InputGlyph.Link, s, "fitlab-manage-references", !state.busy, register)
+            SelectionAction("내 옷 링크로 등록", "등록 후 자동 선택 · 옷장에 저장", InputGlyph.Link, s, "fitlab-manage-references", !state.busy, register)
             SelectionAction("카메라로 등록", "준비 중 · 지금은 링크나 사이즈표 이용", InputGlyph.Camera, s, "fitlab-camera-comparison", !state.busy) { cameraNotice = true }
         }
     }
@@ -46,13 +49,7 @@ internal fun ComparisonSelection(state: FitLabState, s: Float, model: FitLabView
         SelectionAction("옷장에서 골라 비교", "저장된 내 옷 사용 · 다시 등록할 필요 없어요", InputGlyph.Garment, s, "fitlab-choose-closet", true, model::showReferencePicker)
     }
     if (state.busy) FitText("옷장을 불러오는 중이에요", 12f, s)
-    if (state.draft.selectedReferenceIds.isNotEmpty()) Box(Modifier.testTag("fitlab-selected-reference-summary")) {
-        FitText("선택한 기준 옷 ${state.draft.selectedReferenceIds.size}벌 · " + state.references.filter { it.id in state.draft.selectedReferenceIds }.joinToString(", ") { it.nickname ?: "기준 옷" }, 12f, s)
-    }
-    Box(Modifier.testTag("fitlab-comparison-cost")) {
-        FitText("내 옷과 비교하고 상세 리포트를 만들 때 실타래 1개를 사용해요. 링크 등록과 1차 분석은 무료예요.", 12f, s, color = AppColors.muted)
-    }
-    Primary("비교하기 · 실타래 1개", s, "fitlab-submit", state.draft.selectedReferenceIds.isNotEmpty() && !state.busy) {
+    if (state.draft.selectedReferenceIds.isEmpty()) ComparisonSubmitPanel(state, s) {
         if (!state.draft.isExample && state.threadBalanceKnown && state.threadBalance <= 0) insufficient = true else model.submit()
     }
     state.error?.let { Error(it, s); Secondary("다시 불러오기", s, "fitlab-reload-references", model::loadReferences) }
@@ -60,6 +57,19 @@ internal fun ComparisonSelection(state: FitLabState, s: Float, model: FitLabView
     if (cameraNotice) CameraComingSoon { cameraNotice = false }
     if (discard) CoorditConfirmationDialog("새 상품을 등록할까요?", "현재 입력한 상품 정보, 기준 의류 선택, 아직 저장하지 않은 분석 결과는 초기화돼요. 이미 저장된 분석 기록은 그대로 남아요.", "계속 입력", "새 상품 등록", { discard = false }, { discard = false; model.restart(); if (state.draft.isExample) finishExample() }, "fitlab-discard-confirm", destructive = true)
     if (insufficient) CoorditConfirmationDialog("실타래가 부족해요", "상세 비교 리포트를 보려면 실타래 1개가 필요해요. 광고를 보고 무료로 충전할 수 있어요.", "나중에", "실타래 충전하기", { insufficient = false }, { insufficient = false; recharge() }, "fitlab-recharge-confirm")
+}
+
+@Composable
+private fun ComparisonSubmitPanel(state: FitLabState, s: Float, submit: () -> Unit) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy((14 * s).dp)) {
+        if (state.draft.selectedReferenceIds.isNotEmpty()) Box(Modifier.testTag("fitlab-selected-reference-summary")) {
+            FitText("선택한 기준 옷 ${state.draft.selectedReferenceIds.size}벌 · " + state.references.filter { it.id in state.draft.selectedReferenceIds }.joinToString(", ") { it.nickname ?: "기준 옷" }, 12f, s)
+        }
+        Box(Modifier.testTag("fitlab-comparison-cost")) {
+            FitText("내 옷과 비교하고 상세 리포트를 만들 때 실타래 1개를 사용해요. 링크 등록과 1차 분석은 무료예요.", 12f, s, color = AppColors.muted)
+        }
+        Primary("비교하기 · 실타래 1개", s, "fitlab-submit", state.draft.selectedReferenceIds.isNotEmpty() && !state.busy, submit)
+    }
 }
 
 @Composable

@@ -172,7 +172,7 @@ class FitLabReleaseFlowTest {
             assertTrue(model.state.value.references.isEmpty())
             compose.runOnUiThread { model.registerExampleReference() }
             tap("fitlab-choose-closet")
-            compose.onNodeWithTag("fitlab-reference-tutorial-reference").performClick()
+            compose.onNodeWithTag("fitlab-reference-tutorial-reference").assertIsSelected()
             compose.onNodeWithTag("fitlab-reference-picker-done").performClick()
             tap("fitlab-submit"); ready()
             assertEquals(Route.Result, model.state.value.screen)

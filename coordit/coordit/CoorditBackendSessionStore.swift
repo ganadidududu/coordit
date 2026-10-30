@@ -912,29 +912,29 @@ final class CoorditBackendSessionStore: ObservableObject {
         items: [CoorditClosetItem],
         selectedIDs: Set<String>
     ) async -> CoorditReferenceSyncResult? {
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--coordit-ui-testing"),
+           session == nil || arguments.contains("--coordit-test-fitlab-reference-registration") {
+            statusText = "UI 테스트 기준 의류 선택을 저장했어요."
+            isWarning = false
+            let isFitLabReferenceRegistration = arguments.contains("--coordit-test-fitlab-reference-registration")
+            let referenceIDsByItemID: [String: String] = Dictionary(
+                uniqueKeysWithValues: items.compactMap { item in
+                    guard isFitLabReferenceRegistration,
+                          selectedIDs.contains(item.id),
+                          item.backendClothingItemId == "closet-save-success-fixture"
+                    else { return nil }
+                    return (item.id, "reference-fixture-\(item.exactCategory.rawValue)")
+                }
+            )
+            return CoorditReferenceSyncResult(
+                selectedIDs: selectedIDs,
+                referenceIDsByItemID: referenceIDsByItemID
+            )
+        }
+        #endif
         guard session != nil else {
-            #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("--coordit-ui-testing") {
-                statusText = "UI 테스트 기준 의류 선택을 저장했어요."
-                isWarning = false
-                let isFitLabReferenceRegistration = ProcessInfo.processInfo.arguments.contains(
-                    "--coordit-test-fitlab-reference-registration"
-                )
-                let referenceIDsByItemID: [String: String] = Dictionary(
-                    uniqueKeysWithValues: items.compactMap { item in
-                        guard isFitLabReferenceRegistration,
-                              selectedIDs.contains(item.id),
-                              item.backendClothingItemId == "closet-save-success-fixture"
-                        else { return nil }
-                        return (item.id, "reference-fixture-\(item.exactCategory.rawValue)")
-                    }
-                )
-                return CoorditReferenceSyncResult(
-                    selectedIDs: selectedIDs,
-                    referenceIDsByItemID: referenceIDsByItemID
-                )
-            }
-            #endif
             statusText = "기준 의류 선택은 로그인 후 서버에 반영돼요."
             isWarning = true
             return nil
