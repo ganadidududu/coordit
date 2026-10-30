@@ -12,6 +12,9 @@ extension CoorditMyPageFamilyView {
                         .frame(width: metrics.value(76), height: metrics.value(76))
                         .background(CoorditSettingsStyle.field)
                         .clipShape(Circle())
+                        .accessibilityLabel("프로필 이미지")
+                        .accessibilityValue("\(profileAvatarIndex)")
+                        .accessibilityIdentifier("mypage-profile-avatar")
 
                     Button("기본 이미지 바꾸기") {
                         profileAvatarIndex = (profileAvatarIndex + 1) % profileAvatarSymbols.count
@@ -35,18 +38,28 @@ extension CoorditMyPageFamilyView {
                         text: $profileBio,
                         identifier: "mypage-profile-bio",
                         metrics: metrics,
-                        multiline: true
+                        multiline: true,
+                        onFocusChange: { profileBioIsFocused = $0 }
                     )
+                    .id("mypage-profile-bio")
                 }
                 .padding(.horizontal, metrics.value(13))
             }
 
             if profileSaved {
                 CoorditSettingsStatusBanner(
-                    text: backendSession.isAuthenticated ? "프로필이 백엔드에 저장됐어요." : "백엔드 저장은 로그인이 필요해요.",
+                    text: "이름은 계정에, 소개와 이미지는 이 기기에 저장했어요.",
                     identifier: "mypage-profile-saved",
                     metrics: metrics,
-                    isWarning: !backendSession.isAuthenticated
+                    isWarning: false
+                )
+            }
+            if !profileSaveError.isEmpty {
+                CoorditSettingsStatusBanner(
+                    text: profileSaveError,
+                    identifier: "mypage-profile-save-error",
+                    metrics: metrics,
+                    isWarning: true
                 )
             }
 
@@ -54,12 +67,31 @@ extension CoorditMyPageFamilyView {
                 title: "프로필 저장",
                 identifier: "mypage-profile-save",
                 metrics: metrics,
-                isEnabled: !profileName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                isEnabled: !isSavingProfile && !backendSession.isWorking
+                    && !profileName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             ) {
+                guard !isSavingProfile else { return }
+                isSavingProfile = true
+                profileSaved = false
+                profileSaveError = ""
+                if let userID = backendSession.session?.user.id {
+                    CoorditLocalProfileStore.save(
+                        CoorditLocalProfile(bio: profileBio, avatarIndex: profileAvatarIndex),
+                        userID: userID
+                    )
+                }
                 Task {
-                    await backendSession.saveProfile(displayName: profileName.trimmingCharacters(in: .whitespacesAndNewlines))
-                    profileSaved = true
-                    syncBackendProfile()
+                    defer { isSavingProfile = false }
+                    profileSaved = await backendSession.saveProfile(
+                        displayName: profileName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    )
+                    if profileSaved {
+                        syncBackendProfile()
+                    } else {
+                        profileSaveError = backendSession.isAuthenticated
+                            ? "소개와 이미지는 이 기기에 저장했어요. \(backendSession.statusText)"
+                            : backendSession.statusText
+                    }
                 }
             }
         }
@@ -153,7 +185,7 @@ extension CoorditMyPageFamilyView {
     }
 
     private var profileAvatarSymbols: [String] {
-        ["person.crop.circle", "person.crop.circle.fill", "person.crop.square"]
+        CoorditLocalProfile.avatarSymbols
     }
 
     private var profileAvatarSymbol: String {

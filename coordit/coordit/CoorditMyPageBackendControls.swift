@@ -19,8 +19,11 @@ extension CoorditMyPageFamilyView {
     }
 
     func syncBackendProfile() {
-        guard let profile = backendSession.profile else { return }
-        profileName = profile.displayName ?? "코딧 사용자"
+        profileName = backendSession.profile?.displayName ?? "코딧 사용자"
+        let localProfile = backendSession.session.map { CoorditLocalProfileStore.load(userID: $0.user.id) }
+            ?? CoorditLocalProfile()
+        profileBio = localProfile.bio
+        profileAvatarIndex = localProfile.avatarIndex
     }
 
     func syncBackendBodyMeasurement() {

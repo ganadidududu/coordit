@@ -15,14 +15,15 @@ struct CoorditMyPageFamilyView: View {
     @EnvironmentObject var backendSession: CoorditBackendSessionStore
     @Environment(\.openURL) var openURL
     @Environment(\.scenePhase) var scenePhase
-    @State var feedDataConsent = true
-    @State var aiDataConsent = false
     @AppStorage("coordit.marketing-notifications.enabled") var marketingNotifications = false
     @State var marketingNotificationStatus: CoorditMarketingNotificationStatus = .notDetermined
     @State var profileName = "코딧 사용자"
     @State var profileBio = "나에게 꼭 맞는 핏을 찾고 있어요."
     @State var profileAvatarIndex = 0
     @State var profileSaved = false
+    @State var profileSaveError = ""
+    @State var isSavingProfile = false
+    @State var profileBioIsFocused = false
     @State var logoutCompleted = false
     @State var deletionAcknowledged = false
     @State var deletionCompleted = false
@@ -50,30 +51,41 @@ struct CoorditMyPageFamilyView: View {
                 .frame(width: metrics.value(contentWidth))
                 .frame(maxWidth: .infinity)
 
-                ScrollView(.vertical, showsIndicators: false) {
-                    routeContent(metrics: metrics)
-                        .frame(width: metrics.value(contentWidth))
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, metrics.value(routeHeader.spacing))
-                        .padding(
-                            .bottom,
-                            metrics.value(Main01DesignTokens.Metrics.navHeight + 26)
-                        )
-                }
-                .coorditScrollEdgeTreatment(topFade: metrics.value(18))
-                .scrollDismissesKeyboard(.immediately)
-                .toolbar {
-                    ToolbarItemGroup(placement: .keyboard) {
-                        Spacer()
-                        Button("완료") {
-                            UIApplication.shared.sendAction(
-                                #selector(UIResponder.resignFirstResponder),
-                                to: nil,
-                                from: nil,
-                                for: nil
+                ScrollViewReader { scrollProxy in
+                    ScrollView(.vertical, showsIndicators: false) {
+                        routeContent(metrics: metrics)
+                            .frame(width: metrics.value(contentWidth))
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, metrics.value(routeHeader.spacing))
+                            .padding(
+                                .bottom,
+                                metrics.value(Main01DesignTokens.Metrics.navHeight + 26)
                             )
+                    }
+                    .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)) { _ in
+                        guard route == .myPageProfileEdit, profileBioIsFocused else { return }
+                        scrollProxy.scrollTo("mypage-profile-bio", anchor: .bottom)
+                    }
+                    .onChange(of: profileBioIsFocused) { _, focused in
+                        if focused {
+                            scrollProxy.scrollTo("mypage-profile-bio", anchor: .bottom)
                         }
-                        .accessibilityIdentifier("coordit-keyboard-dismiss")
+                    }
+                    .coorditScrollEdgeTreatment(topFade: metrics.value(18))
+                    .scrollDismissesKeyboard(.immediately)
+                    .toolbar {
+                        ToolbarItemGroup(placement: .keyboard) {
+                            Spacer()
+                            Button("완료") {
+                                UIApplication.shared.sendAction(
+                                    #selector(UIResponder.resignFirstResponder),
+                                    to: nil,
+                                    from: nil,
+                                    for: nil
+                                )
+                            }
+                            .accessibilityIdentifier("coordit-keyboard-dismiss")
+                        }
                     }
                 }
             }
@@ -92,6 +104,9 @@ struct CoorditMyPageFamilyView: View {
             await backendSession.bootstrap()
             syncBackendProfile()
             syncBackendBodyMeasurement()
+        }
+        .onChange(of: backendSession.session?.user.id) { _, _ in
+            syncBackendProfile()
         }
         .onChange(of: backendSession.latestBodyMeasurement) { _, _ in
             syncBackendBodyMeasurement()

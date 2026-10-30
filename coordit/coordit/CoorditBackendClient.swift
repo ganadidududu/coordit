@@ -202,6 +202,21 @@ struct CoorditBackendClient {
         try await send(path: "/users/me", method: "PATCH", token: token, body: UpdateProfileRequest(displayName: displayName))
     }
 
+    func consents(token: String) async throws -> CoorditUserConsents {
+        try await send(path: "/users/me/consents", method: "GET", token: token, body: Optional<String>.none)
+    }
+
+    func updateConsents(token: String, accepted: Bool) async throws -> CoorditUserConsents {
+        try await send(
+            path: "/users/me/consents",
+            method: "PATCH",
+            token: token,
+            body: CoorditUpdateConsentsRequest(consents: [
+                "fit_data_improvement": .init(accepted: accepted),
+            ])
+        )
+    }
+
     func deleteAccount(token: String) async throws {
         try await sendWithoutResponse(path: "/users/me", method: "DELETE", token: token)
     }

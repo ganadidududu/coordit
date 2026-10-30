@@ -131,9 +131,12 @@ struct CoorditOnboardingView: View {
             }
             .scrollDismissesKeyboard(.interactively)
         }
+        .environment(\.colorScheme, .light)
         .sheet(item: $legalDocument) { document in
             legalSheet(document)
+                .preferredColorScheme(.light)
         }
+        .preferredColorScheme(.dark)
         .onAppear {
             if displayName.isEmpty {
                 displayName = backendSession.profile?.displayName ?? ""

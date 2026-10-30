@@ -73,6 +73,7 @@ struct CoorditScreenChrome: View {
     let route: CoorditFrameRoute
     let onRouteChange: (CoorditFrameRoute) -> Void
     var showsHeader = true
+    @State private var keyboardIsVisible = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -88,16 +89,24 @@ struct CoorditScreenChrome: View {
 
                 Spacer(minLength: 0)
 
-                CoorditBottomNavigation(
-                    selectedTab: route.selectedTab,
-                    scale: metrics.scale
-                ) { selectedTab in
-                    onRouteChange(CoorditFrameRoute.route(for: selectedTab, from: route))
+                if !keyboardIsVisible || route != .myPageProfileEdit {
+                    CoorditBottomNavigation(
+                        selectedTab: route.selectedTab,
+                        scale: metrics.scale
+                    ) { selectedTab in
+                        onRouteChange(CoorditFrameRoute.route(for: selectedTab, from: route))
+                    }
                 }
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
         .ignoresSafeArea(.container, edges: .all)
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            keyboardIsVisible = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            keyboardIsVisible = false
+        }
     }
 }
 
