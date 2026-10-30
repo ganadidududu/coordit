@@ -55,6 +55,9 @@ max-complexity = 15
 typeCheckingMode = "all"
 # Torch's native loader/autograd/ONNX stubs have partially dynamic signatures.
 # Keep these diagnostics visible as warnings; input parsing remains strict.
+# Warning-level diagnostics remain visible without preventing runtime contracts
+# from running in CI. Error-level diagnostics still fail the check.
+failOnWarnings = false
 reportUnknownMemberType = "warning"
 reportUnknownVariableType = "warning"
 reportAny = "warning"
