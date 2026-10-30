@@ -36,6 +36,8 @@ import com.inseong.coordit.ui.components.*
 import com.inseong.coordit.ui.theme.*
 import java.util.Locale
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class ClosetPhotos(context: android.content.Context? = null, userId: String? = null) {
     val images = mutableStateMapOf<String, Bitmap>()
@@ -97,7 +99,9 @@ fun ClosetScreen(model: ClosetViewModel, photos: ClosetPhotos, onHome: () -> Uni
                 photos.images.remove("draft")?.let { if (!photos.save(item.id, it)) model.error("의류 사진을 기기에 저장하지 못했어요. 사진을 다시 선택해 주세요.") }
                 photos.load(listOf(item.id))
             }
-            if (returningToFitLab && !state.busy) state.registeredFitLabReference?.let(onReferenceRegistered)
+            if (returningToFitLab && !state.busy) state.registeredFitLabReference?.let { reference ->
+                withContext(Dispatchers.Main.immediate) { onReferenceRegistered(reference) }
+            }
         }
     }
     BoxWithConstraints(Modifier.fillMaxSize().testTag("closet-${state.screen.name.lowercase()}")) {
