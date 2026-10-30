@@ -2,11 +2,12 @@
 
 기존 iOS Xcode project에 설정된 Web Client ID와 staging API URL을 Android `gradle.properties`의 공개 기본 설정으로 재사용한다. Client secret은 앱에 포함하지 않는다. `-P` 속성으로 다른 환경을 지정할 수 있다. release API는 별도 HTTPS 설정이며 자동으로 staging에 연결하지 않는다.
 
-Google Cloud Console → Google Auth Platform → 클라이언트에서 기존 iOS/Web 항목을 보존하고 Android 유형을 추가한다.
+Google Cloud Console → Google Auth Platform → 클라이언트에서 빌드의 package와 서명 SHA-1 조합을 Android 유형으로 등록한다. 아래 개발용 클라이언트는 `coordit-dev` 프로젝트에 등록되어 있다.
 
 | 값 | 현재 개발 빌드 |
 |---|---|
 | 이름 | Coordit Android Debug |
+| Android client | `789827940031-8tu6sjjrg1lf4nho1kml09i2bbfer7qf.apps.googleusercontent.com` |
 | package | `com.inseong.coordit.debug` |
 | SHA-1 | `A2:60:95:4D:EC:ED:B2:D0:83:96:46:7F:BF:95:FC:28:7C:96:DD:3D` |
 | Web client | `789827940031-omahjmi6eepp4rpf5ue7kjqndf8rhjr7.apps.googleusercontent.com` |
@@ -14,6 +15,8 @@ Google Cloud Console → Google Auth Platform → 클라이언트에서 기존 i
 SHA-1은 이 Mac의 debug keystore에서 `./gradlew :app:signingReport`로 확인한 값이다. 다른 개발 환경은 자신의 서명을 등록해야 한다. 배포 package는 `com.inseong.coordit`이며 Play App Signing 인증서는 별도 Android OAuth 클라이언트로 등록한다. Android client ID를 GOOGLE_WEB_CLIENT_ID에 넣지 않는다. Supabase 허용 Google audience도 이 Web client와 일치해야 한다.
 
 Google Credential Manager의 명시적 버튼 로그인으로 ID token을 받고 기존 POST /auth/google에 전달한다. 기존 iOS와 동일하게 보안 난수 raw nonce의 SHA-256을 Google 요청에 넣고 raw nonce를 backend에 보낸다. 취소/오류/오래된 콜백은 인증 성공으로 취급하지 않는다. logout은 로컬 암호화 세션을 삭제하고 credential provider 상태도 해제한다.
+
+계정을 선택한 직후 인증 화면으로 돌아오고 Google 로그에 `Invalid key value: <서명 해시>:<package>`가 있으면 해당 package·SHA-1의 Android 클라이언트 등록을 확인한다. 다른 package나 배포용 인증서의 등록은 개발 빌드를 인증하지 않는다. 검증은 계정 선택창 표시에서 끝내지 않고, 실제 서버 세션 발급·홈 진입·앱 재시작 후 세션 복원까지 확인한다.
 
 - [Google 클라이언트 인증/SHA-1](https://developers.google.com/android/guides/client-auth)
 - [Google Android Credential Manager](https://developer.android.com/identity/sign-in/credential-manager-siwg-implementation)
