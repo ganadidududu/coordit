@@ -4,6 +4,7 @@ import {
   productCrawlerAdapters
 } from "./adapters/product-crawler-adapters";
 import { ProductImportError } from "./product-import.error";
+import { logProductImportFailure, logProductImportSuccess } from "./product-import.observability";
 import type { ProductImportRequest } from "./product-import.schemas";
 import type { ProductImportPreview } from "./product-import.types";
 import { assertPublicUrl, normalizeProductUrl, parseProductUrl } from "./security/url-validator";
@@ -46,10 +47,18 @@ export const previewProductImport = async (
   await delayForDomain(normalizedUrl.hostname);
   const adapter = productCrawlerAdapters.find((candidate) => candidate.supports(normalizedUrl))
     ?? genericFashionStoreAdapter;
-  return adapter.extract({
-    url: normalizedUrl,
-    includeImages: request.includeImages,
-    includeDetailImages: request.includeDetailImages,
-    crawledAt: new Date().toISOString()
-  });
+  const attempt = { host: normalizedUrl.hostname, site: adapter.name, startedAt: Date.now() };
+  try {
+    const preview = await adapter.extract({
+      url: normalizedUrl,
+      includeImages: request.includeImages,
+      includeDetailImages: request.includeDetailImages,
+      crawledAt: new Date().toISOString()
+    });
+    logProductImportSuccess(attempt, preview);
+    return preview;
+  } catch (error) {
+    logProductImportFailure(attempt, error);
+    throw error;
+  }
 };
