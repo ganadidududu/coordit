@@ -25,6 +25,8 @@ struct CoorditFitLabURLInputView: View {
     @State private var validationMessage: String?
     @State private var importGeneration = 0
     @State private var importRequest: Task<Void, Never>?
+    /// 웹뷰로 직접 긁을 때의 진행 상태. nil이면 웹뷰 화면을 띄우지 않는다.
+    @State private var webImportURL: URL?
     @FocusState private var focusedField: String?
 
     var body: some View {
@@ -52,6 +54,25 @@ struct CoorditFitLabURLInputView: View {
         .coorditScrollEdgeTreatment(topFade: metrics.value(14))
         .id(stage)
         .scrollDismissesKeyboard(.interactively)
+        .fullScreenCover(item: Binding(
+            get: { webImportURL.map { WebImportTarget($0) } },
+            set: { webImportURL = $0?.url }
+        )) { target in
+            let url = target.url
+            CoorditFitLabWebImportScreen(
+                url: url,
+                metrics: metrics,
+                onExtracted: completeWebImport,
+                onFallbackToServer: {
+                    webImportURL = nil
+                    startServerImport(url: url)
+                },
+                onCancel: {
+                    webImportURL = nil
+                }
+            )
+            .interactiveDismissDisabled()
+        }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
@@ -471,6 +492,93 @@ struct CoorditFitLabURLInputView: View {
             return
         }
         invalidateImport()
+        guard !CoorditTutorialExample.matches(url), !Self.usesStubbedImport else {
+            startServerImport(url: url)
+            return
+        }
+        // 서버를 거치지 않고 기기에서 직접 페이지를 열어 사이즈표를 읽는다.
+        // 요청이 사용자 IP로 나가 판매처 차단을 피하고, 로그인/캡차도 사용자가 그 자리에서 통과할 수 있다.
+        webImportURL = url
+    }
+
+    /// UI 테스트 픽스처는 서버 응답을 대신하므로 실제 페이지를 여는 웹뷰를 건너뛴다.
+    /// 픽스처 실행에서도 웹뷰를 확인하려면 `--coordit-fitlab-web-import`를 함께 넘긴다.
+    private static var usesStubbedImport: Bool {
+        let arguments = ProcessInfo.processInfo.arguments
+        return arguments.contains("--coordit-fitlab-fixture") && !arguments.contains("--coordit-fitlab-web-import")
+    }
+
+    /// 웹뷰에서 사이즈표를 얻은 경우.
+    private func completeWebImport(_ chart: CoorditWebSizeChart) {
+        let url = webImportURL ?? Self.validatedURL(from: urlText)
+        webImportURL = nil
+        guard !chart.rows.isEmpty else {
+            if let url { startServerImport(url: url) }
+            return
+        }
+        let rows = chart.rows.map { row in
+            EditableRow(
+                label: row.sizeLabel,
+                measurements: Dictionary(uniqueKeysWithValues: row.measurements.map { ($0.key, Self.format($0.value)) })
+            )
+        }
+        applyWebChart(chart, editableRows: rows)
+        stage = .review
+        confirm(automatically: true)
+    }
+
+    private static func format(_ value: Double) -> String {
+        value == value.rounded() ? String(Int(value)) : String(value)
+    }
+
+    /// 웹뷰 결과를 기존 review 화면 상태로 옮긴다.
+    private func applyWebChart(_ chart: CoorditWebSizeChart, editableRows: [EditableRow]) {
+        if usesAutomaticCategory {
+            category = Self.inferredCategory(for: chart)
+        }
+        kind = category.garmentKind
+        productName = chart.productName ?? ""
+        brand = chart.brand ?? ""
+        rows = editableRows.isEmpty ? [EditableRow()] : editableRows
+        draft.source = .url
+        draft.productFacts = nil
+        draft.productURL = chart.productURL ?? Self.validatedURL(from: urlText) ?? draft.productURL
+        draft.mallName = chart.mallName
+        draft.selectedReferenceIDs.removeAll()
+        draft.isSourceConfirmed = false
+        validationMessage = nil
+    }
+
+    /// 서버가 해주던 옷 종류 자동 분류를 기기에서 대신한다.
+    /// 상·하의는 표에 있는 측정 항목으로, 세부 종류는 상품명 키워드로 가른다.
+    private static func inferredCategory(for chart: CoorditWebSizeChart) -> CoorditFitLabCategory {
+        let keys = chart.rows.flatMap(\.measurements.keys)
+        let lowerCount = keys.filter { $0.garmentKind == .lower }.count
+        let kind: CoorditFitLabGarmentKind = lowerCount > keys.count - lowerCount ? .lower : .upper
+        let name = (chart.productName ?? "").lowercased()
+        let keywords: [(CoorditFitLabCategory, [String])] = [
+            (.hoodie, ["후드", "후디", "hood"]),
+            (.sweatshirt, ["맨투맨", "스웨트", "sweat"]),
+            (.knit, ["니트", "스웨터", "가디건", "knit", "sweater", "cardigan"]),
+            (.coat, ["코트", "coat"]),
+            (.jacket, ["자켓", "재킷", "점퍼", "블루종", "패딩", "jacket", "blouson"]),
+            (.shirt, ["셔츠", "블라우스", "shirt", "blouse"]),
+            (.shorts, ["반바지", "쇼츠", "쇼트", "shorts"]),
+            (.skirt, ["스커트", "치마", "skirt"]),
+            (.jeans, ["데님", "청바지", "진", "denim", "jeans"]),
+        ]
+        // "티셔츠"는 "셔츠"를 포함하므로 먼저 걸러낸다.
+        let isTee = ["티셔츠", "t-shirt", "tee", "반팔", "긴팔"].contains { name.contains($0) }
+        if !isTee, let match = keywords.first(where: { entry in
+            entry.0.garmentKind == kind && entry.1.contains { name.contains($0) }
+        }) {
+            return match.0
+        }
+        return kind == .upper ? .tshirt : .pants
+    }
+
+    private func startServerImport(url: URL) {
+        invalidateImport()
         let generation = importGeneration
         isLoading = true
         importRequest = Task { @MainActor in
@@ -699,6 +807,13 @@ struct CoorditFitLabURLInputView: View {
         case entry
         case review
         case confirmed
+    }
+
+    private struct WebImportTarget: Identifiable {
+        // URL을 그대로 정체성으로 쓴다. 매번 새 UUID면 본문이 다시 그려질 때마다 웹뷰가 재생성된다.
+        var id: URL { url }
+        let url: URL
+        init(_ url: URL) { self.url = url }
     }
 
     private struct EditableRow: Identifiable, Equatable {
