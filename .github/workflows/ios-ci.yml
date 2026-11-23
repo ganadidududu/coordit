@@ -1,0 +1,134 @@
+name: iOS CI
+
+on:
+  pull_request:
+    paths:
+      - "coordit/**"
+      - ".github/workflows/ios-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "coordit/**"
+      - ".github/workflows/ios-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The app targets iOS 26.5, so the runner needs Xcode 26.5 and an iOS 26.5+ simulator runtime.
+  # Builds are ad-hoc signed ("-") rather than unsigned: the keychain-backed session tests
+  # need the app's entitlements, and ad-hoc signing embeds them without a developer account.
+  XCODE_VERSION: "26.5"
+  MIN_IOS_RUNTIME: "26.5"
+  DERIVED_DATA: ${{ github.workspace }}/DerivedData
+
+jobs:
+  build-and-test:
+    name: Build and unit test (iOS Simulator)
+    runs-on: macos-26
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: coordit
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: |
+          set -euo pipefail
+          XCODE_APP=$(ls -d /Applications/Xcode_${XCODE_VERSION}*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -z "$XCODE_APP" ]; then
+            echo "::error::Xcode ${XCODE_VERSION} is not installed on this runner. Installed:"
+            ls -d /Applications/Xcode*.app
+            exit 1
+          fi
+          sudo xcode-select -s "$XCODE_APP/Contents/Developer"
+          xcodebuild -version
+
+      - name: Pick an iPhone simulator
+        id: simulator
+        run: |
+          set -euo pipefail
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, os, sys
+          minimum = tuple(int(p) for p in os.environ["MIN_IOS_RUNTIME"].split("."))
+          candidates = []
+          for runtime, devices in json.load(sys.stdin)["devices"].items():
+              if ".iOS-" not in runtime:
+                  continue
+              version = tuple(int(p) for p in runtime.rsplit(".iOS-", 1)[1].split("-"))
+              if version < minimum:
+                  continue
+              for device in devices:
+                  if device["name"].startswith("iPhone"):
+                      candidates.append((version, device["name"], device["udid"]))
+          if not candidates:
+              sys.exit("no iPhone simulator with iOS >= " + os.environ["MIN_IOS_RUNTIME"])
+          candidates.sort()
+          version, name, udid = candidates[-1]
+          label = ".".join(str(part) for part in version)
+          print(udid)
+          print(name + " (iOS " + label + ")", file=sys.stderr)
+          ')
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Swift packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.DERIVED_DATA }}/SourcePackages
+          key: spm-${{ runner.os }}-${{ hashFiles('coordit/coordit.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: spm-${{ runner.os }}-
+
+      - name: Build for testing
+        run: |
+          set +e
+          xcodebuild build-for-testing \
+            -project coordit.xcodeproj \
+            -scheme coordit \
+            -destination "id=${{ steps.simulator.outputs.udid }}" \
+            -derivedDataPath "$DERIVED_DATA" \
+            -clonedSourcePackagesDirPath "$DERIVED_DATA/SourcePackages" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY=- \
+            DEVELOPMENT_TEAM= \
+            PROVISIONING_PROFILE_SPECIFIER= \
+            > "$RUNNER_TEMP/build.log" 2>&1
+          status=$?
+          grep -E "error:|BUILD (SUCCEEDED|FAILED)" "$RUNNER_TEMP/build.log" | tail -50
+          exit $status
+
+      - name: Run unit tests
+        run: |
+          set +e
+          xcodebuild test-without-building \
+            -project coordit.xcodeproj \
+            -scheme coordit \
+            -destination "id=${{ steps.simulator.outputs.udid }}" \
+            -derivedDataPath "$DERIVED_DATA" \
+            -clonedSourcePackagesDirPath "$DERIVED_DATA/SourcePackages" \
+            -only-testing:coorditTests \
+            -resultBundlePath "$RUNNER_TEMP/UnitTests.xcresult" \
+            > "$RUNNER_TEMP/test.log" 2>&1
+          status=$?
+          grep -iE "error:|Test case .*failed|\*\* TEST" "$RUNNER_TEMP/test.log" | tail -80
+          grep -ciE "Test case .*passed" "$RUNNER_TEMP/test.log" | xargs echo "passed test cases:"
+          exit $status
+
+      - name: Upload logs and test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ci-results
+          path: |
+            ${{ runner.temp }}/build.log
+            ${{ runner.temp }}/test.log
+            ${{ runner.temp }}/UnitTests.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
