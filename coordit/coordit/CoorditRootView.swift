@@ -76,6 +76,7 @@ struct CoorditRootView: View {
                 closetItems: $closetItems,
                 selectedReferenceIDs: $selectedReferenceIDs,
                 fitLabHistory: fitLabCoordinator.savedHistory,
+                threadBalance: threadBalance,
                 onOpenFitLabHistory: { snapshot in
                     fitLabCoordinator.selectHistory(snapshot)
                     navigate(to: .fitLabHistoryDetail)
