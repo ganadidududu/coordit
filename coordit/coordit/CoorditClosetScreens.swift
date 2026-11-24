@@ -144,7 +144,46 @@ struct CoorditClosetItem: Identifiable {
             )
         ),
         CoorditClosetItem(id: "slacks", name: "Black Slacks", category: .bottom, exactCategory: .pants, score: 0, scoreColor: CoorditClosetColors.navy, route: .closetDetailBottom, imageData: nil),
+        // 홈 디자인 시안(상의·하의 각 4벌)을 채우기 위한 추가 샘플.
+        sampleItem(id: "leather-jacket", name: "가죽 자켓", category: .top, exactCategory: .jacket, size: "L", top: (shoulder: 48, chest: 58)),
+        sampleItem(id: "white-tee", name: "화이트 반팔 티", category: .top, exactCategory: .tshirt, size: "M", top: (shoulder: 45, chest: 54)),
+        sampleItem(id: "brown-chino", name: "갈색 면바지", category: .bottom, exactCategory: .pants, size: "32", bottom: (waist: 42, outseam: 100)),
+        sampleItem(id: "black-track-pants", name: "검정색 추리닝", category: .bottom, exactCategory: .pants, size: "L", bottom: (waist: 40, outseam: 104)),
     ]
+
+    private static func sampleItem(
+        id: String,
+        name: String,
+        category: CoorditClosetCategory,
+        exactCategory: CoorditFitLabCategory,
+        size: String,
+        top: (shoulder: Double, chest: Double)? = nil,
+        bottom: (waist: Double, outseam: Double)? = nil
+    ) -> CoorditClosetItem {
+        CoorditClosetItem(
+            id: id,
+            name: name,
+            category: category,
+            exactCategory: exactCategory,
+            score: 0,
+            scoreColor: CoorditClosetColors.navy,
+            route: category == .top ? .closetDetailTop : .closetDetailBottom,
+            imageData: nil,
+            sizeChart: CoorditClosetSizeChart(
+                sizeLabel: size,
+                measurements: CoorditMeasurementMap(
+                    totalLength: nil,
+                    shoulderWidth: top?.shoulder,
+                    chestWidth: top?.chest,
+                    sleeveLength: nil,
+                    waistWidth: bottom?.waist,
+                    hipWidth: nil,
+                    rise: nil,
+                    outseam: bottom?.outseam
+                )
+            )
+        )
+    }
 }
 
 struct CoorditClosetFamilyView: View {

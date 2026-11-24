@@ -20,6 +20,9 @@ struct CoorditHomeLayout {
 
     /// 좌우 여백(34.03px).
     var gutter: CGFloat { value(34.03) }
+
+    /// FIT LAB·CLOSET 섹션 위쪽 여백(px). 정지 시 섹션 제목이 화면 위에서 310px에 온다.
+    static let sectionTopPadding: CGFloat = 100
 }
 
 /// 4개 화면 정지 지점의 정의.
@@ -28,19 +31,19 @@ struct CoorditHomeLayout {
 enum CoorditHomeSnapStop: Int, CaseIterable {
     /// 1. 카드 뉴스 (맨 위)
     case cardNews
-    /// 2. FIT LAB — 섹션 상단이 헤더 바로 아래(220px)에 걸린다.
+    /// 2. FIT LAB — 섹션 상단이 화면 위 210px(제목은 310px)에 걸린다.
     case fitLab
-    /// 3. CLOSET — 섹션 상단이 헤더 바로 아래(200px)에 걸린다.
+    /// 3. CLOSET — 섹션 상단이 화면 위 210px(제목은 310px)에 걸린다.
     case closet
-    /// 4. 실타래 + 푸터 — 스크롤 맨 끝.
+    /// 4. 실타래 + 푸터 — 실타래 섹션 상단이 270px(잔량 줄은 310px)에 걸린다.
     case footer
 
     /// 섹션 상단이 화면 위에서 얼마나 떨어져 멈추는지(Figma px).
     var sectionInset: CGFloat {
         switch self {
-        case .cardNews, .footer: 0
-        case .fitLab: 220
-        case .closet: 200
+        case .cardNews: 0
+        case .fitLab, .closet: 210
+        case .footer: 270
         }
     }
 }
@@ -49,12 +52,15 @@ enum CoorditHomeSnapStop: Int, CaseIterable {
 struct CoorditHomeSnapAnchors: Equatable {
     var fitLabTop: CGFloat?
     var closetTop: CGFloat?
+    var threadTop: CGFloat?
 
     func offsets(layout: CoorditHomeLayout) -> [CGFloat] {
         var result: [CGFloat] = [0]
         if let fitLabTop { result.append(fitLabTop - layout.value(CoorditHomeSnapStop.fitLab.sectionInset)) }
         if let closetTop { result.append(closetTop - layout.value(CoorditHomeSnapStop.closet.sectionInset)) }
-        // 마지막 화면은 스크롤 끝(.infinity → 동작 시 maxOffset으로 고정).
+        if let threadTop { result.append(threadTop - layout.value(CoorditHomeSnapStop.footer.sectionInset)) }
+        // 스크롤 끝(.infinity → maxOffset). iPhone 15 Pro에서는 4번 화면과 겹쳐 하나로 합쳐지고,
+        // 화면이 더 짧은 폰에서는 푸터 끝까지 볼 수 있는 마지막 정지 지점이 된다.
         result.append(.infinity)
         return result
     }
@@ -104,7 +110,13 @@ struct CoorditHomeSnapScrollBehavior: ScrollTargetBehavior {
             .map { $0.isInfinite ? maxOffset : min(max(0, $0), maxOffset) }
             .sorted()
         var stops: [CGFloat] = []
-        for value in clamped where stops.last.map({ value - $0 > 1 }) ?? true {
+        // 화면 높이의 10%보다 가까운 정지 지점은 하나로 합친다(뒤의 값을 쓴다).
+        let mergeDistance = max(viewportHeight * 0.1, 1)
+        for value in clamped {
+            if let last = stops.last, value - last < mergeDistance {
+                if stops.count > 1 { stops[stops.count - 1] = value }
+                continue
+            }
             if let last = stops.last, viewportHeight > 0 {
                 let step = viewportHeight * 0.85
                 var filler = last + step
@@ -131,7 +143,8 @@ enum CoorditHomePalette {
     static let line = CoorditDesignTokens.ColorToken.line // #E1E5EA
     static let muted = CoorditDesignTokens.ColorToken.muted // #7E8492
     static let blue = CoorditDesignTokens.ColorToken.blue // #194096
-    static let closetTop = Main01DesignTokens.Colors.rgb(252, 253, 254)
+    /// CLOSET 섹션 배경(#F4F5F8).
+    static let closetTop = Main01DesignTokens.Colors.rgb(244, 245, 248)
     static let footer = Main01DesignTokens.Colors.rgb(244, 245, 248) // #F4F5F8
 
     /// FIT LAB 섹션 배경 (#000C40 4.4% → #4A5584 77.4%).
@@ -149,18 +162,6 @@ enum CoorditHomePalette {
         stops: [
             .init(color: slate, location: 0.044),
             .init(color: navy, location: 0.774),
-        ],
-        startPoint: .top,
-        endPoint: .bottom
-    )
-
-    /// CLOSET 섹션 배경 (흰색 위에 남색 계열 반투명 그라데이션).
-    static let closetBackground = LinearGradient(
-        stops: [
-            .init(color: Main01DesignTokens.Colors.rgb(252, 253, 254), location: 0.046),
-            .init(color: Main01DesignTokens.Colors.rgb(166, 171, 189).opacity(0.5), location: 0.642),
-            .init(color: Main01DesignTokens.Colors.rgb(99, 107, 139).opacity(0.3), location: 0.917),
-            .init(color: navy.opacity(0.1), location: 1.0),
         ],
         startPoint: .top,
         endPoint: .bottom
@@ -187,7 +188,11 @@ enum CoorditHomePalette {
 
 extension View {
     /// Figma 공용 칩(#737B9D, 흰 테두리 35%) 모양의 큰 버튼.
-    func coorditHomePrimaryChip(layout: CoorditHomeLayout, verticalPadding: CGFloat = 13) -> some View {
+    func coorditHomePrimaryChip(
+        layout: CoorditHomeLayout,
+        verticalPadding: CGFloat = 13,
+        fill: Color = CoorditHomePalette.chipFill
+    ) -> some View {
         self
             .lineLimit(1)
             .minimumScaleFactor(0.6)
@@ -195,7 +200,7 @@ extension View {
             .padding(.horizontal, layout.value(15.124))
             .padding(.vertical, layout.value(verticalPadding))
             .frame(maxWidth: .infinity)
-            .background(CoorditHomePalette.chipFill, in: Capsule())
+            .background(fill, in: Capsule())
             .overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: layout.value(2)))
             .contentShape(Capsule())
     }
@@ -244,6 +249,17 @@ struct CoorditHomeChromeOverlay: View {
     /// 화면 위에서 CLOSET 섹션 윗선까지의 거리. 3번 화면에서 FIT LAB 끝자락을 가려
     /// Figma처럼 남색 → CLOSET 밝은색으로 부드럽게 이어지게 한다.
     let closetTopOnScreen: CGFloat?
+    /// 화면 위에서 실타래 섹션 윗선까지의 거리. 4번 화면에서 헤더 아래를 실타래 남색으로 채운다.
+    let threadTopOnScreen: CGFloat?
+
+    /// 실타래 윗선이 정지선(270px)에 가까울수록 1.
+    private var threadBlend: CGFloat {
+        guard let threadTopOnScreen else { return 0 }
+        let rest = layout.value(CoorditHomeSnapStop.footer.sectionInset)
+        let x = 1 - (threadTopOnScreen - rest) / layout.value(300)
+        let t = min(max(x, 0), 1)
+        return t * t * (3 - 2 * t)
+    }
 
     /// CLOSET 윗선이 헤더 아래 정지선(200px)에 가까울수록 1.
     private var closetBlend: CGFloat {
@@ -275,7 +291,7 @@ struct CoorditHomeChromeOverlay: View {
             ZStack(alignment: .top) {
                 CoorditHomePalette.chromeFade(fromTop: true)
                     .frame(height: layout.value(225.536))
-                // FIT LAB 섹션 시작선(220px)까지는 완전한 남색, 그 아래 30px에서만 풀린다.
+                // FIT LAB 섹션 시작선(210px)까지는 완전한 남색, 그 아래 30px에서만 풀린다.
                 // 2번 화면에서 풀리는 구간은 FIT LAB 남색 위에 겹치므로 경계가 보이지 않는다.
                 LinearGradient(
                     stops: [
@@ -301,6 +317,20 @@ struct CoorditHomeChromeOverlay: View {
                     )
                     .frame(height: closetTopOnScreen + 1)
                     .opacity(closetBlend)
+                }
+
+                if let threadTopOnScreen, threadTopOnScreen > 0, threadBlend > 0 {
+                    LinearGradient(
+                        stops: [
+                            .init(color: CoorditHomePalette.navy, location: 0),
+                            .init(color: CoorditHomePalette.navy, location: 0.351),
+                            .init(color: CoorditHomePalette.slate, location: 1),
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: threadTopOnScreen + 1)
+                    .opacity(threadBlend)
                 }
             }
             .frame(height: topCoverHeight, alignment: .top)

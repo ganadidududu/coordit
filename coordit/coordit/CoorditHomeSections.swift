@@ -136,19 +136,21 @@ struct CoorditHomeFitLabSection: View {
     let onOpenHistory: (CoorditFitLabHistorySnapshot) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: layout.value(80)) {
+        VStack(alignment: .leading, spacing: layout.value(65)) {
             CoorditHomeSectionHeading(
                 layout: layout,
                 wordmark: "FIT LAB",
+                wordmarkWidth: 279.968,
                 caption: "나에게 가장 잘 맞는 기준 의류 정보",
                 onDark: true
             )
+            .padding(.horizontal, layout.value(10))
 
             Button(action: onStartAnalysis) {
-                let wordmark = Text("FIT LAB").font(CoorditTypography.climate2010(size: layout.value(30), relativeTo: .headline))
+                let wordmark = Text("FIT LAB ").font(CoorditTypography.climate2010(size: layout.value(30), relativeTo: .headline))
                 let rest = Text("에서 새로운 옷 분석하기").font(CoorditTypography.gmarketBold(size: layout.value(30), relativeTo: .headline))
                 Text("\(wordmark)\(rest)")
-                    .coorditHomePrimaryChip(layout: layout)
+                    .coorditHomePrimaryChip(layout: layout, fill: CoorditHomePalette.chipFill.opacity(0.65))
             }
             .buttonStyle(.plain)
             .coorditPressFeedback()
@@ -174,8 +176,8 @@ struct CoorditHomeFitLabSection: View {
 
             Button(action: onSelectReference) {
                 Text("기준 의류 추가하기")
-                    .font(CoorditTypography.gmarketBold(size: layout.value(25), relativeTo: .headline))
-                    .coorditHomePrimaryChip(layout: layout, verticalPadding: 9)
+                    .font(CoorditTypography.gmarketBold(size: layout.value(30), relativeTo: .headline))
+                    .coorditHomePrimaryChip(layout: layout, fill: CoorditHomePalette.chipFill.opacity(0.65))
             }
             .buttonStyle(.plain)
             .coorditPressFeedback()
@@ -183,8 +185,8 @@ struct CoorditHomeFitLabSection: View {
 
             CoorditHomeRecentFitCard(layout: layout, history: history, onOpenHistory: onOpenHistory)
         }
-        .padding(.top, layout.value(80))
-        .padding(.bottom, layout.value(90))
+        .padding(.top, layout.value(CoorditHomeLayout.sectionTopPadding))
+        .padding(.bottom, layout.value(100))
         .padding(.horizontal, layout.gutter)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(CoorditHomePalette.fitLabBackground)
@@ -193,19 +195,26 @@ struct CoorditHomeFitLabSection: View {
     }
 }
 
+/// "FIT LAB" / "CLOSET" 워드마크 + 오른쪽 설명.
+/// 워드마크는 Figma의 고정 폭(36px 높이)에 맞춰 글자 크기를 자동으로 맞춘다.
 struct CoorditHomeSectionHeading: View {
     let layout: CoorditHomeLayout
     let wordmark: String
+    let wordmarkWidth: CGFloat
     let caption: String
     let onDark: Bool
 
     var body: some View {
         HStack(alignment: .center, spacing: layout.value(12)) {
+            // Figma 워드마크(대문자 높이 36px) = 글자 크기 약 50px.
             Text(wordmark)
-                .font(CoorditTypography.climate2010(size: layout.value(onDark ? 34 : 40), relativeTo: .title))
+                .font(CoorditTypography.climate2010(size: layout.value(50), relativeTo: .title))
                 .tracking(layout.value(-2))
                 .foregroundStyle(onDark ? Color.white : CoorditHomePalette.navy)
                 .lineLimit(1)
+                .fixedSize()
+                .frame(minWidth: layout.value(wordmarkWidth), alignment: .leading)
+                .frame(height: layout.value(36))
                 .accessibilityAddTraits(.isHeader)
 
             Spacer(minLength: 0)
@@ -231,11 +240,12 @@ private struct CoorditHomeReferenceRow: View {
         items.first { selectedIDs.contains($0.id) }
     }
 
+    /// 상의는 4칸(어깨·가슴·소매·총장), 하의는 3칸(허리·엉덩이·총장).
     private var measurements: [(label: String, value: Double?)] {
         let map = reference?.sizeChart?.measurements
         switch category {
         case .top:
-            return [("어깨", map?.shoulderWidth), ("가슴", map?.chestWidth), ("소매", map?.sleeveLength)]
+            return [("어깨", map?.shoulderWidth), ("가슴", map?.chestWidth), ("소매", map?.sleeveLength), ("총장", map?.totalLength)]
         case .bottom:
             return [("허리", map?.waistWidth), ("엉덩이", map?.hipWidth), ("총장", map?.outseam)]
         }
@@ -245,38 +255,51 @@ private struct CoorditHomeReferenceRow: View {
         VStack(alignment: .leading, spacing: layout.value(15.124)) {
             HStack(spacing: layout.value(20)) {
                 Text(category.title)
-                    .font(CoorditTypography.gmarketBold(size: layout.value(20), relativeTo: .caption))
-                    .foregroundStyle(CoorditHomePalette.navy)
-                    .padding(.horizontal, layout.value(15.124))
-                    .padding(.vertical, layout.value(7.562))
-                    .background(Color.white, in: Capsule())
+                    .font(CoorditTypography.gmarketBold(size: layout.value(35), relativeTo: .title3))
+                    .foregroundStyle(.white)
+                    .fixedSize()
+                    .accessibilityAddTraits(.isHeader)
 
                 ScrollView(.horizontal) {
-                    HStack(spacing: layout.value(10)) {
-                        if items.isEmpty {
-                            chip(title: "등록된 \(category.title)가 없어요", isSelected: false)
-                        }
-                        ForEach(items) { item in
-                            Button(action: onSelect) {
-                                chip(title: item.name, isSelected: selectedIDs.contains(item.id))
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityAddTraits(selectedIDs.contains(item.id) ? .isSelected : [])
-                            .accessibilityHint("기준 의류를 다시 고를 수 있어요")
-                        }
-                    }
+                    chipGroup
                 }
                 .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
             }
+            .padding(.horizontal, layout.value(15))
 
-            HStack(spacing: layout.value(11.343)) {
-                ForEach(measurements, id: \.label) { measurement in
-                    measurementTile(label: measurement.label, value: measurement.value)
+            HStack(spacing: 0) {
+                ForEach(Array(measurements.enumerated()), id: \.offset) { index, measurement in
+                    if index > 0 {
+                        CoorditHomeDashedDivider(layout: layout)
+                    }
+                    measurementColumn(label: measurement.label, value: measurement.value)
                 }
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("coordit-main04-reference-\(category == .top ? "top" : "bottom")")
+    }
+
+    /// 칩 묶음: 흰 테두리 캡슐 안에 칩들이 붙어 있고, 기준 의류만 채워진 칩으로 보인다.
+    private var chipGroup: some View {
+        HStack(spacing: 0) {
+            if items.isEmpty {
+                chip(title: "현재 등록된 \(category.title)가 없습니다.", isSelected: false)
+            }
+            ForEach(items) { item in
+                let isSelected = selectedIDs.contains(item.id)
+                Button(action: onSelect) {
+                    chip(title: item.name, isSelected: isSelected)
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
+                .accessibilityHint("기준 의류를 다시 고를 수 있어요")
+            }
+        }
+        .padding(max(layout.value(1), 1))
+        .background(Color.white.opacity(0.09), in: Capsule())
+        .overlay(Capsule().stroke(.white.opacity(0.6), lineWidth: 1))
     }
 
     private func chip(title: String, isSelected: Bool) -> some View {
@@ -285,42 +308,57 @@ private struct CoorditHomeReferenceRow: View {
             .foregroundStyle(isSelected ? Color.white : Color.white.opacity(0.7))
             .shadow(color: .black.opacity(isSelected ? 0.25 : 0), radius: layout.value(4))
             .lineLimit(1)
-            .padding(.horizontal, layout.value(15.124))
-            .padding(.vertical, layout.value(7.562))
-            .background(isSelected ? CoorditHomePalette.chipFill : Color.white.opacity(0.09), in: Capsule())
-            .overlay(Capsule().stroke(.white.opacity(isSelected ? 0.35 : 0.12), lineWidth: max(layout.value(1.9), 1)))
+            .padding(.horizontal, layout.value(isSelected ? 14 : 15.124))
+            .padding(.vertical, layout.value(isSelected ? 6 : 7.562))
+            .background {
+                if isSelected {
+                    Capsule().fill(CoorditHomePalette.chipFill.opacity(0.4))
+                        .overlay(Capsule().stroke(.white.opacity(0.15), lineWidth: 1))
+                }
+            }
     }
 
-    private func measurementTile(label: String, value: Double?) -> some View {
+    private func measurementColumn(label: String, value: Double?) -> some View {
         VStack(alignment: .leading, spacing: 0) {
+            Text(label)
+                .font(CoorditTypography.gmarketMedium(size: layout.value(18.905), relativeTo: .caption))
+                .foregroundStyle(.white.opacity(0.7))
             HStack(alignment: .firstTextBaseline, spacing: layout.value(5.672)) {
-                Text(value.map(Self.format) ?? "–")
+                Text(value.map(Self.format) ?? "-")
                     .font(.system(size: layout.value(37.811), weight: .medium, design: .monospaced))
                     .foregroundStyle(.white)
+                    .padding(.trailing, value == nil ? layout.value(23) : 0)
                 Text("cm")
                     .font(CoorditTypography.gmarketMedium(size: layout.value(17.015), relativeTo: .caption2))
                     .foregroundStyle(.white.opacity(0.55))
             }
             .lineLimit(1)
             .minimumScaleFactor(0.6)
-
-            Text(label)
-                .font(CoorditTypography.gmarketMedium(size: layout.value(18.905), relativeTo: .caption))
-                .foregroundStyle(.white.opacity(0.7))
         }
-        .padding(layout.value(18.905))
+        .padding(.vertical, layout.value(18.905))
+        .padding(.horizontal, layout.value(18.905))
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.09), in: RoundedRectangle(cornerRadius: layout.value(22.687), style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: layout.value(22.687), style: .continuous)
-                .stroke(.white.opacity(0.12), lineWidth: layout.value(1.891))
-        )
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(label) \(value.map(Self.format) ?? "정보 없음") 센티미터")
     }
 
     private static func format(_ value: Double) -> String {
         value.rounded() == value ? String(Int(value)) : String(format: "%.1f", value)
+    }
+}
+
+/// 치수 칸 사이의 세로 점선(90px).
+private struct CoorditHomeDashedDivider: View {
+    let layout: CoorditHomeLayout
+
+    var body: some View {
+        Path { path in
+            path.move(to: .zero)
+            path.addLine(to: CGPoint(x: 0, y: layout.value(90)))
+        }
+        .stroke(.white.opacity(0.4), style: StrokeStyle(lineWidth: 1, dash: [layout.value(5), layout.value(4)]))
+        .frame(width: 1, height: layout.value(90))
+        .accessibilityHidden(true)
     }
 }
 
@@ -344,15 +382,17 @@ private struct CoorditHomeRecentFitCard: View {
                     .foregroundStyle(CoorditHomePalette.navy)
                     .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 0)
-                if !history.isEmpty {
-                    HStack(spacing: layout.value(3.781)) {
+                HStack(spacing: layout.value(3.781)) {
+                    if !history.isEmpty {
                         Text("전체 \(history.count)개")
                             .font(CoorditTypography.gmarketBold(size: layout.value(20.796), relativeTo: .caption))
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: layout.value(16), weight: .bold))
                     }
-                    .foregroundStyle(CoorditHomePalette.navy)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: layout.value(17), weight: .bold))
+                        .frame(width: layout.value(22.687), height: layout.value(22.687))
+                        .accessibilityHidden(true)
                 }
+                .foregroundStyle(CoorditHomePalette.navy)
             }
 
             if let latest {
@@ -363,11 +403,12 @@ private struct CoorditHomeRecentFitCard: View {
                 .coorditPressFeedback()
                 .accessibilityIdentifier("coordit-main04-history-card-\(latest.analysisID)")
             } else {
-                Text("저장한 핏 리포트가 아직 없어요")
-                    .font(CoorditTypography.gmarketMedium(size: layout.value(19), relativeTo: .caption))
+                Text("최근 핏 분석 기록이 없습니다.")
+                    .font(CoorditTypography.gmarketBold(size: layout.value(20), relativeTo: .caption))
                     .foregroundStyle(CoorditHomePalette.muted)
-                    .frame(maxWidth: .infinity, minHeight: layout.value(124.776))
-                    .background(Color.white, in: RoundedRectangle(cornerRadius: layout.value(18.905), style: .continuous))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, layout.value(50))
+                    .background(Color.white.opacity(0.95), in: RoundedRectangle(cornerRadius: layout.value(18.905), style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: layout.value(18.905), style: .continuous)
                             .stroke(CoorditHomePalette.line, lineWidth: layout.value(1.891))
@@ -377,7 +418,7 @@ private struct CoorditHomeRecentFitCard: View {
         }
         .padding(layout.value(30.249))
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(CoorditHomePalette.panel, in: RoundedRectangle(cornerRadius: layout.value(22.687), style: .continuous))
+        .background(CoorditHomePalette.panel.opacity(0.95), in: RoundedRectangle(cornerRadius: layout.value(22.687), style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: layout.value(22.687), style: .continuous)
                 .stroke(CoorditHomePalette.line.opacity(0.65), lineWidth: layout.value(1.323))
@@ -395,9 +436,9 @@ private struct CoorditHomeRecentFitRow: View {
     var body: some View {
         let isUpper = snapshot.garmentKind == .upper
         let score = CoorditFitLabResultMeasurement.score(snapshot.recommendation.fitScore)
-        let size = "\(snapshot.recommendation.recommendedSize) 추천"
+        let size = snapshot.recommendation.recommendedSize
 
-        HStack(spacing: layout.value(18.905)) {
+        HStack(spacing: layout.value(25)) {
             Image("CoorditFitGarment-\(snapshot.category.rawValue)")
                 .resizable()
                 .scaledToFit()
@@ -406,22 +447,27 @@ private struct CoorditHomeRecentFitRow: View {
                 .background(CoorditDesignTokens.ColorToken.field, in: RoundedRectangle(cornerRadius: layout.value(15.124), style: .continuous))
                 .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: layout.value(5.672)) {
-                HStack(spacing: layout.value(9.453)) {
-                    Text(snapshot.product.name)
-                        .font(CoorditTypography.gmarketBold(size: layout.value(20.796), relativeTo: .body))
-                        .foregroundStyle(CoorditHomePalette.navy)
-                        .lineLimit(1)
-                    Text(isUpper ? "TOP" : "BOTTOM")
-                        .font(.system(size: layout.value(15.124), weight: .medium, design: .monospaced))
-                        .foregroundStyle(CoorditHomePalette.blue)
-                }
-                Text(size)
-                    .font(CoorditTypography.gmarketMedium(size: layout.value(18.905), relativeTo: .caption))
+            VStack(alignment: .leading, spacing: layout.value(6)) {
+                Text(isUpper ? "상의" : "하의")
+                    .font(CoorditTypography.gmarketMedium(size: layout.value(16), relativeTo: .caption2))
                     .foregroundStyle(CoorditHomePalette.muted)
+                    .frame(width: layout.value(52), height: layout.value(28))
+                    .overlay(Capsule().stroke(CoorditHomePalette.muted, lineWidth: layout.value(1.5)))
+                Text(snapshot.product.name)
+                    .font(CoorditTypography.gmarketBold(size: layout.value(23), relativeTo: .body))
+                    .foregroundStyle(CoorditHomePalette.navy)
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text(size)
+                .font(.system(size: layout.value(40), weight: .medium, design: .monospaced))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .padding(.horizontal, layout.value(8))
+                .padding(.vertical, layout.value(2))
+                .background(CoorditHomePalette.navy, in: RoundedRectangle(cornerRadius: layout.value(10), style: .continuous))
 
             VStack(alignment: .trailing, spacing: 0) {
                 Text("SCORE")
@@ -433,14 +479,14 @@ private struct CoorditHomeRecentFitRow: View {
             }
         }
         .padding(layout.value(18.905))
-        .background(Color.white, in: RoundedRectangle(cornerRadius: layout.value(18.905), style: .continuous))
+        .background(Color.white.opacity(0.95), in: RoundedRectangle(cornerRadius: layout.value(18.905), style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: layout.value(18.905), style: .continuous)
                 .stroke(CoorditHomePalette.line, lineWidth: layout.value(1.891))
         )
         .contentShape(RoundedRectangle(cornerRadius: layout.value(18.905), style: .continuous))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(snapshot.product.name), \(size), \(score)점, 핏랩 히스토리")
+        .accessibilityLabel("\(snapshot.product.name), \(size) 추천, \(score)점, 핏랩 히스토리")
     }
 }
 
@@ -454,10 +500,11 @@ struct CoorditHomeClosetSection: View {
     let onAddGarment: () -> Void
 
     var body: some View {
-        VStack(spacing: layout.value(40)) {
+        VStack(spacing: layout.value(65)) {
             CoorditHomeSectionHeading(
                 layout: layout,
                 wordmark: "CLOSET",
+                wordmarkWidth: 282.874,
                 caption: "현재 내가 보유 중인 옷 목록",
                 onDark: false
             )
@@ -479,81 +526,94 @@ struct CoorditHomeClosetSection: View {
             .accessibilityLabel("CLOSET으로 이동하여 보유 의류 추가")
             .accessibilityIdentifier("coordit-main04-closet-button")
         }
-        .padding(.top, layout.value(50))
-        .padding(.bottom, layout.value(70))
+        .padding(.top, layout.value(CoorditHomeLayout.sectionTopPadding))
+        .padding(.bottom, layout.value(100))
         .frame(maxWidth: .infinity)
-        .background {
-            ZStack {
-                Color.white
-                CoorditHomePalette.closetBackground
-            }
-        }
+        .background(CoorditHomePalette.closetTop)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("coordit-main04-closet-section")
     }
 
     private func categoryRow(_ category: CoorditClosetCategory) -> some View {
         let items = closetItems.filter { $0.category == category }
-        return VStack(alignment: .leading, spacing: layout.value(15.124)) {
+        return VStack(alignment: .leading, spacing: layout.value(25)) {
             HStack {
                 Text(category.title)
-                    .font(CoorditTypography.gmarketBold(size: layout.value(18.905), relativeTo: .caption))
+                    .font(CoorditTypography.gmarketBold(size: layout.value(30), relativeTo: .title3))
                     .foregroundStyle(CoorditHomePalette.navy)
-                    .padding(.horizontal, layout.value(15.124))
-                    .padding(.vertical, layout.value(7.562))
-                    .background(Color.white, in: Capsule())
+                    .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 0)
                 Button(action: onOpenCloset) {
-                    Text("\(items.count)벌  ›")
-                        .font(CoorditTypography.gmarketBold(size: layout.value(18.905), relativeTo: .caption))
-                        .foregroundStyle(CoorditHomePalette.navy)
+                    HStack(spacing: layout.value(10)) {
+                        Text("\(items.count)벌")
+                            .font(CoorditTypography.gmarketBold(size: layout.value(25), relativeTo: .caption))
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: layout.value(17), weight: .bold))
+                            .frame(width: layout.value(22.687), height: layout.value(22.687))
+                    }
+                    .foregroundStyle(CoorditHomePalette.navy)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("\(category.title) \(items.count)벌 모두 보기")
             }
-            .padding(.horizontal, layout.gutter)
+            .padding(.horizontal, layout.value(45))
 
-            ScrollView(.horizontal) {
-                HStack(alignment: .top, spacing: layout.value(14)) {
-                    if items.isEmpty {
-                        emptyCard(category)
-                    }
-                    ForEach(items) { item in
-                        Button(action: onOpenCloset) {
-                            CoorditHomeClosetCard(
-                                layout: layout,
-                                item: item,
-                                isReference: selectedReferenceIDs.contains(item.id)
-                            )
+            // 옷이 없을 때도 카드 줄과 같은 높이를 차지해서, 아래 버튼 위치가 내역 유무와 상관없이 같다.
+            Group {
+                if items.isEmpty {
+                    emptyCard(category)
+                        .padding(.horizontal, layout.gutter)
+                } else {
+                    ScrollView(.horizontal) {
+                        HStack(alignment: .top, spacing: layout.value(14)) {
+                            ForEach(items) { item in
+                                Button(action: onOpenCloset) {
+                                    CoorditHomeClosetCard(
+                                        layout: layout,
+                                        item: item,
+                                        isReference: selectedReferenceIDs.contains(item.id)
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .coorditPressFeedback()
+                            }
                         }
-                        .buttonStyle(.plain)
-                        .coorditPressFeedback()
                     }
+                    .contentMargins(.horizontal, layout.gutter, for: .scrollContent)
+                    .scrollIndicators(.hidden)
                 }
-                .padding(.bottom, layout.value(10))
             }
-            .contentMargins(.horizontal, layout.gutter, for: .scrollContent)
-            .scrollIndicators(.hidden)
+            .frame(height: layout.value(CoorditHomeClosetCard.height))
+            .padding(.bottom, layout.value(10))
         }
     }
 
     private func emptyCard(_ category: CoorditClosetCategory) -> some View {
         Button(action: onAddGarment) {
-            VStack(spacing: layout.value(10)) {
-                Image(systemName: "plus")
-                    .font(.system(size: layout.value(40), weight: .semibold))
-                Text("\(category.title) 등록하기")
-                    .font(CoorditTypography.gmarketBold(size: layout.value(18), relativeTo: .caption))
-            }
-            .foregroundStyle(.white)
-            .frame(width: layout.value(200), height: layout.value(252))
-            .background(CoorditHomePalette.navy.opacity(0.45), in: RoundedRectangle(cornerRadius: layout.value(22), style: .continuous))
+            Text("현재 등록된 \(category.title)가 없습니다.")
+                .font(CoorditTypography.gmarketBold(size: layout.value(25), relativeTo: .body))
+                .foregroundStyle(CoorditHomePalette.navy.opacity(0.8))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .padding(.horizontal, layout.value(20))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(CoorditHomePalette.navy.opacity(0.05), in: RoundedRectangle(cornerRadius: layout.value(22), style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: layout.value(22), style: .continuous)
+                        .stroke(CoorditHomePalette.navy.opacity(0.3), lineWidth: layout.value(2.5))
+                )
+                .contentShape(RoundedRectangle(cornerRadius: layout.value(22), style: .continuous))
         }
         .buttonStyle(.plain)
+        .accessibilityHint("CLOSET에서 \(category.title)를 등록할 수 있어요")
+        .accessibilityIdentifier("coordit-main04-closet-empty-\(category == .top ? "top" : "bottom")")
     }
 }
 
 private struct CoorditHomeClosetCard: View {
+    /// 카드 전체 높이(Figma px): 위아래 여백 20 + 썸네일 200 + 간격 18 + 정보 43 + 테두리.
+    static let height: CGFloat = 304
+
     let layout: CoorditHomeLayout
     let item: CoorditClosetItem
     let isReference: Bool
@@ -572,11 +632,11 @@ private struct CoorditHomeClosetCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: layout.value(12)) {
+        VStack(alignment: .leading, spacing: layout.value(18)) {
             ZStack(alignment: .topLeading) {
                 thumbnail
                     .frame(width: layout.value(124), height: layout.value(124))
-                    .frame(width: layout.value(172), height: layout.value(172))
+                    .frame(width: layout.value(172), height: layout.value(200))
                     .background(Color.white.opacity(0.8))
                     .clipShape(RoundedRectangle(cornerRadius: layout.value(16), style: .continuous))
 
@@ -604,7 +664,9 @@ private struct CoorditHomeClosetCard: View {
             }
             .frame(width: layout.value(172), alignment: .leading)
         }
-        .padding(layout.value(14))
+        .padding(.horizontal, layout.value(14))
+        .padding(.vertical, layout.value(20))
+        .frame(height: layout.value(Self.height), alignment: .top)
         .background(.ultraThinMaterial.opacity(0.35), in: RoundedRectangle(cornerRadius: layout.value(22), style: .continuous))
         .background(CoorditHomePalette.navy.opacity(0.45), in: RoundedRectangle(cornerRadius: layout.value(22), style: .continuous))
         .overlay(
@@ -695,7 +757,7 @@ struct CoorditHomeThreadSection: View {
             .accessibilityIdentifier("coordit-main04-thread-ad")
         }
         .padding(.top, layout.value(40))
-        .padding(.bottom, layout.value(70))
+        .padding(.bottom, layout.value(100))
         .padding(.horizontal, layout.value(34))
         .frame(maxWidth: .infinity)
         .background(CoorditHomePalette.threadBackground)
@@ -710,15 +772,16 @@ struct CoorditHomeFooter: View {
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: layout.value(10)) {
             magazine
             divider
             instagram
             divider
             support
         }
-        .padding(.top, layout.value(24))
-        .padding(.bottom, layout.value(208.756))
+        .padding(.top, layout.value(53))
+        // iPhone 15 Pro에서 4번 화면(실타래가 위 270px)일 때 푸터 끝이 화면 끝과 맞도록 남는 높이.
+        .padding(.bottom, layout.value(375))
         .padding(.horizontal, layout.gutter)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(CoorditHomePalette.footer)
@@ -736,18 +799,18 @@ struct CoorditHomeFooter: View {
         HStack(alignment: .center) {
             HStack(alignment: .center, spacing: layout.value(6)) {
                 Text("COORDIT")
-                    .font(CoorditTypography.climate2019(size: layout.value(22.565), relativeTo: .headline))
-                    .tracking(layout.value(-2.5))
+                    .font(CoorditTypography.climate2019(size: layout.value(30.704), relativeTo: .headline))
+                    .tracking(layout.value(-3.4))
                     .foregroundStyle(CoorditHomePalette.navy)
                 Text("매거진")
-                    .font(CoorditTypography.gmarketBold(size: layout.value(22), relativeTo: .headline))
+                    .font(CoorditTypography.gmarketBold(size: layout.value(29.936), relativeTo: .headline))
                     .foregroundStyle(CoorditHomePalette.navy)
             }
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 0)
             Text("더보기")
-                .font(CoorditTypography.gmarketMedium(size: layout.value(17), relativeTo: .caption))
+                .font(CoorditTypography.gmarketMedium(size: layout.value(28.857), relativeTo: .caption))
                 .underline()
                 .foregroundStyle(CoorditHomePalette.chipFill)
         }
@@ -841,7 +904,7 @@ struct CoorditHomeFooter: View {
 
     private func sectionTitle(_ title: String) -> some View {
         Text(title)
-            .font(CoorditTypography.gmarketBold(size: layout.value(22), relativeTo: .headline))
+            .font(CoorditTypography.gmarketBold(size: layout.value(28), relativeTo: .headline))
             .foregroundStyle(CoorditHomePalette.navy)
             .accessibilityAddTraits(.isHeader)
     }

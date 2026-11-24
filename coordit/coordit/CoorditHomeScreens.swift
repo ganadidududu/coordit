@@ -57,7 +57,8 @@ struct CoorditMain04Screen: View {
                         ),
                         bottomCoverHeight: bottomCoverHeight(fitLabStop: stops.fitLab, viewport: geometry.size.height),
                         fitLabTopOnScreen: anchors.fitLabTop.map { $0 - currentOffset },
-                        closetTopOnScreen: anchors.closetTop.map { $0 - currentOffset }
+                        closetTopOnScreen: anchors.closetTop.map { $0 - currentOffset },
+                        threadTopOnScreen: anchors.threadTop.map { $0 - currentOffset }
                     )
                 }
             }
@@ -142,6 +143,9 @@ struct CoorditMain04Screen: View {
                     onOpenHistory: { onRouteChange(.myPageThreadCharge) },
                     onWatchAd: { onRouteChange(.myPageThreadCharge) }
                 )
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.frame(in: .named(Self.contentSpace)).minY
+                } action: { anchors.threadTop = $0 }
 
                 CoorditHomeFooter(layout: layout, onRouteChange: onRouteChange)
             }
