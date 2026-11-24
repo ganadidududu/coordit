@@ -157,11 +157,16 @@ enum CoorditHomePalette {
         endPoint: .bottom
     )
 
-    /// 실타래 섹션 배경 (#4A5584 4.4% → #000C40 77.4%).
+    /// 실타래 섹션 윗부분 색. Figma에서는 실타래 그라데이션(#4A5584 4.4% → #000C40 77.4%, 632px)이
+    /// 화면 맨 위부터 깔리고 섹션은 270px 아래에서 시작하므로, 섹션 윗선은 그라데이션의 43% 지점 색이다.
+    static let threadTop = Main01DesignTokens.Colors.rgb(35, 47, 96)
+
+    /// 실타래 섹션 배경(362px): 살짝 밝은 남색에서 시작해 광고 버튼 근처(60%)에서 남색이 된다.
     static let threadBackground = LinearGradient(
         stops: [
-            .init(color: slate, location: 0.044),
-            .init(color: navy, location: 0.774),
+            .init(color: threadTop, location: 0),
+            .init(color: navy, location: 0.605),
+            .init(color: navy, location: 1),
         ],
         startPoint: .top,
         endPoint: .bottom
@@ -170,19 +175,124 @@ enum CoorditHomePalette {
     /// 상·하단 크롬: 남색이 35%까지 꽉 차 있다가 투명으로 풀린다.
     /// 불투명 배경이 아니라 투명으로 풀리기 때문에, 아래로 지나가는 콘텐츠 색과 자연스럽게 섞인다.
     /// → FIT LAB(남색) 구간이 지나갈 때만 위·아래가 통째로 남색으로 이어진다.
-    static func chromeFade(fromTop: Bool) -> LinearGradient {
+    /// 상단 헤더 페이드: Figma 화면을 측정하면 남색이 60px까지 유지되다 260px에서 완전히 풀린다.
+    static let topFadeSolidUntil: CGFloat = 60
+    static let topFadeEnd: CGFloat = 260
+
+    static func chromeFade(fromTop: Bool, solidUntil: CGFloat = 0.351) -> LinearGradient {
         LinearGradient(
-            stops: [
-                .init(color: navy, location: 0),
-                .init(color: navy, location: 0.351),
-                .init(color: navy.opacity(0.72), location: 0.52),
-                .init(color: navy.opacity(0.38), location: 0.70),
-                .init(color: navy.opacity(0.12), location: 0.86),
-                .init(color: navy.opacity(0), location: 1),
-            ],
+            stops: CoorditSmoothGradient.fade(color: navy, solidUntil: solidUntil),
             startPoint: fromTop ? .top : .bottom,
             endPoint: fromTop ? .bottom : .top
         )
+    }
+}
+
+/// 층(띠) 없이 이어지는 그라데이션 도구.
+/// 몇 개 지점을 직선으로 이으면 꺾이는 곳마다 눈에 경계(마하 밴드)가 보인다. 그래서 매끄러운 곡선
+/// (smootherstep)을 촘촘하게 샘플링해 기울기가 갑자기 바뀌지 않게 만든다.
+enum CoorditSmoothGradient {
+    static let sampleCount = 32
+
+    /// Figma 화면에서 잰 밝아지는 곡선: smoothstep(t^0.89).
+    /// 시작과 끝 모두 기울기 0이라 남색·배경색에 닿는 곳에서 꺾임(선처럼 보이는 경계)이 없고,
+    /// 지수 0.89로 가운데를 살짝 앞당겨 Figma 측정값과 0.03 이내로 맞춘다.
+    static func ease(_ t: CGFloat) -> CGFloat {
+        let x = pow(min(max(t, 0), 1), 0.89)
+        return x * x * (3 - 2 * x)
+    }
+
+    /// `solidUntil`까지는 불투명, 그 뒤로 투명까지 부드럽게 풀린다.
+    static func fade(color: Color, solidUntil: CGFloat) -> [Gradient.Stop] {
+        var stops: [Gradient.Stop] = [.init(color: color, location: 0)]
+        for index in 0...sampleCount {
+            let t = CGFloat(index) / CGFloat(sampleCount)
+            let location = solidUntil + (1 - solidUntil) * t
+            stops.append(.init(color: color.opacity(1 - ease(t)), location: location))
+        }
+        return stops
+    }
+
+    /// `solidUntil`까지 `from` 색, `end`에서 `to` 색이 되고 그 뒤로는 `to` 색.
+    static func blend(from: RGB, to: RGB, solidUntil: CGFloat, end: CGFloat) -> [Gradient.Stop] {
+        var stops: [Gradient.Stop] = [.init(color: from.color, location: 0)]
+        for index in 0...sampleCount {
+            let t = CGFloat(index) / CGFloat(sampleCount)
+            let location = solidUntil + (end - solidUntil) * t
+            stops.append(.init(color: from.mixed(with: to, amount: ease(t)).color, location: location))
+        }
+        if end < 1 { stops.append(.init(color: to.color, location: 1)) }
+        return stops
+    }
+
+    struct RGB {
+        let red: CGFloat
+        let green: CGFloat
+        let blue: CGFloat
+
+        init(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) {
+            self.red = red
+            self.green = green
+            self.blue = blue
+        }
+
+        var color: Color { Main01DesignTokens.Colors.rgb(red, green, blue) }
+
+        func mixed(with other: RGB, amount: CGFloat) -> RGB {
+            RGB(
+                red + (other.red - red) * amount,
+                green + (other.green - green) * amount,
+                blue + (other.blue - blue) * amount
+            )
+        }
+
+        static let navy = RGB(0, 12, 64)
+        static let closetTop = RGB(244, 245, 248)
+        static let threadTop = RGB(35, 47, 96)
+    }
+}
+
+/// 눈에 보이지 않는 미세 노이즈. 남색→밝은색처럼 좁은 색 범위가 길게 이어질 때 8비트 색 단계가
+/// 몇 픽셀씩 뭉쳐 생기는 띠를 흩뜨린다(Figma 원본 배경의 노이즈와 같은 역할).
+struct CoorditDitherNoise: View {
+    private static let tile: UIImage = {
+        let size = 96
+        var generator = SystemRandomNumberGenerator()
+        var pixels = [UInt8](repeating: 0, count: size * size * 4)
+        for index in 0..<(size * size) {
+            let white = Bool.random(using: &generator)
+            let alpha = UInt8.random(in: 0...3, using: &generator)
+            let value: UInt8 = white ? 255 : 0
+            // 미리 곱한(premultiplied) 알파 형식.
+            let premultiplied = UInt8((Int(value) * Int(alpha)) / 255)
+            pixels[index * 4] = premultiplied
+            pixels[index * 4 + 1] = premultiplied
+            pixels[index * 4 + 2] = premultiplied
+            pixels[index * 4 + 3] = alpha
+        }
+        let provider = CGDataProvider(data: Data(pixels) as CFData)!
+        let image = CGImage(
+            width: size,
+            height: size,
+            bitsPerComponent: 8,
+            bitsPerPixel: 32,
+            bytesPerRow: size * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+            provider: provider,
+            decode: nil,
+            shouldInterpolate: false,
+            intent: .defaultIntent
+        )!
+        return UIImage(cgImage: image, scale: 3, orientation: .up)
+    }()
+
+    var body: some View {
+        Image(uiImage: Self.tile)
+            .resizable(resizingMode: .tile)
+            .interpolation(.none)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
 }
 
@@ -251,15 +361,31 @@ struct CoorditHomeChromeOverlay: View {
     let closetTopOnScreen: CGFloat?
     /// 화면 위에서 실타래 섹션 윗선까지의 거리. 4번 화면에서 헤더 아래를 실타래 남색으로 채운다.
     let threadTopOnScreen: CGFloat?
+    /// 화면 높이. 3번 화면 하단 덮개 계산에 쓴다.
+    let viewportHeight: CGFloat
 
-    /// 실타래 윗선이 정지선(270px)에 가까울수록 1.
+    /// 실타래 윗선이 정지선(270px) 근처면 1.
+    /// 4번 화면은 스크롤 끝과 합쳐져 폰마다 실타래 위치가 조금씩 달라서, 정지선 아래 200px까지는
+    /// 완전히 불투명하게 둔다. 반투명이면 밝은 배경이 비쳐 남색과 실타래 사이에 흰 줄이 생긴다.
     private var threadBlend: CGFloat {
         guard let threadTopOnScreen else { return 0 }
-        let rest = layout.value(CoorditHomeSnapStop.footer.sectionInset)
+        let rest = layout.value(CoorditHomeSnapStop.footer.sectionInset + 200)
         let x = 1 - (threadTopOnScreen - rest) / layout.value(300)
         let t = min(max(x, 0), 1)
         return t * t * (3 - 2 * t)
     }
+
+    /// 3번 화면 하단: 실타래 섹션 윗선이 화면 아래쪽(하단 내비 근처)에 있을 때 1.
+    /// 이때 실타래 윗선 대신 CLOSET 배경 → 남색 그라데이션이 보이게 덮는다.
+    private var closetBottomBlend: CGFloat {
+        guard let threadTopOnScreen, threadTopOnScreen < viewportHeight, viewportHeight > 0 else { return 0 }
+        let x = (threadTopOnScreen - viewportHeight * 0.55) / (viewportHeight * 0.25)
+        let t = min(max(x, 0), 1)
+        return t * t * (3 - 2 * t)
+    }
+
+    /// 3번 화면 하단 덮개가 실타래 윗선보다 위로 더 올라가 풀리는 길이(Figma px).
+    private static let closetBottomFeather: CGFloat = 90
 
     /// CLOSET 윗선이 헤더 아래 정지선(200px)에 가까울수록 1.
     private var closetBlend: CGFloat {
@@ -273,6 +399,8 @@ struct CoorditHomeChromeOverlay: View {
 
     /// 남색 덮개 아래쪽이 풀리는 길이(Figma px).
     private static let topFeather: CGFloat = 30
+    /// 미세 노이즈를 까는 상·하단 높이(Figma px).
+    private static let ditherHeight: CGFloat = 420
 
     private var topCoverHeight: CGFloat {
         let base = layout.value(CoorditHomeSnapStop.fitLab.sectionInset + Self.topFeather)
@@ -286,19 +414,38 @@ struct CoorditHomeChromeOverlay: View {
         return min(max((height - layout.value(Self.topFeather - 2)) / height, 0), 1)
     }
 
+    /// 헤더 남색 → 섹션 윗부분 색으로 이어지는 덮개.
+    /// 섹션 윗선에서 끝내면 그 아래로 헤더 남색 페이드(225px)의 꼬리가 남아 밝아지다 어두워지는
+    /// 계단(층)이 생긴다. 그래서 덮개를 헤더 페이드 끝보다 아래까지 섹션 색으로 이어 칠한다.
+    private func sectionBlend(sectionTop: CGFloat, sectionColor: CoorditSmoothGradient.RGB) -> some View {
+        // Figma처럼 남색은 60px까지, 섹션 색은 260px(섹션이 더 아래면 섹션 윗선)에서 완성된다.
+        let colorEnd = max(sectionTop, layout.value(CoorditHomePalette.topFadeEnd))
+        let height = colorEnd + layout.value(4)
+        return LinearGradient(
+            stops: CoorditSmoothGradient.blend(
+                from: .navy,
+                to: sectionColor,
+                solidUntil: layout.value(CoorditHomePalette.topFadeSolidUntil) / height,
+                end: colorEnd / height
+            ),
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .frame(height: height)
+    }
+
     var body: some View {
         ZStack {
             ZStack(alignment: .top) {
-                CoorditHomePalette.chromeFade(fromTop: true)
-                    .frame(height: layout.value(225.536))
+                CoorditHomePalette.chromeFade(
+                    fromTop: true,
+                    solidUntil: CoorditHomePalette.topFadeSolidUntil / CoorditHomePalette.topFadeEnd
+                )
+                .frame(height: layout.value(CoorditHomePalette.topFadeEnd))
                 // FIT LAB 섹션 시작선(210px)까지는 완전한 남색, 그 아래 30px에서만 풀린다.
                 // 2번 화면에서 풀리는 구간은 FIT LAB 남색 위에 겹치므로 경계가 보이지 않는다.
                 LinearGradient(
-                    stops: [
-                        .init(color: CoorditHomePalette.navy, location: 0),
-                        .init(color: CoorditHomePalette.navy, location: topSolidRatio),
-                        .init(color: CoorditHomePalette.navy.opacity(0), location: 1),
-                    ],
+                    stops: CoorditSmoothGradient.fade(color: CoorditHomePalette.navy, solidUntil: topSolidRatio),
                     startPoint: .top,
                     endPoint: .bottom
                 )
@@ -306,35 +453,30 @@ struct CoorditHomeChromeOverlay: View {
                 .opacity(tint.top)
 
                 if let closetTopOnScreen, closetTopOnScreen > 0, closetBlend > 0 {
-                    LinearGradient(
-                        stops: [
-                            .init(color: CoorditHomePalette.navy, location: 0),
-                            .init(color: CoorditHomePalette.navy, location: 0.351),
-                            .init(color: CoorditHomePalette.closetTop, location: 1),
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(height: closetTopOnScreen + 1)
-                    .opacity(closetBlend)
+                    sectionBlend(sectionTop: closetTopOnScreen, sectionColor: .closetTop)
+                        .opacity(closetBlend)
                 }
 
                 if let threadTopOnScreen, threadTopOnScreen > 0, threadBlend > 0 {
-                    LinearGradient(
-                        stops: [
-                            .init(color: CoorditHomePalette.navy, location: 0),
-                            .init(color: CoorditHomePalette.navy, location: 0.351),
-                            .init(color: CoorditHomePalette.slate, location: 1),
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(height: threadTopOnScreen + 1)
-                    .opacity(threadBlend)
+                    sectionBlend(sectionTop: threadTopOnScreen, sectionColor: .threadTop)
+                        .opacity(threadBlend)
                 }
             }
             .frame(height: topCoverHeight, alignment: .top)
             .frame(maxHeight: .infinity, alignment: .top)
+            // 겹친 반투명 레이어를 한 번에 고정밀(부동소수점)로 합성해 단계마다 반올림되며 생기는 계단을 줄인다.
+            .drawingGroup(opaque: false, colorMode: .extendedLinear)
+            .overlay(alignment: .top) {
+                CoorditDitherNoise()
+                    .frame(height: layout.value(Self.ditherHeight))
+                    .mask {
+                        LinearGradient(
+                            stops: CoorditSmoothGradient.fade(color: .black, solidUntil: 0.7),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    }
+            }
 
             ZStack(alignment: .bottom) {
                 LinearGradient(
@@ -349,10 +491,38 @@ struct CoorditHomeChromeOverlay: View {
                 .frame(height: max(bottomCoverHeight, layout.value(290)))
                 .opacity(tint.bottom)
 
+                if let threadTopOnScreen, closetBottomBlend > 0 {
+                    let feather = layout.value(Self.closetBottomFeather)
+                    let height = viewportHeight - threadTopOnScreen + feather
+                    LinearGradient(
+                        stops: [
+                            .init(color: CoorditHomePalette.closetTop.opacity(0), location: 0),
+                            .init(color: CoorditHomePalette.closetTop, location: min(feather / max(height, 1), 0.5)),
+                            .init(color: CoorditHomePalette.navy, location: 1),
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: max(height, 0))
+                    .opacity(closetBottomBlend)
+                }
+
                 CoorditHomePalette.chromeFade(fromTop: false)
                     .frame(height: layout.value(290))
             }
             .frame(maxHeight: .infinity, alignment: .bottom)
+            .drawingGroup(opaque: false, colorMode: .extendedLinear)
+            .overlay(alignment: .bottom) {
+                CoorditDitherNoise()
+                    .frame(height: layout.value(Self.ditherHeight))
+                    .mask {
+                        LinearGradient(
+                            stops: CoorditSmoothGradient.fade(color: .black, solidUntil: 0.7),
+                            startPoint: .bottom,
+                            endPoint: .top
+                        )
+                    }
+            }
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
