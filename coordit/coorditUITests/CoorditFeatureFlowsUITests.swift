@@ -431,7 +431,7 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
             extraArguments: ["--coordit-test-analysis-running"]
         )
 
-        app.buttons["새로운 옷 찾기"].tap()
+        scrollHomeTo("coordit-main04-new-fit-button", in: app).tap()
 
         assertScreen("fitlab-loading", in: app)
         XCTAssertTrue(element("global-fit-analysis-running", in: app).exists)
@@ -522,10 +522,10 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
             fixture: "history-persistence",
             extraArguments: ["--coordit-fitlab-history-namespace", historyNamespace]
         )
-        XCTAssertTrue(app.staticTexts["저장한 핏 리포트가 아직 없어요"].waitForExistence(timeout: 5))
+        XCTAssertTrue(element("coordit-main04-history-empty", in: app).waitForExistence(timeout: 5))
     }
 
-    func testHomeShowsTwoSavedFitReportsAndOpensExactDetail() throws {
+    func testHomeShowsLatestOfTwoSavedFitReportsAndOpensExactDetail() throws {
         let historyNamespace = "feature-home-history-\(UUID().uuidString)"
         let historyArguments = ["--coordit-fitlab-history-namespace", historyNamespace]
 
@@ -554,11 +554,10 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         )
         assertScreen("main04", in: app)
 
-        let latestCard = element("coordit-main04-history-card-analysis-fixture-lower", in: app)
-        let previousCard = element("coordit-main04-history-card-analysis-fixture-upper", in: app)
-        XCTAssertTrue(latestCard.waitForExistence(timeout: 5))
-        XCTAssertTrue(previousCard.waitForExistence(timeout: 5))
-        XCTAssertLessThan(latestCard.frame.minX, previousCard.frame.minX)
+        // 홈의 "최근 핏 분석"은 가장 최근 리포트 한 건과 전체 개수만 보여준다.
+        let latestCard = scrollHomeTo("coordit-main04-history-card-analysis-fixture-lower", in: app)
+        XCTAssertFalse(element("coordit-main04-history-card-analysis-fixture-upper", in: app).exists)
+        XCTAssertTrue(app.staticTexts["전체 2개"].exists)
 
         latestCard.tap()
         assertScreen("fitlab-history-detail", in: app)
@@ -569,7 +568,7 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         let app = launchApp(at: "main04")
         assertScreen("main04", in: app)
 
-        app.buttons["옷장에서 선택"].tap()
+        scrollHomeTo("home-reference-select", in: app).tap()
         let oxford = app.buttons["home-reference-item-oxford"]
         XCTAssertTrue(oxford.waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["home-reference-item-denim"].exists)
@@ -580,7 +579,9 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
         oxford.tap()
         app.buttons["home-reference-done"].tap()
 
-        XCTAssertTrue(app.buttons["다시 선택"].waitForExistence(timeout: 5))
+        let selectedChip = app.buttons["Oxford Shirt"]
+        let selected = expectation(for: NSPredicate(format: "isSelected == true"), evaluatedWith: selectedChip)
+        wait(for: [selected], timeout: 5)
     }
 
     func testMyPageRowsOpenTheirFinalScreens() throws {
@@ -794,6 +795,23 @@ final class CoorditFeatureFlowsUITests: XCTestCase {
             file: file,
             line: line
         )
+    }
+
+    /// 홈은 화면 단위로 멈추는 스냅 스크롤이라, 한 화면씩 넘기면서 대상이 눌릴 수 있을 때까지 찾는다.
+    @discardableResult
+    private func scrollHomeTo(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
+        let target = element(identifier, in: app)
+        // 하단 내비가 화면 아래 약 20%를 덮고 있어서, 그 위로 올라와야 누를 수 있는 것으로 본다.
+        let reachable = { target.exists && target.isHittable && target.frame.maxY < app.windows.firstMatch.frame.height * 0.8 }
+        for _ in 0..<8 where !reachable() {
+            let below = !target.exists || target.frame.midY > app.windows.firstMatch.frame.midY
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: below ? 0.65 : 0.42))
+                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: below ? 0.42 : 0.65)))
+        }
+        XCTAssertTrue(target.waitForExistence(timeout: 5), identifier)
+        XCTAssertTrue(target.isHittable, identifier)
+        Thread.sleep(forTimeInterval: 0.6) // 스냅 애니메이션이 끝난 뒤 누른다.
+        return target
     }
 
     private func element(_ identifier: String, in app: XCUIApplication) -> XCUIElement {

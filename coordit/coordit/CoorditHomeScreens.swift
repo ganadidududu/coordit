@@ -1,20 +1,30 @@
 import SwiftUI
 
 #if os(iOS)
+/// 홈 화면: 하나의 긴 세로 스크롤이 4개 화면(카드 뉴스 / FIT LAB / CLOSET / 실타래·푸터)에서 멈춘다.
 struct CoorditMain04Screen: View {
     let onRouteChange: (CoorditFrameRoute) -> Void
     @Binding var closetItems: [CoorditClosetItem]
     @Binding var selectedReferenceIDs: Set<String>
     let fitLabHistory: [CoorditFitLabHistorySnapshot]
+    let threadBalance: Int
     let onOpenFitLabHistory: (CoorditFitLabHistorySnapshot) -> Void
     let onReferenceCommit: (Set<String>) -> Void
+
     @State private var showsReferenceSelection = false
+    @State private var anchors = CoorditHomeSnapAnchors()
+    @State private var currentOffset: CGFloat = 0
+    @State private var scrollExtent = CoorditHomeScrollExtent()
+    @State private var fitLabHeight: CGFloat = 0
     @EnvironmentObject private var backendSession: CoorditBackendSessionStore
+
+    private static let contentSpace = "coordit-home-content"
 
     init(
         closetItems: Binding<[CoorditClosetItem]>,
         selectedReferenceIDs: Binding<Set<String>>,
         fitLabHistory: [CoorditFitLabHistorySnapshot] = [],
+        threadBalance: Int = 0,
         onOpenFitLabHistory: @escaping (CoorditFitLabHistorySnapshot) -> Void = { _ in },
         onReferenceCommit: @escaping (Set<String>) -> Void,
         onRouteChange: @escaping (CoorditFrameRoute) -> Void = { _ in }
@@ -22,48 +32,37 @@ struct CoorditMain04Screen: View {
         _closetItems = closetItems
         _selectedReferenceIDs = selectedReferenceIDs
         self.fitLabHistory = fitLabHistory
+        self.threadBalance = threadBalance
         self.onOpenFitLabHistory = onOpenFitLabHistory
         self.onReferenceCommit = onReferenceCommit
         self.onRouteChange = onRouteChange
     }
 
     var body: some View {
-        CoorditScreenScaffold(route: .main04, onRouteChange: onRouteChange, contentTop: 117, contentBottom: 0) { metrics in
-            ScrollView {
-            VStack(spacing: metrics.value(12)) {
-                CoorditBannerCard(metrics: metrics) { onRouteChange(.fitLabInput) }
+        CoorditScreenScaffold(route: .main04, onRouteChange: onRouteChange, contentTop: 0, contentBottom: 0) { _ in
+            GeometryReader { geometry in
+                let layout = CoorditHomeLayout(width: geometry.size.width)
 
-                CoorditHomeReferenceCard(
-                    items: closetItems,
-                    selectedIDs: selectedReferenceIDs,
-                    metrics: metrics,
-                    onSelect: { showsReferenceSelection = true }
-                )
+                ZStack {
+                    scrollContent(layout: layout)
 
-                CoorditFitLabHistoryCard(
-                    history: fitLabHistory,
-                    metrics: metrics,
-                    onOpenHistory: onOpenFitLabHistory
-                )
-
-                if backendSession.isWarning {
-                    Text("일부 기록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.")
-                        .font(CoorditTypography.gmarketMedium(size: metrics.value(9.5)))
-                        .foregroundStyle(CoorditDesignTokens.ColorToken.danger)
-                        .frame(width: metrics.value(361), alignment: .leading)
-                        .accessibilityIdentifier("home-reference-sync-status")
-                }
-
-                CoorditClosetEntryCard(metrics: metrics) {
-                    onRouteChange(.closetOverview)
+                    // 상·하단 크롬. FIT LAB 화면에 가까워질수록 위아래가 남색으로 차오른다.
+                    let stops = resolvedStops(layout: layout)
+                    CoorditHomeChromeOverlay(
+                        layout: layout,
+                        tint: CoorditHomeChromeTint.resolve(
+                            offset: currentOffset,
+                            fitLabStop: stops.fitLab,
+                            closetStop: stops.closet
+                        ),
+                        bottomCoverHeight: bottomCoverHeight(fitLabStop: stops.fitLab, viewport: geometry.size.height),
+                        fitLabTopOnScreen: anchors.fitLabTop.map { $0 - currentOffset },
+                        closetTopOnScreen: anchors.closetTop.map { $0 - currentOffset },
+                        threadTopOnScreen: anchors.threadTop.map { $0 - currentOffset }
+                    )
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .top)
-            .padding(.bottom, metrics.value(110))
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("coordit-screen-main04")
-            }
-            .scrollIndicators(.hidden)
+            .ignoresSafeArea()
         }
         .sheet(isPresented: $showsReferenceSelection) {
             CoorditHomeReferenceSelectionSheet(
@@ -76,208 +75,106 @@ struct CoorditMain04Screen: View {
             )
         }
     }
-}
 
-private struct CoorditHomeFitLabHistoryItem: Identifiable {
-    let snapshot: CoorditFitLabHistorySnapshot
-    let id: String
-    let name: String
-    let category: String
-    let sizeSummary: String
-    let score: String
-    let tint: Color
-
-    init(snapshot: CoorditFitLabHistorySnapshot) {
-        self.snapshot = snapshot
-        self.id = snapshot.analysisID
-        self.name = snapshot.product.name
-        self.category = snapshot.garmentKind == .upper ? "TOP" : "BOTTOM"
-        self.sizeSummary = "\(snapshot.recommendation.recommendedSize) 추천"
-        self.score = CoorditFitLabResultMeasurement.score(snapshot.recommendation.fitScore)
-        self.tint = snapshot.garmentKind == .upper
-            ? Main01DesignTokens.Colors.rgb(54, 93, 168)
-            : Main01DesignTokens.Colors.rgb(24, 132, 120)
-    }
-}
-
-private struct CoorditFitLabHistoryCard: View {
-    @Environment(\.dynamicTypeSize) private var typeSize
-    let history: [CoorditFitLabHistorySnapshot]
-    let metrics: CoorditResponsiveMetrics
-    let onOpenHistory: (CoorditFitLabHistorySnapshot) -> Void
-
-    private var recentItems: [CoorditHomeFitLabHistoryItem] {
-        history
-            .sorted {
-                if $0.savedAt == $1.savedAt { return $0.analysisID > $1.analysisID }
-                return $0.savedAt > $1.savedAt
-            }
-            .prefix(2)
-            .map { CoorditHomeFitLabHistoryItem(snapshot: $0) }
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            let heading = typeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: metrics.value(6)))
-                : AnyLayout(HStackLayout(alignment: .firstTextBaseline))
-            heading {
-                Text("최근 핏 분석")
-                    .font(CoorditTypography.gmarketBold(size: metrics.value(17), relativeTo: .headline))
-                    .foregroundStyle(CoorditHomePalette.ink)
-                Spacer(minLength: 0)
-                Text("최근 저장 \(recentItems.count)개")
-                    .font(CoorditTypography.gmarketMedium(size: metrics.value(9), relativeTo: .caption))
-                    .foregroundStyle(CoorditDesignTokens.ColorToken.muted)
-            }
-            .padding(.horizontal, metrics.value(16))
-            .padding(.top, metrics.value(14))
-
-            Group {
-                if recentItems.isEmpty {
-                    Text("저장한 핏 리포트가 아직 없어요")
-                        .font(CoorditTypography.gmarketMedium(size: metrics.value(10), relativeTo: .caption))
-                        .foregroundStyle(.black.opacity(0.55))
-                        .frame(maxWidth: .infinity, minHeight: metrics.value(54))
-                        .background(Color.black.opacity(0.035))
-                        .clipShape(RoundedRectangle(cornerRadius: metrics.value(6), style: .continuous))
-                        .accessibilityIdentifier("coordit-main04-history-empty")
-                } else {
-                    let rows = typeSize.isAccessibilitySize
-                        ? AnyLayout(VStackLayout(spacing: metrics.value(8)))
-                        : AnyLayout(HStackLayout(spacing: metrics.value(8)))
-                    rows {
-                        ForEach(recentItems) { item in
-                            Button {
-                                onOpenHistory(item.snapshot)
-                            } label: {
-                                CoorditFitLabHistoryPreviewCard(item: item, metrics: metrics)
-                                    .accessibilityElement(children: .ignore)
-                                    .accessibilityIdentifier("coordit-main04-history-card-\(item.id)")
-                                    .accessibilityLabel("\(item.name), \(item.sizeSummary), \(item.score)점, 핏랩 히스토리")
-                            }
-                            .coorditPressFeedback()
-                            .accessibilityElement(children: .ignore)
-                            .accessibilityIdentifier("coordit-main04-history-card-\(item.id)")
-                            .accessibilityLabel("\(item.name), \(item.sizeSummary), \(item.score)점, 핏랩 히스토리")
-                        }
-                    }
-                }
-            }
-            .padding(.top, metrics.value(6))
-            .padding(.horizontal, metrics.value(16))
-
+    /// 실제 정지 지점(스크롤 범위로 보정된 값).
+    private func resolvedStops(layout: CoorditHomeLayout) -> (fitLab: CGFloat?, closet: CGFloat?) {
+        let maxOffset = scrollExtent.maxOffset
+        func clamp(_ value: CGFloat?) -> CGFloat? {
+            value.map { min(max(0, $0), maxOffset) }
         }
-        .padding(.bottom, metrics.value(14))
-        .homePanel(metrics: metrics)
-        .accessibilityIdentifier("coordit-main04-fitlab-card")
+        let fitLab = anchors.fitLabTop.map { $0 - layout.value(CoorditHomeSnapStop.fitLab.sectionInset) }
+        let closet = anchors.closetTop.map { $0 - layout.value(CoorditHomeSnapStop.closet.sectionInset) }
+        return (clamp(fitLab), clamp(closet))
     }
-}
 
-private struct CoorditFitLabHistoryPreviewCard: View {
-    let item: CoorditHomeFitLabHistoryItem
-    let metrics: CoorditResponsiveMetrics
-
-    var body: some View {
-        HStack(alignment: .center, spacing: metrics.value(7)) {
-            VStack(alignment: .leading, spacing: metrics.value(4)) {
-                HStack(alignment: .firstTextBaseline, spacing: metrics.value(5)) {
-                    Text(item.name)
-                        .font(CoorditTypography.gmarketBold(size: metrics.value(10), relativeTo: .caption))
-                        .foregroundStyle(.black)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.76)
-
-                    Text(item.category)
-                        .font(CoorditTypography.mona12(size: metrics.value(7.4), relativeTo: .caption2))
-                        .foregroundStyle(item.tint.opacity(0.82))
-                        .lineLimit(1)
-                }
-
-                HStack(spacing: metrics.value(5)) {
-                    Text(item.sizeSummary)
-                        .font(CoorditTypography.gmarketMedium(size: metrics.value(8.2), relativeTo: .caption2))
-                        .foregroundStyle(.black.opacity(0.56))
-                        .lineLimit(1)
-                }
-            }
-
-            Spacer(minLength: metrics.value(4))
-
-            VStack(alignment: .trailing, spacing: metrics.value(1)) {
-                Text("SCORE")
-                    .font(CoorditTypography.mona12(size: metrics.value(7.4), relativeTo: .caption2))
-                    .foregroundStyle(.black.opacity(0.45))
-                    .lineLimit(1)
-
-                Text(item.score)
-                    .font(CoorditTypography.mona12(size: metrics.value(19), relativeTo: .headline))
-                    .foregroundStyle(CoorditHomePalette.ink)
-                    .lineLimit(1)
-            }
-        }
-        .padding(.horizontal, metrics.value(10))
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(minHeight: metrics.value(54))
-        .background(
-            LinearGradient(
-                colors: [
-                    Color.white.opacity(0.98),
-                    item.tint.opacity(0.08),
-                ],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: metrics.value(6), style: .continuous)
-                .stroke(.black.opacity(0.1), lineWidth: metrics.value(0.8))
-        )
-        .clipShape(RoundedRectangle(cornerRadius: metrics.value(6), style: .continuous))
-        .contentShape(RoundedRectangle(cornerRadius: metrics.value(6), style: .continuous))
+    /// 2번 화면에서 FIT LAB 섹션 아래로 드러나는 영역 높이.
+    private func bottomCoverHeight(fitLabStop: CGFloat?, viewport: CGFloat) -> CGFloat {
+        guard let fitLabStop, let fitLabTop = anchors.fitLabTop else { return 0 }
+        let fitLabBottomOnScreen = fitLabTop + fitLabHeight - fitLabStop
+        return viewport - fitLabBottomOnScreen + 40
     }
-}
 
-private struct CoorditClosetEntryCard: View {
-    let metrics: CoorditResponsiveMetrics
-    let action: () -> Void
+    private func scrollContent(layout: CoorditHomeLayout) -> some View {
+        ScrollView(.vertical) {
+            VStack(spacing: 0) {
+                CoorditHomeCardNewsSection(layout: layout, items: CoorditHomeCardNews.items)
 
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Text("MY CLOSET")
-                    .font(CoorditTypography.climate2019(size: metrics.value(17.2), relativeTo: .headline))
-                    .tracking(-0.86 * metrics.scale)
-                    .foregroundStyle(.black)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5)
-
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, metrics.value(12))
-            .frame(width: metrics.value(366))
-            .frame(minHeight: metrics.value(44))
-            .background(
-                LinearGradient(
-                    colors: [
-                        CoorditHomePalette.card,
-                        Main01DesignTokens.Colors.rgb(235, 238, 247),
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
+                CoorditHomeFitLabSection(
+                    layout: layout,
+                    closetItems: closetItems,
+                    selectedReferenceIDs: selectedReferenceIDs,
+                    history: fitLabHistory,
+                    onStartAnalysis: { onRouteChange(.fitLabInput) },
+                    onSelectReference: { showsReferenceSelection = true },
+                    onOpenHistory: onOpenFitLabHistory
                 )
-            )
-            .clipShape(RoundedRectangle(cornerRadius: metrics.value(10), style: .continuous))
-            .shadow(color: .black.opacity(0.035), radius: metrics.value(9), y: metrics.value(3))
+                .onGeometryChange(for: CGRect.self) { proxy in
+                    proxy.frame(in: .named(Self.contentSpace))
+                } action: { frame in
+                    anchors.fitLabTop = frame.minY
+                    fitLabHeight = frame.height
+                }
+
+                CoorditHomeClosetSection(
+                    layout: layout,
+                    closetItems: closetItems,
+                    selectedReferenceIDs: selectedReferenceIDs,
+                    onOpenCloset: { onRouteChange(.closetOverview) },
+                    onAddGarment: { onRouteChange(.closetOverview) }
+                )
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.frame(in: .named(Self.contentSpace)).minY
+                } action: { anchors.closetTop = $0 }
+
+                if backendSession.isWarning {
+                    Text("일부 기록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.")
+                        .font(CoorditTypography.gmarketMedium(size: layout.value(18), relativeTo: .caption))
+                        .foregroundStyle(CoorditDesignTokens.ColorToken.danger)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, layout.gutter)
+                        .padding(.vertical, layout.value(12))
+                        .background(CoorditHomePalette.slate)
+                        .accessibilityIdentifier("home-reference-sync-status")
+                }
+
+                CoorditHomeThreadSection(
+                    layout: layout,
+                    threadBalance: threadBalance,
+                    onOpenHistory: { onRouteChange(.myPageThreadCharge) },
+                    onWatchAd: { onRouteChange(.myPageThreadCharge) }
+                )
+                .onGeometryChange(for: CGFloat.self) { proxy in
+                    proxy.frame(in: .named(Self.contentSpace)).minY
+                } action: { anchors.threadTop = $0 }
+
+                CoorditHomeFooter(layout: layout, onRouteChange: onRouteChange)
+            }
+            .coordinateSpace(name: Self.contentSpace)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("coordit-screen-main04")
         }
-        .coorditPressFeedback()
-        .padding(.bottom, metrics.value(7))
-        .accessibilityIdentifier("coordit-main04-closet-button")
+        .scrollIndicators(.hidden)
+        .scrollTargetBehavior(
+            CoorditHomeSnapScrollBehavior(
+                anchors: anchors.offsets(layout: layout)
+            )
+        )
+        .onScrollGeometryChange(for: CoorditHomeScrollExtent.self) { geometry in
+            CoorditHomeScrollExtent(
+                offset: geometry.contentOffset.y + geometry.contentInsets.top,
+                maxOffset: max(0, geometry.contentSize.height - geometry.containerSize.height),
+                viewport: geometry.containerSize.height
+            )
+        } action: { _, extent in
+            currentOffset = extent.offset
+            scrollExtent = extent
+        }
+        .ignoresSafeArea()
     }
 }
-
-private enum CoorditHomePalette {
-    static let card = CoorditDesignTokens.ColorToken.panel
-    static let ink = CoorditDesignTokens.ColorToken.ink
+struct CoorditHomeScrollExtent: Equatable {
+    var offset: CGFloat = 0
+    var maxOffset: CGFloat = 0
+    var viewport: CGFloat = 0
 }
 #endif
