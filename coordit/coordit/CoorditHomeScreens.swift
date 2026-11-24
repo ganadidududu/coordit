@@ -58,7 +58,8 @@ struct CoorditMain04Screen: View {
                         bottomCoverHeight: bottomCoverHeight(fitLabStop: stops.fitLab, viewport: geometry.size.height),
                         fitLabTopOnScreen: anchors.fitLabTop.map { $0 - currentOffset },
                         closetTopOnScreen: anchors.closetTop.map { $0 - currentOffset },
-                        threadTopOnScreen: anchors.threadTop.map { $0 - currentOffset }
+                        threadTopOnScreen: anchors.threadTop.map { $0 - currentOffset },
+                        viewportHeight: geometry.size.height
                     )
                 }
             }
