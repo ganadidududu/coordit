@@ -121,6 +121,16 @@ struct CoorditProductWebView: UIViewRepresentable {
                 webView.load(URLRequest(url: fallback))
                 return
             }
+            // 무신사 공유 링크(musinsa.onelink.me)는 중계 페이지가 곧장 앱 스킴(musinsaad://web?link=https://…)으로 넘긴다.
+            // 앱 이동은 막되, 그 안에 담긴 웹 상품 주소로 이어서 간다. 안 그러면 빈 중계 페이지에 멈춘다.
+            if isMainFrame, !isWeb, let url = navigationAction.request.url,
+               let fallback = Self.webURLInAppLink(url), !followedFallbacks.contains(fallback) {
+                followedFallbacks.insert(fallback)
+                Self.log("app link -> \(fallback.absoluteString)")
+                decisionHandler(.cancel)
+                webView.load(URLRequest(url: fallback))
+                return
+            }
             decisionHandler(isWeb ? .allow : .cancel)
         }
 
@@ -184,6 +194,25 @@ struct CoorditProductWebView: UIViewRepresentable {
                       fallback.host != nil, fallback != url
                 else { continue }
                 return fallback
+            }
+            return nil
+        }
+
+        /// 앱 스킴 딥링크 안에서 웹으로 열 주소를 찾는다. 웹 주소일 때와 달리 link·url처럼 흔한 이름도 본다.
+        private static let appLinkWebParameters: [String] = [
+            "link", "url", "af_ios_url", "af_web_dp", "fallback_url", "$fallback_url", "af_android_url",
+        ]
+
+        static func webURLInAppLink(_ url: URL) -> URL? {
+            guard let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems else { return nil }
+            for name in appLinkWebParameters {
+                guard let value = items.first(where: { $0.name == name })?.value,
+                      let candidate = URL(string: value),
+                      let scheme = candidate.scheme?.lowercased(), scheme == "http" || scheme == "https",
+                      let host = candidate.host?.lowercased(),
+                      host != "apps.apple.com", host != "itunes.apple.com", host != "play.google.com"
+                else { continue }
+                return candidate
             }
             return nil
         }

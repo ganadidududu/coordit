@@ -476,6 +476,8 @@ struct CoorditFitLabURLInputView: View {
     private func completeLinkEntry() {
         focusedField = nil
         guard Self.validatedURL(from: urlText) != nil else { return }
+        // 상품명 같은 문구가 같이 들어왔으면 링크만 남겨 보여준다.
+        urlText = CoorditProductLinkText.extract(from: urlText)
         tutorial.advance(from: .link, to: .importLink)
     }
 
@@ -728,7 +730,7 @@ struct CoorditFitLabURLInputView: View {
     }
 
     private static func validatedURL(from input: String) -> URL? {
-        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = CoorditProductLinkText.extract(from: input)
         let forbiddenScalars = CharacterSet.whitespacesAndNewlines.union(.controlCharacters)
         guard !trimmed.isEmpty,
               trimmed.unicodeScalars.allSatisfy({ !forbiddenScalars.contains($0) }),

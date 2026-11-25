@@ -1,5 +1,19 @@
 import SwiftUI
 
+/// 쇼핑앱 "공유하기"로 복사하면 링크 앞뒤에 상품명 같은 문구가 붙어 온다(지그재그 등).
+/// 그 안에서 http(s) 주소만 꺼낸다. 주소가 없으면 앞뒤 공백만 정리해 그대로 돌려준다.
+enum CoorditProductLinkText {
+    static func extract(from input: String) -> String {
+        let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let start = trimmed.range(of: "https://", options: .caseInsensitive)?.lowerBound
+                ?? trimmed.range(of: "http://", options: .caseInsensitive)?.lowerBound
+        else { return trimmed }
+        let tail = trimmed[start...]
+        let end = tail.firstIndex(where: { $0.isWhitespace || $0.isNewline }) ?? tail.endIndex
+        return String(tail[..<end])
+    }
+}
+
 #if os(iOS)
 struct CoorditLinkPasteButton: View {
     @Binding var text: String
@@ -8,7 +22,7 @@ struct CoorditLinkPasteButton: View {
     var body: some View {
         PasteButton(payloadType: String.self) { values in
             guard let value = values.first else { return }
-            text = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            text = CoorditProductLinkText.extract(from: value)
         }
         .labelStyle(.titleAndIcon)
         .tint(CoorditFitLabPalette.ink)
