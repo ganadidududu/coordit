@@ -580,7 +580,7 @@ private struct CoorditClosetLinkInputScreen: View {
     }
 
     private var validatedURL: URL? {
-        let trimmed = draft.productLink.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = CoorditProductLinkText.extract(from: draft.productLink)
         guard let components = URLComponents(string: trimmed),
               let scheme = components.scheme?.lowercased(),
               ["http", "https"].contains(scheme),
